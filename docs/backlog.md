@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **CARD-07 [P2]** - Can cards be contained/attached outside Stack/Process/Connection?
-2. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
-3. **INTERACT-06 [P2]** - How do source and target attributes determine interaction legality and effect?
-4. **WOUND-02 [P2]** - How are cleaning and dressing represented?
-5. **CARD-11 [P2]** - How does a card instance change identity?
+1. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
+2. **INTERACT-06 [P2]** - How do source and target attributes determine interaction legality and effect?
+3. **WOUND-02 [P2]** - How are cleaning and dressing represented?
+4. **CARD-11 [P2]** - How does a card instance change identity?
+5. **MOVE-03 [P2]** - Can moving a card between Room and Inventory consume time or create consequences?
 
 ---
 
@@ -92,11 +92,17 @@ For the first release, a normal card shows only title/name, picture, and visible
 
 Fixed size, content-driven size, or a small standard set. Test visually first.
 
-## CARD-07 - Contained/attached cards outside Stack/Process/Connection
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
+## CARD-D06 - Current relationship model is complete for now
+**Status:** DECIDED BY SIMON
 
-Can equipment, fuel, contents, etc. be attached to or contained by another card outside the normal Stack/Process/Connection model?
+For now, the game assumes the currently defined card relationship forms are sufficient. Do not add a separate containment, attachment, equipment, fuel, or similar relationship mechanism unless a concrete future design need cannot be expressed with the existing model.
+
+- **Stack** exists only to visually reduce card clutter in the **Room** zone. It has no mechanical meaning.
+- **Process** represents unattended ongoing change/work and may exist in Room or Inventory.
+- **Connection** represents a persistent mechanically meaningful relationship and may exist in Room or Inventory.
+- **Action** is not a persistent relationship; it is Nadir-performed work resolved through the Action window.
+
+This closes the earlier CARD-07 question for now rather than asserting that every conceivable future relationship must fit these forever.
 
 ## CARD-09 - Durability and object-specific state
 **Status:** OPEN - SIMON TO DECIDE
@@ -173,7 +179,7 @@ The three persistent forms of deliberate card combination are **Stack**, **Proce
 
 ### Stack
 
-A `Stack` is visual compression for identical cards. Represented cards remain separate instances, individual cards need not all remain exposed, the Stack shows a count, and it has no mechanical effect merely because it exists.
+A `Stack` exists solely to reduce visual card clutter in the Room zone by compressing identical cards. Represented cards remain separate instances, individual cards need not all remain exposed, the Stack shows a count, and it has no mechanical effect merely because it exists.
 
 ### Process
 
@@ -181,9 +187,9 @@ A `Process` is unattended work that continues while Nadir spends game time doing
 
 ### Connection
 
-A `Connection` is a persistent mechanically meaningful relationship. It begins immediately, lasts until the player separates its cards, and relationship-dependent effects disappear when it is broken.
+A `Connection` is a persistent mechanically meaningful relationship. It begins immediately, lasts until the player separates the cards, and relationship-dependent effects disappear when it is broken.
 
-Example: a machine connected to a power outlet gains `Powered`; disconnecting removes it. One outlet can power only one card at a time.
+Example: a machine connected to a power outlet gains `Powered`; disconnecting removes `Powered`. One outlet can power only one card at a time.
 
 `Action` is a separate card-on-card interaction type, not a persistent stacking form; see ACTION-D01.
 
@@ -414,7 +420,7 @@ The exact user-facing vocabulary is provisional and not locked. Revisit after UI
 ## TARGET-D01 - Legal interaction targets highlight
 **Status:** DECIDED BY SIMON
 
-While dragging, every card that can legally receive it as an interaction target highlights. Legal movement destinations may use a placement affordance but are not interaction targets.
+While dragging, every card that can legally receive the dragged card as an interaction target highlights. Legal movement destinations may use a placement affordance but are not interaction targets.
 
 ## PREVIEW-01 - Multiple affected attributes
 **Status:** OPEN - SIMON TO DECIDE
