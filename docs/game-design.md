@@ -31,7 +31,19 @@ A card may additionally have zero or more attributes. Attributes are optional ra
 
 Cards do not currently have separate categories, tags, or capabilities. A card is functionally defined only by its attributes. Do not introduce another classification or capability system unless a concrete design need appears later that attributes cannot satisfy.
 
-Two identical objects are still two distinct card instances. A Stack can compress their presentation, but it does not merge them into one underlying card.
+#### Master definitions and instances
+
+Each reusable card type has one **master definition**. The master definition supplies:
+
+- name/title,
+- picture,
+- starting attributes.
+
+Cards created from that master are separate **card instances**. Each instance receives the starting attributes and thereafter maintains its own current attributes independently of the master and of sibling instances.
+
+Two identical objects are therefore still two distinct card instances. A Stack can compress their presentation, but it does not merge them into one underlying card.
+
+Whether an individual instance can later override its master name/picture, or how a card changes into a materially different card type, is not yet decided.
 
 Whether non-interactable state or temporary conditions should also use card representation is not yet decided.
 
