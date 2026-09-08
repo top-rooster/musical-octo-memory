@@ -30,7 +30,7 @@ Cards created from that master are separate **card instances**. Each instance re
 
 Two identical objects are therefore still two distinct card instances. A Stack can compress their presentation, but it does not merge them into one underlying card.
 
-Whether an instance can later override its master name/picture, or how a card changes into a materially different card type, is not yet decided. A water container becoming empty after use is a concrete case this rule will eventually need to cover.
+Whether an instance can later override its master name/picture, or exactly how a card changes into a materially different card type, is not yet decided. A water container becoming empty after use and a `Dead Rat` turning into `Rotten Meat` when Spoilage reaches 100 are concrete cases this rule will eventually need to cover.
 
 ### Attributes
 
@@ -41,11 +41,15 @@ Every attribute is represented by an icon. There are two official forms:
 - **Marker** — icon only; presence carries the meaning.
 - **Value** — icon plus an integer value.
 
-Examples: `Player`, `Anchored`, `Powered`, `Cutting Tool`, `Health 100`, `Progress 42`, `Durability 80`.
+Examples: `Player`, `Anchored`, `Powered`, `Cutting Tool`, `Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`.
 
 Markers may describe functional roles used by interaction matching. `Cutting Tool` is a confirmed example. Anything Nadir can eat or otherwise ingest must also carry an ingestion Marker; its final user-facing name has not yet been fixed.
 
 `Durability` is an ordinary Value. A tool therefore does not need a generic `Reusable` Marker: a knife can be a `Cutting Tool` with a current `Durability` value. The scale and wear rules are still open.
+
+`Spoilage` is also an ordinary Value. `Dead Rat` has a Spoilage value that increases over time and transforms the card into `Rotten Meat` at 100.
+
+A `Burn Wound` also carries a Value whose effect is to accelerate Nadir's dehydration over time. The final name and scale of that burn-specific Value are not yet fixed, and the exact card/attribute representation of dehydration itself is still open.
 
 #### Anchored
 
@@ -178,7 +182,7 @@ A Process can involve several cards, as with cooking, or it can be embodied by a
 
 Processes are allowed in both Room and Inventory, including on or between Nadir-related cards in Inventory.
 
-Processes use a visible `Progress` Value from 0 to 100. There is no universal progress calculation: each Process defines its own progression from relevant state and elapsed game time. Conditions may speed up, slow down, or stop progress.
+Processes currently use a visible `Progress` Value from 0 to 100. There is no universal progress calculation: each Process defines its own progression from relevant state and elapsed game time. Conditions may speed up, slow down, or stop progress.
 
 Concrete examples:
 
@@ -186,6 +190,8 @@ Concrete examples:
 - A bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time while Nadir is occupied elsewhere.
 - `Flesh Wound` and `Burn Wound` are single-card Processes. Their `Progress` represents healing, and the wound card disappears when `Progress` reaches 100.
 - `Fever` is a single-card Process. Its `Progress` represents recovery over game time, and the Fever card disappears when `Progress` reaches 100.
+
+`Dead Rat` introduces a related unresolved case: its visible `Spoilage` Value rises over time and transforms it into `Rotten Meat` at 100. Simon specified `Spoilage`, not a generic `Progress` attribute. It remains open whether such timed state change should itself be treated as a Process, or whether ordinary Values may evolve over game time outside the Process model.
 
 When `Progress` reaches 100, completion is Process-specific. A Process can consume or transform participating cards, create output cards, change attributes, separate participants, remove itself, or combine these effects.
 
@@ -247,6 +253,8 @@ Condition lifecycles are condition-specific rather than using one universal time
 - when Infection becomes too high, healing over time is reduced;
 - severe Infection spawns a `Fever` condition card.
 
+In addition, each `Burn Wound` has another Value that accelerates Nadir's dehydration over time. The exact name/scale of that Value and the exact representation of dehydration are not yet fixed.
+
 `Fever` is cumulative. If Nadir has **three Fever cards**, he dies.
 
 Each `Fever` card is itself a single-card Process. Its recovery `Progress` advances with game time and the card disappears at `Progress 100`.
@@ -296,15 +304,31 @@ Example: dragging an ingestible food card over **Body** should preview something
 
 The preview should appear on or immediately adjacent to the affected stat.
 
-### Eating
+### Eating and spoilage
 
 Anything Nadir can eat or otherwise ingest must carry a visible ingestion Marker. The exact final name of that Marker is not yet fixed.
 
 The ingestion Marker is what makes the card a legal source for Nadir's ingestion interaction. Eating currently uses **Body** as the receiving card.
 
-Dropping an ingestible food card on Body applies the food's hunger effect, consumes the food card, clamps Hunger to its valid range, and updates the visible Hunger value immediately.
+Dropping an ingestible food card on Body applies the food's interaction-specific effects, consumes the food card, and updates affected visible state immediately. Ordinary food can, for example, change Hunger; Hunger is clamped to its valid range.
+
+`Dead Rat` has a `Spoilage` Value that increases over game time. When Spoilage reaches **100**, the Dead Rat turns into a `Rotten Meat` card.
+
+`Rotten Meat` remains ingestible. If Nadir eats it:
+
+- the Rotten Meat card is consumed,
+- Nadir receives a mood debuff,
+- a `Fever` card is created.
+
+The exact representation, magnitude, and duration of the mood debuff are not yet fixed.
 
 For the first prototype, do **not** add a second hidden stomach/fullness system. This remains a prototype simplification rather than a permanent design rule.
+
+### Dehydration
+
+Dehydration is a survival pressure that can worsen over game time. Its exact representation has not yet been fixed.
+
+`Burn Wound` cards carry a Value that accelerates Nadir's dehydration rate while the wound exists. The name and scale of that wound Value and the dehydration formula remain open.
 
 ## Product principles
 
