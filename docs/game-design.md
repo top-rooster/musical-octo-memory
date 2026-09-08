@@ -30,7 +30,9 @@ Cards created from that master are separate **card instances**. Each instance re
 
 Two identical objects are therefore still two distinct card instances. A Stack can compress their presentation, but it does not merge them into one underlying card.
 
-Whether an instance can later override its master name/picture, or exactly how a card changes into a materially different card type, is not yet decided. A water container becoming empty after use and a `Dead Rat` turning into `Rotten Meat` when Spoilage reaches 100 are concrete cases this rule will eventually need to cover.
+When something remains the same card identity, its Values and Markers may change in place. When it becomes a materially different card identity, preserve the physical-card analogy: **discard the old card and draw the replacement card** rather than changing the existing instance into another master definition. The replacement is placed at the exact location occupied by the discarded card unless a specific rule says otherwise.
+
+Confirmed example: when a `Dead Rat` reaches `Spoilage 100`, discard the Dead Rat and draw `Rotten Meat` at exactly the same position.
 
 ### Attributes
 
@@ -114,9 +116,9 @@ Bare zone space can receive a card for legal movement/placement, but that is mov
 
 This rule applies across the game: food onto a Nadir card, medicine onto a Nadir card, a cutting tool onto a dead rat, a machine onto a power outlet, material or tool onto a machine, a water container onto Fever, and card combinations that start Actions, Processes, or Connections.
 
-A card-on-card interaction does not have to remain stacked afterward. It may resolve immediately, start an Action, consume a card, alter attributes, create a Stack, start a Process, create a Connection, or produce another interaction-specific result.
+A card-on-card interaction does not have to remain stacked afterward. It may resolve immediately, start an Action, discard a card, draw a card, alter attributes, create a Stack, start a Process, create a Connection, or produce another interaction-specific result.
 
-Consumption or continued use is an interaction outcome rather than a universal `Consumable`/`Reusable` classification. For example, Skinning returns the cutting tool but consumes the dead rat; eating consumes the ingested card. Specific functional Markers and Values describe what a card can do and its current state.
+Consumption or continued use is an interaction outcome rather than a universal `Consumable`/`Reusable` classification. For example, Skinning returns the cutting tool but discards the dead rat; eating consumes/discards the ingested card. Specific functional Markers and Values describe what a card can do and its current state.
 
 ### Stack, Action, Process, and Connection
 
@@ -167,8 +169,8 @@ Concrete example: skinning a dead rat.
 5. A window appears displaying `Skinning` and the cutting tool and dead rat cards.
 6. The Action represents **15 minutes** of game time.
 7. When the window animation terminates, the cutting tool returns to where it came from.
-8. The `Dead Rat` dissolves/is consumed.
-9. A `Rat Skin` card and a `Rat Meat` card are created.
+8. The `Dead Rat` is discarded.
+9. A `Rat Skin` card and a `Rat Meat` card are drawn as the Action outputs.
 
 A knife is a concrete `Cutting Tool` and has a `Durability` Value. The exact effect of Skinning on Durability has not yet been fixed.
 
@@ -192,13 +194,13 @@ There is no universal progress calculation: each Process defines its own progres
 
 Concrete examples:
 
-- `Dead Rat` is a single-card Process whose visible progress is `Spoilage`. Spoilage rises over game time and at 100 transforms the card into `Rotten Meat`.
+- `Dead Rat` is a single-card Process whose visible progress is `Spoilage`. At 100, discard the Dead Rat and draw `Rotten Meat` at exactly the same location.
 - `Rat Meat` placed on a lit camp fire starts a cooking Process. It progresses while the fire remains lit and Nadir spends time doing other things.
 - A bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time while Nadir is occupied elsewhere.
 - `Flesh Wound` and `Burn Wound` are single-card Processes whose progress represents healing.
 - `Fever` is a single-card Process whose progress represents recovery.
 
-When a Process reaches its completion state, the result is Process-specific. A Process can consume or transform participating cards, create output cards, change attributes, separate participants, remove itself, or combine these effects.
+When a Process reaches its completion state, the result is Process-specific. A Process can discard cards, draw replacement/output cards, change attributes, separate participants, remove itself, or combine these effects.
 
 If a future Process needs an `Anchored` participant whose home is another zone, its ongoing visual presentation still needs to be decided. There is no current concrete example requiring this.
 
@@ -316,15 +318,15 @@ Anything Nadir can eat or otherwise ingest must carry a visible ingestion Marker
 
 The ingestion Marker is what makes the card a legal source for Nadir's ingestion interaction. Eating currently uses **Body** as the receiving card.
 
-Dropping an ingestible food card on Body applies the food's interaction-specific effects, consumes the food card, and updates affected visible state immediately. Ordinary food can, for example, change Hunger; Hunger is clamped to its valid range.
+Dropping an ingestible food card on Body applies the food's interaction-specific effects, consumes/discards the food card, and updates affected visible state immediately. Ordinary food can, for example, change Hunger; Hunger is clamped to its valid range.
 
-`Dead Rat` is a single-card Process whose visible progress is named `Spoilage`. Spoilage increases over game time. When it reaches **100**, the Dead Rat turns into a `Rotten Meat` card.
+`Dead Rat` is a single-card Process whose visible progress is named `Spoilage`. Spoilage increases over game time. When it reaches **100**, discard the Dead Rat and draw a `Rotten Meat` card in exactly the same position.
 
 `Rotten Meat` remains ingestible. If Nadir eats it:
 
-- the Rotten Meat card is consumed,
+- the Rotten Meat card is consumed/discarded,
 - Nadir receives a mood debuff,
-- a `Fever` card is created.
+- a `Fever` card is drawn/created.
 
 The exact representation, magnitude, and duration of the mood debuff are not yet fixed.
 
@@ -340,6 +342,7 @@ Dehydration is a survival pressure that can worsen over game time. Its exact rep
 
 - Prefer direct manipulation over nested menus.
 - Prefer visible consequences over hidden arithmetic, while preserving meaningful discovery.
+- Preserve the physical-card analogy: when something becomes a different card identity, discard the old card and draw the replacement rather than morphing the existing card; keep the replacement in the old card's location unless a specific effect moves it.
 - Let specific visible attributes define what cards can do; avoid generic classifications such as `Reusable` when a concrete functional Marker and state Value express the behavior more directly.
 - Give Process progress a contextual player-facing name when that improves comprehension, while keeping it one common mechanic underneath.
 - Discovery, relational understanding, exploratory play, and knowledge unlocks are intended parts of play rather than problems for the UI to eliminate.
