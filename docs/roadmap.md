@@ -21,9 +21,11 @@ Build a small browser prototype whose only purpose is to validate the core card 
 - Reaching `Hydration 0` or `Satiation 0` is a game-over condition, although Milestone 1 does not need to implement the ongoing Processes that reduce those Values over time.
 - Physical injury/health state is represented through injury and condition cards rather than a separate Body `Health` Value.
 - Temporary Nadir condition cards such as `Exhausted` and `Flesh Wound` are part of the design and also live in Inventory, but their lifecycle mechanics are not required in Milestone 1.
-- Seed the prototype with a few movable cards, including at least two ingestible food cards with different satiation effects and one non-ingestible item.
+- Seed the prototype with **Rat Meat** and **Canned Food** as the two ingestible food cards. They must have different Satiation effects. The exact gains remain a design input and must not be silently invented as permanent product values.
+- Seed at least one non-ingestible movable item as a negative interaction example.
 - Give every card Nadir can eat/ingest a visible ingestion **Marker**. The final product-facing name of this Marker is not yet fixed; use one consistent prototype identifier without treating that identifier as locked design terminology.
 - Non-anchored cards can be dragged between Room and Inventory when the destination is legal.
+- The only current rules that can prevent a Room/Inventory transfer are `Anchored` and the Inventory capacity limit.
 - Gameplay interactions are card-on-card: dragging one card onto another card initiates the interaction.
 - Interaction legality must be driven by card attributes rather than by a hard-coded list of specific food card IDs. For the prototype, **Body** accepts cards carrying the ingestion Marker for the eating interaction.
 - While dragging a card, all legal card interaction targets highlight.
@@ -44,10 +46,11 @@ Build a small browser prototype whose only purpose is to validate the core card 
 - Implement source/target interaction matching so a target can accept a source based on visible source attributes. Milestone 1 only needs the ingestion-Marker → Body example, but do not couple the rule to specific food master definitions.
 - Do not introduce generic `Consumable` or `Reusable` classifications for the prototype. Whether a card is consumed or remains is part of the interaction result.
 - Implement `Anchored` as an attribute-driven home-zone rule, not as a special Nadir card type. It prevents the card from coming to rest outside its home zone while preserving cross-zone dragging and legal card-on-card interaction.
+- Do not add extra contextual Room/Inventory transfer blockers beyond `Anchored` and Inventory capacity.
 - Keep state transition/game-rule functions separate from React rendering where practical.
 - Keep the text-data parser/loader separate from rendering and validate malformed authored data with useful errors rather than silently accepting ambiguity.
 - Avoid a heavy state-management library for this prototype unless there is a demonstrated need.
-- Add lightweight automated tests for the pure game-rule logic, especially ingestion-Marker matching, rejection of a non-ingestible card by Body, food consumption, Value clamping, invalid interactions, and anchored-card return-to-home behavior after a foreign-zone release.
+- Add lightweight automated tests for the pure game-rule logic, especially ingestion-Marker matching, rejection of a non-ingestible card by Body, food consumption, Value clamping, invalid interactions, Inventory-capacity rejection, and anchored-card return-to-home behavior after a foreign-zone release.
 - Add lightweight tests that prove the prototype card masters and starting level state are actually loaded from text data.
 
 ### Done means
