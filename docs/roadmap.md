@@ -12,6 +12,7 @@ Build a small browser prototype whose only purpose is to validate the core card 
   - **Body**,
   - **Mind**,
   - **Spirit**.
+- All three persistent Nadir cards have `Anchored` and remain persistently in the Nadir zone. `Anchored` does not prevent dragging a card onto another card for an interaction.
 - Put visible `Hunger` and `Health` attributes on **Body** for the prototype. `Health` remains prototype scope rather than a confirmed permanent survival attribute.
 - Temporary Nadir condition cards such as `Exhausted` and `Flesh Wound` are part of the design, but their lifecycle mechanics are not required in Milestone 1.
 - Seed the prototype with a few movable cards, including at least two food cards with different hunger effects and one non-food item.
@@ -27,9 +28,10 @@ Build a small browser prototype whose only purpose is to validate the core card 
 ### Architecture constraints
 
 - Keep card definitions and effects as data rather than hard-coding each individual card in UI components.
+- Implement `Anchored` as an attribute-driven rule, not as a special Nadir card type. It prevents persistent zone transfer while preserving legal card-on-card dragging.
 - Keep state transition/game-rule functions separate from React rendering where practical.
 - Avoid a heavy state-management library for this prototype unless there is a demonstrated need.
-- Add lightweight automated tests for the pure game-rule logic, especially food consumption, hunger clamping, and invalid interactions.
+- Add lightweight automated tests for the pure game-rule logic, especially food consumption, hunger clamping, invalid interactions, and the fact that anchored cards cannot be persistently transferred out of their home zone.
 
 ### Done means
 
@@ -39,6 +41,7 @@ A developer can clone the repo, install dependencies, start the app, and immedia
 
 Do not implement these during Milestone 1:
 
+- cross-zone Process presentation for anchored Nadir cards,
 - temporary condition creation/removal/healing rules,
 - complete survival simulation,
 - hidden stomach/fullness mechanics,
