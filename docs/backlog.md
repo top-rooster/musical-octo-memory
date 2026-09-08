@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **NADIR-03 [P2]** - How is equipment represented?
-2. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
-3. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
-4. **TARGET-01 [P2]** - Should highlights differ by interaction type?
-5. **TARGET-02 [P2]** - Should dangerous legal interactions use the normal target highlight?
+1. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
+2. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
+3. **TARGET-01 [P2]** - Should highlights differ by interaction type?
+4. **TARGET-02 [P2]** - Should dangerous legal interactions use the normal target highlight?
+5. **SURV-01 [P2]** - Which survival pressures should be permanent?
 
 ---
 
@@ -810,11 +810,16 @@ For now, every injury is represented as a **Process**.
 
 This is a current design rule rather than a claim that no future exception can ever exist.
 
-## NADIR-03 - Equipment representation
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
+## NADIR-D09 - Equipment is equipped by being in Inventory
+**Status:** DECIDED BY SIMON
 
-Ordinary Inventory cards, Connections, attributes, or something else?
+Equipment is represented by ordinary cards.
+
+An equipment card is considered **equipped exactly while that card instance is in Inventory**. Moving the card out of Inventory unequips it.
+
+There is no separate equipment zone, equipment-slot system, attachment relationship, or `Equipped` Marker in the current design. This does not mean every Inventory card is equipment; food, materials, containers, and other ordinary carried cards may also occupy Inventory.
+
+Any effect that depends on equipment being equipped should derive that state from the equipment card being present in Inventory.
 
 ## NADIR-04 - Mental/narrative state detail
 **Status:** OPEN - SIMON TO DECIDE
