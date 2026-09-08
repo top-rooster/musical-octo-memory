@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **WOUND-02 [P2]** - How are cleaning and dressing represented?
-2. **CARD-11 [P2]** - How does a card instance change identity?
-3. **MOVE-03 [P2]** - Can moving a card between Room and Inventory consume time or create consequences?
-4. **INTERACT-03 [P2]** - Do some drops need confirmation?
-5. **INTERACT-04 [P2]** - How do immediate interactions handle time/noise consequences?
+1. **CARD-11 [P2]** - How does a card instance change identity?
+2. **MOVE-03 [P2]** - Can moving a card between Room and Inventory consume time or create consequences?
+3. **INTERACT-03 [P2]** - Do some drops need confirmation?
+4. **INTERACT-04 [P2]** - How do immediate interactions handle time/noise consequences?
+5. **WOUND-03 [P2]** - Which interactions change `Clean` and `Dressed`, and how?
 
 ---
 
@@ -56,8 +56,8 @@ Cards have no separate categories, tags, capability lists, or card classes. A ca
 
 All card attributes are visible and represented by icons. There are no hidden/internal card attributes in the current model.
 
-- **Marker** - icon only; presence carries meaning (`Player`, `Anchored`, `Powered`, `Cutting Tool`).
-- **Value** - icon plus integer (`Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`).
+- **Marker** - icon only; presence carries meaning (`Player`, `Anchored`, `Powered`, `Cutting Tool`, `Dressed`).
+- **Value** - icon plus integer (`Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`, `Clean 70`).
 
 ## ATTR-D02 - Anchored
 **Status:** DECIDED BY SIMON
@@ -598,16 +598,17 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 
 - Each wound has a process progress Value from 0 to 100 representing healing. Its eventual player-facing label can be process-specific; no exact label is fixed yet.
 - The wound card disappears when its process progress reaches 100.
-- Each wound has an `Infection` numerical counter, represented under the current attribute model as an `Infection` Value.
-- `Infection` rises over time if not adequately managed.
-- Wounds need cleaning to keep Infection down.
-- Wounds can be dressed; dressing improves healing over time and causes Infection to decrease over time.
+- Each wound has an `Infection` Value that rises over time if the wound is not adequately managed.
+- Each wound has a `Clean` Value representing how clean the wound currently is.
+- A wound can carry the `Dressed` Marker to show that it is currently dressed.
+- Cleaning raises or otherwise restores `Clean`, helping keep Infection down.
+- `Dressed` improves healing over time and causes Infection to decrease over time.
 - When Infection becomes too high, the wound's healing rate is reduced.
 - Severe Infection spawns a `Fever` condition card.
 
 In addition, a `Burn Wound` has another Value that accelerates Nadir's dehydration over time while the burn exists. The final name/scale of this burn-specific Value and the exact representation of dehydration are not yet fixed.
 
-The exact card/attribute representation of cleaning and dressing and their rates/durations are not yet decided. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
+The exact interactions, source cards, Action durations, rates, and formulas that change `Clean` or add/remove `Dressed` are not yet decided. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
 
 ### Fever
 
@@ -636,6 +637,26 @@ If a wound's `Infection` becomes too high:
 
 The exact Infection threshold or thresholds are not yet fixed.
 
+## WOUND-D02 - Wound treatment state uses Clean Value and Dressed Marker
+**Status:** DECIDED BY SIMON
+
+Wound treatment state is represented directly on the wound card:
+
+- `Clean` is a **Value** representing current wound cleanliness;
+- `Dressed` is a **Marker** whose presence means the wound is currently dressed.
+
+This preserves cleaning and dressing inside the existing visible attribute model rather than creating separate wound-treatment cards or a new relationship type.
+
+Cleaning is intended to keep Infection down by improving `Clean`. A dressed wound improves healing over time and causes Infection to decrease over time, as already decided.
+
+The exact card interactions, materials, Action durations, Value changes, and rules for adding/removing `Dressed` remain open in WOUND-03.
+
+## WOUND-03 - Cleaning and dressing interactions
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+Which source cards can clean or dress a wound, are those interactions Actions, how much do they change `Clean`, when is `Dressed` added/removed, and do those interventions consume materials or time?
+
 ## BURN-D01 - Burn Wounds accelerate dehydration
 **Status:** DECIDED BY SIMON
 
@@ -661,12 +682,6 @@ A water container can be dragged onto a Fever card. That interaction:
 - empties the water container.
 
 The exact Fever recovery rate is not yet fixed. The exact player-facing name of Fever's process progress, the exact representation of an emptied water container, and whether the water treatment itself consumes game time are not yet decided.
-
-## WOUND-02 - Cleaning and dressing representation
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Cleaning and dressing are confirmed wound interventions. Decide later exactly which cards initiate them, whether they are Actions, and whether dressing is represented by an attribute, another card relationship, or another mechanism.
 
 ## NADIR-02 - Injury representation beyond simple condition cards
 **Status:** OPEN - SIMON TO DECIDE
