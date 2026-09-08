@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **ZONE-02 [P2]** - Can non-Nadir cards persist in the Nadir zone?
-2. **STACK-02 [P2]** - What happens when a Process completes?
-3. **STACK-05 [P2]** - How is a cross-zone Process with an anchored Nadir card presented?
-4. **INTERACT-02 [P2]** - What if one source/target pair supports several actions?
-5. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
+1. **STACK-02 [P2]** - What happens when a Process completes?
+2. **STACK-05 [P2]** - How is a cross-zone Process with an anchored card presented?
+3. **INTERACT-02 [P2]** - What if one source/target pair supports several actions?
+4. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
+5. **MOVE-02 [P2]** - Does Inventory have a capacity limit?
 
 ---
 
@@ -70,11 +70,9 @@ Anchored does not prevent:
 - crossing zone boundaries while being dragged,
 - dragging the card onto another card in another zone for a legal interaction, including starting a Process.
 
-If an anchored card is released onto bare space in another zone, or otherwise released without a legal interaction that accepts it, the card returns to its home zone rather than remaining in the foreign zone.
+If an anchored card is released onto bare space in another zone, or otherwise released without a legal interaction that accepts it, it returns to its home zone.
 
 A legal cross-zone interaction does not transfer the anchored card's home zone. How an anchored card is visually represented while participating in an ongoing cross-zone Process remains open.
-
-This supersedes the earlier narrower wording that described `Anchored` only as blocking Room/Inventory transfer.
 
 ## CARD-D04 - Master definition and card instances
 **Status:** DECIDED BY SIMON
@@ -110,7 +108,7 @@ Should values such as durability use ordinary attributes or another representati
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P3
 
-Temporary conditions applying to Nadir are confirmed as cards in the Nadir zone. It remains undecided whether other non-interactable state or temporary conditions elsewhere also use cards.
+Temporary conditions applying to Nadir are confirmed as cards. It remains undecided whether other non-interactable state or temporary conditions elsewhere also use cards.
 
 ## CARD-11 - Instance changing identity
 **Status:** OPEN - SIMON TO DECIDE
@@ -128,31 +126,17 @@ Descriptions are not part of the first release. Revisit later if cards need expl
 
 # Zones, positioning, movement, and card stacking
 
-## ZONE-D01 - Three top-level zones
+## ZONE-D01 - Two top-level zones: Room and Inventory
 **Status:** DECIDED BY SIMON
 
-The play space has three zones:
+The play space has two zones:
 
-- **Room** - the currently viewed physical space.
-- **Inventory** - persistent carried possessions.
-- **Nadir** - Nadir's persistent representation cards plus temporary condition cards that currently apply to him.
+- **Room** - the currently viewed physical space; its contents change when Nadir moves to another room.
+- **Inventory** - persistent cards that remain on screen when Nadir moves to another room.
 
-The Nadir zone supersedes the earlier assumption that Nadir's cards live in Inventory.
+The previously proposed separate **Nadir** zone is removed. Nadir's cards live in Inventory.
 
-## ZONE-D02 - Nadir's cards are Anchored to the Nadir zone
-**Status:** DECIDED BY SIMON
-
-All of Nadir's cards in the Nadir zone are `Anchored` and cannot come to rest outside that zone.
-
-This includes the persistent Nadir representation cards and temporary condition cards that currently apply to him.
-
-An anchored Nadir card may cross a zone boundary while being dragged. If released onto bare space in Room or Inventory, it returns to the Nadir zone. It may instead be dropped onto another card in another zone to start a legal interaction, explicitly including a Process, without changing its home zone.
-
-## ZONE-02 - Non-Nadir cards in the Nadir zone
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Can cards that do not represent or currently apply to Nadir ever persist in the Nadir zone, for example equipment or other attached possessions?
+Inventory therefore contains both ordinary persistent possessions and Nadir's own persistent/condition cards. `Anchored`, rather than a separate zone, prevents Nadir's cards from being ordinarily moved into Room.
 
 ## MOVE-D01 - Room/Inventory transfer
 **Status:** DECIDED BY SIMON
@@ -224,11 +208,9 @@ When a Process reaches `Progress 100`, how is its result specified: attribute ch
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-An anchored Nadir card can be dragged onto a target card in another zone to start a Process without changing home zone.
+An anchored Inventory card, including a Nadir card, can be dragged onto a Room card to start a Process without changing home zone.
 
-How is that Process visually represented while the Nadir card remains anchored to the Nadir zone: does the target show a linked/ghosted participant, does the Nadir card remain visibly participating from its home zone, or another solution?
-
-Do not infer a presentation until this is decided.
+How is that Process visually represented while the anchored card remains owned by Inventory? Do not infer a presentation until this is decided.
 
 ## MOVE-02 - Inventory capacity
 **Status:** OPEN - SIMON TO DECIDE
@@ -240,7 +222,7 @@ Does Inventory have a capacity limit? If yes: slots, weight, bulk, containers, o
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Can moving a card between zones consume time or create consequences?
+Can moving a card between Room and Inventory consume time or create consequences?
 
 ## MOVE-05 - Other reasons a card cannot change zones
 **Status:** OPEN - SIMON TO DECIDE
@@ -255,7 +237,7 @@ Can moving a card between zones consume time or create consequences?
 ## CORE-D04 - Eating
 **Status:** DECIDED BY SIMON
 
-Food is eaten by dragging the food card onto the relevant Nadir card.
+Food is eaten by dragging the food card onto Body.
 
 ## INTERACT-D01 - All interactions are card-on-card
 **Status:** DECIDED BY SIMON
@@ -331,21 +313,21 @@ Direct visible stat consequences can preview before the drop, e.g. `Hunger 67 ->
 
 Previews reflect what Nadir/the player currently understands.
 
-- Known consequences may be shown accurately, including indirect consequences when they are understood.
+- Known consequences may be shown accurately, including indirect consequences when understood.
 - Undiscovered relationships should not automatically be spoiled by hovering cards together.
 - Known meaningful danger may be communicated qualitatively even when the exact result remains uncertain.
 - The UI should not reveal a complete causal future and turn play into exhaustive deterministic planning.
 
-Design example: repairing an exposed electrical outlet can carry a known risk of shock. A shock can produce a burn-wound condition; if the risk outcome does not produce a shock, the repair can instead result in a functional outlet. The player can understand that the attempt is dangerous without necessarily knowing the exact roll result in advance.
+Design example: repairing an exposed electrical outlet can carry a known risk of shock. A shock can produce a burn-wound condition; if the risk outcome does not produce a shock, the repair can instead result in a functional outlet.
 
 ## PREVIEW-D03 - Uncertain likelihoods are calibrated but non-numeric
 **Status:** DECIDED BY SIMON
 
-When Nadir understands an uncertain risk, the UI should communicate the likelihood clearly enough for the player to distinguish materially different odds such as roughly even chances from a clearly favored outcome.
+When Nadir understands an uncertain risk, the UI should communicate likelihood clearly enough to distinguish materially different odds, such as roughly even chances from a clearly favored outcome.
 
-Do not normally expose the underlying percentage or numerical odds. The communication should use sufficiently precise plain-language likelihoods rather than only coarse labels such as `Low`, `Moderate`, and `High`.
+Do not normally expose the underlying percentage or numerical odds. Coarse labels such as only `Low`, `Moderate`, and `High` are not precise enough.
 
-The exact user-facing vocabulary is provisional and not locked. Keep the principle for now and revisit the wording after UI testing if needed.
+The exact user-facing vocabulary is provisional and not locked. Revisit after UI testing if needed.
 
 ## TARGET-D01 - Legal interaction targets highlight
 **Status:** DECIDED BY SIMON
@@ -392,10 +374,10 @@ Test visually.
 
 # Nadir and survival
 
-## NADIR-D01 - Nadir cards live in the Nadir zone
+## NADIR-D01 - Nadir cards live in Inventory
 **Status:** DECIDED BY SIMON
 
-Nadir's persistent representation cards live in the dedicated **Nadir** zone rather than Inventory.
+Nadir's representation is part of the persistent **Inventory** zone. There is no separate Nadir zone.
 
 ## NADIR-D02 - Character state uses card attributes
 **Status:** DECIDED BY SIMON
@@ -405,7 +387,7 @@ Relevant character state lives as attributes on Nadir's cards rather than in a s
 ## NADIR-D03 - Nadir may be represented by multiple cards
 **Status:** DECIDED BY SIMON
 
-Nadir is not required to fit on a single card. His representation may span several simultaneously visible cards in the Nadir zone.
+Nadir is not required to fit on a single card. His representation may span several simultaneously visible cards in Inventory.
 
 ## NADIR-D04 - Three persistent Nadir cards: Body, Mind, Spirit
 **Status:** DECIDED BY SIMON
@@ -418,33 +400,33 @@ For now, Nadir has three persistent representation cards:
 
 More persistent Nadir cards may be added later if a concrete need appears.
 
-## NADIR-D05 - Temporary conditions are cards in the Nadir zone
+## NADIR-D05 - Temporary conditions are cards in Inventory
 **Status:** DECIDED BY SIMON
 
-Conditions currently applying to Nadir are represented as temporary cards in the Nadir zone rather than being forced into Body, Mind, or Spirit.
+Conditions currently applying to Nadir are represented as temporary cards in Inventory rather than being forced into Body, Mind, or Spirit.
 
-Examples explicitly given by Simon include `Exhausted` and `Flesh Wound`. A burn wound from an electrical shock is another concrete condition example; its exact final card title is not yet separately fixed.
+Examples explicitly given by Simon include `Exhausted` and `Flesh Wound`. A burn wound from an electrical shock is another concrete condition example; its exact final card title is not yet fixed.
 
 These cards exist while the condition applies. How they are created, progress, heal, expire, or otherwise disappear is not yet decided.
 
-## NADIR-D06 - All Nadir cards are Anchored
+## NADIR-D06 - All Nadir cards are Anchored to Inventory
 **Status:** DECIDED BY SIMON
 
-All of Nadir's cards, including Body, Mind, Spirit and temporary condition cards in the Nadir zone, have `Anchored`.
+All of Nadir's cards, including Body, Mind, Spirit and temporary condition cards, have `Anchored` with **Inventory** as their home zone.
 
-They can cross zone boundaries while being dragged but cannot come to rest outside the Nadir zone. If released elsewhere without a legal accepting card interaction, they return to the Nadir zone. They may be dropped onto a card in another zone to start a legal Process without changing their home zone.
+They can cross into Room while being dragged but cannot come to rest there as ordinary placement. If released in Room without a legal accepting card interaction, they return to Inventory. They may be dropped onto a Room card to start a legal interaction or Process without changing home zone.
 
 ## NADIR-02 - Injury representation beyond simple condition cards
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Injury-like conditions can be temporary Nadir-zone cards. Decide later whether all injuries use that model or whether some persistent/complex injuries need another representation.
+Injury-like conditions can be temporary Nadir cards. Decide later whether all injuries use that model or whether some persistent/complex injuries need another representation.
 
 ## NADIR-03 - Equipment representation
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Attributes, Nadir-zone cards, ordinary Inventory cards, Connections, or something else?
+Attributes, ordinary Inventory cards, Connections, or something else?
 
 ## NADIR-04 - Mental/narrative state detail
 **Status:** OPEN - SIMON TO DECIDE
