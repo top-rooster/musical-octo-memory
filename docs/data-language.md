@@ -41,6 +41,29 @@ These examples express the desired low-boilerplate style. Do not turn them into 
 
 Mutable object state should prefer Markers/Values on the same card identity where appropriate. Example: a `Plastic Bottle` remains the same card whether full or empty; it always has `Container`, and it has `Contains Water` only while it contains water.
 
+## Interaction requirements
+
+When an Action or other interaction accepts a source based on more than one Marker, combine the required Markers with `+`.
+
+Example:
+
+`action Fabric+Sterilized Dress 15m`
+
+means the dragged source card must carry both `Fabric` and `Sterilized`.
+
+A single Marker requirement remains unadorned, for example `action Contains Water Clean 15m`.
+
+## Removal vocabulary
+
+When a card leaves play, use `discard`, not `remove`.
+
+Examples:
+
+- `discard self`
+- `at progress 100 discard self`
+
+Use `remove` for removing an attribute/Marker from an existing card instance, for example `remove Contains Water source`.
+
 ## Explicit time
 
 Every authored **Action** and **Process** must include an explicit time value in the data.
@@ -51,10 +74,11 @@ Examples:
 - `Sleep 8h`
 - an instant Action must still say `0m`
 - fabric sterilization must explicitly say `1h`
+- a repeating Process may use its explicit tick interval, e.g. a wound healing Process evaluated every `15m`
 
-There is no implicit default duration. If the duration of an Action or Process has not yet been designed, that authored behavior is incomplete and should remain visibly unresolved rather than receiving a guessed time.
+There is no implicit default duration. If the duration or tick interval of an Action or Process has not yet been designed, that authored behavior is incomplete and should remain visibly unresolved rather than receiving a guessed time.
 
-Only Actions advance game time. A Process duration describes how much elapsed game time it requires while Actions advance time; it does not itself create that elapsed time.
+Only Actions advance game time. A Process time describes how much elapsed game time must accumulate before that Process evaluates/progresses; it does not itself create elapsed time.
 
 ## Current format draft
 
@@ -67,8 +91,10 @@ The draft currently uses:
 - the picture path as the second line;
 - Marker names as plain lines;
 - Values as `name integer`;
+- `+` between Marker names when a source must satisfy all listed Markers;
 - explicit time tokens such as `0m`, `15m`, `1h`, or `8h` on every Action/Process;
-- short behavior verbs only where the data needs to express an Action, Process, input, output, or state change.
+- `discard` for removing cards from play and `remove` for removing attributes from a surviving card;
+- short behavior verbs only where the data needs to express an Action, Process, input, output, condition, or state change.
 
 This file exists so the format can be judged against real Safe Room data. The syntax in `data/cards.txt` is **not yet a locked design decision**. Keep changing it if doing so removes boilerplate or ambiguity while preserving phone-friendly authoring.
 
@@ -76,7 +102,7 @@ This file exists so the format can be judged against real Safe Room data. The sy
 
 Level design uses the same text-data philosophy and parser/tooling family as card data.
 
-The runtime world should be constructed from authored text data rather than from room-specific setup code. At minimum, level data must be able to identify rooms and the card instances/starting state that belong in them. As more world relationships become implementation-relevant, extend the text format rather than moving those authored facts into code.
+The runtime world should be constructed from authored text data rather than from room-specific setup code. At minimum, level data must be able to identify rooms and the card instances/starting state that belong in them. As more authored world relationships become implementation-relevant, extend the text format rather than moving those authored facts into code.
 
 This makes the data files the place where Simon can both design cards and author the playable world.
 
