@@ -102,8 +102,8 @@ There are no non-card interaction targets in the current design. Bare Room or In
 
 This rule applies across the game rather than only to eating. Examples include:
 
-- food onto Nadir,
-- medicine onto Nadir,
+- food onto the relevant Nadir card,
+- medicine onto the relevant Nadir card,
 - a machine onto a power outlet,
 - material or a tool onto a machine,
 - any card combination that starts a Process or Connection.
@@ -171,9 +171,13 @@ A single power outlet can power only one card at a time.
 
 ### Nadir
 
-Nadir Veylan is represented by a card in Inventory with the `Anchored` Marker. He therefore cannot be transferred into the Room zone, but his card can still be repositioned within Inventory or dragged onto other cards when an interaction allows it.
+Nadir Veylan is not required to fit on a single card. His representation may consist of several cards in Inventory while remaining fully inside the same card-based interaction system.
 
-Character state is expressed primarily as attributes on Nadir's card rather than through a separate character-stat subsystem.
+The representation includes an Inventory card with the `Anchored` Marker. That card cannot be transferred into the Room zone, but it can still be repositioned within Inventory or dragged onto other cards when an interaction allows it. Whether every card representing Nadir is also anchored is not yet decided.
+
+Character state is expressed primarily as attributes on the card or cards representing Nadir rather than through a separate character-stat subsystem or alternate character views.
+
+The exact division of state across Nadir's cards is not yet decided.
 
 For the first prototype, expose at least:
 
@@ -191,7 +195,7 @@ Whenever the player drags a card:
 3. Potential state changes should be previewed before the drop is committed.
 4. Invalid targets should not suggest that they accept the card.
 
-Example: dragging food over Nadir should preview something like:
+Example: dragging food over the Nadir card that accepts it should preview something like:
 
 `Hunger 67 → 98`
 
@@ -199,7 +203,7 @@ The preview should appear on or immediately adjacent to the affected stat so the
 
 ### Eating
 
-Food is consumed by dragging a food card onto Nadir.
+Food is consumed by dragging a food card onto the relevant Nadir card.
 
 Dropping the food on Nadir:
 
