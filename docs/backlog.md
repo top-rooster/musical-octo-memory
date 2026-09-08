@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision. Do not dump the
 
 # Current decision queue
 
-1. **ATTR-01 [P0]** - What is the basic structure and meaning of a card attribute?
+1. **ATTR-02 [P0]** - What working names should the two attribute forms use?
 2. **CARD-04 [P1]** - How does a specific card instance differ from its reusable definition?
 3. **CARD-05 [P1]** - What belongs permanently on a card face versus contextual reveal?
 4. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
@@ -114,6 +114,25 @@ Do not add separate card categories, tags, capability lists, or equivalent class
 
 ChatGPT previously suggested composable capabilities/tags. Simon rejected that extra layer for now in favor of the simpler attribute-only model.
 
+### ATTR-D01 - All attributes are visible, icon-based, and have one of two forms
+**Status:** DECIDED BY SIMON
+
+Every attribute on a card is visible on that card. There are no hidden/internal attributes in the current model.
+
+Every attribute is represented by an icon.
+
+There are two attribute forms:
+
+- an icon with no number, where the presence of the attribute itself carries the meaning,
+- an icon with an integer value.
+
+Examples on Nadir:
+
+- `Player` - icon only,
+- `Health 100` - icon plus integer value.
+
+The working names for these two forms are still open.
+
 ## Threat and pacing
 
 ### THREAT-D01 - No mandatory constant real-time pressure
@@ -187,19 +206,32 @@ None for now. A card is functionally defined only by its attributes.
 Do not introduce categories, tags, capabilities, or similar metadata unless a concrete need appears later.
 
 ## ATTR-01 - Basic attribute model
+**Status:** DECIDED BY SIMON
+
+All card attributes are visible on the card and represented by icons.
+
+There are two forms:
+
+1. icon only,
+2. icon plus an integer value.
+
+There are no hidden/internal card attributes in the current model.
+
+Examples:
+
+- Nadir has an icon-only `Player` attribute,
+- Nadir has a numeric `Health 100` attribute.
+
+## ATTR-02 - Working names for the two attribute forms
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P0
 
-Because attributes now define both card state and card function, we need a minimal shared understanding of what an attribute actually is.
+**Suggested by ChatGPT:**
 
-Questions:
+- **Marker attribute** - icon only; presence itself carries the meaning, for example `Player`.
+- **Value attribute** - icon plus integer value, for example `Health 100`.
 
-- Does every attribute have a name and value?
-- Are attributes always visible on the card, or can some be internal/hidden?
-- Can an attribute represent behavior as well as state, or are behaviors derived from specific attribute names/values?
-- What value forms are needed initially: number, boolean, text, reference, or something simpler?
-
-Do not answer more than needed for the first prototype.
+Reason for the suggestion: `Marker` and `Value` are neutral across characters, machines, food, passages, and other card types. Alternatives such as `Trait`/`Stat` are more game-like but can sound character-specific, while `Flag` is more implementation-oriented.
 
 ## CARD-04 - Card instance versus reusable definition
 **Status:** OPEN - SIMON TO DECIDE
@@ -217,7 +249,7 @@ Questions:
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P1
 
-Simon has decided that title and picture are always present and attributes are optional.
+Simon has decided that title, picture, and all attributes are visible on the card.
 
 Still open:
 
