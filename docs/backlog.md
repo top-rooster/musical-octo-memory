@@ -26,11 +26,10 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **FOOD-03 [P0]** - How much Satiation do Rat Meat and Canned Food restore in the first prototype?
-2. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
-3. **TARGET-01 [P2]** - Should highlights differ by interaction type?
-4. **TARGET-02 [P2]** - Should dangerous legal interactions use the normal target highlight?
-5. **SURV-01 [P2]** - Are there other permanent survival pressures beyond Hydration and Satiation?
+1. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
+2. **TARGET-01 [P2]** - Should highlights differ by interaction type?
+3. **TARGET-02 [P2]** - Should dangerous legal interactions use the normal target highlight?
+4. **SURV-01 [P2]** - Are there other permanent survival pressures beyond Hydration and Satiation?
 
 ---
 
@@ -117,7 +116,7 @@ For the first release, a normal card shows only title/name, picture, and visible
 ## CARD-D06 - Current relationship model is complete for now
 **Status:** DECIDED BY SIMON
 
-For now, the game assumes the currently defined card relationship forms are sufficient. Do not add a separate containment, attachment, equipment, fuel, or similar relationship mechanism unless a concrete future need cannot be expressed with the existing model.
+For now, the game assumes the currently defined card relationship forms are sufficient. Do not add a separate containment, attachment, equipment, fuel, or similar relationship mechanism unless a concrete future design need cannot be expressed with the existing model.
 
 - **Stack** exists only to visually reduce card clutter in the **Room** zone. It has no mechanical meaning.
 - **Process** represents unattended ongoing change/work and may exist in Room or Inventory.
@@ -475,23 +474,15 @@ If Nadir eats Rotten Meat by dropping it onto **Body**:
 
 The exact representation, magnitude, and duration of the mood debuff are not yet decided.
 
-## FOOD-D03 - First prototype foods are Rat Meat and Canned Food
+## FOOD-D03 - First prototype foods and Satiation effects
 **Status:** DECIDED BY SIMON
 
 The two ingestible food cards used to validate the first prototype's Satiation interaction are:
 
-- `Rat Meat`
-- `Canned Food`
+- `Rat Meat` — eating it applies `Satiation +15` to Body;
+- `Canned Food` — eating it applies `Satiation +25` to Body.
 
-They must have different Satiation effects so the preview interaction demonstrates different outcomes. Their exact Satiation gains are still open and must not be invented as a product decision.
-
-## FOOD-03 - Prototype Satiation amounts
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P0
-
-How much Satiation should eating `Rat Meat` restore, and how much should eating `Canned Food` restore?
-
-The two values should differ so Milestone 1 can validate exact consequence previews.
+Both are consumed after eating. Their different effects are used to validate exact pre-drop Satiation previews.
 
 ## INTERACT-D01 - All interactions are card-on-card
 **Status:** DECIDED BY SIMON
@@ -585,7 +576,7 @@ Design example: a flooded room with exposed electrical outlets is obviously dang
 ## PREVIEW-D01 - Direct known stat preview
 **Status:** DECIDED BY SIMON
 
-Direct visible stat consequences can preview before the drop, e.g. `Satiation 67 -> 98` or `Hydration 50 -> 75` on Body.
+Direct visible stat consequences can preview before the drop, e.g. `Satiation 67 -> 82` for Rat Meat, `Satiation 67 -> 92` for Canned Food, or `Hydration 50 -> 75` on Body.
 
 ## PREVIEW-D02 - Previews are knowledge-dependent, not omniscient
 **Status:** DECIDED BY SIMON
