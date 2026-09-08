@@ -15,7 +15,7 @@ Build a small browser prototype whose only purpose is to validate the core card 
   - **Mind**,
   - **Spirit**.
 - All three persistent Nadir cards have `Anchored` with Inventory as their home zone. They may be dragged across the Room/Inventory boundary, but cannot come to rest in Room as ordinary placement. If released onto bare Room space, they return to Inventory.
-- `Anchored` does not prevent dragging a card onto another card for a legal interaction. Cross-zone Processes are part of the design, although their ongoing visual presentation is not required in Milestone 1.
+- `Anchored` does not prevent dragging a card onto another card for a legal interaction.
 - Put visible `Hunger` and `Health` attributes on **Body** for the prototype. `Health` remains prototype scope rather than a confirmed permanent survival attribute.
 - Temporary Nadir condition cards such as `Exhausted` and `Flesh Wound` are part of the design and also live in Inventory, but their lifecycle mechanics are not required in Milestone 1.
 - Seed the prototype with a few movable cards, including at least two food cards with different hunger effects and one non-food item.
@@ -44,10 +44,11 @@ A developer can clone the repo, install dependencies, start the app, and immedia
 
 Do not implement these during Milestone 1:
 
-- Nadir-involved Process windows that force game time forward to completion,
-- unattended/background Process progression while Nadir performs other activities,
-- the `Skinning` recipe or other Process completion transformations,
-- ongoing cross-zone Process presentation for anchored cards,
+- **Action** windows that advance game time to completion,
+- the `Skinning` Action or other Action-specific completion transformations,
+- unattended **Process** progression while Nadir performs Actions or other time-consuming activities,
+- Process completion transformations,
+- ongoing cross-zone Process presentation for anchored participants,
 - temporary condition creation/removal/healing rules,
 - complete survival simulation,
 - hidden stomach/fullness mechanics,
