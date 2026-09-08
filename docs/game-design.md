@@ -51,11 +51,11 @@ Anchored does **not** mean the card cannot cross a zone boundary while being dra
 
 - be repositioned within its home zone,
 - cross into another zone during a drag,
-- be dragged onto another card in another zone for a legal interaction, including starting a Process.
+- be dragged onto another card in another zone for a legal interaction.
 
 If an anchored card is released onto bare space in another zone, or otherwise released without a legal interaction that accepts it, it returns to its home zone rather than remaining in the foreign zone.
 
-A legal cross-zone interaction does not transfer the anchored card's persistent home. Exactly how an anchored card is visually represented while participating in an ongoing cross-zone Process is not yet decided.
+A legal cross-zone interaction does not transfer the anchored card's persistent home.
 
 All cards representing Nadir or conditions currently applying to him are `Anchored` to Inventory.
 
@@ -66,9 +66,9 @@ The main play space has two zones:
 - **Room** — the currently viewed physical space. Its contents change when Nadir moves to another room.
 - **Inventory** — persistent cards that remain on screen when Nadir moves to another room.
 
-The previously proposed separate **Nadir** zone has been removed. Nadir remains represented entirely through cards, but those cards now live in Inventory alongside other persistent cards.
+The previously proposed separate **Nadir** zone has been removed. Nadir remains represented entirely through cards, but those cards live in Inventory alongside other persistent cards.
 
-`Anchored` is what distinguishes Nadir's fixed Inventory cards from ordinary cards that may move between Room and Inventory. This avoids needing a separate spatial zone solely for Nadir.
+`Anchored` is what distinguishes Nadir's fixed Inventory cards from ordinary cards that may move between Room and Inventory.
 
 Within a zone, every card can be positioned to the player's liking. Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
@@ -85,13 +85,13 @@ An interaction always has:
 
 Bare zone space can receive a card for legal movement/placement, but that is movement rather than an interaction.
 
-This rule applies across the game: food onto a Nadir card, medicine onto a Nadir card, machine onto a power outlet, material or tool onto a machine, and any card combination that starts a Process or Connection.
+This rule applies across the game: food onto a Nadir card, medicine onto a Nadir card, a knife onto a dead rat, a machine onto a power outlet, material or tool onto a machine, and card combinations that start Actions, Processes, or Connections.
 
-A card-on-card interaction does not have to remain stacked afterward. It may resolve immediately, consume a card, alter attributes, create a Stack, start a Process, create a Connection, or produce another process-specific result.
+A card-on-card interaction does not have to remain stacked afterward. It may resolve immediately, start an Action, consume a card, alter attributes, create a Stack, start a Process, create a Connection, or produce another interaction-specific result.
 
-### Stack, Process, and Connection
+### Stack, Action, Process, and Connection
 
-There are three forms of deliberate card stacking: **Stack**, **Process**, and **Connection**.
+There are three persistent forms of deliberate card combination: **Stack**, **Process**, and **Connection**. **Action** is a separate interaction type for work Nadir personally performs; it resolves through a temporary Action window instead of remaining as an ongoing card combination.
 
 #### Stack
 
@@ -111,50 +111,52 @@ Dragging a Stack peels off its top card:
 
 A single remaining card is shown normally rather than as Stack 1. The Stack count is presentation, not currently a normal `Value` attribute.
 
-#### Process
+#### Action
 
-A Process is a finite mechanically meaningful combination of cards. Processes have **two execution kinds**, distinguished by whether Nadir must personally perform the work.
+An **Action** is work that requires Nadir's personal involvement.
 
-The official names for those two kinds are not yet decided.
+The initiating cards do not have to include a Nadir card. What matters is that Nadir must personally spend the time doing the work. `Skinning` is an Action even though the initiating cards are a knife and a dead rat.
 
-##### Nadir-involved Process
+When an Action is committed:
 
-If Nadir is personally involved, committing the Process immediately advances game time until that Process is complete. The player does not continue performing other actions during that interval.
+1. an Action window opens,
+2. the window displays the Action and its participating cards,
+3. the window animation represents the Action's duration,
+4. the corresponding amount of game time advances,
+5. the Action completes as soon as the window animation terminates,
+6. the Action-specific result is applied.
+
+Actions do **not** use a `Progress` attribute. Their progress/time passage is already represented by the Action window.
 
 Concrete example: skinning a dead rat.
 
 1. The player moves a knife onto a `Dead Rat`.
-2. The rat card displays `Skin`, the name of the available Process.
+2. The rat card displays `Skin`, the available Action.
 3. Dropping the knife commits it.
-4. A window appears displaying `Skinning` and the two participating cards: the knife and the dead rat.
-5. Game time immediately advances **15 minutes**.
-6. The knife returns to where it came from.
+4. A window appears displaying `Skinning` and the knife and dead rat cards.
+5. The Action represents **15 minutes** of game time.
+6. When the window animation terminates, the knife returns to where it came from.
 7. The `Dead Rat` dissolves/is consumed.
 8. A `Rat Skin` card and a `Rat Meat` card are created.
 
-The 15-minute duration and outputs belong to this Process; other Nadir-involved Processes can have different durations and completion behavior.
+The duration and result belong to the specific Action. Other Actions may use different durations and completion effects.
 
-##### Unattended Process
+#### Process
 
-If Nadir does not need to remain personally involved, committing the Process does **not** force time forward to completion.
+A **Process** is unattended work that can continue while Nadir spends game time doing something else.
 
-Instead, the Process advances as game time passes **while Nadir is doing something else**.
+Starting a Process does **not** force time forward to completion. Instead, it progresses when game time passes because Nadir is occupied with Actions or other activities.
 
-Concrete example: putting `Rat Meat` on a lit camp fire starts a cooking Process. The meat progresses while the fire remains lit and Nadir spends time on other activities. Starting the cooking Process itself does not jump time forward until the meat is done.
+Processes use a visible `Progress` Value from 0 to 100. There is no universal progress calculation: each Process defines its own progression from relevant state and elapsed game time. Conditions may speed up, slow down, or stop progress.
 
-A bowl on a condenser is another example of an unattended Process: its progress can depend on room moisture, room temperature, and the game time that passes while Nadir is occupied elsewhere.
+Concrete examples:
 
-##### Process progression and completion
+- `Rat Meat` placed on a lit camp fire starts a cooking Process. It progresses while the fire remains lit and Nadir spends time doing other things.
+- A bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time while Nadir is occupied elsewhere.
 
-There is no universal progress calculation or universal completion transformation. Each Process defines what it needs.
+When `Progress` reaches 100, completion is Process-specific. A Process can consume or transform participating cards, create output cards, change attributes, separate participants, or combine these effects.
 
-For unattended Processes, progress can depend on relevant world state and elapsed game time. Conditions can therefore speed up, slow down, or stop progress.
-
-Completion is also process-specific. A Process may preserve and return tools, consume input cards, create output cards, change attributes, or combine those effects.
-
-`Skinning` is the confirmed example: the knife returns, the dead rat is consumed, and `Rat Skin` plus `Rat Meat` are created.
-
-An anchored Inventory card, including one of Nadir's cards, can be dragged onto a Room card to start a legal Process without changing its home zone. How an **ongoing unattended** cross-zone Process with an anchored participant is visually represented remains open. Nadir-involved Processes use the temporary Process window while time advances to completion.
+If a future Process needs an `Anchored` participant whose home is another zone, its ongoing visual presentation still needs to be decided. There is no current concrete example requiring this.
 
 #### Connection
 
@@ -189,7 +191,7 @@ Confirmed examples include:
 
 These condition cards exist while the condition applies. Their creation, progression, healing, expiry, and removal rules are not yet decided.
 
-All of Nadir's persistent cards and temporary condition cards are `Anchored` to Inventory. They cannot come to rest in Room as ordinary placement, but they can cross the boundary while being dragged and can be dropped onto a Room card for a legal interaction or Process. If released in Room without a legal accepting interaction, they return to Inventory.
+All of Nadir's persistent cards and temporary condition cards are `Anchored` to Inventory. They cannot come to rest in Room as ordinary placement, but they can cross the boundary while being dragged and can be dropped onto a Room card for a legal interaction. If released in Room without a legal accepting interaction, they return to Inventory.
 
 ### Discovery, knowledge, risk, and previews
 
@@ -221,7 +223,7 @@ Whenever the player drags a card:
 3. Consequences that Nadir/the player currently understands may be previewed before the drop is committed.
 4. Meaningful known danger may be communicated even when an exact outcome remains uncertain.
 5. Known uncertain likelihood should be communicated with calibrated plain language rather than routine percentages; exact wording remains provisional.
-6. An available Process may communicate its action name on the target before commitment, as `Skin` does when a knife is moved onto a dead rat.
+6. An available Action may communicate its name on the target before commitment, as `Skin` does when a knife is moved onto a dead rat.
 7. Invalid targets should not suggest that they accept the card.
 
 Example: dragging food over **Body** should preview something like:
@@ -247,7 +249,7 @@ For the first prototype, do **not** add a second hidden stomach/fullness system.
 - Exploratory play should not cause severe, unforeseeable punishment. Meaningful danger should be reasonably telegraphed even when details remain unknown.
 - A player's uncertainty should come from the situation, incomplete knowledge, discovery, and genuine risk — not from unclear UI rules.
 - Known danger does not imply known outcome, but when Nadir understands the likelihood the player should receive a clear non-numeric sense of how strongly the odds lean.
-- Game time should primarily advance through Nadir's activities; unattended Processes can progress concurrently with time Nadir spends doing something else rather than creating an independent real-time pressure loop.
+- Game time should primarily advance through Nadir's **Actions** and other explicit time-consuming activities. Processes progress concurrently with that elapsed game time rather than creating an independent real-time pressure loop.
 - Avoid adding systems merely because comparable survival games have them.
 - Keep the play area readable; complexity should emerge from combinations of cards and attributes.
 - No direct player violence is part of the broader concept; defensive violence, if present later, is indirect/automated.
