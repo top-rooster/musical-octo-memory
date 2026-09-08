@@ -45,19 +45,19 @@ Examples: `Player`, `Anchored`, `Powered`, `Health 100`, `Progress 42`.
 
 #### Anchored
 
-`Anchored` is a Marker that prevents a card from being persistently transferred out of its current/home zone.
+`Anchored` is a Marker that prevents a card from coming to rest outside its home zone.
 
-Anchored does **not** mean the card cannot be dragged. An anchored card can still:
+Anchored does **not** mean the card cannot cross a zone boundary while being dragged. An anchored card can still:
 
 - be repositioned within its home zone,
-- be dragged onto another card for an interaction,
-- cross a zone boundary during that interaction drag when the target card is in another zone.
+- cross into another zone during a drag,
+- be dragged onto another card in another zone for a legal interaction, including starting a Process.
 
-Crossing a zone boundary during an interaction drag does not transfer the anchored card to that zone. Its persistent home remains unchanged.
+If an anchored card is released onto bare space in another zone, or otherwise released without a legal interaction that accepts it, it returns to its home zone rather than remaining in the foreign zone.
 
-For Nadir specifically, all cards representing or currently applying to him in the Nadir zone are `Anchored`. They cannot be persistently moved out of the Nadir zone, but they can be dragged onto cards in another zone to start a Process when that interaction is legal.
+A legal cross-zone interaction does not transfer the anchored card's persistent home. Exactly how an anchored card is visually represented while participating in an ongoing cross-zone Process is not yet decided.
 
-Exactly how a cross-zone Process is visually presented while an anchored Nadir card remains owned by the Nadir zone is not yet decided.
+For Nadir specifically, all cards representing or currently applying to him in the Nadir zone are `Anchored` to that zone.
 
 ### Zones and positioning
 
@@ -69,7 +69,7 @@ The main play space has three zones:
 
 The Nadir zone replaces the earlier assumption that Nadir's representation lives in Inventory. Nadir remains represented through cards rather than through a separate character sheet or alternate character views.
 
-All of Nadir's cards in the Nadir zone are `Anchored` and cannot persist outside that zone. It remains undecided whether non-Nadir cards may ever persist in the Nadir zone.
+All of Nadir's cards in the Nadir zone are `Anchored` and cannot persist outside that zone. They may nevertheless be dragged across zone boundaries to interact with cards elsewhere. It remains undecided whether non-Nadir cards may ever persist in the Nadir zone.
 
 Within a zone, every card can be positioned to the player's liking. Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
@@ -130,7 +130,7 @@ Examples:
 - Rat meat on a camp fire progresses with elapsed time while the camp fire is lit.
 - A bowl on a condenser progresses according to room moisture, room temperature, and elapsed time.
 
-An anchored Nadir card can be dragged onto a target card in another zone to start a Process without changing its persistent home zone. The visual representation of that cross-zone participation is still open.
+An anchored Nadir card can be dragged onto a target card in another zone to start a Process without changing its home zone. The visual representation of that cross-zone participation is still open.
 
 #### Connection
 
@@ -165,7 +165,7 @@ Confirmed examples include:
 
 These condition cards exist while the condition applies. Their creation, progression, healing, expiry, and removal rules are not yet decided.
 
-All of Nadir's persistent and temporary condition cards are `Anchored` to the Nadir zone. They cannot persist in Room or Inventory, but can still be dragged onto a card in another zone for a legal interaction, explicitly including starting a Process.
+All of Nadir's persistent and temporary condition cards are `Anchored` to the Nadir zone. They cannot persist in Room or Inventory. They can cross zone boundaries while being dragged, and can be dropped onto another card in another zone to start a legal Process. If released elsewhere without a legal accepting interaction, they return to the Nadir zone.
 
 This gives the Nadir zone two kinds of content without introducing a separate UI model:
 
