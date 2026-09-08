@@ -26,7 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
+1. **PREVIEW-03 [P2]** - How should known-but-uncertain risk be communicated before an interaction?
+2. **ZONE-01 [P2]** - What may persist in the Nadir zone, and can Nadir cards leave it?
+3. **STACK-02 [P2]** - What happens when a Process completes?
+4. **INTERACT-02 [P2]** - What if one source/target pair supports several actions?
+5. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
 
 ---
 
@@ -96,7 +100,7 @@ Should values such as durability use ordinary attributes or another representati
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P3
 
-Temporary conditions applying to Nadir are now confirmed as cards in the Nadir zone. It remains undecided whether other non-interactable state or temporary conditions elsewhere also use cards.
+Temporary conditions applying to Nadir are confirmed as cards in the Nadir zone. It remains undecided whether other non-interactable state or temporary conditions elsewhere also use cards.
 
 ## CARD-11 - Instance changing identity
 **Status:** OPEN - SIMON TO DECIDE
@@ -153,11 +157,11 @@ The three official stacking forms are **Stack**, **Process**, and **Connection**
 
 ### Stack
 
-A `Stack` is only visual compression for identical cards. Represented cards remain separate instances, individual cards need not all remain exposed, the Stack shows a count, and it has no mechanical effect merely because it exists.
+A `Stack` is visual compression for identical cards. Represented cards remain separate instances, individual cards need not all remain exposed, the Stack shows a count, and it has no mechanical effect merely because it exists.
 
 ### Process
 
-A `Process` is a finite mechanically meaningful combination of cards. Creating it starts it immediately. Every participating card remains identifiable and every name stays visible. The top card gets `Progress` from 0 to 100. At 100 the Process is complete.
+A `Process` is a finite mechanically meaningful combination of cards. Creating it starts immediately. Every participating card remains identifiable and every name stays visible. The top card gets `Progress` from 0 to 100. At 100 the Process is complete.
 
 ### Connection
 
@@ -265,12 +269,70 @@ How do source and target attributes determine whether an interaction is legal an
 
 ---
 
-# Target highlighting and previews
+# Discovery, risk, target highlighting, and previews
+
+## DISC-D01 - Discovery is part relational understanding and part exploratory play
+**Status:** DECIDED BY SIMON
+
+The game should support discovery rather than expose every causal relationship immediately.
+
+Understanding can come from:
+
+- **relational understanding** - visible cards, attributes, room state, and their relationships let the player infer danger/opportunity;
+- **exploratory play / knowledge unlocks** - interaction, observation, reading, or other discovery can improve what Nadir and the player understand later.
+
+The intended progression can move from unknown to suspected to understood.
+
+## RISK-D01 - Severe danger must be reasonably foreseeable
+**Status:** DECIDED BY SIMON
+
+Exploratory play should not inflict severe punishment that the player had no reasonable way to anticipate.
+
+Danger can be telegraphed by visible relationships or by Nadir articulating what he understands. Telegraphing danger does not require revealing an exact probability or exact outcome.
+
+Design example: a flooded room with exposed electrical outlets is obviously dangerous from visible elements and their relationship; Nadir may explicitly articulate that danger. The example is not a universal electrical-simulation specification.
+
+## PREVIEW-D01 - Direct known stat preview
+**Status:** DECIDED BY SIMON
+
+Direct visible stat consequences can preview before the drop, e.g. `Hunger 67 -> 98` on Body.
+
+## PREVIEW-D02 - Previews are knowledge-dependent, not omniscient
+**Status:** DECIDED BY SIMON
+
+Previews reflect what Nadir/the player currently understands.
+
+- Known consequences may be shown accurately, including indirect consequences when they are understood.
+- Undiscovered relationships should not automatically be spoiled by hovering cards together.
+- Known meaningful danger may be communicated qualitatively even when the exact result remains uncertain.
+- The UI should not reveal a complete causal future and turn play into exhaustive deterministic planning.
+
+Design example: repairing an exposed electrical outlet can carry a known risk of shock. A shock can produce a burn-wound condition; if the risk outcome does not produce a shock, the repair can instead result in a functional outlet. The player can understand that the attempt is dangerous without necessarily knowing the exact roll result in advance.
 
 ## TARGET-D01 - Legal interaction targets highlight
 **Status:** DECIDED BY SIMON
 
 While dragging, every card that can legally receive the dragged card as an interaction target highlights. Legal movement destinations may use a placement affordance but are not interaction targets.
+
+## PREVIEW-01 - Multiple affected attributes
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+How much should be shown when several known attributes change?
+
+## PREVIEW-03 - Known but uncertain outcomes
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+When Nadir understands that an interaction carries risk but the result is uncertain, what should the player see: only a qualitative warning, an approximate risk level, an exact probability when known, or something else?
+
+The exposed-outlet repair establishes that understood danger can coexist with a hidden roll outcome; it does not yet decide how much probability information the UI should reveal.
+
+## PREVIEW-04 - Long-term deterministic consequences
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P3
+
+Preview only immediate understood effects or also known longer-term effects?
 
 ## TARGET-01 - Different highlights by action type
 **Status:** OPEN - SIMON TO DECIDE
@@ -295,35 +357,6 @@ Remain hidden or sometimes appear disabled?
 **Priority:** P3
 
 Test visually.
-
-## PREVIEW-D01 - Direct stat preview
-**Status:** DECIDED BY SIMON
-
-Direct visible stat consequences preview before the drop, e.g. `Hunger 67 -> 98` on the relevant Nadir card.
-
-## PREVIEW-01 - Multiple affected attributes
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-How much should be shown when several attributes change?
-
-## PREVIEW-02 - Indirect deterministic consequences
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P1
-
-Should known indirect effects such as noise be part of the same preview system?
-
-## PREVIEW-03 - Uncertain outcomes
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Range, probability, qualitative warning, or no numerical preview?
-
-## PREVIEW-04 - Long-term deterministic consequences
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P3
-
-Preview only immediate effects or also known longer-term effects?
 
 ---
 
@@ -360,20 +393,17 @@ More persistent Nadir cards may be added later if a concrete need appears.
 ## NADIR-D05 - Temporary conditions are cards in the Nadir zone
 **Status:** DECIDED BY SIMON
 
-Conditions currently applying to Nadir are represented as temporary cards in the Nadir zone rather than being forced into the three persistent cards.
+Conditions currently applying to Nadir are represented as temporary cards in the Nadir zone rather than being forced into Body, Mind, or Spirit.
 
-Examples explicitly given by Simon:
+Examples explicitly given by Simon include `Exhausted` and `Flesh Wound`. A burn wound from an electrical shock is another concrete condition example; its exact final card title is not yet separately fixed.
 
-- `Exhausted`
-- `Flesh Wound`
-
-These are normal cards in the card system while the condition exists. How they are created, expire, heal, or otherwise disappear is not yet decided.
+These cards exist while the condition applies. How they are created, progress, heal, expire, or otherwise disappear is not yet decided.
 
 ## NADIR-02 - Injury representation beyond simple condition cards
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-`Flesh Wound` confirms that injury-like conditions can be temporary Nadir-zone cards. Decide later whether all injuries use that model or whether some persistent/complex injuries need another representation.
+Injury-like conditions can be temporary Nadir-zone cards. Decide later whether all injuries use that model or whether some persistent/complex injuries need another representation.
 
 ## NADIR-03 - Equipment representation
 **Status:** OPEN - SIMON TO DECIDE
@@ -385,13 +415,13 @@ Attributes, Nadir-zone cards, ordinary Inventory cards, Connections, or somethin
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P3
 
-Beyond the decided Mind and Spirit cards, how much mental/narrative state should be numerical, qualitative, or expressed through writing/behavior?
+Beyond Mind and Spirit, how much mental/narrative state should be numerical, qualitative, or expressed through writing/behavior?
 
 ## NADIR-06 - Temporary condition lifecycle
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-How are condition cards such as `Exhausted` and `Flesh Wound` created, changed, and removed?
+How are condition cards such as `Exhausted`, `Flesh Wound`, and burn-wound conditions created, changed, and removed?
 
 ## SURV-D01 - Keep survival complexity legible
 **Status:** DECIDED BY SIMON
@@ -470,7 +500,7 @@ How does noise persist and travel?
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-How much detectability/search risk is visible?
+How much detectability/search risk is visible, subject to the knowledge-dependent preview rules above?
 
 ## NOISE-04 - Environmental masking
 **Status:** OPEN - SIMON TO DECIDE
@@ -599,7 +629,8 @@ These are ChatGPT suggestions, not Simon decisions.
 - **IMPL-01:** keep interaction legality/state transitions outside one-off presentation code.
 - **IMPL-02:** use concise data-driven card definitions where it reduces boilerplate.
 - **IMPL-03:** highlighting and committing should use the same legality rules.
-- **IMPL-04:** preview and commit should use the same deterministic effect calculation.
+- **IMPL-04:** preview and commit should use the same deterministic effect calculation for information the preview actually reveals.
+- **IMPL-05:** knowledge state should gate what the preview layer reveals without changing the underlying interaction result.
 
 ---
 
