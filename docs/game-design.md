@@ -34,6 +34,16 @@ When something remains the same card identity, its Values and Markers may change
 
 Confirmed example: when a `Dead Rat` reaches `Spoilage 100`, discard the Dead Rat and draw `Rotten Meat` at exactly the same position.
 
+#### Authored data and level design
+
+All authored card data lives in plain text files and is loaded by the game code. The text files are the source of truth for card master definitions and their authored state/behavior; TypeScript/React code may parse, validate, index, and transform that data into runtime structures but should not duplicate the card masters as code constants.
+
+The same authoring approach is used for **level design**. Rooms and the card instances/starting state placed in them are read from text data rather than built through room-specific setup code. As more authored world relationships become implementation-relevant, they should be added to the text-data format instead of being moved into application code.
+
+The authoring format follows the earlier Safe Room **Data language** direction: very low boilerplate, pleasant to edit from a phone, no required braces or tabs, no explicit array/list lengths, dynamic lists, and no repeated field labels such as `name` or `damage` when context already makes their meaning obvious. It should remain a purpose-built terse text format rather than being replaced by JSON, YAML, TOON, or the older modified-properties approach for implementation convenience.
+
+Detailed authoring constraints are maintained in `docs/data-language.md`. The language should grow only when concrete Safe Room data requires new syntax rather than being designed upfront as a general-purpose configuration language.
+
 ### Attributes
 
 All card attributes are visible on the card. There are no hidden/internal card attributes in the current model.
@@ -120,7 +130,7 @@ Confirmed examples:
 - a wound can accept water in a container for the wound-cleaning Action;
 - a wound can accept sterilized fabric for the wound-dressing Action. The fabric must carry the `Sterilized` Marker. The exact attribute rule that identifies a card as fabric is not yet fixed.
 
-The exact data syntax for target requirements and interaction effects is not yet fixed.
+The exact text-data syntax for target requirements and interaction effects is not yet fixed.
 
 Bare zone space can receive a card for legal movement/placement, but that is movement rather than an interaction.
 
@@ -195,7 +205,7 @@ A **Process** is unattended change that can continue while Nadir performs Action
 
 Starting or existing as a Process does **not** advance game time. Instead, it progresses when an Action advances game time.
 
-A Process can involve several cards, as with cooking or fabric sterilization, or it can be embodied by a single card whose state changes over time, as with spoilage, a wound, or Fever.
+A Process can involve several cards, as with cooking or fabric sterilization, or it can be embodied by a single card whose state changes over time, as with spoilage, an injury, or Fever.
 
 Processes are allowed in both Room and Inventory, including on or between Nadir-related cards in Inventory.
 
@@ -211,7 +221,7 @@ Concrete examples:
 - `Rat Meat` placed on a lit camp fire starts a cooking Process. It progresses while the fire remains lit as Actions advance game time.
 - Fabric sterilization is a three-card Process requiring an appropriate heat source, a water-filled container, and fabric without `Sterilized`. It completes after one hour of elapsed game time, empties the container, and adds `Sterilized` to the fabric.
 - A bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time created by Actions.
-- `Flesh Wound` and `Burn Wound` are single-card Processes whose progress represents healing.
+- All injuries use the Process model for now. `Flesh Wound` and `Burn Wound` are concrete single-card injury Processes whose progress represents healing.
 - `Fever` is a single-card Process whose progress represents recovery.
 
 When a Process reaches its completion state, the result is Process-specific. A Process can discard cards, draw replacement/output cards, change attributes, separate participants, remove itself, or combine these effects.
@@ -260,6 +270,8 @@ Nadir-related cards may participate in **Processes** and **Connections** while r
 #### Condition lifecycles
 
 Condition lifecycles are condition-specific rather than using one universal timer/removal rule.
+
+**All injuries use the Process model for now.** This is the default representation for injury conditions unless a later concrete design need leads to revisiting the rule. `Flesh Wound` and `Burn Wound` are the current concrete examples.
 
 **Exhausted** is removed by sleeping. Dragging `Exhausted` onto **Body** exposes the `Sleep` Action. Committing it advances game time through the normal Action window, and when the Action completes the `Exhausted` card disappears. The exact sleep duration and any additional effects of sleep are not yet decided.
 
@@ -368,6 +380,7 @@ The noise mechanic is intentionally **shelved for now**. The broader possibility
 - Prefer visible consequences over hidden arithmetic, while preserving meaningful discovery.
 - Preserve the physical-card analogy: when something becomes a different card identity, discard the old card and draw the replacement rather than morphing the existing card; keep the replacement in the old card's location unless a specific effect moves it.
 - Let specific visible attributes define what cards can do; avoid generic classifications such as `Reusable` when a concrete functional Marker and state Value express the behavior more directly.
+- Author card masters and level design in terse text data files and keep those files as the source of truth rather than duplicating authored game content in application code.
 - Give Process progress a contextual player-facing name when that improves comprehension, while keeping it one common mechanic underneath.
 - Communicate understood consequences before commitment, then treat the card drop as the player's decision; avoid confirmation dialogs that interrupt the interaction flow.
 - **Game time advances only through Actions.** Processes react to that elapsed time; other interactions and movement do not create elapsed game time themselves.
