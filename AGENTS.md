@@ -28,7 +28,8 @@ Keep this file short. Put detailed design decisions in `docs/` rather than expan
 - Inspect the repository before making changes and preserve unrelated user work.
 - Keep changes focused on the current request; do not add frameworks, dependencies, or broad scaffolding without a concrete need.
 - Prefer small vertical slices that can be run and evaluated immediately.
-- Card master data and authored level design belong in the project's text data files, not duplicated as TypeScript/React constants. Code may parse, validate, and transform that data into runtime structures.
+- Card master data belongs in the project's text data files, not duplicated as TypeScript/React constants. Code may parse, validate, and transform that data into runtime structures.
+- Authored level design is also a product-level text-data requirement, but follow `docs/roadmap.md` for milestone-specific scope. **Milestone 1 explicitly generates its temporary starting Room population from loaded card masters and must not invent or implement level-data syntax yet.**
 - Preserve the terse, low-boilerplate, phone-friendly authoring direction in `docs/data-language.md`; do not replace it with JSON, YAML, TOON, or another verbose object format for convenience.
 - Prioritize player legibility: state changes should be visible before an action is committed when the design calls for a preview.
 - Follow the existing project structure and toolchain once one exists.
