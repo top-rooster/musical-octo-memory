@@ -35,11 +35,13 @@ The data language must map directly onto the game's visible attribute model with
 - A Marker can be represented tersely as its attribute name.
 - A Value can be represented tersely as its attribute name followed by its integer value.
 
-Examples of the intended authoring feel are `Anchored`, `Cutting Tool`, `Sterilized`, `Container`, `Contains Water`, `Durability 80`, and `Infection 50`.
+Examples of the intended authoring feel are `Anchored`, `Cutting Tool`, `Sterilized`, `Container`, `Contains-Water`, `Durability 80`, `Infection 50`, and `Hydration 75`.
+
+Parser-facing attribute names may use hyphens to avoid spaces. The UI renders those hyphens as spaces. For example, `Contains-Water` is displayed to the player as **Contains Water**.
 
 These examples express the desired low-boilerplate style. Do not turn them into a more verbose key/value object model during implementation.
 
-Mutable object state should prefer Markers/Values on the same card identity where appropriate. Example: a `Plastic Bottle` remains the same card whether full or empty; it always has `Container`, and it has `Contains Water` only while it contains water.
+Mutable object state should prefer Markers/Values on the same card identity where appropriate. Example: a `Plastic Bottle` remains the same card whether full or empty; it always has `Container`, and it has `Contains-Water` only while it contains water.
 
 ## Interaction requirements
 
@@ -51,7 +53,13 @@ Example:
 
 means the dragged source card must carry both `Fabric` and `Sterilized`.
 
-A single Marker requirement remains unadorned, for example `action Contains Water Clean 15m`.
+A single Marker requirement remains unadorned, for example `action Contains-Water Clean 15m`.
+
+When a card is itself the source of an Action and eligibility depends on one of its own mutable Markers, state that explicitly. Current draft example:
+
+`requires Contains-Water self`
+
+A receiving card may be named directly in source-card interaction data. Current examples include `action Body Drink 0m` and `eat Body`.
 
 ## Removal vocabulary
 
@@ -62,7 +70,7 @@ Examples:
 - `discard self`
 - `at progress 100 discard self`
 
-Use `remove` for removing an attribute/Marker from an existing card instance, for example `remove Contains Water source`.
+Use `remove` for removing an attribute/Marker from an existing card instance, for example `remove Contains-Water source` or `remove Contains-Water self`.
 
 ## Explicit time
 
@@ -72,9 +80,9 @@ Examples:
 
 - `Skin 15m`
 - `Sleep 8h`
-- an instant Action must still say `0m`
+- `action Body Drink 0m`
 - fabric sterilization must explicitly say `1h`
-- a repeating Process may use its explicit tick interval, e.g. a wound healing Process evaluated every `15m`
+- a repeating Process may use its explicit tick interval, e.g. a wound or Hydration Process evaluated every `15m`
 
 There is no implicit default duration. If the duration or tick interval of an Action or Process has not yet been designed, that authored behavior is incomplete and should remain visibly unresolved rather than receiving a guessed time.
 
@@ -91,6 +99,7 @@ The draft currently uses:
 - the picture path as the second line;
 - Marker names as plain lines;
 - Values as `name integer`;
+- hyphens inside parser-facing attribute names where spaces would make parsing awkward; the UI displays those hyphens as spaces;
 - `+` between Marker names when a source must satisfy all listed Markers;
 - explicit time tokens such as `0m`, `15m`, `1h`, or `8h` on every Action/Process;
 - `discard` for removing cards from play and `remove` for removing attributes from a surviving card;
@@ -102,7 +111,7 @@ This file exists so the format can be judged against real Safe Room data. The sy
 
 Level design uses the same text-data philosophy and parser/tooling family as card data.
 
-The runtime world should be constructed from authored text data rather than from room-specific setup code. At minimum, level data must be able to identify rooms and the card instances/starting state that belong in them. As more authored world relationships become implementation-relevant, extend the text format rather than moving those authored facts into code.
+The runtime world should be constructed from authored text data rather than from room-specific setup code. At minimum, level data must be able to identify rooms and the card instances/starting state that belong in them. As more world relationships become implementation-relevant, extend the text format rather than moving those authored facts into code.
 
 This makes the data files the place where Simon can both design cards and author the playable world.
 
