@@ -195,7 +195,7 @@ A **Process** is unattended change that can continue while Nadir performs Action
 
 Starting or existing as a Process does **not** advance game time. Instead, it progresses when an Action advances game time.
 
-A Process can involve several cards, as with cooking, or it can be embodied by a single card whose state changes over time, as with spoilage, a wound, or Fever.
+A Process can involve several cards, as with cooking or fabric sterilization, or it can be embodied by a single card whose state changes over time, as with spoilage, a wound, or Fever.
 
 Processes are allowed in both Room and Inventory, including on or between Nadir-related cards in Inventory.
 
@@ -209,6 +209,7 @@ Concrete examples:
 
 - `Dead Rat` is a single-card Process whose visible progress is `Spoilage`. At 100, discard the Dead Rat and draw `Rotten Meat` at exactly the same location.
 - `Rat Meat` placed on a lit camp fire starts a cooking Process. It progresses while the fire remains lit as Actions advance game time.
+- Fabric sterilization is a three-card Process requiring an appropriate heat source, a water-filled container, and fabric without `Sterilized`. It completes after one hour of elapsed game time, empties the container, and adds `Sterilized` to the fabric.
 - A bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time created by Actions.
 - `Flesh Wound` and `Burn Wound` are single-card Processes whose progress represents healing.
 - `Fever` is a single-card Process whose progress represents recovery.
@@ -272,7 +273,7 @@ Condition lifecycles are condition-specific rather than using one universal time
 - a wound may carry the `Dressed` Marker; once added, it remains until the wound card disappears;
 - water in a container can be used to clean a wound, reducing `Infection` by **40**, never below 0;
 - any fabric carrying the `Sterilized` Marker can be used to dress a wound; dressing gives the wound the `Dressed` Marker;
-- fabric can be sterilized by boiling it, which gives that fabric the `Sterilized` Marker;
+- fabric can be sterilized by a one-hour boiling Process requiring an appropriate heat-source card, a water-filled container, and non-sterilized fabric. On completion, the container is empty and the fabric gains `Sterilized`;
 - cleaning a wound is a **15-minute Action** and empties the water container used for the Action;
 - dressing a wound is a **15-minute Action** and consumes the sterilized fabric card used for the Action;
 - `Dressed` improves healing over time and causes Infection to decrease over time;
@@ -281,7 +282,7 @@ Condition lifecycles are condition-specific rather than using one universal time
 
 In addition, each `Burn Wound` has another Value that accelerates Nadir's dehydration as game time advances. The exact name/scale of that Value and the exact representation of dehydration are not yet fixed.
 
-Because cleaning and dressing are Actions, each runs through the normal Action window, advances **15 minutes** of game time, and causes active Processes to update during that elapsed time. The cleaning Action reduces `Infection` by **40** and empties its water container. The dressing Action consumes its sterilized fabric card and leaves the wound carrying `Dressed` for the rest of the wound card's lifetime. The exact boiling interaction is not yet decided. Partial liquid/container quantities are deferred; this interaction does not require a volume system.
+Because cleaning and dressing are Actions, each runs through the normal Action window, advances **15 minutes** of game time, and causes active Processes to update during that elapsed time. The cleaning Action reduces `Infection` by **40** and empties its water container. The dressing Action consumes its sterilized fabric card and leaves the wound carrying `Dressed` for the rest of the wound card's lifetime. Fabric sterilization itself is a Process and therefore progresses only as other Actions advance game time. Partial liquid/container quantities are deferred; this interaction does not require a volume system.
 
 `Fever` is cumulative. If Nadir has **three Fever cards**, he dies.
 
