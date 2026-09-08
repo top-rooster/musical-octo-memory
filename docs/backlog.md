@@ -30,7 +30,7 @@ Normally discuss only the single highest-priority open decision.
 2. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
 3. **TARGET-01 [P2]** - Should highlights differ by interaction type?
 4. **TARGET-02 [P2]** - Should dangerous legal interactions use the normal target highlight?
-5. **SURV-01 [P2]** - Are there other permanent survival pressures beyond Hydration, Satiation, and Health?
+5. **SURV-01 [P2]** - Are there other permanent survival pressures beyond Hydration and Satiation?
 
 ---
 
@@ -57,7 +57,7 @@ Cards have no separate categories, tags, capability lists, or card classes. A ca
 All card attributes are visible and represented by icons. There are no hidden/internal card attributes in the current model.
 
 - **Marker** - icon only; presence carries meaning (`Player`, `Anchored`, `Powered`, `Cutting Tool`, `Dressed`, `Fabric`, `Container`, `Contains-Water`, and `Sterilized`).
-- **Value** - icon plus integer (`Health 80`, `Hydration 50`, `Satiation 50`, `Progress 42`, `Durability 80`, `Spoilage 63`, `Infection 50`).
+- **Value** - icon plus integer (`Hydration 50`, `Satiation 50`, `Progress 42`, `Durability 80`, `Spoilage 63`, `Infection 50`).
 
 Unless Simon explicitly states a different range for a specific Value, every Value is bounded and clamped from **0 to 100**.
 
@@ -173,12 +173,12 @@ Conditional Value bands are written using `start..end` rather than comparison op
 
 The current Flesh Wound data uses:
 
-- `if Infection 0..25 progress +2`
+- `if Infection 0..24 progress +2`
 - `if Infection 25..49 progress +1`
-- `if Infection 50..75 progress +0`
+- `if Infection 50..74 progress +0`
 - `if Infection 75..100 progress -1`
 
-These exact authored ranges are decided. Their boundary precedence/inclusivity at the overlapping values `25` and `75` remains unresolved and must not be silently invented by the parser.
+The bands are non-overlapping and cover the full default `0..100` Infection range.
 
 ## CARD-10 - Other non-interactable state and temporary conditions
 **Status:** OPEN - SIMON TO DECIDE
@@ -698,12 +698,10 @@ Any effects of sleep beyond removing `Exhausted` are not yet decided.
 
 `Flesh Wound` has a confirmed repeating healing Process evaluated every **15 minutes** of elapsed game time:
 
-- `Infection 0..25` -> progress `+2`
+- `Infection 0..24` -> progress `+2`
 - `Infection 25..49` -> progress `+1`
-- `Infection 50..75` -> progress `+0`
+- `Infection 50..74` -> progress `+0`
 - `Infection 75..100` -> progress `-1`
-
-The exact authored ranges intentionally overlap at 25 and 75. Parser precedence/inclusivity at those boundary values remains unresolved.
 
 `Burn Wound` uses the injury Process model but its exact healing rate is still undecided. It also carries another Value/effect that accelerates loss of Body `Hydration`; the exact burn modifier is still open.
 
@@ -806,12 +804,10 @@ The exact name of the heat-source Marker is still open; no specific Marker name 
 
 Current authored bands:
 
-- `if Infection 0..25 progress +2`
+- `if Infection 0..24 progress +2`
 - `if Infection 25..49 progress +1`
-- `if Infection 50..75 progress +0`
+- `if Infection 50..74 progress +0`
 - `if Infection 75..100 progress -1`
-
-The exact boundary semantics at the overlapping values 25 and 75 are still open.
 
 ## BURN-D01 - Burn Wounds accelerate Hydration loss
 **Status:** DECIDED BY SIMON
@@ -863,13 +859,14 @@ Any effect that depends on equipment being equipped should derive that state fro
 ## SURV-D02 - Body survival Values and starting state
 **Status:** DECIDED BY SIMON
 
-Body carries three confirmed permanent survival Values:
+Body carries two confirmed permanent survival Values:
 
 - `Hydration 50`
 - `Satiation 50`
-- `Health 80`
 
-If any of `Hydration`, `Satiation`, or `Health` reaches **0**, the game ends.
+If either `Hydration` or `Satiation` reaches **0**, the game ends.
+
+There is no separate Body `Health` Value. Physical injury and health consequences are represented through injury/condition cards instead, avoiding a parallel health system.
 
 Body has a repeating Process evaluated every **15 minutes** of elapsed game time that applies `Hydration -2`.
 
@@ -895,9 +892,9 @@ Aim for high decision complexity with as few exposed systems/attributes/cards as
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-`Hydration`, `Satiation`, and `Health` are now confirmed permanent Body Values. Decide later whether any additional permanent survival pressures are needed.
+`Hydration` and `Satiation` are now confirmed permanent Body Values. Decide later whether any additional permanent survival pressures are needed.
 
-Candidates previously raised include fatigue, temperature, illness, stress, injury, and morale. Listing them is not approval.
+Candidates previously raised include fatigue, temperature, illness, stress, injury, and morale. Listing them is not approval. Injury is currently represented through injury cards rather than a Body Value.
 
 ## SURV-02 - Attribute versus condition card for other pressures
 **Status:** OPEN - SIMON TO DECIDE
@@ -917,7 +914,7 @@ Current card attributes are never hidden. Decide whether simulation may neverthe
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Body loses **2 Hydration per 15 minutes** of elapsed game time. Decide the corresponding time behavior for Satiation and Health, plus remaining modifiers such as Burn Wound acceleration.
+Body loses **2 Hydration per 15 minutes** of elapsed game time. Decide the corresponding time behavior for Satiation, plus remaining modifiers such as Burn Wound acceleration.
 
 ---
 
