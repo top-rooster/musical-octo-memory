@@ -83,6 +83,8 @@ An interaction always has:
 - a source card being dragged,
 - a target card receiving it.
 
+A given source-card/target-card pair supports **at most one interaction**. If the pair is legal, the resulting interaction is unambiguous; the player is never asked to choose between multiple Actions, Processes, Connections, or other outcomes for that same pair.
+
 Bare zone space can receive a card for legal movement/placement, but that is movement rather than an interaction.
 
 This rule applies across the game: food onto a Nadir card, medicine onto a Nadir card, a knife onto a dead rat, a machine onto a power outlet, material or tool onto a machine, and card combinations that start Actions, Processes, or Connections.
@@ -219,12 +221,13 @@ The intended information progression is therefore closer to **unknown → suspec
 Whenever the player drags a card:
 
 1. Every card that can legally receive it as an interaction target highlights.
-2. Legal zone placement for movement should remain legible without being confused with a card interaction target.
-3. Consequences that Nadir/the player currently understands may be previewed before the drop is committed.
-4. Meaningful known danger may be communicated even when an exact outcome remains uncertain.
-5. Known uncertain likelihood should be communicated with calibrated plain language rather than routine percentages; exact wording remains provisional.
-6. An available Action may communicate its name on the target before commitment, as `Skin` does when a knife is moved onto a dead rat.
-7. Invalid targets should not suggest that they accept the card.
+2. Each legal source/target pair has at most one interaction, so a highlighted target never requires a follow-up interaction chooser.
+3. Legal zone placement for movement should remain legible without being confused with a card interaction target.
+4. Consequences that Nadir/the player currently understands may be previewed before the drop is committed.
+5. Meaningful known danger may be communicated even when an exact outcome remains uncertain.
+6. Known uncertain likelihood should be communicated with calibrated plain language rather than routine percentages; exact wording remains provisional.
+7. An available Action may communicate its name on the target before commitment, as `Skin` does when a knife is moved onto a dead rat.
+8. Invalid targets should not suggest that they accept the card.
 
 Example: dragging food over **Body** should preview something like:
 
@@ -234,7 +237,7 @@ The preview should appear on or immediately adjacent to the affected stat.
 
 ### Eating
 
-Food is consumed by dragging a food card onto **Body**.
+Food is consumed by dragging the food card onto **Body**.
 
 Dropping the food applies the food's hunger effect, consumes the food card, clamps Hunger to its valid range, and updates the visible Hunger value immediately.
 
