@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **WOUND-03 [P2]** - Which interactions change `Clean` and `Dress`, and how?
+1. **WOUND-03 [P2]** - Are cleaning/dressing Actions, what do they consume, and how much state do they change?
 2. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
 3. **NADIR-03 [P2]** - How is equipment represented?
 4. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
@@ -56,8 +56,10 @@ Cards have no separate categories, tags, capability lists, or card classes. A ca
 
 All card attributes are visible and represented by icons. There are no hidden/internal card attributes in the current model.
 
-- **Marker** - icon only; presence carries meaning (`Player`, `Anchored`, `Powered`, `Cutting Tool`, `Dress`).
-- **Value** - icon plus integer (`Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`, `Clean 70`).
+- **Marker** - icon only; presence carries meaning (`Player`, `Anchored`, `Powered`, `Cutting Tool`, `Dress`, and `Clean` when used on fabric).
+- **Value** - icon plus integer (`Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`, `Clean 70` on a wound).
+
+The word `Clean` is currently used in two explicitly different attribute forms: a `Clean` **Value** on wounds and a `Clean` **Marker** on fabric. This remains the current terminology unless Simon later chooses to rename one of them.
 
 ## ATTR-D02 - Anchored
 **Status:** DECIDED BY SIMON
@@ -617,14 +619,16 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 - Each wound has an `Infection` Value that rises over time if not adequately managed.
 - Each wound has a `Clean` Value representing how clean the wound currently is.
 - A wound can carry the `Dress` Marker to show that it is currently dressed.
-- Cleaning raises or otherwise restores `Clean`, helping keep Infection down.
+- Water in a container can be used to clean the wound and improve its `Clean` Value.
+- Fabric that has the `Clean` Marker can be used to dress the wound, causing the wound to gain `Dress`.
+- Fabric can be made clean by boiling, which gives the fabric the `Clean` Marker.
 - `Dress` improves healing over time and causes Infection to decrease over time.
 - When Infection becomes too high, the wound's healing rate is reduced.
 - Severe Infection spawns a `Fever` condition card.
 
 In addition, a `Burn Wound` has another Value that accelerates Nadir's dehydration over time while the burn exists. The final name/scale of this burn-specific Value and the exact representation of dehydration are not yet fixed.
 
-The exact interactions, source cards, Action durations, rates, and formulas that change `Clean` or add/remove `Dress` are not yet decided. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
+The exact Action/immediate-interaction form, Action durations, amount by which water changes wound `Clean`, whether/how much water is consumed, whether fabric is consumed when dressing, how `Dress` is later removed, and the exact boiling interaction are not yet decided. Any part that advances game time must be an Action. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
 
 ### Fever
 
@@ -665,15 +669,34 @@ This preserves cleaning and dressing inside the existing visible attribute model
 
 Cleaning is intended to keep Infection down by improving `Clean`. A wound with `Dress` improves healing over time and causes Infection to decrease over time, as already decided.
 
-The exact card interactions, materials, Action durations, Value changes, and rules for adding/removing `Dress` remain open in WOUND-03.
+## WOUND-D03 - Water cleans wounds; clean fabric dresses them
+**Status:** DECIDED BY SIMON
 
-## WOUND-03 - Cleaning and dressing interactions
+Treatment inputs are attribute/card driven:
+
+- **Water in a container** can be used to clean a wound, increasing or otherwise improving the wound's `Clean` Value.
+- Any **fabric** that has the `Clean` **Marker** can be used to dress a wound. Dressing gives the wound its `Dress` Marker.
+- Fabric can be made clean by **boiling** it; boiling gives the fabric the `Clean` Marker.
+
+The wound's `Clean` Value and a fabric card's `Clean` Marker are distinct uses of the same current label.
+
+The exact representation that identifies a card as fabric is not yet fixed. Do not silently introduce a `Fabric` Marker until Simon chooses it.
+
+## WOUND-03 - Remaining cleaning and dressing interaction details
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Which source cards can clean or dress a wound, are those interactions Actions, how much do they change `Clean`, when is `Dress` added/removed`, and do those interventions consume materials?
+The treatment sources are decided. Remaining questions are:
 
-Any cleaning or dressing interaction that advances game time must be an Action.
+- are cleaning and dressing immediate interactions or Actions;
+- if Actions, what are their durations;
+- how much does water change the wound's `Clean` Value;
+- how much water is consumed;
+- whether clean fabric is consumed/changed when used to dress a wound;
+- how and when `Dress` is removed;
+- how boiling fabric is represented and what it consumes.
+
+Anything that advances game time must be an Action.
 
 ## BURN-D01 - Burn Wounds accelerate dehydration
 **Status:** DECIDED BY SIMON
