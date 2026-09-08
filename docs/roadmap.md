@@ -16,9 +16,10 @@ Build a small browser prototype whose only purpose is to validate the core card 
   - **Spirit**.
 - All three persistent Nadir cards have `Anchored` with Inventory as their home zone. They may be dragged across the Room/Inventory boundary, but cannot come to rest in Room as ordinary placement. If released onto bare Room space, they return to Inventory.
 - `Anchored` does not prevent dragging a card onto another card for a legal interaction.
-- Put visible `Hydration 50`, `Satiation 50`, and `Health 80` Values on **Body**.
+- Put visible `Hydration 50` and `Satiation 50` Values on **Body**.
 - Values are clamped to 0–100 unless a specific Value explicitly defines another range.
-- Reaching `Hydration 0`, `Satiation 0`, or `Health 0` is a game-over condition, although Milestone 1 does not need to implement the ongoing Processes that reduce those Values over time.
+- Reaching `Hydration 0` or `Satiation 0` is a game-over condition, although Milestone 1 does not need to implement the ongoing Processes that reduce those Values over time.
+- Physical injury/health state is represented through injury and condition cards rather than a separate Body `Health` Value.
 - Temporary Nadir condition cards such as `Exhausted` and `Flesh Wound` are part of the design and also live in Inventory, but their lifecycle mechanics are not required in Milestone 1.
 - Seed the prototype with a few movable cards, including at least two ingestible food cards with different satiation effects and one non-ingestible item.
 - Give every card Nadir can eat/ingest a visible ingestion **Marker**. The final product-facing name of this Marker is not yet fixed; use one consistent prototype identifier without treating that identifier as locked design terminology.
