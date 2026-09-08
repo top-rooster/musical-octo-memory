@@ -26,12 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **ATTR-02 [P0]** - What names should the two attribute forms use?
-2. **CARD-04 [P1]** - How does a card instance differ from its reusable definition?
-3. **CARD-05 [P1]** - Is anything besides title, picture, and attributes shown on a card?
-4. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
-5. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
-6. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
+1. **CARD-04 [P1]** - How does a card instance differ from its reusable definition?
+2. **CARD-05 [P1]** - Is anything besides title, picture, and attributes shown on a card?
+3. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
+4. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
+5. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
 
 ---
 
@@ -54,33 +53,22 @@ Cards have no separate categories, tags, capability lists, or card classes in th
 
 ChatGPT previously suggested composable capabilities/tags; Simon rejected that extra layer for now.
 
-## ATTR-D01 - Attribute representation
+## ATTR-D01 - Attribute representation and names
 **Status:** DECIDED BY SIMON
 
 All attributes are visible on the card and represented by icons. There are no hidden/internal card attributes in the current model.
 
-There are two forms:
+There are two official forms:
 
-- icon only,
-- icon plus an integer value.
-
-Examples on Nadir: `Player`, `Anchored`, `Health 100`.
+- **Marker** - icon only; presence carries the meaning (`Player`, `Anchored`, `Powered`).
+- **Value** - icon plus integer (`Health 100`, `Progress 42`).
 
 ## ATTR-D02 - Anchored attribute
 **Status:** DECIDED BY SIMON
 
-`Anchored` is an icon-only attribute. It prevents dragging the card between Room and Inventory, but does not prevent repositioning within the current zone or dragging the card onto another card.
+`Anchored` is a Marker. It prevents dragging the card between Room and Inventory, but does not prevent repositioning within the current zone or dragging the card onto another card.
 
 Nadir is anchored because he has this attribute, not because he belongs to a special card type.
-
-## ATTR-02 - Names for the two attribute forms
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P0
-
-**Suggested by ChatGPT:**
-
-- **Marker attribute** - icon only; presence carries the meaning (`Player`, `Anchored`, `Powered`).
-- **Value attribute** - icon plus integer (`Health 100`, `Progress 42`).
 
 ## CARD-04 - Card instance versus reusable definition
 **Status:** OPEN - SIMON TO DECIDE
@@ -164,7 +152,7 @@ A `Process` is a finite mechanically meaningful combination of cards.
 
 - Creating the Process starts it immediately.
 - Every participating card remains individually identifiable and every card name stays visible.
-- The top card gets a `Progress` integer attribute from 0 to 100.
+- The top card gets a `Progress` Value from 0 to 100.
 - At `Progress 100`, the Process is complete.
 - The Process may change attributes on participating cards.
 
@@ -178,7 +166,7 @@ A `Connection` is a persistent mechanically meaningful relationship between card
 - It lasts until the player breaks the Connection by separating cards.
 - Effects that depend on the Connection disappear when it is broken.
 
-Example: connecting a machine to a power outlet gives the machine `Powered`. Disconnecting it removes `Powered`. One outlet can power only one card at a time.
+Example: connecting a machine to a power outlet gives the machine the `Powered` Marker. Disconnecting it removes `Powered`. One outlet can power only one card at a time.
 
 ## STACK-D02 - Process progress is process-specific
 **Status:** DECIDED BY SIMON
@@ -380,7 +368,7 @@ Candidates raised: Hunger, Health, thirst, fatigue, temperature, illness, stress
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Which pressures deserve permanent value attributes and which should use another representation?
+Which pressures deserve permanent Value attributes and which should use another representation?
 
 ## SURV-03 - Hidden survival state
 **Status:** OPEN - SIMON TO DECIDE
