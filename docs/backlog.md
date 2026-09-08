@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **WOUND-01 [P2]** - What happens when a wound's Infection becomes severe?
+1. **FEVER-01 [P2]** - How are Fever cards treated or removed?
 2. **MOVE-02 [P2]** - Does Inventory have a capacity limit?
 3. **CARD-07 [P2]** - Can cards be contained/attached outside Stack/Process/Connection?
 4. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
@@ -397,7 +397,7 @@ The exact user-facing vocabulary is provisional and not locked. Revisit after UI
 ## TARGET-D01 - Legal interaction targets highlight
 **Status:** DECIDED BY SIMON
 
-While dragging, every card that can legally receive the dragged card as an interaction target highlights. Legal movement destinations may use a placement affordance but are not interaction targets.
+While dragging, every card that can legally receive it as an interaction target highlights. Legal movement destinations may use a placement affordance but are not interaction targets.
 
 ## PREVIEW-01 - Multiple affected attributes
 **Status:** OPEN - SIMON TO DECIDE
@@ -498,8 +498,10 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 - `Infection` rises over time if not adequately managed.
 - Wounds need cleaning to keep Infection down.
 - Wounds can be dressed; dressing improves healing over time and causes Infection to decrease over time.
+- When Infection becomes too high, the wound's healing rate is reduced.
+- Severe Infection spawns a `Fever` condition card.
 
-The exact card/attribute representation of cleaning and dressing, their rates/durations, and the consequences of severe Infection are not yet decided.
+The exact card/attribute representation of cleaning and dressing and their rates/durations are not yet decided. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
 
 ## NADIR-D07 - All Nadir cards are Anchored to Inventory
 **Status:** DECIDED BY SIMON
@@ -508,13 +510,28 @@ All of Nadir's cards, including Body, Mind, Spirit and temporary condition cards
 
 They can cross into Room while being dragged but cannot come to rest there as ordinary placement. If released in Room without a legal accepting card interaction, they return to Inventory. They may be dropped onto a Room card for a legal interaction without changing home zone.
 
-## WOUND-01 - Severe Infection consequences
+## WOUND-D01 - Severe Infection slows healing and creates Fever
+**Status:** DECIDED BY SIMON
+
+If a wound's `Infection` becomes too high:
+
+- healing over time is reduced;
+- severe Infection spawns a `Fever` condition card.
+
+The exact Infection threshold or thresholds are not yet fixed.
+
+## FEVER-D01 - Three Fever cards kill Nadir
+**Status:** DECIDED BY SIMON
+
+`Fever` is a temporary condition card applying to Nadir. If Nadir accumulates **three Fever cards**, he dies.
+
+This establishes Fever accumulation as a lethal escalation path from unmanaged wound Infection.
+
+## FEVER-01 - Fever treatment and removal
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-What happens as a wound's `Infection` becomes severe? Does it slow/stop healing, create another condition, damage Body/Health, transform the wound, or use some other consequence?
-
-Do not infer thresholds or outcomes yet.
+How are `Fever` cards reduced, treated, or removed? Do not infer a treatment or automatic expiry yet.
 
 ## WOUND-02 - Cleaning and dressing representation
 **Status:** OPEN - SIMON TO DECIDE
