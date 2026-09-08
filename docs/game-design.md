@@ -194,6 +194,7 @@ Confirmed examples include:
 - `Exhausted`
 - `Flesh Wound`
 - `Burn Wound`
+- `Fever`
 
 All of Nadir's persistent cards and temporary condition cards are `Anchored` to Inventory. They cannot come to rest in Room as ordinary placement, but they can cross the boundary while being dragged and can be dropped onto a Room card for a legal interaction. If released in Room without a legal accepting interaction, they return to Inventory.
 
@@ -210,9 +211,13 @@ Condition lifecycles are condition-specific rather than using one universal time
 - each has an `Infection` Value that rises over time if the wound is not adequately managed;
 - wounds need cleaning to keep Infection down;
 - wounds can be dressed to improve their healing rate;
-- a dressed wound also causes Infection to decrease over time.
+- a dressed wound also causes Infection to decrease over time;
+- when Infection becomes too high, healing over time is reduced;
+- severe Infection spawns a `Fever` condition card.
 
-The exact representation and card interactions for cleaning and dressing are not yet fixed. The consequences of severe Infection are also still open.
+`Fever` is cumulative. If Nadir has **three Fever cards**, he dies.
+
+The exact representation and card interactions for cleaning and dressing are not yet fixed. The exact Infection threshold or thresholds for impaired healing and Fever spawning are also not fixed. How Fever cards are treated or removed is still open.
 
 ### Discovery, knowledge, risk, and previews
 
