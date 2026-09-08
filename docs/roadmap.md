@@ -10,6 +10,10 @@ Build a small browser prototype whose only purpose is to validate the core card 
 - Show two zones on one screen: **Room** and **Inventory**.
 - **Room** represents the currently viewed physical space.
 - **Inventory** is persistent and remains on screen when Nadir moves to another room.
+- Each Room/area has its own subtle non-illustrated background used for ambience only. The Inventory uses one constant background across rooms.
+- Backgrounds are not gameplay state. Any mechanically meaningful room condition or interactable/environmental state is represented by cards, not by changing or overlaying the background.
+- Room zoom changes the size and positions of cards only. The Room background stays fixed to the viewport and does not pan or scale, so the player can never move or zoom past an edge of the background.
+- Inventory remains its own fixed interface area rather than participating in Room zoom.
 - Inventory contains three persistent Nadir cards:
   - **Body**,
   - **Mind**,
@@ -49,6 +53,8 @@ Build a small browser prototype whose only purpose is to validate the core card 
 - Do not introduce generic `Consumable` or `Reusable` classifications for the prototype. Whether a card is consumed or remains is part of the interaction result.
 - Implement `Anchored` as an attribute-driven home-zone rule, not as a special Nadir card type. It prevents the card from coming to rest outside its home zone while preserving cross-zone dragging and legal card-on-card interaction.
 - Do not add extra contextual Room/Inventory transfer blockers beyond `Anchored` and Inventory capacity.
+- Keep Room background rendering separate from the zoomable card layer. Do not implement browser-page zoom for gameplay zoom.
+- Treat backgrounds as ambience/presentation only; do not encode flooding, exposed wiring, broken windows, lit campfires, condensation, machinery state, hazards, or other gameplay facts into them. Those belong to cards.
 - Keep state transition/game-rule functions separate from React rendering where practical.
 - Keep the text-data parser/loader separate from rendering and validate malformed authored data with useful errors rather than silently accepting ambiguity.
 - Avoid a heavy state-management library for this prototype unless there is a demonstrated need.
