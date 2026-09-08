@@ -31,6 +31,8 @@ A card may additionally have zero or more attributes. Attributes are optional ra
 
 Cards do not currently have separate categories, tags, or capabilities. A card is functionally defined only by its attributes. Do not introduce another classification or capability system unless a concrete design need appears later that attributes cannot satisfy.
 
+Two identical objects are still two distinct card instances. A Stack can compress their presentation, but it does not merge them into one underlying card.
+
 Whether non-interactable state or temporary conditions should also use card representation is not yet decided.
 
 ### Attributes
@@ -80,9 +82,19 @@ There are three forms of deliberate card stacking: **Stack**, **Process**, and *
 
 A Stack is a visual convenience for identical cards that would otherwise occupy unnecessary space.
 
+- The cards remain separate card instances.
 - The cards do not all need to remain individually exposed.
-- The Stack shows a count of how many identical cards it contains.
+- The Stack shows a count of how many cards it represents.
 - It has no mechanical effect merely because it exists.
+
+Dragging a Stack peels off its top card as an individual card:
+
+- Stack 3 → one dragged card + Stack 2,
+- Stack 2 → one dragged card + one ordinary card.
+
+A single remaining card is shown as a normal card rather than as a Stack with count 1.
+
+The Stack count is presentation for how many card instances are compressed into the Stack; it is not currently defined as a normal `Value` attribute.
 
 #### Process
 
