@@ -62,15 +62,17 @@ All card attributes are visible and represented by icons. There are no hidden/in
 ## ATTR-D02 - Anchored
 **Status:** DECIDED BY SIMON
 
-`Anchored` is a Marker that prevents a card from being persistently transferred out of its current/home zone.
+`Anchored` is a Marker that prevents a card from coming to rest outside its home zone.
 
 Anchored does not prevent:
 
 - repositioning within the home zone,
-- dragging the card onto another card for an interaction,
-- crossing a zone boundary during that interaction drag when the target is in another zone.
+- crossing zone boundaries while being dragged,
+- dragging the card onto another card in another zone for a legal interaction, including starting a Process.
 
-Crossing a zone boundary during an interaction drag does not transfer the anchored card's persistent home.
+If an anchored card is released onto bare space in another zone, or otherwise released without a legal interaction that accepts it, the card returns to its home zone rather than remaining in the foreign zone.
+
+A legal cross-zone interaction does not transfer the anchored card's home zone. How an anchored card is visually represented while participating in an ongoing cross-zone Process remains open.
 
 This supersedes the earlier narrower wording that described `Anchored` only as blocking Room/Inventory transfer.
 
@@ -140,11 +142,11 @@ The Nadir zone supersedes the earlier assumption that Nadir's cards live in Inve
 ## ZONE-D02 - Nadir's cards are Anchored to the Nadir zone
 **Status:** DECIDED BY SIMON
 
-All of Nadir's cards in the Nadir zone are `Anchored` and cannot be persistently transferred out of that zone.
+All of Nadir's cards in the Nadir zone are `Anchored` and cannot come to rest outside that zone.
 
 This includes the persistent Nadir representation cards and temporary condition cards that currently apply to him.
 
-An anchored Nadir card may still be dragged onto a card in another zone to start a legal Process. That interaction drag does not change the Nadir card's persistent home zone.
+An anchored Nadir card may cross a zone boundary while being dragged. If released onto bare space in Room or Inventory, it returns to the Nadir zone. It may instead be dropped onto another card in another zone to start a legal interaction, explicitly including a Process, without changing its home zone.
 
 ## ZONE-02 - Non-Nadir cards in the Nadir zone
 **Status:** OPEN - SIMON TO DECIDE
@@ -155,7 +157,7 @@ Can cards that do not represent or currently apply to Nadir ever persist in the 
 ## MOVE-D01 - Room/Inventory transfer
 **Status:** DECIDED BY SIMON
 
-Cards can normally be dragged between Room and Inventory when legal. `Anchored` prevents persistent transfer out of the card's home zone while preserving interaction dragging.
+Cards can normally be dragged between Room and Inventory when legal. `Anchored` prevents a card from coming to rest outside its home zone while preserving cross-zone dragging and legal card-on-card interaction.
 
 ## MOVE-D02 - Free positioning within a zone
 **Status:** DECIDED BY SIMON
@@ -428,9 +430,9 @@ These cards exist while the condition applies. How they are created, progress, h
 ## NADIR-D06 - All Nadir cards are Anchored
 **Status:** DECIDED BY SIMON
 
-All of Nadir's cards, including Body, Mind, Spirit and temporary condition cards in the Nadir zone, have `Anchored` and cannot be persistently moved out of that zone.
+All of Nadir's cards, including Body, Mind, Spirit and temporary condition cards in the Nadir zone, have `Anchored`.
 
-They can still be dragged onto a card in another zone to start a legal Process without changing their home zone.
+They can cross zone boundaries while being dragged but cannot come to rest outside the Nadir zone. If released elsewhere without a legal accepting card interaction, they return to the Nadir zone. They may be dropped onto a card in another zone to start a legal Process without changing their home zone.
 
 ## NADIR-02 - Injury representation beyond simple condition cards
 **Status:** OPEN - SIMON TO DECIDE
