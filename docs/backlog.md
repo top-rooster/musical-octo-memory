@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **WOUND-03 [P2]** - What are the cleaning/dressing consumption rules and exact state changes?
+1. **WOUND-03 [P2]** - What are the remaining dressing consumption/state-change rules and exact wound `Clean` change?
 2. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
 3. **NADIR-03 [P2]** - How is equipment represented?
 4. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
@@ -622,7 +622,7 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 - Water in a container can be used to clean the wound and improve its `Clean` Value.
 - Fabric that has the `Clean` Marker can be used to dress the wound, causing the wound to gain `Dress`.
 - Fabric can be made clean by boiling, which gives the fabric the `Clean` Marker.
-- Cleaning a wound is an **Action** and takes **15 minutes**.
+- Cleaning a wound is an **Action** and takes **15 minutes**. The Action empties the water container used to clean the wound.
 - Dressing a wound is an **Action** and takes **15 minutes**.
 - `Dress` improves healing over time and causes Infection to decrease over time.
 - When Infection becomes too high, the wound's healing rate is reduced.
@@ -630,7 +630,7 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 
 In addition, a `Burn Wound` has another Value that accelerates Nadir's dehydration over time while the burn exists. The final name/scale of this burn-specific Value and the exact representation of dehydration are not yet fixed.
 
-Because cleaning and dressing are Actions, each advances game time through the normal Action window and active Processes update during that elapsed time. Both Actions take **15 minutes**. The amount by which water changes wound `Clean`, whether/how much water is consumed, whether fabric is consumed or changed when dressing, how `Dress` is later removed, and the exact boiling interaction are not yet decided. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
+Because cleaning and dressing are Actions, each advances game time through the normal Action window and active Processes update during that elapsed time. Both Actions take **15 minutes**. Cleaning consumes the container's current water by emptying the container; partial liquid amounts are intentionally deferred rather than modeled now. The amount by which cleaning changes wound `Clean`, whether clean fabric is consumed or changed when dressing, how `Dress` is later removed, and the exact boiling interaction are not yet decided. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
 
 ### Fever
 
@@ -689,10 +689,12 @@ The exact representation that identifies a card as fabric is not yet fixed. Do n
 
 Both confirmed wound-treatment interactions require Nadir's time and use the normal **Action** model:
 
-- water in a container onto a wound starts the wound-cleaning Action, which takes **15 minutes**;
+- water in a container onto a wound starts the wound-cleaning Action, which takes **15 minutes** and empties the source water container;
 - clean fabric onto a wound starts the wound-dressing Action, which takes **15 minutes**.
 
 Dropping the source onto the wound commits the Action. The Action window runs, 15 minutes of game time advances, and active Processes respond to that elapsed time.
+
+For wound cleaning, the container is treated as simply containing water or being empty. Partial liquid/container amounts are deferred and are not required by the current design.
 
 Boiling fabric is confirmed as a way to make fabric clean, but its exact interaction type has not yet been decided.
 
@@ -700,10 +702,9 @@ Boiling fabric is confirmed as a way to make fabric clean, but its exact interac
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Cleaning and dressing are confirmed 15-minute Actions. Remaining questions are:
+Cleaning and dressing are confirmed 15-minute Actions, and wound cleaning empties its water container. Remaining questions are:
 
 - how much does water change the wound's `Clean` Value;
-- how much water is consumed;
 - whether clean fabric is consumed/changed when used to dress a wound;
 - how and when `Dress` is removed;
 - how boiling fabric is represented and what it consumes.
