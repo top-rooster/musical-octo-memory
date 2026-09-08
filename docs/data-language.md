@@ -96,12 +96,12 @@ For parser-friendly conditional data, numeric bands use explicit `start..end` sy
 
 Current Flesh Wound example:
 
-- `if Infection 0..25 progress +2`
+- `if Infection 0..24 progress +2`
 - `if Infection 25..49 progress +1`
-- `if Infection 50..75 progress +0`
+- `if Infection 50..74 progress +0`
 - `if Infection 75..100 progress -1`
 
-These exact ranges are Simon's current authored form. They overlap at `25` and `75`; the precedence/inclusivity semantics at those two shared boundaries are not yet fixed. Do not silently change the authored ranges or invent a precedence rule until Simon decides it.
+The bands are non-overlapping and cover the full default `0..100` Infection range.
 
 ## Current format draft
 
