@@ -44,6 +44,9 @@ A developer can clone the repo, install dependencies, start the app, and immedia
 
 Do not implement these during Milestone 1:
 
+- Nadir-involved Process windows that force game time forward to completion,
+- unattended/background Process progression while Nadir performs other activities,
+- the `Skinning` recipe or other Process completion transformations,
 - ongoing cross-zone Process presentation for anchored cards,
 - temporary condition creation/removal/healing rules,
 - complete survival simulation,
