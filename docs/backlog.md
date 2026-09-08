@@ -1,658 +1,843 @@
-# Safe Room — design backlog
+# Safe Room - design decision backlog
 
-This file is a design backlog, not an implementation plan.
+This file exists to keep design questions under control.
 
-Items here are candidates for future work. They capture enough intent and context that we can discuss, refine, reject, split, or later promote them into `roadmap.md` without relying on memory.
+It is **not** an implementation plan. Codex must not implement something merely because it appears here.
 
-**Codex must not implement a backlog item merely because it appears here.** An item should only be implemented when it is explicitly requested or promoted into the roadmap.
+Most importantly, a suggestion is not a decision.
 
-The backlog is allowed to contain unresolved questions. Where a rule has not been decided, preserve the uncertainty rather than silently choosing an answer.
+## Status language
 
-## Index
+Every design point must be marked as one of these:
 
-### Core card interaction
-- Card
-- Drag cards between Room and Inventory
-- Card-on-card interactions
-- Valid-target highlighting
-- Action previews
+- **DECIDED BY SIMON** - Simon explicitly chose this direction. Treat it as a design constraint until Simon changes it.
+- **OPEN - SIMON TO DECIDE** - no decision has been made yet.
+- **SUGGESTED BY CHATGPT** - an option or recommendation from ChatGPT. It is not part of the game design unless Simon accepts it.
+- **DEFERRED** - intentionally left undecided because deciding it now would not help the current work.
 
-### Nadir and survival
-- Anchored Nadir card and character attributes
-- Survival attributes and information density
+When ChatGPT adds new ideas to this file, they must be clearly marked as suggestions or open decisions. ChatGPT must never silently promote its own suggestion into a decided rule.
 
-### Environment and threat
-- Noise as a consequence of activity
-- Search teams and sweeps
+## Priority language
 
-### Narrative
-- Nadir's notes and self-deception
+- **P0 - Now:** foundational or directly relevant to the next prototype. Discuss these first.
+- **P1 - Soon:** important to the core interaction model, but not needed for the next immediate decision.
+- **P2 - Later:** needed before the associated system is implemented.
+- **P3 - Parked:** preserve the question, but do not spend design attention on it yet.
+
+## Conversation rule
+
+To avoid drowning Simon in questions, normally discuss **one highest-priority open decision at a time**. Do not dump the entire open-decision list into the conversation unless Simon asks for it.
 
 ---
 
-# Core card interaction
+# Current decision queue
 
-## Card
+These are the questions to answer next, in priority order.
 
-### Purpose
+1. **CARD-01 [P0]** - What kinds of things should be represented as cards?
+2. **CARD-02 [P0]** - What information must every card have or display?
+3. **CARD-03 [P0]** - Do cards use categories, composable capabilities/tags, or both?
+4. **CARD-04 [P1]** - How should a specific card instance differ from its reusable card definition?
+5. **CARD-05 [P1]** - How much information belongs permanently on a card face versus contextual reveal?
 
-Cards are the primary visible building blocks of Safe Room. They should let the game represent many different kinds of things through one consistent interface instead of creating a separate UI system for every category of object or state.
+Everything else remains recorded below, but should not compete for attention yet.
 
-A card is not synonymous with an inventory item. A card can represent something the player carries, something that exists in a room, a person such as Nadir, a machine, or another persistent thing that benefits from being visible and directly interactable.
+---
 
-The card system should carry a large part of the game's mechanical complexity while keeping the play space readable. Complexity should come from the attributes, capabilities, relationships, and interactions of a relatively small number of cards rather than from exposing many separate menus and subsystems.
+# Decisions already made
 
-### Player experience
+These are choices Simon has already made in Safe Room discussions.
 
-The player should quickly learn that a card means: "this is a thing in the game I can inspect and may be able to act with or act upon."
+## Core interaction
 
-Cards should share a recognizable visual and interaction grammar even when they represent very different things. The player should not have to relearn the interface for food, tools, Nadir, machinery, and later card types.
+### CORE-D01 - Movable cards can move between Room and Inventory
 
-A card should expose the information necessary to make immediate decisions while avoiding unnecessary detail. When more detail is required, the design should prefer contextual reveal over permanently crowding every card.
+**Status:** DECIDED BY SIMON
 
-### Current direction
+Movable cards can be dragged back and forth between the Room area and Inventory when the move is legal.
 
-- A card is a general-purpose representation of a game entity or persistent game state that should be visible in the workspace.
-- Every card has an identity and a player-facing name.
-- Cards may have attributes. Attributes belong to the represented thing and can be shown directly on the card when relevant.
-- Cards may have capabilities that determine what can be done with them and what they can accept.
-- Some cards are movable between zones.
-- Some cards are anchored to a zone or position, such as Nadir in Inventory.
-- A card may be a valid target for another card.
-- A card may itself be dragged and used on another target when its rules allow it.
-- Card behavior should be determined by game rules and card data rather than by one-off behavior embedded in presentation components.
-- Different card categories may present different information, but they should remain variations of the same basic interaction language rather than unrelated widgets.
-- The existence of a card does not imply that it can be carried, consumed, or moved.
-- Avoid putting an attribute on every card merely because the card system supports attributes. Show only state that matters.
+### CORE-D02 - Nadir is an anchored card in Inventory
 
-### Conceptual properties
+**Status:** DECIDED BY SIMON
 
-The exact data format is not decided, but the design currently implies that a card may need concepts such as:
+Nadir is represented by a persistent card in Inventory. He is anchored rather than dragged around like an ordinary item.
 
-- identity,
+### CORE-D03 - Character stats live on Nadir's card
+
+**Status:** DECIDED BY SIMON
+
+Relevant character stats should be card attributes on Nadir rather than requiring a separate character-stat UI system.
+
+### CORE-D04 - Food is used by dragging it onto Nadir
+
+**Status:** DECIDED BY SIMON
+
+Eating is a card-on-card interaction: drag food onto Nadir.
+
+### CORE-D05 - Valid targets highlight during dragging
+
+**Status:** DECIDED BY SIMON
+
+Whenever a card is dragged, cards or destinations that can accept it should highlight.
+
+### CORE-D06 - Direct stat consequences are previewed before dropping
+
+**Status:** DECIDED BY SIMON
+
+When a dragged card would change a visible stat, the affected value should show the prospective result before the action is committed, for example:
+
+`Hunger 67 -> 98`
+
+The preview belongs on or immediately around the affected stat so the player can read the consequence directly.
+
+### CORE-D07 - Complexity should come from a small number of legible systems
+
+**Status:** DECIDED BY SIMON
+
+Cards and numerical attributes should carry substantial mechanical complexity without flooding the play area with many separate cards, bars, and overlapping systems. The player should be able to read the state well enough to make decisions.
+
+## Threat and pacing
+
+### THREAT-D01 - No mandatory constant real-time pressure
+
+**Status:** DECIDED BY SIMON
+
+Risk should often come from player-chosen actions and exposure rather than from a constant artificial timer.
+
+### THREAT-D02 - Noise can make productive actions dangerous
+
+**Status:** DECIDED BY SIMON
+
+Machinery and other activity can create noise and therefore danger. The player should be informed before choosing a meaningfully noisy action.
+
+### THREAT-D03 - Attacks/search pressure require a credible threat reason
+
+**Status:** DECIDED BY SIMON
+
+The game should not generate attacks merely to tax the player for progressing. A genuinely quiet or "silent" period must be possible when the situation warrants it.
+
+### THREAT-D04 - Nadir does not perform direct violence
+
+**Status:** DECIDED BY SIMON
+
+If violent defense exists, Nadir does not directly carry it out; traps, turrets, or other automated/indirect systems may do so.
+
+## Narrative
+
+### NARR-D01 - Nadir is fundamentally a decent man
+
+**Status:** DECIDED BY SIMON
+
+He did not want to become ruthless or cruel. The military system and culture damaged him rather than revealing that he was secretly that kind of person all along.
+
+### NARR-D02 - Nadir lies to himself as a survival mechanism
+
+**Status:** DECIDED BY SIMON
+
+His self-deception grows from things he has done, enabled, caused, or survived that he cannot comfortably live with. It should not make him appear stupid.
+
+### NARR-D03 - Nadir and Elina are a genuine love story
+
+**Status:** DECIDED BY SIMON
+
+The relationship is complicated by concealment, fear, and Nadir's past. The story should not resolve into a twist that he was simply using Elina.
+
+### NARR-D04 - Nadir's notes may reflect moral discomfort with player actions
+
+**Status:** DECIDED BY SIMON
+
+The notes can reflect things Nadir feels bad about, but from his perspective rather than as a simple authorial morality score.
+
+---
+
+# Card
+
+This section defines questions about the basic card abstraction. It is currently the highest-priority design area.
+
+## CARD-01 - What kinds of things should be cards?
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P0
+
+Known constraints from Simon's decisions:
+
+- ordinary movable objects can be cards,
+- Nadir is a card even though he is not a movable inventory item,
+- cards are therefore broader than "things the player can carry."
+
+**Suggested by ChatGPT:** A card could be the general visible representation of a persistent game entity that the player may inspect, act with, or act upon. Under that model, food, tools, Nadir, and a generator could all be cards, while global values or incidental room properties would not automatically become cards.
+
+Questions contained in this decision:
+
+- Do machines deserve cards?
+- Can temporary conditions be cards, or should they use a lighter visual language?
+- Should rooms themselves ever be cards, or remain spatial containers for cards?
+- Which state should stay as a property of a room, another card, or global game state rather than becoming its own card?
+
+## CARD-02 - What must every card contain or display?
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P0
+
+**Suggested by ChatGPT:** Every card probably needs a stable identity and a player-facing name, but very little else should be universal. Attributes, descriptions, images, location, movability, and interaction data should only exist where needed.
+
+The exact data structure is not decided.
+
+Candidate concepts previously suggested by ChatGPT:
+
+- unique instance identity,
 - player-facing name,
-- card kind or capabilities,
+- reusable definition/type reference,
 - current zone or anchored location,
-- movable or anchored state,
+- capabilities or tags,
 - visible attributes,
-- interaction rules or tags used to derive interactions,
-- state specific to the represented entity.
+- interaction rules,
+- entity-specific state.
 
-These are conceptual requirements, not a required TypeScript interface. The implementation should not create fields for concepts that are not yet needed.
+Simon needs to decide which of these are genuinely universal and which are optional.
 
-### Examples
+## CARD-03 - Categories, capabilities/tags, or both?
 
-**Tin of beans**
+**Status:** OPEN - SIMON TO DECIDE
 
-A movable item card. It can exist in Room or Inventory. It can be dragged onto Nadir, where it is consumed and changes Hunger.
+**Priority:** P0
 
-**Screwdriver**
+**Suggested by ChatGPT:** Prefer composable capabilities over a rigid class hierarchy. A card could independently be movable, edible, targetable, anchored, usable as a tool, able to accept fuel, and so on. A broad descriptive category could still be useful for presentation/content organization without defining all behavior.
 
-A movable tool card. It can be carried between Room and Inventory. Later it may be accepted by machines or other objects without being consumed.
+This suggestion is intended to avoid increasingly rigid categories such as `FoodCard`, `ToolCard`, `CharacterCard`, and `MachineCard` when a card may combine several behaviors.
 
-**Nadir**
+Simon needs to decide whether the design language should use:
 
-An anchored character card in Inventory. It cannot be moved like an item. It exposes relevant character attributes and accepts compatible cards such as food.
+- explicit mutually exclusive card categories,
+- composable tags/capabilities,
+- both categories and capabilities,
+- or another approach.
 
-**Generator**
+## CARD-04 - Card instance versus reusable card definition
 
-A possible future anchored room card. It might expose operational state, accept fuel or tools, and create consequences such as power and noise.
+**Status:** OPEN - SIMON TO DECIDE
 
-These examples should use the same core card model even though their capabilities differ substantially.
+**Priority:** P1
 
-### Card identity versus card type
+**Suggested by ChatGPT:** Two tins of beans should be able to be separate card instances even when they share the same reusable content definition. Shared information such as name/art/base effects can come from the definition; location, condition, quantity, or other changing state can live on the instance when necessary.
 
-Two cards that look like the same kind of object may still be distinct game entities. For example, two tins of beans can occupy different places or potentially acquire different state.
+Questions:
 
-The design should therefore distinguish the identity of a specific card instance from the reusable definition or data that describes what kind of thing it is.
+- Do identical objects always get distinct instances?
+- What state belongs to the reusable definition versus the individual instance?
+- Can a card transform by changing definition, or should transformation create/replace an instance?
 
-Exactly how much state is shared through definitions versus stored per instance is an implementation decision to make when the content format is designed.
+## CARD-05 - Information hierarchy on the card face
 
-### Attributes
+**Status:** OPEN - SIMON TO DECIDE
 
-Cards can display numerical or qualitative attributes when those values are important to decisions.
+**Priority:** P1
 
-Attributes are intended to be one of the main ways Safe Room creates system depth without multiplying the number of visible systems. Nadir's Hunger and Health are the first examples, but the concept should not be character-specific.
+Simon has already decided that immediate stat consequences should be visible during interactions. The broader information hierarchy is still open.
 
-Attribute presentation should follow these principles:
+**Suggested by ChatGPT:** Prioritize information in roughly this order:
 
-- Do not show a value merely because the simulation has one.
-- Prefer values the player can understand and act on.
-- Changes caused by a direct card interaction should be previewable when the outcome is meant to be known.
-- Different card kinds do not need identical attribute layouts.
-- Avoid turning every card into a dense spreadsheet.
+1. what the thing is,
+2. immediately important current state,
+3. interaction-relevant information,
+4. secondary detail only when inspected or contextually relevant.
 
-### Capabilities rather than rigid categories
+Questions:
 
-The system should avoid assuming that every card belongs to one mutually exclusive behavioral class such as `FoodCard`, `ToolCard`, `CharacterCard`, or `MachineCard` if combinations of capabilities would describe the game more naturally.
+- What is permanently visible?
+- What appears on hover or selection?
+- What appears only during a drag/action preview?
+- How much visual distinction should different card kinds have before the common card language breaks down?
 
-For example, a card might be movable, consumable by Nadir, and also useful as an ingredient. A machine might be anchored, accept fuel, accept tools, and expose attributes. The design should remain open to composing these behaviors rather than forcing an increasingly deep inheritance hierarchy.
+## CARD-06 - Card size
 
-This is a design preference, not yet a commitment to a particular component/entity architecture.
+**Status:** OPEN - SIMON TO DECIDE
 
-### Information hierarchy
+**Priority:** P2
 
-The face of a card should prioritize information needed for the current decision. Not every property needs to be permanently visible.
+Question: should cards have one fixed size, content-driven size, or a small number of standard sizes?
 
-A likely hierarchy is:
+**Suggested by ChatGPT:** Defer the permanent answer until the interaction prototype can be tested visually.
 
-1. identity: what is this?
-2. immediately important state: what condition is it in?
-3. interaction-relevant information: what will happen if I use it here?
-4. secondary detail available through contextual inspection when needed.
+## CARD-07 - Cards containing or attaching other cards
 
-The direct manipulation workflow should remain usable without requiring the player to open a detailed card view for routine actions.
+**Status:** OPEN - SIMON TO DECIDE
 
-### Open questions
+**Priority:** P2
 
-- Which things deserve to become cards, and which should remain properties of a room, card, or global state?
-- What is the minimum universal information every card must display besides its identity/name?
-- Do cards need explicit categories, composable tags/capabilities, or both?
-- Should card size be fixed, vary by content, or have a small number of standard sizes?
-- Can cards contain or visually attach other cards, for example equipment, injuries, fuel, or containers?
-- Can a card change its fundamental capabilities over time, or should transformations replace it with another card definition?
-- How are stacks of identical objects represented without flooding the play area with duplicate cards?
-- Do quantity and durability belong as attributes, specialized card state, or something else?
-- When should information appear on the card face versus on hover, selection, inspection, or during a drag interaction?
-- Can cards represent temporary conditions, or should conditions use a lighter-weight visual language?
-- Should rooms themselves ever be cards, or should they remain spatial containers for cards?
-- How much visual distinction between card kinds is useful before the shared card grammar starts to break down?
+Question: can equipment, injuries, fuel, container contents, or similar things appear as cards attached to or contained by another card?
 
-### Dependencies
+This decision affects equipment, injuries, containers, and machinery later.
 
-This is a foundational concept. Most other interaction backlog items depend on it, including:
+## CARD-08 - Stacks and quantities
 
-- Drag cards between Room and Inventory
-- Card-on-card interactions
-- Valid-target highlighting
-- Action previews
-- Nadir and character attributes
-- Future item, machine, condition, and resource systems
+**Status:** OPEN - SIMON TO DECIDE
 
-### Acceptance criteria before treating the card model as mature
+**Priority:** P2
 
-- A single card abstraction can represent at least a movable consumable, a reusable tool, an anchored character, and an anchored machine without special-casing each one in the UI architecture.
-- Card identity is distinct from reusable card definition/content data.
-- Cards can expose only the attributes relevant to their represented entity.
-- Movability, targetability, and other capabilities are not assumed merely from the existence of a card.
-- New card kinds can participate in the existing drag, targeting, and preview language without inventing parallel interaction systems.
-- The model remains simple enough that adding ordinary game content does not require large amounts of boilerplate.
-- The visual card remains readable even as the underlying model supports richer state.
+Question: how should multiple identical objects be represented without flooding the play area with duplicate cards?
+
+Related question: should quantity be an attribute, a special card state, a stack representation, or something else?
+
+## CARD-09 - Durability and other object-specific state
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P3
+
+Question: should durability and similar values use the same visible attribute system as Hunger/Health, specialized state, conditions, or another representation?
 
 ---
 
-## Drag cards between Room and Inventory
+# Moving cards between Room and Inventory
 
-### Purpose
+## MOVE-01 - Basic movement
 
-Cards should behave like physical objects in the player's workspace. Moving an object between the environment and Nadir's possessions should usually be expressed by moving the card itself rather than opening an inventory management screen.
+**Status:** DECIDED BY SIMON
 
-The interaction is intended to make inventory management spatial, immediate, and easy to read while keeping the number of separate UI systems low.
+**Priority:** already decided
 
-### Player experience
+Movable cards can be dragged from Room to Inventory and back when legal. Anchored cards do not move through this interaction.
 
-The player sees a Room area and a persistent Inventory area. A movable card can be picked up and dragged between them when the move is legal.
+**Suggested by ChatGPT implementation consequence:** invalid drops should leave state unchanged and legal destinations should be determined by game rules rather than by accidental UI behavior.
 
-The player should be able to understand where a card can go before releasing it. Failed interactions should feel like a clearly invalid action, not like an unexplained UI failure.
+## MOVE-02 - Inventory capacity model
 
-### Current direction
+**Status:** OPEN - SIMON TO DECIDE
 
-- Movable cards may exist in the Room or Inventory.
-- Some cards are anchored and cannot be moved normally.
-- Room and Inventory are meaningful zones, not merely visual columns.
-- A legal drop into a zone moves the card there.
-- An invalid drop leaves the game state unchanged.
-- Dropping a card onto another card can represent an action rather than a move.
+**Priority:** P2
 
-### Examples
+Question: does Inventory eventually have a capacity limit? If yes, is it based on slots, weight, bulk, containers, or something else?
 
-- Drag a screwdriver from Room to Inventory to take it.
-- Drag the screwdriver from Inventory back to Room to leave it behind.
-- Drag food onto Nadir to eat it rather than moving it into Nadir's position.
+## MOVE-03 - Cost/consequence of taking or dropping an object
 
-### Open questions
+**Status:** OPEN - SIMON TO DECIDE
 
-- Does Inventory eventually have a capacity limit, and if so what creates that limit: slots, weight, bulk, containers, or something else?
-- Is moving a card between Room and Inventory always free, or can circumstances make taking or dropping something an action with consequences?
-- Does exact placement inside the Room area ever matter mechanically, or is Room initially just a zone?
-- Can some objects be too large or otherwise impossible to put in Inventory?
+**Priority:** P2
 
-### Dependencies
+Question: is moving a card between Room and Inventory always mechanically free, or can taking/dropping something consume time or create other consequences?
 
-- Card representation
-- Room zone
-- Inventory zone
-- Drop validation
-- Card-on-card interaction rules
+## MOVE-04 - Exact placement inside a room
 
-### Acceptance criteria for a future implementation
+**Status:** OPEN - SIMON TO DECIDE
 
-- A movable card can be dragged from Room to Inventory when legal.
-- The same card can be dragged back to Room when legal.
-- Invalid moves do not alter state.
-- Anchored cards cannot accidentally be moved by the same interaction.
-- The player can tell legal and illegal destinations apart before committing the drop.
+**Priority:** P2
+
+Question: does exact card placement in a Room ever matter mechanically, or is Room primarily a zone containing cards?
+
+## MOVE-05 - Objects that cannot be carried
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P2
+
+Question: can an object be a card and still be too large, fixed, or otherwise impossible to move into Inventory?
+
+**Suggested by ChatGPT:** yes; being a card should not imply being carryable.
 
 ---
 
-## Card-on-card interactions
+# Card-on-card interactions
 
-### Purpose
+## INTERACT-01 - Card-on-card interaction as the common action language
 
-Cards should act as both objects and possible interaction targets. This allows many verbs to emerge from one consistent UI language instead of requiring separate buttons and menus for eating, using medicine, equipping an item, repairing something, giving an item to someone, and similar actions.
+**Status:** PARTLY DECIDED BY SIMON
 
-### Player experience
+**Priority:** P1
 
-When the player picks up a card, other cards that can meaningfully accept it become possible destinations. Dropping one card on another performs the obvious contextual interaction if that interaction is legal.
+Simon has explicitly decided that Food -> Nadir performs eating.
 
-The interface should remain predictable. The player should not have to guess whether a drop means "move this here" or "use this on that."
+The broader generalization to medicine, tools, machines, giving items, equipping, repairing, and other verbs is **SUGGESTED BY CHATGPT**, not yet decided.
 
-### Current direction
+**Suggested by ChatGPT:** use card-on-card drops as a common interaction language wherever the action is clear enough, instead of creating a separate menu/button system for every verb.
 
-- A card may declare or derive which other cards it can interact with.
-- The game rules, not the React/UI component, decide whether a card-on-card interaction is legal.
-- A successful interaction can transform attributes, consume cards, move cards, create cards, or change state.
-- The target should communicate that it accepts the dragged card before the drop.
-- Interactions should be data-driven where doing so keeps the content concise and understandable.
+## INTERACT-02 - Multiple plausible actions between the same two cards
 
-### Examples
+**Status:** OPEN - SIMON TO DECIDE
 
-- Food -> Nadir: eat the food and change Hunger.
-- Medicine -> Nadir: potentially treat an injury or health state later.
-- Tool -> machine: potentially repair or modify the machine later.
-- Item -> another person: potentially give the item later.
+**Priority:** P2
 
-Only the first example is currently committed to the interaction prototype. The others illustrate the intended extensibility of the interaction language.
+Question: if the same source and target could support more than one action, how does the player choose?
 
-### Open questions
+## INTERACT-03 - Confirmation before committing an action
 
-- When several actions between the same two cards are plausible, how does the player choose?
-- Should card-on-card actions ever require a confirmation step?
-- Can an action take time or create noise while still being initiated by a simple drop?
-- How are reusable tools distinguished from consumables in the effect model?
-- Should the target own the interaction definition, the dragged card own it, or should a separate rule describe the pair?
+**Status:** OPEN - SIMON TO DECIDE
 
-### Dependencies
+**Priority:** P2
 
-- Drop-target system
-- Action preview system
-- Game-state transition model
-- Card/content data format
+Question: should some card-on-card actions require confirmation, or should a valid drop normally commit immediately?
 
-### Acceptance criteria for a future generalized implementation
+## INTERACT-04 - Actions with time/noise consequences
 
-- Interaction legality is determined outside presentation code.
-- A target can accept one card type while rejecting another.
-- Successful interactions produce deterministic state transitions.
-- Rejected interactions leave state unchanged.
-- The UI can represent a consumable interaction and a reusable-item interaction without inventing separate interaction systems.
+**Status:** OPEN - SIMON TO DECIDE
 
----
+**Priority:** P2
 
-## Valid-target highlighting
+Question: can a simple drop initiate an action that takes time or creates noise rather than resolving instantly?
 
-### Purpose
+This must eventually fit Simon's existing decision that meaningful noise should be communicated before commitment.
 
-Dragging should expose the game's interaction possibilities rather than forcing the player to discover them by trial and error. Highlighting valid targets turns the act of picking up a card into a way of asking the game, "What can I do with this?"
+## INTERACT-05 - Consumables versus reusable tools
 
-This is important because Safe Room is intended to gain complexity from combinations between a limited number of visible systems. That complexity becomes frustrating if legal combinations are opaque.
+**Status:** OPEN - SIMON TO DECIDE
 
-### Player experience
+**Priority:** P2
 
-As soon as a card is dragged, every card or location that can currently accept it becomes visually distinct. Invalid targets remain visually quiet.
+Question: how does the design distinguish an item that is consumed by an interaction from one that remains available afterward?
 
-The highlight should indicate legality, not necessarily desirability. A legal action may still have bad consequences.
+## INTERACT-06 - Where interaction rules live
 
-### Current direction
+**Status:** OPEN - SIMON TO DECIDE
 
-- Highlight all currently legal drop targets while a card is being dragged.
-- Recalculate legality from current game state rather than from static UI assumptions.
-- Do not highlight targets that cannot accept the card under current conditions.
-- Keep the visual language consistent across Room, Inventory, Nadir, machines, and future characters.
-- Highlighting should not reveal information the player is not supposed to know merely because an interaction exists internally.
+**Priority:** P2
 
-### Examples
+Question: does the dragged card define an interaction, does the target define what it accepts, does a separate rule describe the pair, or is it derived from capabilities/tags?
 
-- Dragging food highlights Nadir if Nadir can currently eat it.
-- Dragging a generic item highlights Inventory if it can be carried.
-- A locked or unavailable interaction does not highlight merely because it might become possible later.
-
-### Open questions
-
-- Should highlights distinguish different kinds of valid targets, such as move, consume, repair, equip, or give?
-- Should a valid but dangerous action use the same highlight as a harmless action, leaving consequences to the preview system?
-- How subtle can the highlight be before players miss it?
-- Should inaccessible interactions ever be shown in a disabled form as a teaching mechanism?
-
-### Dependencies
-
-- Interaction legality rules
-- Drag state
-- Action preview system
-
-### Acceptance criteria for a future implementation
-
-- Starting a drag reveals all legal current targets.
-- Ending or cancelling the drag clears all target highlights.
-- Invalid targets do not appear valid.
-- A state change that affects legality also affects highlighting.
-- Highlight behavior comes from the same legality rules used when the action is actually committed.
+**Suggested by ChatGPT:** keep the actual legality/effect rules outside UI rendering and make content data-driven where doing so stays readable.
 
 ---
 
-## Action previews
+# Valid-target highlighting
 
-### Purpose
+## TARGET-D01 - Legal targets highlight during dragging
 
-The player should understand the direct mechanical consequence of an action before committing it. Numerical attributes can hold substantial system complexity without filling the interface with extra cards and bars, but only if the player can read what an item or action will actually do.
+**Status:** DECIDED BY SIMON
 
-The preview system is intended to avoid the common survival-game problem where the player knows that they are hungry but cannot tell whether eating now is wasteful or useful because the effects are hidden.
+All cards/locations that can currently accept the dragged card should highlight.
 
-### Player experience
+## TARGET-01 - Different highlights for different action types
 
-When a dragged card is positioned over a valid target, affected visible values temporarily show their prospective result. The preview disappears if the player moves away or cancels the drag. Dropping commits exactly the change that was previewed unless another explicit mechanic intervenes.
+**Status:** OPEN - SIMON TO DECIDE
 
-### Current direction
+**Priority:** P2
 
-- Preview direct visible state changes before the drop.
-- Show old and new values near the affected attribute, for example `Hunger 67 -> 98`.
-- Clamp or otherwise resolve the value exactly as the committed action will.
-- A preview is temporary and must not mutate game state.
-- Prefer showing the resulting value rather than only an abstract modifier such as `+31` when the resulting state is what matters to the decision.
-- Do not use previews to expose deliberately hidden information.
+Question: should move, consume, repair, equip, give, etc. use distinct target highlights, or should all valid targets share one visual language?
 
-### Examples
+## TARGET-02 - Dangerous but legal actions
 
-- Food over Nadir: `Hunger 67 -> 98`.
-- A stronger food when Hunger is 90 might preview `90 -> 100`, making the wasted capacity visible.
-- A future medicine might preview a visible Health or injury change if that information is meant to be known.
+**Status:** OPEN - SIMON TO DECIDE
 
-### Open questions
+**Priority:** P2
 
-- How should previews display multiple affected attributes without making cards visually noisy?
-- Should negative consequences caused indirectly by an action also be previewed, such as noise?
-- When an outcome is uncertain, should the preview show a range, probability, qualitative warning, or nothing?
-- Should long-term consequences be excluded even when deterministic?
+Question: should a legal but dangerous action use the same validity highlight as a harmless one, with danger communicated through the preview/warning system?
 
-### Dependencies
+**Suggested by ChatGPT:** validity and desirability are different concepts; the target highlight should primarily communicate legality.
 
-- Pure game-rule calculation
-- Valid-target detection
-- Attribute display
+## TARGET-03 - Hidden or currently inaccessible interactions
 
-### Acceptance criteria for a future generalized implementation
+**Status:** OPEN - SIMON TO DECIDE
 
-- Hovering a dragged card over a valid target can calculate an outcome without mutating state.
-- The visible preview matches the value produced by committing the action.
-- Clamping and other deterministic rules are reflected in the preview.
-- Cancelling the interaction restores the ordinary display with no state change.
-- Multiple future action types can use the same preview mechanism.
+**Priority:** P3
+
+Question: should interactions that are currently unavailable remain entirely hidden, or can they appear disabled as a teaching mechanism?
+
+## TARGET-04 - Highlight visual intensity
+
+**Status:** DEFERRED
+
+**Priority:** P3
+
+This should be tested in the prototype rather than decided abstractly. The player needs to notice valid targets without the screen becoming visually noisy.
+
+**Suggested by ChatGPT implementation consequence:** the same underlying legality rules should drive both highlighting and the actual committed drop so the UI cannot promise an interaction that the game later rejects.
+
+---
+
+# Action previews
+
+## PREVIEW-D01 - Preview direct visible stat changes before commitment
+
+**Status:** DECIDED BY SIMON
+
+Example: `Hunger 67 -> 98` appears on Nadir while food is positioned over him.
+
+## PREVIEW-01 - Multiple affected attributes
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P2
+
+Question: if an interaction affects several visible attributes, how much should be previewed without making the target card unreadable?
+
+## PREVIEW-02 - Indirect consequences such as noise
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P1
+
+Question: should deterministic indirect consequences also appear in the same preview system, for example an action's noise cost?
+
+This is relevant because Simon has already decided that the player should know before deliberately causing meaningful noise.
+
+## PREVIEW-03 - Uncertain outcomes
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P2
+
+Question: if an outcome is uncertain, should the preview show a range, probability, qualitative warning, or no numerical outcome?
+
+## PREVIEW-04 - Long-term deterministic consequences
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P3
+
+Question: should a preview show only immediate consequences, or also deterministic longer-term effects?
+
+**Suggested by ChatGPT:** show the resulting value rather than only an abstract modifier when the resulting state is what matters to the decision. A preview should not mutate game state and should use the same rules as the committed action.
 
 ---
 
 # Nadir and survival
 
-## Anchored Nadir card and character attributes
+## NADIR-D01 - Nadir is an anchored Inventory card
 
-### Purpose
+**Status:** DECIDED BY SIMON
 
-Nadir should exist in the interface as a persistent card rather than requiring a separate character sheet or status screen. This gives the player a physical target for actions involving Nadir and lets character state live in the same interaction language as the rest of the game.
+## NADIR-D02 - Character stats are attributes on Nadir's card
 
-The design deliberately tries to remove a whole UI/system layer: instead of a character panel plus an inventory plus item-use menus, Nadir himself is an anchored inventory card that items can act on.
+**Status:** DECIDED BY SIMON
 
-### Player experience
+Hunger is a confirmed example. Health was introduced for the prototype by ChatGPT and should not be treated as a permanent final attribute merely because it exists there.
 
-Nadir is always available in the Inventory area. His card displays the character information currently important to decisions. The player can drag compatible cards onto him to perform actions such as eating.
+## NADIR-01 - How many attributes can Nadir expose legibly?
 
-Nadir's card is stable and cannot accidentally be dragged out of Inventory like an ordinary object.
+**Status:** OPEN - SIMON TO DECIDE
 
-### Current direction
+**Priority:** P1
 
-- Nadir is an anchored card in Inventory.
-- Character survival state is represented as attributes on that card when possible.
-- Hunger and Health are the first prototype attributes.
-- Cards can target Nadir through the ordinary card-on-card interaction system.
-- Attribute changes are previewed directly on Nadir when possible.
-- Do not add separate status systems if the same information can live legibly on the card.
+This is partly a design decision and partly something to observe in prototypes.
 
-### Examples
+## NADIR-02 - Injury representation
 
-- Food -> Nadir changes Hunger.
-- Future medicine -> Nadir could affect Health or an injury.
-- Future wearable equipment might interact with Nadir without opening a separate equipment screen, depending on later design.
+**Status:** OPEN - SIMON TO DECIDE
 
-### Open questions
+**Priority:** P2
 
-- How many attributes can Nadir's card display before it stops being readable?
-- Are injuries attributes, attached cards, conditions, or some combination?
-- Should equipment appear as attributes/slots on Nadir, as cards attached to him, or remain in Inventory?
-- Are mental or narrative states ever shown numerically, qualitatively, or not at all?
+Question: are injuries numerical attributes, conditions, attached cards, or some combination?
 
-### Dependencies
+## NADIR-03 - Equipment representation
 
-- Card-on-card interactions
-- Attribute model
-- Action previews
+**Status:** OPEN - SIMON TO DECIDE
 
-### Acceptance criteria for a future mature implementation
+**Priority:** P2
 
-- Nadir remains a persistent, non-movable interaction target.
-- Character state required for immediate decisions is readable without opening another screen.
-- Compatible items can operate on Nadir through the same rules used for other card interactions.
-- Adding a new character attribute does not require inventing a new UI subsystem.
+Question: does equipment appear as slots/attributes on Nadir, cards attached to him, ordinary cards remaining in Inventory, or something else?
+
+## NADIR-04 - Mental and narrative state representation
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P3
+
+Question: are mental/narrative states shown numerically, qualitatively, indirectly through writing/behavior, or not shown at all?
 
 ---
 
-## Survival attributes and information density
+# Survival attributes and information density
 
-### Purpose
+## SURV-D01 - Avoid complexity that only makes the game harder to read
 
-Safe Room needs enough state to produce difficult survival decisions, but every additional stat increases cognitive load and can make the game harder to read rather than deeper.
+**Status:** DECIDED BY SIMON
 
-The goal is to get maximum decision complexity from the minimum number of player-facing attributes. Hidden variables should only exist when the uncertainty they create is intentional and interesting, not because the simulation happens to model them.
+The goal is a lot of decision complexity with as few exposed systems and attributes as practical. Hidden or overlapping stats can make otherwise clever survival systems difficult to read.
 
-### Player experience
+## SURV-01 - Which permanent survival pressures exist?
 
-The player should be able to glance at Nadir and understand the survival pressures relevant to the next decision. They should not need to memorize hidden thresholds, convert bars into unknown item effects, or reason about multiple overlapping measures of essentially the same need.
+**Status:** OPEN - SIMON TO DECIDE
 
-### Current direction
+**Priority:** P2
 
-- Start with Hunger and Health in the prototype.
-- Add attributes only when they create a distinct decision that existing attributes cannot represent well.
-- Prefer explicit numerical consequences during direct manipulation.
-- Avoid a hidden stomach/fullness stat for the first food implementation.
-- Distinguish useful uncertainty about the world from uncertainty caused by unclear rules.
+Candidates raised so far include Hunger, Health, thirst, fatigue, temperature, illness, stress, injury, morale, and similar pressures.
 
-### Examples
+No candidate becomes a permanent stat merely by appearing in this list.
 
-A hunger system can become deep through scarcity, food quality, timing, travel risk, noise, spoilage, or competing uses for resources without necessarily adding separate hunger, fullness, stomach capacity, metabolism, and meal-frequency stats.
+**Suggested by ChatGPT decision test:** before adding a permanent attribute, ask:
 
-### Open questions
-
-- Which additional survival pressures are actually necessary: thirst, fatigue, temperature, illness, stress, injury, morale, or others?
-- Can some pressures be conditions/cards rather than permanent numerical stats?
-- When is a hidden state desirable because Nadir himself would not know the exact value?
-- Should attributes always use 0-100, or should scale follow the semantics of each attribute?
-- How should attribute degradation over time work given the design preference against arbitrary real-time pressure?
-
-### Dependencies
-
-- Nadir card
-- Time/action model
-- Food and resource design
-
-### Acceptance criteria before adding a new permanent survival attribute
-
-Before promotion to the roadmap, a proposed attribute should answer:
-
-- What distinct decision does this create?
+- What distinct decision does it create?
 - Why cannot an existing attribute, card state, or condition express it?
-- What information does the player see?
-- How does the player intentionally influence it?
-- What interaction or trade-off makes it interesting rather than merely another bar to maintain?
+- What does the player see?
+- How can the player intentionally influence it?
+- What trade-off makes it interesting rather than another bar to maintain?
+
+## SURV-02 - Permanent attribute versus condition/card
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P2
+
+Question: which pressures should be permanent numbers and which should appear only as conditions, cards, or other temporary state?
+
+## SURV-03 - Hidden survival state
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P2
+
+Question: when, if ever, is a hidden state desirable because Nadir would not know the exact value or because uncertainty is itself interesting?
+
+**Suggested by ChatGPT:** do not add a hidden stomach/fullness system to the first food prototype. This was a recommendation, not a final decision by Simon.
+
+## SURV-04 - Attribute scales
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P3
+
+Question: should attributes generally use a common scale such as 0-100, or should the scale follow the semantics of each attribute?
+
+## SURV-05 - Attribute change over time/actions
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P2
+
+Question: how do survival pressures degrade or change over time without violating the decision against arbitrary constant real-time pressure?
 
 ---
 
-# Environment and threat
+# Noise
 
-## Noise as a consequence of activity
+## NOISE-D01 - Noise links useful activity with exposure
 
-### Purpose
+**Status:** DECIDED BY SIMON
 
-Noise is intended to connect productivity with danger. The player should often be able to improve the safe room, operate useful machinery, or perform valuable actions, but doing so can increase the chance of attracting attention.
+Machinery and other activity can create noise, and noise can create danger. The player should know before deliberately choosing a meaningfully noisy action.
 
-This creates pressure without relying on constant enemy waves or an arbitrary ticking clock. Risk comes from what the player chooses to do.
+## NOISE-D02 - Quiet play can genuinely remain quiet
 
-### Player experience
+**Status:** DECIDED BY SIMON
 
-Before starting a noisy action, the player should understand that it will make noise and have enough information to judge whether the benefit is worth the exposure. Noise should feel like a consequence of concrete actions, not a random punishment.
+Noise/threat should not secretly function as a mandatory attack meter. A silent night is possible.
 
-A quiet period should be possible when the player deliberately avoids noisy activity.
+## NOISE-01 - What is noise mechanically?
 
-### Current direction
+**Status:** OPEN - SIMON TO DECIDE
 
-- Machinery and other actions can generate noise.
-- The player should be informed before committing a meaningfully noisy action.
-- Noise increases threat only when there is a credible reason for someone to detect or investigate it.
-- Avoid spawning attacks simply to punish progress or create artificial activity.
-- External conditions may create better or worse windows for noisy work.
-- The threat model should support the possibility of a genuinely silent night.
+**Priority:** P2
 
-### Examples
+Question: is noise a numerical value, discrete event, spatial signal, or combination?
 
-- Running a generator may enable useful systems while increasing detectability.
-- Performing loud construction could be safer during environmental noise than during a quiet night.
-- Choosing not to operate machinery may preserve safety at the cost of lost productivity.
+## NOISE-02 - Accumulation, decay, and propagation
 
-### Open questions
+**Status:** OPEN - SIMON TO DECIDE
 
-- Is noise a numerical value, a spatial signal, discrete events, or a combination?
-- Does noise accumulate, decay, propagate through rooms, or merely create detectable events?
-- How much of the current detection risk is visible to the player?
-- Which external conditions can mask noise?
-- Can repeated noise teach enemies where to search even when a single event does not trigger a sweep?
-- How does the system avoid becoming a predictable "fill the danger meter" mechanic?
+**Priority:** P2
 
-### Dependencies
+Question: does noise accumulate, decay, propagate through rooms/space, or simply create detectable events?
 
-- Action/time model
-- Machinery
-- Threat/search system
-- Environment conditions
+## NOISE-03 - What risk information does the player see?
 
-### Acceptance criteria before implementation
+**Status:** OPEN - SIMON TO DECIDE
 
-- The system creates a meaningful choice between benefit and exposure.
-- The player receives warning before deliberately causing significant noise.
-- Remaining quiet is a valid strategy, not merely a delay before a mandatory attack.
-- Threat responses follow understandable world logic rather than a fixed grind loop.
+**Priority:** P2
 
----
+Question: how much of current detectability or search risk is visible to the player?
 
-## Search teams and sweeps
+## NOISE-04 - Environmental masking
 
-### Purpose
+**Status:** OPEN - SIMON TO DECIDE
 
-Search teams provide the principal external human threat around the hideout. They should create tension through routines, uncertainty, preparation, and the possibility of discovery rather than through direct player combat.
+**Priority:** P2
 
-The player is defending a vulnerable hidden life against people who are actively looking for someone like Nadir.
+Simon has previously considered external windows such as weather making noisy actions safer. The exact masking model remains undecided.
 
-### Player experience
+## NOISE-05 - Persistent enemy learning from repeated noise
 
-The player learns enough about search behavior to prepare and make plans but never gains perfect omniscience. Sweeps should feel like events with causes and warning signs, not arbitrary enemy waves.
+**Status:** OPEN - SIMON TO DECIDE
 
-When danger arrives, the player's earlier decisions about noise, rooms, concealment, equipment, and automated defenses should matter.
+**Priority:** P3
 
-### Current direction
+Question: can repeated noise teach searchers where to investigate even if no single event triggers a sweep?
 
-- Search teams sweep areas looking for Nadir or other refugees.
-- Search behavior should be grounded in schedules, information, suspicion, and credible triggers.
-- Nadir does not solve the problem through direct violence.
-- Defensive violence, if eventually present, is indirect or automated.
-- The player should often have ways to reduce exposure before a sweep rather than only react after it begins.
-- The game should avoid mandatory repetitive attacks used as a resource tax.
+## NOISE-06 - Avoiding a disguised danger meter
 
-### Examples
+**Status:** OPEN - SIMON TO DECIDE
 
-- A noisy pattern could make the hideout more likely to be investigated.
-- A scheduled or scripted sweep could force the player to prepare particular rooms.
-- Equipment failures or changing routines can disrupt a previously safe plan.
+**Priority:** P2
 
-### Open questions
-
-- Are individual guards simulated persistently, or are sweeps generated from a higher-level threat model?
-- How much of guard schedules can the player learn?
-- Does the enemy know it is looking for Nadir specifically, a code-named suspect, or simply an unknown person?
-- How does suspicion persist between incidents?
-- What happens mechanically when a search team partially discovers evidence but not Nadir?
-- What are the failure states besides immediate capture/death?
-
-### Dependencies
-
-- World map/rooms
-- Noise
-- NPC/routine model
-- Concealment and defensive systems
-
-### Acceptance criteria before implementation
-
-- Every sweep has a world-state reason or authored narrative reason.
-- Preparation can materially change the outcome.
-- Direct player violence is not required.
-- Repeated sweeps do not become a predictable grind loop disconnected from player behavior.
-- The player can understand enough of the threat model to make informed decisions without having perfect information.
+The exact mechanics need to preserve Simon's decision that attacks happen only when there is credible threat, rather than because a hidden or visible meter inevitably fills.
 
 ---
 
-# Narrative
+# Search teams and sweeps
 
-## Nadir's notes and self-deception
+## SEARCH-D01 - Human search teams are a core external threat
 
-### Purpose
+**Status:** DECIDED BY SIMON
 
-Nadir's written reflections can expose character, reinterpret player actions, and gradually reveal the gap between what happened and what Nadir can admit to himself.
+Search teams can sweep the complex looking for Nadir or other refugees.
 
-His defining flaw is not stupidity or habitual manipulation. He has experienced and participated in things he cannot comfortably integrate into his self-image. Lying to himself is a survival mechanism created by that history.
+## SEARCH-D02 - Nadir does not answer searches with direct violence
 
-### Player experience
+**Status:** DECIDED BY SIMON
 
-Notes should initially feel like Nadir's sincere account of his circumstances. Over time, inconsistencies, omissions, euphemisms, rationalizations, and later reflections can allow the player to recognize that his narration is not always reliable.
+Preparation, concealment, avoidance, traps, automated defenses, and other indirect systems can matter instead.
 
-If the player causes or permits something Nadir finds morally troubling, his notes can reflect the emotional consequence without becoming a simplistic morality meter.
+## SEARCH-01 - Persistent individual guards versus higher-level sweep model
 
-### Current direction
+**Status:** OPEN - SIMON TO DECIDE
 
-- Nadir is fundamentally a decent man who did not want to become ruthless or cruel.
-- His military system and culture were coercive, toxic, and corrupting.
-- His self-deception helps him live with things he has done, enabled, or survived.
-- Moral reflections should be written from Nadir's perspective rather than as authorial judgement of the player.
-- His relationship with Elina is a genuine love story complicated by concealment and his past, not a twist revealing that he was simply using her.
-- Notes can change in tone or interpretation as events force Nadir closer to acknowledging uncomfortable truths.
+**Priority:** P2
 
-### Examples
+Question: are guards individually simulated with persistent schedules, are sweeps generated at a higher level, or is there a hybrid?
 
-A troubling player action might initially be described in logistical or impersonal terms. A later note might revisit the same event indirectly, revealing that Nadir has been thinking about the person affected even if he still avoids stating his own responsibility plainly.
+Simon has previously favored inhabitants having daily schedules, but the exact search-team simulation is not yet fixed.
 
-The point is not for the game to announce "Nadir feels guilty." The writing itself should carry the conflict.
+## SEARCH-02 - How much can the player learn about schedules?
 
-### Open questions
+**Status:** OPEN - SIMON TO DECIDE
 
-- Are notes automatically created after significant events, manually written at rest, or both?
-- Can different player choices change only the content of notes, or also what Nadir eventually admits about his past?
-- How often can moral reflection appear before it becomes commentary on every player action?
-- Should the player ever see a clearly objective account that confirms where Nadir's version is distorted?
-- How much of the backstory is fixed versus dependent on player interpretation and discovery order?
+**Priority:** P2
 
-### Dependencies
+Question: how predictable/learnable are guard and search routines?
 
-- Narrative event/state tracking
-- Nadir backstory
-- Elina relationship arc
-- Significant-choice/event model
+## SEARCH-03 - What does the enemy know about Nadir?
 
-### Acceptance criteria before implementation
+**Status:** OPEN - SIMON TO DECIDE
 
-- Notes sound like Nadir rather than a game morality system.
-- Reflections can acknowledge troubling events without labeling the player good or evil.
-- Self-deception is conveyed through wording, omission, contradiction, or reinterpretation rather than making Nadir appear unintelligent.
-- The narrative remains compatible with Nadir and Elina having genuinely loved each other.
+**Priority:** P2
+
+Question: are they looking for Nadir specifically, a code-named suspect, one unknown person, or potentially multiple people?
+
+The story idea that searchers assign a code name exists, but exact knowledge remains undecided.
+
+## SEARCH-04 - Persistent suspicion
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P2
+
+Question: how does suspicion/information persist between incidents?
+
+## SEARCH-05 - Partial discovery
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P2
+
+Question: what happens when a team finds evidence of occupancy/activity but does not find Nadir?
+
+## SEARCH-06 - Failure states
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P2
+
+Question: what meaningful failure states exist besides immediate capture/death?
+
+**Suggested by ChatGPT:** sweeps should have a world-state or authored narrative reason; preparation should materially change outcomes; repeated sweeps should not become a detached grind loop. These are recommendations consistent with Simon's existing pacing decisions, but are not additional decisions unless Simon accepts them.
+
+---
+
+# Nadir's notes and self-deception
+
+## NOTES-D01 - Notes can reflect Nadir's moral discomfort
+
+**Status:** DECIDED BY SIMON
+
+## NOTES-D02 - Self-deception should not make Nadir look stupid
+
+**Status:** DECIDED BY SIMON
+
+His lies to himself are a survival mechanism rooted in his military past.
+
+## NOTES-D03 - The Elina relationship remains genuine
+
+**Status:** DECIDED BY SIMON
+
+Any unreliable narration must remain compatible with Nadir and Elina genuinely loving each other.
+
+## NOTES-01 - When are notes created?
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P3
+
+Question: automatically after significant events, manually during rest, on authored triggers, or some combination?
+
+## NOTES-02 - Can choices change what Nadir eventually admits about his past?
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P3
+
+Question: do choices only alter his reflections on current events, or can they change how directly he confronts fixed events from his past?
+
+## NOTES-03 - Frequency of moral reflection
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P3
+
+Question: how often can moral reflection appear before it feels like the game comments on every action?
+
+## NOTES-04 - Objective account versus Nadir's account
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P3
+
+Question: should the player ever receive a clearly objective account that confirms where Nadir's narration is distorted?
+
+## NOTES-05 - Fixed backstory versus interpretation/discovery order
+
+**Status:** OPEN - SIMON TO DECIDE
+
+**Priority:** P3
+
+Question: how much of Nadir's past is objectively fixed and how much remains open to interpretation or changes with discovery order?
+
+**Suggested by ChatGPT:** self-deception can be conveyed through omissions, euphemisms, contradictions, rationalizations, and later reinterpretations rather than by explicitly announcing guilt or unreliability. This is a writing recommendation, not a decided narrative rule.
+
+---
+
+# Suggested implementation principles not yet approved as game-design decisions
+
+These came from ChatGPT while translating the design into something Codex could build. They are preserved here so they do not masquerade as Simon's choices.
+
+## IMPL-01 - Rules outside presentation code
+
+**Status:** SUGGESTED BY CHATGPT
+
+Keep interaction legality and state transitions in game-rule code rather than embedding one-off behavior directly in React components.
+
+## IMPL-02 - Data-driven card/content definitions
+
+**Status:** SUGGESTED BY CHATGPT
+
+Keep ordinary card definitions/effects as concise data where this reduces boilerplate and makes content easy to author.
+
+## IMPL-03 - Highlight and commit use the same legality rules
+
+**Status:** SUGGESTED BY CHATGPT
+
+The rules that decide whether a target highlights should be the same rules that decide whether the eventual drop is legal.
+
+## IMPL-04 - Preview and commit use the same effect calculation
+
+**Status:** SUGGESTED BY CHATGPT
+
+Preview calculations should not mutate state, and committing the action should produce the same deterministic result that was previewed.
+
+## IMPL-05 - Card identity separate from reusable definition
+
+**Status:** SUGGESTED BY CHATGPT
+
+Keep a specific card instance distinguishable from reusable content data. This overlaps CARD-04 and should not be treated as approved until Simon decides it.
+
+---
+
+# Maintenance rule
+
+When Simon answers an open decision:
+
+1. change its status to **DECIDED BY SIMON**,
+2. record the decision in plain language,
+3. remove it from the current decision queue,
+4. promote the next relevant question by priority,
+5. preserve rejected ChatGPT suggestions only when the rejection itself is useful context,
+6. never rewrite a ChatGPT recommendation as if Simon had originally proposed it.
