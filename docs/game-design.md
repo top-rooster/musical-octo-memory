@@ -158,26 +158,38 @@ This gives the Nadir zone two kinds of content without introducing a separate UI
 - persistent cards that describe ongoing parts of Nadir,
 - temporary cards that describe current conditions affecting him.
 
+### Discovery, knowledge, and previews
+
+Safe Room should preserve substantial discovery rather than revealing the complete causal future of an interaction before commitment. Understanding can come from two sources:
+
+- **relational understanding** — the player can infer danger or opportunity from visible cards, attributes, room state, and relationships between them;
+- **exploratory play and knowledge unlocks** — using, observing, reading about, or otherwise learning a system can improve what Nadir and the player understand about it later.
+
+Previews should therefore be **knowledge-dependent** rather than omniscient. Known consequences can be shown accurately. Undiscovered relationships should not automatically be spoiled by hovering cards together.
+
+However, exploratory play should not unexpectedly inflict severe punishment that the player had no reasonable way to anticipate. Serious danger must be sufficiently telegraphed through visible context, Nadir's existing understanding, or an explicit qualitative warning. Nadir may articulate obvious danger when appropriate.
+
+Example: a flooded room containing exposed electrical outlets is likely to electrocute Nadir. The danger does not need an exact numerical preview because the relevant elements are visible and their relationship is understandable; Nadir may also explicitly recognize that the room is dangerous.
+
+Uncertainty can remain after the danger is understood. Attempting to repair an exposed electrical outlet may carry a known risk of electric shock. A shock can result in a burn wound, while a successful risk outcome can leave a functional outlet. The player should be able to understand that the repair is dangerous without necessarily being shown the exact result or probability before acting.
+
+The intended information progression is therefore closer to **unknown → suspected → understood** than to either complete opacity or complete prediction.
+
 ### Drag affordances
 
 Whenever the player drags a card:
 
 1. Every card that can legally receive it as an interaction target highlights.
 2. Legal zone placement for movement should remain legible without being confused with a card interaction target.
-3. Potential state changes should be previewed before the drop is committed when the design calls for that consequence to be known.
-4. Invalid targets should not suggest that they accept the card.
+3. Consequences that Nadir/the player currently understands may be previewed before the drop is committed.
+4. Meaningful known danger may be communicated qualitatively even when an exact outcome remains uncertain.
+5. Invalid targets should not suggest that they accept the card.
 
 Example: dragging food over **Body** should preview something like:
 
 `Hunger 67 → 98`
 
 The preview should appear on or immediately adjacent to the affected stat.
-
-The preview system must leave room for discovery. Safe Room should not become a chess-like game where hovering an action reveals its complete causal future. Learning interactions, discovering properties, and unlocking knowledge are intended parts of play.
-
-At the same time, exploratory play should not unexpectedly inflict severe punishment that the player had no reasonable way to anticipate. Dangerous consequences should be telegraphed strongly enough for the player to understand that an experiment carries meaningful risk, even when the exact mechanism or magnitude remains undiscovered.
-
-The exact rule for which indirect deterministic consequences are shown numerically, shown qualitatively, hidden until learned, or revealed through unlocks is still open.
 
 ### Eating
 
@@ -191,10 +203,11 @@ For the first prototype, do **not** add a second hidden stomach/fullness system.
 
 - Prefer direct manipulation over nested menus.
 - Prefer visible consequences over hidden arithmetic, while preserving meaningful discovery.
-- Discovery and knowledge unlocks are intended parts of play rather than problems for the UI to eliminate.
+- Discovery, relational understanding, exploratory play, and knowledge unlocks are intended parts of play rather than problems for the UI to eliminate.
 - Do not turn the game into exhaustive deterministic planning by revealing every consequence before commitment.
 - Exploratory play should not cause severe, unforeseeable punishment. Meaningful danger should be reasonably telegraphed even when details remain unknown.
-- A player's uncertainty should come from the situation, incomplete knowledge, discovery, and trade-offs — not from unclear UI rules.
+- A player's uncertainty should come from the situation, incomplete knowledge, discovery, and genuine risk — not from unclear UI rules.
+- Known danger does not imply known probability or known outcome.
 - Avoid adding systems merely because comparable survival games have them.
 - Keep the play area readable; complexity should emerge from combinations of cards and attributes.
 - No direct player violence is part of the broader concept; defensive violence, if present later, is indirect/automated.
