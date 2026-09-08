@@ -26,8 +26,8 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **STACK-02 [P2]** - What happens when a Process completes?
-2. **STACK-05 [P2]** - How is a cross-zone Process with an anchored card presented?
+1. **PROCESS-03 [P2]** - What should the two Process kinds be called?
+2. **STACK-05 [P2]** - How is an ongoing cross-zone Process with an anchored card presented?
 3. **INTERACT-02 [P2]** - What if one source/target pair supports several actions?
 4. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
 5. **MOVE-02 [P2]** - Does Inventory have a capacity limit?
@@ -164,7 +164,7 @@ A `Stack` is visual compression for identical cards. Represented cards remain se
 
 ### Process
 
-A `Process` is a finite mechanically meaningful combination of cards. Creating it starts immediately. Every participating card remains identifiable and every name stays visible. The top card gets `Progress` from 0 to 100. At 100 the Process is complete.
+A `Process` is a finite mechanically meaningful combination of cards. Creating it starts immediately. Every participating card remains identifiable and every name stays visible. Processes have two execution kinds depending on whether Nadir must personally perform the work; see PROCESS-D01 and PROCESS-D02 below.
 
 ### Connection
 
@@ -175,12 +175,68 @@ Example: a machine connected to a power outlet gains `Powered`; disconnecting re
 ## STACK-D02 - Process progress is process-specific
 **Status:** DECIDED BY SIMON
 
-There is no universal progress rate. Each Process defines its own calculation from relevant game state and elapsed game time.
+There is no universal progress calculation. Each Process defines its own duration/progression from relevant state and elapsed game time.
+
+For an unattended Process, progress can depend on world conditions as time passes during Nadir's other activities.
 
 Examples:
 
-- rat meat on a lit camp fire progresses with time while the fire is lit,
-- a bowl on a condenser progresses from room moisture, room temperature, and time.
+- rat meat on a lit camp fire progresses while the fire is lit and Nadir is doing something else,
+- a bowl on a condenser can progress according to room moisture, room temperature, and elapsed time while Nadir is occupied elsewhere.
+
+## PROCESS-D01 - Nadir-involved Processes force time to completion
+**Status:** DECIDED BY SIMON
+
+There are Processes that require Nadir to perform the work personally. When such a Process is committed, game time immediately advances by the Process's required duration until it completes; the player does not continue performing other actions during that interval.
+
+Concrete design example - skinning a dead rat:
+
+1. Dragging a knife onto a `Dead Rat` exposes the available Process name `Skin` on the rat card.
+2. Dropping the knife commits the Process.
+3. A window appears showing `Skinning` and the two participating cards: the knife and the dead rat.
+4. Game time immediately advances **15 minutes**.
+5. On completion, the knife returns to where it came from.
+6. The `Dead Rat` is consumed/dissolves.
+7. A `Rat Skin` card and a `Rat Meat` card are created.
+
+The example establishes the interaction and completion behavior for this Process; it does not establish that all Nadir-involved Processes take 15 minutes or have the same outputs.
+
+## PROCESS-D02 - Unattended Processes advance while Nadir does something else
+**Status:** DECIDED BY SIMON
+
+The other kind of Process does not force time forward on commitment because Nadir does not need to remain personally occupied with it.
+
+Such a Process progresses as game time passes **while Nadir is doing something else**.
+
+Concrete design example: `Rat Meat` placed on a lit camp fire cooks in the background. It does not immediately advance time to completion when started; its Process progresses during time consumed by Nadir's other activities.
+
+## PROCESS-D03 - Process completion is process-specific
+**Status:** DECIDED BY SIMON
+
+There is no single universal completion transformation. Each Process defines its own completion result.
+
+A Process may, as needed by that specific recipe/action:
+
+- preserve and return a tool,
+- consume/dissolve input cards,
+- create output cards,
+- change attributes,
+- or combine such results.
+
+`Skinning` is the confirmed example: the knife returns, the dead rat is consumed, and `Rat Skin` plus `Rat Meat` are created.
+
+## PROCESS-03 - Names for the two Process kinds
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+The two execution kinds are decided, but their official design/player-facing names are not.
+
+Need names for:
+
+- a Process that occupies Nadir and immediately advances time until completion,
+- a Process that runs while Nadir spends time doing other things.
+
+Do not treat any ChatGPT naming suggestion as accepted until Simon chooses it.
 
 ## STACK-D03 - Dragging from a Stack peels off one card
 **Status:** DECIDED BY SIMON
@@ -198,19 +254,15 @@ The Stack count is presentation, not currently a normal card `Value`.
 
 Cards can share a `Stack` only when they come from the same master definition and have identical current attributes: same Marker set, same Values, same Value numbers.
 
-## STACK-02 - Process completion result
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-When a Process reaches `Progress 100`, how is its result specified: attribute changes, consumed cards, transformed cards, separation, created cards, or some combination? This may be process-specific.
-
 ## STACK-05 - Cross-zone Process presentation
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
 An anchored Inventory card, including a Nadir card, can be dragged onto a Room card to start a Process without changing home zone.
 
-How is that Process visually represented while the anchored card remains owned by Inventory? Do not infer a presentation until this is decided.
+How is an **ongoing unattended** Process visually represented if one of its participants is anchored to Inventory? Nadir-involved Processes already use a temporary Process window while time advances to completion.
+
+Do not infer a presentation until this is decided.
 
 ## MOVE-02 - Inventory capacity
 **Status:** OPEN - SIMON TO DECIDE
@@ -264,7 +316,7 @@ Should some drops require confirmation?
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Can a drop initiate an action that takes time or creates noise rather than resolving instantly?
+Time behavior for Processes is now partly decided by PROCESS-D01/D02. Other immediate interactions may still need separate time/noise rules.
 
 ## INTERACT-05 - Consumable versus reusable
 **Status:** OPEN - SIMON TO DECIDE
@@ -420,13 +472,13 @@ They can cross into Room while being dragged but cannot come to rest there as or
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Injury-like conditions can be temporary Nadir cards. Decide later whether all injuries use that model or whether some persistent/complex injuries need another representation.
+Injury-like conditions can be temporary Inventory cards applying to Nadir. Decide later whether all injuries use that model or whether some persistent/complex injuries need another representation.
 
 ## NADIR-03 - Equipment representation
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Attributes, ordinary Inventory cards, Connections, or something else?
+Ordinary Inventory cards, Connections, attributes, or something else?
 
 ## NADIR-04 - Mental/narrative state detail
 **Status:** OPEN - SIMON TO DECIDE
