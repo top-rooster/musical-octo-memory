@@ -43,9 +43,9 @@ Every attribute is represented by an icon. There are two official forms:
 - **Marker** — icon only; presence carries the meaning.
 - **Value** — icon plus an integer value.
 
-Examples include `Player`, `Anchored`, `Powered`, `Cutting Tool`, `Dressed`, `Clean` as a Marker on fabric, `Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`, and `Infection 50` on a wound.
+Examples include `Player`, `Anchored`, `Powered`, `Cutting Tool`, `Dressed`, `Sterilized` on fabric, `Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`, and `Infection 50` on a wound.
 
-`Clean` is currently a fabric **Marker**. Wounds do not have a separate cleanliness Value; their cleanliness/infection state is represented by the `Infection` Value.
+`Sterilized` is the Marker used on fabric that is safe to use as wound dressing. Wounds do not have a separate cleanliness Value; their cleanliness/infection state is represented by the `Infection` Value.
 
 Markers may describe functional roles used by interaction matching. `Cutting Tool` is a confirmed example. Anything Nadir can eat or otherwise ingest must also carry an ingestion Marker; its final user-facing name has not yet been fixed.
 
@@ -53,7 +53,7 @@ Markers may describe functional roles used by interaction matching. `Cutting Too
 
 Process progress is also represented as a normal visible Value, but its **player-facing name may be specific to the Process**. Mechanically/code-wise, these are the same progress concept. `Spoilage` on `Dead Rat` is the confirmed example: it is the visible name of that card's Process progress, not a separate timed-state system.
 
-Wounds keep treatment state in the same attribute model: `Infection` is a Value from **0 to 100**, where lower is better and higher is worse, while `Dressed` is a Marker whose presence means the wound is currently dressed. A newly created wound starts at `Infection 50`.
+Wounds keep treatment state in the same attribute model: `Infection` is a Value from **0 to 100**, where lower is better and higher is worse, while `Dressed` is a Marker whose presence means the wound is currently dressed. A newly created wound starts at `Infection 50`. Once added, `Dressed` remains until the wound card itself disappears.
 
 A `Burn Wound` also carries a Value whose effect is to accelerate Nadir's dehydration as game time advances. The final name and scale of that burn-specific Value are not yet fixed, and the exact card/attribute representation of dehydration itself is still open.
 
@@ -118,7 +118,7 @@ Confirmed examples:
 - `Dead Rat` accepts a source carrying `Cutting Tool` and maps it to `Skin` / the `Skinning` Action. A knife works because it has the `Cutting Tool` Marker, not because the rat specifically recognizes a knife master definition.
 - Nadir's ingestion interaction accepts cards carrying the ingestion Marker. That Marker tells the interaction logic that the card can be dropped onto the relevant Nadir ingestion target; eating currently uses **Body**.
 - a wound can accept water in a container for the wound-cleaning Action;
-- a wound can accept clean fabric for the wound-dressing Action. The fabric must carry the `Clean` Marker. The exact attribute rule that identifies a card as fabric is not yet fixed.
+- a wound can accept sterilized fabric for the wound-dressing Action. The fabric must carry the `Sterilized` Marker. The exact attribute rule that identifies a card as fabric is not yet fixed.
 
 The exact data syntax for target requirements and interaction effects is not yet fixed.
 
@@ -269,19 +269,19 @@ Condition lifecycles are condition-specific rather than using one universal time
 - each starts at `Infection 50`;
 - `Infection` is bounded from **0 to 100**; lower is better and higher is worse;
 - Infection rises as game time advances if the wound is not adequately managed;
-- a wound may carry the `Dressed` Marker; its presence means the wound is currently dressed;
+- a wound may carry the `Dressed` Marker; once added, it remains until the wound card disappears;
 - water in a container can be used to clean a wound, reducing `Infection` by **40**, never below 0;
-- any fabric carrying the `Clean` Marker can be used to dress a wound; dressing gives the wound the `Dressed` Marker;
-- fabric can be made clean by boiling it, which gives that fabric the `Clean` Marker;
+- any fabric carrying the `Sterilized` Marker can be used to dress a wound; dressing gives the wound the `Dressed` Marker;
+- fabric can be sterilized by boiling it, which gives that fabric the `Sterilized` Marker;
 - cleaning a wound is a **15-minute Action** and empties the water container used for the Action;
-- dressing a wound is a **15-minute Action** and consumes the clean fabric card used for the Action;
+- dressing a wound is a **15-minute Action** and consumes the sterilized fabric card used for the Action;
 - `Dressed` improves healing over time and causes Infection to decrease over time;
 - when Infection becomes too high, healing over time is reduced;
 - severe Infection spawns a `Fever` condition card.
 
 In addition, each `Burn Wound` has another Value that accelerates Nadir's dehydration as game time advances. The exact name/scale of that Value and the exact representation of dehydration are not yet fixed.
 
-Because cleaning and dressing are Actions, each runs through the normal Action window, advances **15 minutes** of game time, and causes active Processes to update during that elapsed time. The cleaning Action reduces `Infection` by **40** and empties its water container. The dressing Action consumes its clean fabric card and leaves the wound carrying `Dressed`. How `Dressed` is later removed and the exact boiling interaction are not yet decided. Partial liquid/container quantities are deferred; this interaction does not require a volume system.
+Because cleaning and dressing are Actions, each runs through the normal Action window, advances **15 minutes** of game time, and causes active Processes to update during that elapsed time. The cleaning Action reduces `Infection` by **40** and empties its water container. The dressing Action consumes its sterilized fabric card and leaves the wound carrying `Dressed` for the rest of the wound card's lifetime. The exact boiling interaction is not yet decided. Partial liquid/container quantities are deferred; this interaction does not require a volume system.
 
 `Fever` is cumulative. If Nadir has **three Fever cards**, he dies.
 
