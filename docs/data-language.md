@@ -39,6 +39,21 @@ Examples of the intended authoring feel are `Anchored`, `Cutting Tool`, `Sterili
 
 These examples express the desired low-boilerplate style. Do not turn them into a more verbose key/value object model during implementation.
 
+## Current format draft
+
+`data/cards.txt` contains the first concrete draft of the card-data format using current Safe Room card decisions.
+
+The draft currently uses:
+
+- blank lines to separate card masters;
+- the card title as the first line;
+- the picture path as the second line;
+- Marker names as plain lines;
+- Values as `name integer`;
+- short behavior verbs only where the data needs to express an Action, Process, input, output, or state change.
+
+This file exists so the format can be judged against real Safe Room data. The syntax in `data/cards.txt` is **not yet a locked design decision**. Keep changing it if doing so removes boilerplate or ambiguity while preserving phone-friendly authoring.
+
 ## Level design
 
 Level design uses the same text-data philosophy and parser/tooling family as card data.
