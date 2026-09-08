@@ -55,7 +55,7 @@ Every attribute is represented by an icon. There are two official forms:
 - **Marker** — icon only; presence carries the meaning.
 - **Value** — icon plus an integer value.
 
-Examples include `Player`, `Anchored`, `Powered`, `Cutting Tool`, `Fabric`, `Dressed`, `Sterilized`, `Container`, `Contains-Water`, `Health 80`, `Hydration 50`, `Satiation 50`, `Progress 42`, `Durability 80`, `Spoilage 63`, and `Infection 50`.
+Examples include `Player`, `Anchored`, `Powered`, `Cutting Tool`, `Fabric`, `Dressed`, `Sterilized`, `Container`, `Contains-Water`, `Hydration 50`, `Satiation 50`, `Progress 42`, `Durability 80`, `Spoilage 63`, and `Infection 50`.
 
 Unless Simon explicitly defines a different range for a particular Value, every Value is bounded and clamped from **0 to 100**.
 
@@ -270,18 +270,19 @@ Relevant persistent character state is expressed as attributes on those cards.
 Body starts with:
 
 - `Hydration 50`,
-- `Satiation 50`,
-- `Health 80`.
+- `Satiation 50`.
 
-All three use the default 0–100 Value bounds.
+Both use the default 0–100 Value bounds.
 
-If **Hydration, Satiation, or Health reaches 0, the game ends**.
+If **Hydration or Satiation reaches 0, the game ends**.
+
+There is no separate Body `Health` Value. Physical injury and health consequences are represented through injury/condition cards instead, avoiding a redundant parallel health system.
 
 Body continuously participates in a repeating Process evaluated every **15 minutes of elapsed game time**:
 
 - `Hydration -2`.
 
-The corresponding ongoing Satiation and Health rules have not yet been decided.
+The corresponding ongoing Satiation rule has not yet been decided.
 
 A `Plastic Bottle` has the `Container` Marker. When filled, that bottle instance also carries `Contains-Water`. Its `Drink` interaction is an instant Action:
 
@@ -333,12 +334,12 @@ Condition lifecycles are condition-specific rather than using one universal time
 
 **Flesh Wound** has a confirmed 15-minute healing tick. Its current authored bands are:
 
-- `if Infection 0..25 progress +2`
+- `if Infection 0..24 progress +2`
 - `if Infection 25..49 progress +1`
-- `if Infection 50..75 progress +0`
+- `if Infection 50..74 progress +0`
 - `if Infection 75..100 progress -1`
 
-The exact ranges are intentional authored data. They overlap at `25` and `75`; precedence/inclusivity at those shared boundaries is still unresolved and should not be silently inferred by the parser.
+The bands are non-overlapping and cover the full default Infection range.
 
 `Burn Wound` also accelerates loss of Body `Hydration`. Hydration itself is now a confirmed Body Value; the exact burn-specific modifier Value/name and acceleration formula remain open.
 
@@ -416,12 +417,13 @@ For the first prototype, do **not** add a second hidden stomach/fullness system.
 The confirmed permanent Body survival Values are:
 
 - Hydration,
-- Satiation,
-- Health.
+- Satiation.
 
-They start at 50, 50, and 80 respectively. Reaching 0 in any one of them causes game over.
+They both start at 50. Reaching 0 in either causes game over.
 
-Hydration currently decreases by **2 every 15 minutes of elapsed game time** through Body's Process. Other ongoing survival rates remain to be designed.
+There is no general Body Health Value. Physical health is represented through injury/condition cards instead.
+
+Hydration currently decreases by **2 every 15 minutes of elapsed game time** through Body's Process. The ongoing Satiation rate remains to be designed.
 
 Burn Wounds accelerate Hydration loss; the exact acceleration formula remains open.
 
