@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **PROCESS-03 [P2]** - What should the two Process kinds be called?
-2. **STACK-05 [P2]** - How is an ongoing cross-zone Process with an anchored card presented?
-3. **INTERACT-02 [P2]** - What if one source/target pair supports several actions?
-4. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
-5. **MOVE-02 [P2]** - Does Inventory have a capacity limit?
+1. **INTERACT-02 [P2]** - What if one source/target pair supports several interactions?
+2. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
+3. **MOVE-02 [P2]** - Does Inventory have a capacity limit?
+4. **CARD-07 [P2]** - Can cards be contained/attached outside Stack/Process/Connection?
+5. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
 
 ---
 
@@ -56,7 +56,7 @@ Cards have no separate categories, tags, capability lists, or card classes. A ca
 
 All card attributes are visible and represented by icons. There are no hidden/internal card attributes in the current model.
 
-- **Marker** - icon only; presence carries the meaning (`Player`, `Anchored`, `Powered`).
+- **Marker** - icon only; presence carries meaning (`Player`, `Anchored`, `Powered`).
 - **Value** - icon plus integer (`Health 100`, `Progress 42`).
 
 ## ATTR-D02 - Anchored
@@ -68,11 +68,11 @@ Anchored does not prevent:
 
 - repositioning within the home zone,
 - crossing zone boundaries while being dragged,
-- dragging the card onto another card in another zone for a legal interaction, including starting a Process.
+- dragging the card onto another card in another zone for a legal interaction.
 
 If an anchored card is released onto bare space in another zone, or otherwise released without a legal interaction that accepts it, it returns to its home zone.
 
-A legal cross-zone interaction does not transfer the anchored card's home zone. How an anchored card is visually represented while participating in an ongoing cross-zone Process remains open.
+A legal cross-zone interaction does not transfer the anchored card's home zone.
 
 ## CARD-D04 - Master definition and card instances
 **Status:** DECIDED BY SIMON
@@ -124,7 +124,7 @@ Descriptions are not part of the first release. Revisit later if cards need expl
 
 ---
 
-# Zones, positioning, movement, and card stacking
+# Zones, positioning, movement, and card combinations
 
 ## ZONE-D01 - Two top-level zones: Room and Inventory
 **Status:** DECIDED BY SIMON
@@ -134,9 +134,9 @@ The play space has two zones:
 - **Room** - the currently viewed physical space; its contents change when Nadir moves to another room.
 - **Inventory** - persistent cards that remain on screen when Nadir moves to another room.
 
-The previously proposed separate **Nadir** zone is removed. Nadir's cards live in Inventory.
+The previously proposed separate Nadir zone is removed. Nadir's cards live in Inventory.
 
-Inventory therefore contains both ordinary persistent possessions and Nadir's own persistent/condition cards. `Anchored`, rather than a separate zone, prevents Nadir's cards from being ordinarily moved into Room.
+Inventory contains both ordinary persistent possessions and Nadir's persistent/condition cards. `Anchored`, rather than a separate zone, prevents Nadir's cards from being ordinarily moved into Room.
 
 ## MOVE-D01 - Room/Inventory transfer
 **Status:** DECIDED BY SIMON
@@ -156,7 +156,7 @@ Cards may not overlap in ordinary placement. Deliberately combined cards snap in
 ## STACK-D01 - Stack, Process, Connection
 **Status:** DECIDED BY SIMON
 
-The three official stacking forms are **Stack**, **Process**, and **Connection**.
+The three persistent forms of deliberate card combination are **Stack**, **Process**, and **Connection**.
 
 ### Stack
 
@@ -164,7 +164,7 @@ A `Stack` is visual compression for identical cards. Represented cards remain se
 
 ### Process
 
-A `Process` is a finite mechanically meaningful combination of cards. Creating it starts immediately. Every participating card remains identifiable and every name stays visible. Processes have two execution kinds depending on whether Nadir must personally perform the work; see PROCESS-D01 and PROCESS-D02 below.
+A `Process` is unattended work that continues while Nadir spends game time doing other things. Participating cards remain mechanically combined while the Process is running.
 
 ### Connection
 
@@ -172,71 +172,80 @@ A `Connection` is a persistent mechanically meaningful relationship. It begins i
 
 Example: a machine connected to a power outlet gains `Powered`; disconnecting removes it. One outlet can power only one card at a time.
 
+`Action` is a separate card-on-card interaction type, not a persistent stacking form; see ACTION-D01.
+
 ## STACK-D02 - Process progress is process-specific
 **Status:** DECIDED BY SIMON
 
-There is no universal progress calculation. Each Process defines its own duration/progression from relevant state and elapsed game time.
+Processes use a visible `Progress` Value from 0 to 100.
 
-For an unattended Process, progress can depend on world conditions as time passes during Nadir's other activities.
+There is no universal progress calculation. Each Process defines its own progression from relevant state and elapsed game time.
+
+A Process progresses as game time passes while Nadir is occupied with Actions or other activities. Relevant conditions can speed up, slow down, or stop it.
 
 Examples:
 
-- rat meat on a lit camp fire progresses while the fire is lit and Nadir is doing something else,
-- a bowl on a condenser can progress according to room moisture, room temperature, and elapsed time while Nadir is occupied elsewhere.
+- `Rat Meat` on a lit camp fire progresses while the fire is lit and Nadir spends time doing something else,
+- a bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time.
 
-## PROCESS-D01 - Nadir-involved Processes force time to completion
+## PROCESS-D01 - Processes are unattended
 **Status:** DECIDED BY SIMON
 
-There are Processes that require Nadir to perform the work personally. When such a Process is committed, game time immediately advances by the Process's required duration until it completes; the player does not continue performing other actions during that interval.
+The name **Process** is reserved for card combinations that do not require Nadir's continuous personal involvement.
 
-Concrete design example - skinning a dead rat:
+Starting a Process does not itself force game time forward to completion. It advances when game time passes because Nadir is doing something else.
 
-1. Dragging a knife onto a `Dead Rat` exposes the available Process name `Skin` on the rat card.
-2. Dropping the knife commits the Process.
+Concrete example: putting `Rat Meat` on a lit camp fire starts a cooking Process. The meat cooks while the fire remains lit and Nadir spends time on other activities.
+
+## ACTION-D01 - Nadir-involved work is an Action
+**Status:** DECIDED BY SIMON
+
+Work that requires Nadir's personal involvement is called an **Action**, not a Process.
+
+An Action is initiated through the same universal card-on-card interaction language, but it does not remain as an ongoing card stack.
+
+When an Action is committed:
+
+1. an Action window opens,
+2. the window shows the Action and its participating cards,
+3. the window animation represents the Action's duration,
+4. the corresponding amount of game time advances,
+5. the Action completes when the window animation terminates,
+6. its Action-specific completion result is applied.
+
+Actions do **not** use a `Progress` attribute. The Action window itself communicates the ongoing completion/time passage.
+
+The presence of a Nadir card is not required for something to be an Action. `Skinning` is an Action because Nadir personally performs the work even though the initiating cards are a knife and a dead rat.
+
+## ACTION-D02 - Skinning example
+**Status:** DECIDED BY SIMON
+
+Concrete Action example - skinning a dead rat:
+
+1. Dragging a knife onto a `Dead Rat` exposes `Skin` on the rat card.
+2. Dropping the knife commits the Action.
 3. A window appears showing `Skinning` and the two participating cards: the knife and the dead rat.
-4. Game time immediately advances **15 minutes**.
-5. On completion, the knife returns to where it came from.
-6. The `Dead Rat` is consumed/dissolves.
-7. A `Rat Skin` card and a `Rat Meat` card are created.
+4. The Action represents **15 minutes** of game time.
+5. When the Action window animation terminates, the Action completes.
+6. The knife returns to where it came from.
+7. The `Dead Rat` is consumed/dissolves.
+8. A `Rat Skin` card and a `Rat Meat` card are created.
 
-The example establishes the interaction and completion behavior for this Process; it does not establish that all Nadir-involved Processes take 15 minutes or have the same outputs.
+The 15-minute duration and outputs belong to this Action; other Actions can have different durations and results.
 
-## PROCESS-D02 - Unattended Processes advance while Nadir does something else
+## ACTION-D03 - Action completion is Action-specific
 **Status:** DECIDED BY SIMON
 
-The other kind of Process does not force time forward on commitment because Nadir does not need to remain personally occupied with it.
+There is no single universal Action completion transformation. An Action can return tools, consume inputs, create cards, change attributes, or combine those effects.
 
-Such a Process progresses as game time passes **while Nadir is doing something else**.
+`Skinning` is the confirmed example.
 
-Concrete design example: `Rat Meat` placed on a lit camp fire cooks in the background. It does not immediately advance time to completion when started; its Process progresses during time consumed by Nadir's other activities.
-
-## PROCESS-D03 - Process completion is process-specific
+## PROCESS-D02 - Process completion is Process-specific
 **Status:** DECIDED BY SIMON
 
-There is no single universal completion transformation. Each Process defines its own completion result.
+There is no single universal Process completion transformation. Each Process defines its own result when `Progress` reaches 100.
 
-A Process may, as needed by that specific recipe/action:
-
-- preserve and return a tool,
-- consume/dissolve input cards,
-- create output cards,
-- change attributes,
-- or combine such results.
-
-`Skinning` is the confirmed example: the knife returns, the dead rat is consumed, and `Rat Skin` plus `Rat Meat` are created.
-
-## PROCESS-03 - Names for the two Process kinds
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-The two execution kinds are decided, but their official design/player-facing names are not.
-
-Need names for:
-
-- a Process that occupies Nadir and immediately advances time until completion,
-- a Process that runs while Nadir spends time doing other things.
-
-Do not treat any ChatGPT naming suggestion as accepted until Simon chooses it.
+A Process may consume/transform participating cards, create output cards, change attributes, separate its participants, or combine such results.
 
 ## STACK-D03 - Dragging from a Stack peels off one card
 **Status:** DECIDED BY SIMON
@@ -254,15 +263,11 @@ The Stack count is presentation, not currently a normal card `Value`.
 
 Cards can share a `Stack` only when they come from the same master definition and have identical current attributes: same Marker set, same Values, same Value numbers.
 
-## STACK-05 - Cross-zone Process presentation
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
+## STACK-05 - Anchored participant in an ongoing Process
+**Status:** DEFERRED
+**Priority:** P3
 
-An anchored Inventory card, including a Nadir card, can be dragged onto a Room card to start a Process without changing home zone.
-
-How is an **ongoing unattended** Process visually represented if one of its participants is anchored to Inventory? Nadir-involved Processes already use a temporary Process window while time advances to completion.
-
-Do not infer a presentation until this is decided.
+If a future unattended Process needs an `Anchored` participant whose home is another zone, decide how that ongoing relationship is presented. There is no current concrete requirement; Nadir-performed work is now an Action and resolves in its window rather than remaining as an ongoing Process.
 
 ## MOVE-02 - Inventory capacity
 **Status:** OPEN - SIMON TO DECIDE
@@ -298,25 +303,25 @@ Every gameplay interaction is initiated by putting one card on top of another ca
 
 Moving a card within or between zones is movement rather than interaction. Bare zone space can receive a card for legal movement but is not an interaction target.
 
-An interaction may resolve immediately or create/change a Stack, Process, Connection, cards, or attributes.
+An interaction may resolve immediately, start an **Action**, create/change a Stack, start/alter a Process, create/change a Connection, create cards, consume cards, or change attributes.
 
-## INTERACT-02 - Multiple plausible actions
+## INTERACT-02 - Multiple plausible interactions
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-If one source/target pair supports several actions, how does the player choose?
+If one source/target pair supports several interactions, how does the player choose between them?
 
 ## INTERACT-03 - Confirmation
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Should some drops require confirmation?
+Should some drops require confirmation beyond the Action window or normal drop commitment?
 
 ## INTERACT-04 - Time/noise consequences
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Time behavior for Processes is now partly decided by PROCESS-D01/D02. Other immediate interactions may still need separate time/noise rules.
+Action time behavior is decided by ACTION-D01. Processes consume elapsed game time indirectly as Nadir does other things. Other immediate interactions may still need separate time/noise rules.
 
 ## INTERACT-05 - Consumable versus reusable
 **Status:** OPEN - SIMON TO DECIDE
@@ -398,17 +403,17 @@ How much should be shown when several known attributes change?
 
 Preview only immediate understood effects or also known longer-term effects?
 
-## TARGET-01 - Different highlights by action type
+## TARGET-01 - Different highlights by interaction type
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-One validity language or different visuals for move/consume/repair/etc.?
+One validity language or different visuals for Action/Process/consume/repair/etc.?
 
-## TARGET-02 - Dangerous but legal actions
+## TARGET-02 - Dangerous but legal interactions
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Should dangerous legal actions use the normal legal-target highlight, with danger communicated separately?
+Should dangerous legal interactions use the normal legal-target highlight, with danger communicated separately?
 
 ## TARGET-03 - Inaccessible interactions
 **Status:** OPEN - SIMON TO DECIDE
@@ -466,7 +471,7 @@ These cards exist while the condition applies. How they are created, progress, h
 
 All of Nadir's cards, including Body, Mind, Spirit and temporary condition cards, have `Anchored` with **Inventory** as their home zone.
 
-They can cross into Room while being dragged but cannot come to rest there as ordinary placement. If released in Room without a legal accepting card interaction, they return to Inventory. They may be dropped onto a Room card to start a legal interaction or Process without changing home zone.
+They can cross into Room while being dragged but cannot come to rest there as ordinary placement. If released in Room without a legal accepting card interaction, they return to Inventory. They may be dropped onto a Room card for a legal interaction without changing home zone.
 
 ## NADIR-02 - Injury representation beyond simple condition cards
 **Status:** OPEN - SIMON TO DECIDE
@@ -527,7 +532,7 @@ Common scale such as 0-100 or semantics-specific ranges?
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-How do survival pressures change without creating arbitrary constant real-time pressure?
+How do survival pressures change as Actions advance game time without creating arbitrary constant real-time pressure?
 
 ---
 
