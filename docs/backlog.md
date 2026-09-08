@@ -86,7 +86,7 @@ Nadir is anchored because he has this attribute, not because he belongs to a spe
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P1
 
-Decide whether identical objects always have distinct instances, what state belongs to the reusable definition versus the instance, whether transformation changes/replaces an instance, and what counts as identical for passive stacking.
+Decide whether identical objects always have distinct instances, what state belongs to the reusable definition versus the instance, whether transformation changes/replaces an instance, and what counts as identical for a `Stack`.
 
 **Suggested by ChatGPT:** shared name/picture/base data in a reusable definition; changing state on the instance.
 
@@ -106,7 +106,7 @@ Fixed size, content-driven size, or a small standard set. Test visually first.
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Can equipment, injuries, fuel, container contents, etc. be attached to or contained by another card outside the ordinary stack model?
+Can equipment, injuries, fuel, container contents, etc. be attached to or contained by another card outside the normal Stack/Process/Connection model?
 
 ## CARD-09 - Durability and object-specific state
 **Status:** OPEN - SIMON TO DECIDE
@@ -122,7 +122,7 @@ All interactable entities are cards. It remains undecided whether non-interactab
 
 ---
 
-# Positioning, movement, and stacks
+# Positioning, movement, and card stacking
 
 ## MOVE-D01 - Room/Inventory transfer
 **Status:** DECIDED BY SIMON
@@ -137,59 +137,66 @@ Every card can be positioned within its current zone to the player's liking, inc
 ## MOVE-D03 - No accidental overlap
 **Status:** DECIDED BY SIMON
 
-Cards may not overlap in ordinary placement. Deliberately stacked cards snap into a neat aligned stack.
+Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
-## STACK-D01 - Active and passive stacks
+## STACK-D01 - Three stacking forms: Stack, Process, Connection
 **Status:** DECIDED BY SIMON
 
-A stack is either **active** or **passive**.
+The three official names are:
 
-### Passive stack
+- **Stack**
+- **Process**
+- **Connection**
 
-A passive stack is only a visual convenience for identical cards. Individual cards do not all need to remain exposed; the stack shows a count and has no process effect merely because it exists.
+Do not use the older terms `compact stack`, `passive stack`, `process stack`, `active stack`, `linked stack`, or `permanent active stack` as the primary design terminology.
 
-### Active stack
+### Stack
 
-An active stack is mechanically meaningful. Creating it immediately starts its effect. Every participating card remains individually identifiable and every card name stays visible.
+A `Stack` is only a visual convenience for identical cards.
 
-An active stack is either **process** or **permanent**.
+- Individual cards do not all need to remain exposed.
+- The Stack shows a count.
+- It has no mechanical effect merely because it exists.
 
-## STACK-D02 - Process active stack
-**Status:** DECIDED BY SIMON
+### Process
 
-A process stack is finite.
+A `Process` is a finite mechanically meaningful combination of cards.
 
-- Creating the stack starts the process.
+- Creating the Process starts it immediately.
+- Every participating card remains individually identifiable and every card name stays visible.
 - The top card gets a `Progress` integer attribute from 0 to 100.
-- At `Progress 100`, the process is complete.
-- The process may change attributes on cards in the stack.
+- At `Progress 100`, the Process is complete.
+- The Process may change attributes on participating cards.
 
-## STACK-D03 - Permanent active stack
+### Connection
+
+A `Connection` is a persistent mechanically meaningful relationship between cards.
+
+- Creating the Connection starts its effect immediately.
+- Every participating card remains individually identifiable and every card name stays visible.
+- It does not complete by itself.
+- It lasts until the player breaks the Connection by separating cards.
+- Effects that depend on the Connection disappear when it is broken.
+
+Example: connecting a machine to a power outlet gives the machine `Powered`. Disconnecting it removes `Powered`. One outlet can power only one card at a time.
+
+## STACK-D02 - Process progress is process-specific
 **Status:** DECIDED BY SIMON
 
-A permanent active stack remains active until the player breaks the stack. Effects that depend on the relationship disappear when it is broken.
-
-Example: stacking a machine on a power outlet gives the machine `Powered`. Removing it removes `Powered`. One outlet can power only one card at a time.
-
-## STACK-D04 - Progress calculation is process-specific
-**Status:** DECIDED BY SIMON
-
-There is no universal progress rate. Each process defines its own calculation for how `Progress` changes.
-
-A progress calculation can combine relevant conditions and elapsed game time.
+There is no universal progress rate. Each Process defines its own calculation for how `Progress` changes. The calculation can combine relevant game state and elapsed game time.
 
 Examples:
 
-- **Rat meat on a camp fire:** progresses with time while the camp fire is lit. If the fire is not lit, that condition for progress is absent.
-- **Bowl on a condenser:** progress depends on a combination of room moisture, room temperature, and elapsed time.
+- rat meat on a lit camp fire progresses with time while the fire is lit,
+- a bowl on a condenser progresses from room moisture, room temperature, and time.
 
-The system should therefore support progress rates that vary with current game state rather than assuming a fixed amount per tick/action.
+Progress can therefore speed up, slow down, or stop as conditions change.
 
-## STACK-02 - Completion result
+## STACK-02 - Process completion result
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-When a process reaches `Progress 100`, how is its particular result specified: attribute changes, consumed cards, transformed cards, unstacking, created cards, or some combination?
+When a Process reaches `Progress 100`, how is its particular result specified: attribute changes, consumed cards, transformed cards, separation, created cards, or some combination?
 
 This may be process-specific rather than one universal rule.
 
