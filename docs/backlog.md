@@ -26,11 +26,10 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **CARD-04 [P1]** - What belongs to a reusable card definition versus an individual card instance?
-2. **CARD-05 [P1]** - Is anything besides title, picture, and attributes shown on a card?
-3. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
-4. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
-5. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
+1. **CARD-05 [P1]** - Is anything besides title, picture, and attributes shown on a card?
+2. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
+3. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
+4. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
 
 ---
 
@@ -58,8 +57,6 @@ ChatGPT previously suggested composable capabilities/tags; Simon rejected that e
 
 All attributes are visible on the card and represented by icons. There are no hidden/internal card attributes in the current model.
 
-There are two official forms:
-
 - **Marker** - icon only; presence carries the meaning (`Player`, `Anchored`, `Powered`).
 - **Value** - icon plus integer (`Health 100`, `Progress 42`).
 
@@ -70,22 +67,18 @@ There are two official forms:
 
 Nadir is anchored because he has this attribute, not because he belongs to a special card type.
 
-## CARD-D04 - Identical objects remain distinct card instances
+## CARD-D04 - Master definition and card instances
 **Status:** DECIDED BY SIMON
 
-Two identical objects are still two separate cards.
+Each reusable card type has one **master definition** containing:
 
-A `Stack` does not merge those cards into a single game object. It is a compressed presentation of multiple distinct card instances.
+- name/title,
+- picture,
+- starting attributes.
 
-## CARD-04 - Reusable definition versus instance state
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P1
+Cards created from the master are separate **card instances**. Each instance receives the starting attributes and maintains its own current attributes independently thereafter.
 
-The instance question is partly resolved: identical objects remain distinct card instances even while visually represented as a Stack.
-
-Still decide what belongs to a reusable card definition versus an individual instance, and how a card changing into something materially different should be represented.
-
-**Suggested by ChatGPT:** shared name/picture/base data in a reusable definition; changing state on the instance.
+Two identical objects are therefore still two separate cards. A `Stack` only compresses their presentation; it does not merge the instances.
 
 ## CARD-05 - Additional card-face information
 **Status:** OPEN - SIMON TO DECIDE
@@ -117,6 +110,12 @@ Should values such as durability use ordinary attributes or another representati
 
 All interactable entities are cards. It remains undecided whether non-interactable state or temporary conditions may also be cards.
 
+## CARD-11 - Instance changing identity
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+If an instance becomes materially different, does it switch master definition, get replaced by another card instance, or use another rule? Also decide whether an instance can ever override its master's name/picture.
+
 ---
 
 # Positioning, movement, and card stacking
@@ -139,75 +138,72 @@ Cards may not overlap in ordinary placement. Deliberately combined cards snap in
 ## STACK-D01 - Three stacking forms: Stack, Process, Connection
 **Status:** DECIDED BY SIMON
 
-The three official names are:
-
-- **Stack**
-- **Process**
-- **Connection**
-
-Do not use the older terms `compact stack`, `passive stack`, `process stack`, `active stack`, `linked stack`, or `permanent active stack` as the primary design terminology.
+The three official names are **Stack**, **Process**, and **Connection**. Do not use the older compact/passive/active/linked/permanent-stack terminology as the primary design language.
 
 ### Stack
 
 A `Stack` is only a visual convenience for identical cards.
 
+- The represented cards remain separate card instances.
 - Individual cards do not all need to remain exposed.
 - The Stack shows a count.
 - It has no mechanical effect merely because it exists.
-- The cards represented by the Stack remain separate card instances.
 
 ### Process
 
 A `Process` is a finite mechanically meaningful combination of cards.
 
-- Creating the Process starts it immediately.
+- Creating it starts it immediately.
 - Every participating card remains individually identifiable and every card name stays visible.
 - The top card gets a `Progress` Value from 0 to 100.
 - At `Progress 100`, the Process is complete.
-- The Process may change attributes on participating cards.
+- It may change attributes on participating cards.
 
 ### Connection
 
 A `Connection` is a persistent mechanically meaningful relationship between cards.
 
-- Creating the Connection starts its effect immediately.
+- Creating it starts its effect immediately.
 - Every participating card remains individually identifiable and every card name stays visible.
-- It does not complete by itself.
-- It lasts until the player breaks the Connection by separating cards.
-- Effects that depend on the Connection disappear when it is broken.
+- It lasts until the player breaks it by separating cards.
+- Effects that depend on it disappear when broken.
 
-Example: connecting a machine to a power outlet gives the machine the `Powered` Marker. Disconnecting it removes `Powered`. One outlet can power only one card at a time.
+Example: connecting a machine to a power outlet gives the machine `Powered`. Disconnecting removes `Powered`. One outlet can power only one card at a time.
 
 ## STACK-D02 - Process progress is process-specific
 **Status:** DECIDED BY SIMON
 
-There is no universal progress rate. Each Process defines its own calculation for how `Progress` changes. The calculation can combine relevant game state and elapsed game time.
+There is no universal progress rate. Each Process defines its own calculation from relevant game state and elapsed game time.
 
 Examples:
 
 - rat meat on a lit camp fire progresses with time while the fire is lit,
 - a bowl on a condenser progresses from room moisture, room temperature, and time.
 
-Progress can therefore speed up, slow down, or stop as conditions change.
+Progress can speed up, slow down, or stop as conditions change.
 
 ## STACK-D03 - Dragging from a Stack peels off one card
 **Status:** DECIDED BY SIMON
 
-When the player drags a Stack, the top card separates from it as an individual card.
+Dragging a Stack separates its top card as an individual card.
 
-- A Stack of 3 becomes one dragged card plus a Stack of 2.
-- A Stack of 2 becomes one dragged card plus one ordinary card.
-- A count of 1 is never presented as a Stack.
+- Stack 3 -> one dragged card + Stack 2.
+- Stack 2 -> one dragged card + one ordinary card.
+- Count 1 is never presented as a Stack.
 
-The Stack count is presentation for the number of represented card instances; it is not currently defined as a normal card `Value` attribute.
+The Stack count is presentation, not currently a normal card `Value`.
 
 ## STACK-02 - Process completion result
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-When a Process reaches `Progress 100`, how is its particular result specified: attribute changes, consumed cards, transformed cards, separation, created cards, or some combination?
+When a Process reaches `Progress 100`, how is its result specified: attribute changes, consumed cards, transformed cards, separation, created cards, or some combination? This may be process-specific.
 
-This may be process-specific rather than one universal rule.
+## STACK-03 - What counts as identical for a Stack?
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+Does sharing the same master definition suffice, or must instances also have identical current attributes/state before they can be compressed into one Stack?
 
 ## MOVE-02 - Inventory capacity
 **Status:** OPEN - SIMON TO DECIDE
@@ -581,7 +577,6 @@ These are ChatGPT suggestions, not Simon decisions.
 - **IMPL-02:** use concise data-driven card definitions where it reduces boilerplate.
 - **IMPL-03:** highlighting and committing should use the same legality rules.
 - **IMPL-04:** preview and commit should use the same deterministic effect calculation.
-- **IMPL-05:** distinguish card instances from reusable definitions; the distinct-instance part is now decided, while the definition/instance data split remains open under CARD-04.
 
 ---
 
