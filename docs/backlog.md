@@ -26,10 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **ZONE-01 [P2]** - What may persist in the Nadir zone, and can Nadir cards leave it?
+1. **ZONE-02 [P2]** - Can non-Nadir cards persist in the Nadir zone?
 2. **STACK-02 [P2]** - What happens when a Process completes?
-3. **INTERACT-02 [P2]** - What if one source/target pair supports several actions?
-4. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
+3. **STACK-05 [P2]** - How is a cross-zone Process with an anchored Nadir card presented?
+4. **INTERACT-02 [P2]** - What if one source/target pair supports several actions?
+5. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
 
 ---
 
@@ -61,9 +62,17 @@ All card attributes are visible and represented by icons. There are no hidden/in
 ## ATTR-D02 - Anchored
 **Status:** DECIDED BY SIMON
 
-`Anchored` is a Marker. It blocks transfer between Room and Inventory, but does not block repositioning within the current zone or dragging the card onto another card.
+`Anchored` is a Marker that prevents a card from being persistently transferred out of its current/home zone.
 
-The Nadir zone does not yet redefine `Anchored`; transfer restrictions involving that zone remain open if needed.
+Anchored does not prevent:
+
+- repositioning within the home zone,
+- dragging the card onto another card for an interaction,
+- crossing a zone boundary during that interaction drag when the target is in another zone.
+
+Crossing a zone boundary during an interaction drag does not transfer the anchored card's persistent home.
+
+This supersedes the earlier narrower wording that described `Anchored` only as blocking Room/Inventory transfer.
 
 ## CARD-D04 - Master definition and card instances
 **Status:** DECIDED BY SIMON
@@ -128,16 +137,25 @@ The play space has three zones:
 
 The Nadir zone supersedes the earlier assumption that Nadir's cards live in Inventory.
 
-## ZONE-01 - Nadir zone transfer rules
+## ZONE-D02 - Nadir's cards are Anchored to the Nadir zone
+**Status:** DECIDED BY SIMON
+
+All of Nadir's cards in the Nadir zone are `Anchored` and cannot be persistently transferred out of that zone.
+
+This includes the persistent Nadir representation cards and temporary condition cards that currently apply to him.
+
+An anchored Nadir card may still be dragged onto a card in another zone to start a legal Process. That interaction drag does not change the Nadir card's persistent home zone.
+
+## ZONE-02 - Non-Nadir cards in the Nadir zone
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Besides Nadir's persistent cards and temporary condition cards, can other cards persist in the Nadir zone? Can persistent Nadir cards ever leave it?
+Can cards that do not represent or currently apply to Nadir ever persist in the Nadir zone, for example equipment or other attached possessions?
 
 ## MOVE-D01 - Room/Inventory transfer
 **Status:** DECIDED BY SIMON
 
-Cards can normally be dragged between Room and Inventory when legal. `Anchored` prevents that transfer while preserving other dragging.
+Cards can normally be dragged between Room and Inventory when legal. `Anchored` prevents persistent transfer out of the card's home zone while preserving interaction dragging.
 
 ## MOVE-D02 - Free positioning within a zone
 **Status:** DECIDED BY SIMON
@@ -200,6 +218,16 @@ Cards can share a `Stack` only when they come from the same master definition an
 
 When a Process reaches `Progress 100`, how is its result specified: attribute changes, consumed cards, transformed cards, separation, created cards, or some combination? This may be process-specific.
 
+## STACK-05 - Cross-zone Process presentation
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+An anchored Nadir card can be dragged onto a target card in another zone to start a Process without changing home zone.
+
+How is that Process visually represented while the Nadir card remains anchored to the Nadir zone: does the target show a linked/ghosted participant, does the Nadir card remain visibly participating from its home zone, or another solution?
+
+Do not infer a presentation until this is decided.
+
 ## MOVE-02 - Inventory capacity
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
@@ -216,7 +244,7 @@ Can moving a card between zones consume time or create consequences?
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-`Anchored` handles fixed-zone cards between Room and Inventory. Decide later whether capacity, the Nadir zone, or contextual rules can also prevent transfer.
+`Anchored` handles fixed-home cards. Decide later whether capacity or contextual rules can also prevent transfer.
 
 ---
 
@@ -315,7 +343,7 @@ When Nadir understands an uncertain risk, the UI should communicate the likeliho
 
 Do not normally expose the underlying percentage or numerical odds. The communication should use sufficiently precise plain-language likelihoods rather than only coarse labels such as `Low`, `Moderate`, and `High`.
 
-The exact user-facing vocabulary is not yet fixed and can be tested in UI, but the player should be able to make a meaningfully informed risk judgment without seeing numbers.
+The exact user-facing vocabulary is provisional and not locked. Keep the principle for now and revisit the wording after UI testing if needed.
 
 ## TARGET-D01 - Legal interaction targets highlight
 **Status:** DECIDED BY SIMON
@@ -367,8 +395,6 @@ Test visually.
 
 Nadir's persistent representation cards live in the dedicated **Nadir** zone rather than Inventory.
 
-Whether those cards use `Anchored`, another transfer restriction, or no explicit restriction remains open.
-
 ## NADIR-D02 - Character state uses card attributes
 **Status:** DECIDED BY SIMON
 
@@ -398,6 +424,13 @@ Conditions currently applying to Nadir are represented as temporary cards in the
 Examples explicitly given by Simon include `Exhausted` and `Flesh Wound`. A burn wound from an electrical shock is another concrete condition example; its exact final card title is not yet separately fixed.
 
 These cards exist while the condition applies. How they are created, progress, heal, expire, or otherwise disappear is not yet decided.
+
+## NADIR-D06 - All Nadir cards are Anchored
+**Status:** DECIDED BY SIMON
+
+All of Nadir's cards, including Body, Mind, Spirit and temporary condition cards in the Nadir zone, have `Anchored` and cannot be persistently moved out of that zone.
+
+They can still be dragged onto a card in another zone to start a legal Process without changing their home zone.
 
 ## NADIR-02 - Injury representation beyond simple condition cards
 **Status:** OPEN - SIMON TO DECIDE
