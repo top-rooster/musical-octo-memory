@@ -26,8 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **NADIR-05 [P1]** - What are the final names of Nadir's three persistent cards?
-2. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
+1. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
 
 ---
 
@@ -347,16 +346,16 @@ Relevant character state lives as attributes on Nadir's cards rather than in a s
 
 Nadir is not required to fit on a single card. His representation may span several simultaneously visible cards in the Nadir zone.
 
-## NADIR-D04 - Three persistent Nadir domains for now
+## NADIR-D04 - Three persistent Nadir cards: Body, Mind, Spirit
 **Status:** DECIDED BY SIMON
 
-For now, Nadir has three persistent representation cards covering these domains:
+For now, Nadir has three persistent representation cards:
 
-1. **physical** - Simon proposed possible labels `Health`, `Body`, or `Physical`;
-2. **cognitive / will** - possible labels include `Mind`, `Cognition`, `Will`, or `Super Ego`;
-3. **emotional / spiritual** - possible labels include `Emotion`, `Spirit`, or `Id`.
+1. **Body** - physical state;
+2. **Mind** - cognitive / will state;
+3. **Spirit** - emotional / spiritual state.
 
-The three-domain structure is decided; the exact user-facing card names are not. More persistent Nadir cards may be added later if a concrete need appears.
+More persistent Nadir cards may be added later if a concrete need appears.
 
 ## NADIR-D05 - Temporary conditions are cards in the Nadir zone
 **Status:** DECIDED BY SIMON
@@ -369,18 +368,6 @@ Examples explicitly given by Simon:
 - `Flesh Wound`
 
 These are normal cards in the card system while the condition exists. How they are created, expire, heal, or otherwise disappear is not yet decided.
-
-## NADIR-05 - Names for the three persistent Nadir cards
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P1
-
-Choose the final card title for each decided domain:
-
-- physical,
-- cognitive / will,
-- emotional / spiritual.
-
-The slash-separated names in NADIR-D04 are candidates, not final decisions.
 
 ## NADIR-02 - Injury representation beyond simple condition cards
 **Status:** OPEN - SIMON TO DECIDE
@@ -398,7 +385,7 @@ Attributes, Nadir-zone cards, ordinary Inventory cards, Connections, or somethin
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P3
 
-Beyond the decided cognitive/will and emotional/spiritual cards, how much mental/narrative state should be numerical, qualitative, or expressed through writing/behavior?
+Beyond the decided Mind and Spirit cards, how much mental/narrative state should be numerical, qualitative, or expressed through writing/behavior?
 
 ## NADIR-06 - Temporary condition lifecycle
 **Status:** OPEN - SIMON TO DECIDE
@@ -421,7 +408,7 @@ Candidates raised: Hunger, Health, thirst, fatigue, temperature, illness, stress
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Which pressures deserve persistent Value/Marker attributes on one of Nadir's three persistent cards, and which should appear as temporary condition cards?
+Which pressures deserve persistent Value/Marker attributes on Body, Mind, or Spirit, and which should appear as temporary condition cards?
 
 ## SURV-03 - Hidden survival state
 **Status:** OPEN - SIMON TO DECIDE
