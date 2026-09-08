@@ -37,24 +37,20 @@ Whether non-interactable state or temporary conditions should also use card repr
 
 All card attributes are visible on the card. There are no hidden/internal card attributes in the current model.
 
-Every attribute is represented by an icon.
+Every attribute is represented by an icon. There are two official attribute forms:
 
-There are two attribute forms:
-
-- **icon only** — the presence of the attribute itself carries the meaning,
-- **icon plus integer** — the attribute also has a numerical value.
+- **Marker** — icon only; the presence of the attribute itself carries the meaning.
+- **Value** — icon plus an integer value.
 
 Examples on Nadir:
 
-- `Player` — icon only,
-- `Anchored` — icon only,
-- `Health 100` — icon plus integer.
-
-Working terminology for these two forms is still undecided. ChatGPT has suggested **Marker attribute** for icon-only attributes and **Value attribute** for icon-plus-integer attributes; these names are not yet a design decision.
+- `Player` — Marker,
+- `Anchored` — Marker,
+- `Health 100` — Value.
 
 #### Anchored
 
-`Anchored` is an icon-only attribute that prevents a card from being transferred by dragging between the Room and Inventory zones.
+`Anchored` is a Marker that prevents a card from being transferred by dragging between the Room and Inventory zones.
 
 Anchored does **not** mean immovable. An anchored card can still:
 
@@ -94,7 +90,7 @@ A Process is a finite mechanically meaningful combination of cards. Creating it 
 
 Every participating card remains individually identifiable: the name of every card remains visible.
 
-- The top card gets a `Progress` integer attribute.
+- The top card gets a `Progress` Value.
 - `Progress` ranges from 0 to 100.
 - When `Progress` reaches 100, the Process is complete.
 - The Process may change attributes on participating cards.
@@ -118,13 +114,13 @@ A Connection does not complete by itself. Its effect exists for as long as the r
 
 The player can break a Connection by separating its cards. Effects granted by the Connection disappear when it is broken.
 
-Example: connecting a machine to a power outlet gives the machine the icon-only `Powered` attribute. Disconnecting it removes `Powered`.
+Example: connecting a machine to a power outlet gives the machine the `Powered` Marker. Disconnecting it removes `Powered`.
 
 A single power outlet can power only one card at a time.
 
 ### Nadir
 
-Nadir Veylan is represented by a card in Inventory with the `Anchored` attribute. He therefore cannot be transferred into the Room zone, but his card can still be repositioned within Inventory or dragged onto other cards when an interaction allows it.
+Nadir Veylan is represented by a card in Inventory with the `Anchored` Marker. He therefore cannot be transferred into the Room zone, but his card can still be repositioned within Inventory or dragged onto other cards when an interaction allows it.
 
 Character state is expressed primarily as attributes on Nadir's card rather than through a separate character-stat subsystem.
 
