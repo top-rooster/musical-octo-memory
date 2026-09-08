@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **CARD-04 [P1]** - How does a card instance differ from its reusable definition?
+1. **CARD-04 [P1]** - What belongs to a reusable card definition versus an individual card instance?
 2. **CARD-05 [P1]** - Is anything besides title, picture, and attributes shown on a card?
 3. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
 4. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
@@ -70,11 +70,20 @@ There are two official forms:
 
 Nadir is anchored because he has this attribute, not because he belongs to a special card type.
 
-## CARD-04 - Card instance versus reusable definition
+## CARD-D04 - Identical objects remain distinct card instances
+**Status:** DECIDED BY SIMON
+
+Two identical objects are still two separate cards.
+
+A `Stack` does not merge those cards into a single game object. It is a compressed presentation of multiple distinct card instances.
+
+## CARD-04 - Reusable definition versus instance state
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P1
 
-Decide whether identical objects always have distinct instances, what state belongs to the reusable definition versus the instance, whether transformation changes/replaces an instance, and what counts as identical for a `Stack`.
+The instance question is partly resolved: identical objects remain distinct card instances even while visually represented as a Stack.
+
+Still decide what belongs to a reusable card definition versus an individual instance, and how a card changing into something materially different should be represented.
 
 **Suggested by ChatGPT:** shared name/picture/base data in a reusable definition; changing state on the instance.
 
@@ -145,6 +154,7 @@ A `Stack` is only a visual convenience for identical cards.
 - Individual cards do not all need to remain exposed.
 - The Stack shows a count.
 - It has no mechanical effect merely because it exists.
+- The cards represented by the Stack remain separate card instances.
 
 ### Process
 
@@ -179,6 +189,17 @@ Examples:
 - a bowl on a condenser progresses from room moisture, room temperature, and time.
 
 Progress can therefore speed up, slow down, or stop as conditions change.
+
+## STACK-D03 - Dragging from a Stack peels off one card
+**Status:** DECIDED BY SIMON
+
+When the player drags a Stack, the top card separates from it as an individual card.
+
+- A Stack of 3 becomes one dragged card plus a Stack of 2.
+- A Stack of 2 becomes one dragged card plus one ordinary card.
+- A count of 1 is never presented as a Stack.
+
+The Stack count is presentation for the number of represented card instances; it is not currently defined as a normal card `Value` attribute.
 
 ## STACK-02 - Process completion result
 **Status:** OPEN - SIMON TO DECIDE
@@ -560,7 +581,7 @@ These are ChatGPT suggestions, not Simon decisions.
 - **IMPL-02:** use concise data-driven card definitions where it reduces boilerplate.
 - **IMPL-03:** highlighting and committing should use the same legality rules.
 - **IMPL-04:** preview and commit should use the same deterministic effect calculation.
-- **IMPL-05:** distinguish card instances from reusable definitions; this remains unapproved until CARD-04 is decided.
+- **IMPL-05:** distinguish card instances from reusable definitions; the distinct-instance part is now decided, while the definition/instance data split remains open under CARD-04.
 
 ---
 
