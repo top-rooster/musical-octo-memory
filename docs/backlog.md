@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **CARD-11 [P2]** - How does a card instance change identity?
-2. **MOVE-03 [P2]** - Can moving a card between Room and Inventory consume time or create consequences?
-3. **INTERACT-03 [P2]** - Do some drops need confirmation?
-4. **INTERACT-04 [P2]** - How do immediate interactions handle time/noise consequences?
-5. **WOUND-03 [P2]** - Which interactions change `Clean` and `Dress`, and how?
+1. **MOVE-03 [P2]** - Can moving a card between Room and Inventory consume time or create consequences?
+2. **INTERACT-03 [P2]** - Do some drops need confirmation?
+3. **INTERACT-04 [P2]** - How do immediate interactions handle time/noise consequences?
+4. **WOUND-03 [P2]** - Which interactions change `Clean` and `Dress`, and how?
+5. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
 
 ---
 
@@ -92,7 +92,7 @@ The different labels do **not** create different mechanics or attribute types. C
 
 Confirmed example:
 
-- `Dead Rat` is a single-card Process whose progress Value is shown to the player as `Spoilage`. Spoilage increases over game time, and at **100** the Dead Rat turns into `Rotten Meat`.
+- `Dead Rat` is a single-card Process whose progress Value is shown to the player as `Spoilage`. Spoilage increases over game time, and at **100** the Dead Rat is discarded and a `Rotten Meat` card is drawn in its place.
 
 Other Processes may likewise use a contextual player-facing name instead of the generic word `Progress`. Their exact UI labels are not fixed unless explicitly decided.
 
@@ -108,12 +108,6 @@ Each spawned card is a separate **card instance**. It receives the starting attr
 
 For the first release, a normal card shows only title/name, picture, and visible attributes. Description text is deferred.
 
-## CARD-06 - Card size
-**Status:** DEFERRED
-**Priority:** P2
-
-Fixed size, content-driven size, or a small standard set. Test visually first.
-
 ## CARD-D06 - Current relationship model is complete for now
 **Status:** DECIDED BY SIMON
 
@@ -126,24 +120,26 @@ For now, the game assumes the currently defined card relationship forms are suff
 
 This closes the earlier CARD-07 question for now rather than asserting that every conceivable future relationship must fit these forever.
 
+## CARD-D07 - Identity changes use discard and draw
+**Status:** DECIDED BY SIMON
+
+Preserve the physical-card analogy when a card becomes a materially different card identity.
+
+The old card is **discarded** and the replacement card is **drawn**. The replacement appears at the same location as the discarded card so the transformation does not move the represented thing spatially.
+
+Confirmed example:
+
+- at `Spoilage 100`, discard the `Dead Rat` card and draw a `Rotten Meat` card at exactly the Dead Rat's previous location.
+
+This is distinct from ordinary state changes. A card can still change its own Values or Markers in place without being discarded when it remains the same card identity.
+
+Do not model a material identity change by silently switching an existing instance to another master definition or overriding its master name/picture.
+
 ## CARD-10 - Other non-interactable state and temporary conditions
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P3
 
 Temporary conditions applying to Nadir are confirmed as cards. It remains undecided whether other non-interactable state or temporary conditions elsewhere also use cards.
-
-## CARD-11 - Instance changing identity
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-If an instance becomes materially different, does it switch master definition, get replaced by another card instance, or use another rule? Can an instance ever override its master's name/picture?
-
-Concrete cases now include:
-
-- a water container becoming empty after treating Fever;
-- `Dead Rat` turning into `Rotten Meat` when Spoilage reaches 100.
-
-The gameplay transformations are decided, but their underlying instance/master-definition mechanics are not yet decided.
 
 ## CARD-12 - Card descriptions
 **Status:** DEFERRED
@@ -229,7 +225,7 @@ A Process progresses as game time passes while Nadir is occupied with Actions or
 
 Examples:
 
-- `Dead Rat` is a single-card Process whose visible progress is `Spoilage`; at 100 it becomes `Rotten Meat`,
+- `Dead Rat` is a single-card Process whose visible progress is `Spoilage`; at 100 the Dead Rat is discarded and `Rotten Meat` is drawn at the same location,
 - `Rat Meat` on a lit camp fire progresses while the fire is lit and Nadir spends time doing something else,
 - a bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time,
 - `Flesh Wound` and `Burn Wound` are single-card Processes whose progress represents healing,
@@ -253,9 +249,7 @@ Most Processes need a progress Value, but the generic word `Progress` is not req
 
 A Process may expose that same underlying mechanical progress through a context-specific Value name that helps the player understand what is changing. This is a UI/player-facing naming difference only; it does not create a separate progress system in code.
 
-`Dead Rat` is the confirmed example: its single-card Process exposes progress as `Spoilage`, and at `Spoilage 100` it transforms into `Rotten Meat`.
-
-This resolves the earlier PROCESS-04 question: Spoilage is Process progress with a specific visible name, not a separate timed-Value system outside Processes.
+`Dead Rat` is the confirmed example: its single-card Process exposes progress as `Spoilage`, and at `Spoilage 100` the Dead Rat is discarded and `Rotten Meat` is drawn at the same location.
 
 ## ACTION-D01 - Nadir-involved work is an Action
 **Status:** DECIDED BY SIMON
@@ -288,8 +282,8 @@ Concrete Action example - skinning a dead rat:
 4. A window appears showing `Skinning` and the two participating cards: the cutting tool and the dead rat.
 5. The Action represents **15 minutes** of game time.
 6. When the Action window animation terminates, the cutting tool returns to where it came from.
-7. The `Dead Rat` is consumed/dissolves.
-8. A `Rat Skin` card and a `Rat Meat` card are created.
+7. The `Dead Rat` is consumed/discarded.
+8. A `Rat Skin` card and a `Rat Meat` card are drawn/created as the Action outputs.
 
 A knife is one concrete `Cutting Tool` and has a `Durability` Value. The exact effect of Skinning on Durability has not yet been fixed.
 
@@ -298,7 +292,7 @@ The 15-minute duration and outputs belong to this Action; other Actions can have
 ## ACTION-D03 - Action completion is Action-specific
 **Status:** DECIDED BY SIMON
 
-There is no single universal Action completion transformation. An Action can return tools, consume inputs, create cards, change attributes, or combine those effects.
+There is no single universal Action completion transformation. An Action can return tools, discard inputs, draw output cards, change attributes, or combine those effects.
 
 `Skinning` is the confirmed example.
 
@@ -307,11 +301,11 @@ There is no single universal Action completion transformation. An Action can ret
 
 There is no single universal Process completion transformation. Each Process defines its own result when its progress reaches the completion state.
 
-A Process may consume/transform participating cards, create output cards, change attributes, separate its participants, remove itself, or combine such results.
+A Process may discard cards, draw replacement/output cards, change attributes, separate its participants, remove itself, or combine such results.
 
 Confirmed examples include:
 
-- `Dead Rat` transforms into `Rotten Meat` when its `Spoilage` progress reaches 100;
+- at `Spoilage 100`, `Dead Rat` is discarded and `Rotten Meat` is drawn at the same location;
 - `Flesh Wound`, `Burn Wound`, and `Fever` remove themselves when their recovery/healing progress reaches 100.
 
 ## STACK-D03 - Dragging from a Stack peels off one card
@@ -373,9 +367,13 @@ Eating currently uses **Body** as the target. The ingestion Marker is what tells
 
 `Dead Rat` is a single-card Process whose visible progress Value is named `Spoilage`.
 
-Spoilage increases over game time. At `Spoilage 100`, the Dead Rat turns into a `Rotten Meat` card.
+Spoilage increases over game time. At `Spoilage 100`:
 
-The exact rate/formula for Spoilage growth and the underlying card-instance/master transformation mechanics are not yet fixed.
+1. discard the `Dead Rat` card;
+2. draw a `Rotten Meat` card;
+3. place the Rotten Meat at exactly the same location the Dead Rat occupied.
+
+The exact rate/formula for Spoilage growth is not yet fixed.
 
 ## FOOD-D02 - Rotten Meat remains edible but has penalties
 **Status:** DECIDED BY SIMON
@@ -397,7 +395,7 @@ Every gameplay interaction is initiated by putting one card on top of another ca
 
 Moving a card within or between zones is movement rather than interaction. Bare zone space can receive a card for legal movement but is not an interaction target.
 
-An interaction may resolve immediately, start an **Action**, create/change a Stack, start/alter a Process, create/change a Connection, create cards, consume cards, or change attributes.
+An interaction may resolve immediately, start an **Action**, create/change a Stack, start/alter a Process, create/change a Connection, draw cards, discard cards, or change attributes.
 
 ## INTERACT-D02 - At most one interaction per card pair
 **Status:** DECIDED BY SIMON
@@ -430,8 +428,8 @@ There is no need for a generic `Reusable` Marker on tools.
 Cards instead describe what they can do through specific functional attributes, while each interaction decides what happens to its participants:
 
 - a knife is a `Cutting Tool` with a `Durability` Value;
-- the Skinning Action returns the cutting tool and consumes the dead rat;
-- an ingestible card may be consumed by the ingestion interaction.
+- the Skinning Action returns the cutting tool and discards the dead rat;
+- an ingestible card may be discarded/consumed by the ingestion interaction.
 
 This replaces the earlier open question about a universal consumable-versus-reusable classification. Specific consumption rules remain interaction-specific.
 
@@ -598,7 +596,7 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 
 - Each wound has a process progress Value from 0 to 100 representing healing. Its eventual player-facing label can be process-specific; no exact label is fixed yet.
 - The wound card disappears when its process progress reaches 100.
-- Each wound has an `Infection` Value that rises over time if the wound is not adequately managed.
+- Each wound has an `Infection` Value that rises over time if not adequately managed.
 - Each wound has a `Clean` Value representing how clean the wound currently is.
 - A wound can carry the `Dress` Marker to show that it is currently dressed.
 - Cleaning raises or otherwise restores `Clean`, helping keep Infection down.
