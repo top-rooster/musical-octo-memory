@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **WOUND-02 [P2]** - How are cleaning and dressing represented?
-2. **CARD-11 [P2]** - How does a card instance change identity?
-3. **MOVE-03 [P2]** - Can moving a card between Room and Inventory consume time or create consequences?
-4. **INTERACT-03 [P2]** - Do some drops need confirmation?
-5. **INTERACT-04 [P2]** - How do immediate interactions handle time/noise consequences?
+1. **PROCESS-04 [P1]** - Is timed card state such as Spoilage itself a Process, or can ordinary Values change over time outside Processes?
+2. **WOUND-02 [P2]** - How are cleaning and dressing represented?
+3. **CARD-11 [P2]** - How does a card instance change identity?
+4. **MOVE-03 [P2]** - Can moving a card between Room and Inventory consume time or create consequences?
+5. **INTERACT-03 [P2]** - Do some drops need confirmation?
 
 ---
 
@@ -57,7 +57,7 @@ Cards have no separate categories, tags, capability lists, or card classes. A ca
 All card attributes are visible and represented by icons. There are no hidden/internal card attributes in the current model.
 
 - **Marker** - icon only; presence carries meaning (`Player`, `Anchored`, `Powered`, `Cutting Tool`).
-- **Value** - icon plus integer (`Health 100`, `Progress 42`, `Durability 80`).
+- **Value** - icon plus integer (`Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`).
 
 ## ATTR-D02 - Anchored
 **Status:** DECIDED BY SIMON
@@ -82,6 +82,15 @@ Durability is represented through the normal visible attribute system as a `Dura
 A tool does not need a generic `Reusable` Marker. Its functional role is represented by specific capability Markers such as `Cutting Tool`, while its current wear/state can be represented by `Durability`.
 
 The exact scale, wear rate, zero-durability behavior, and which interactions change Durability are not yet fixed.
+
+## ATTR-D04 - Spoilage is an ordinary Value
+**Status:** DECIDED BY SIMON
+
+`Dead Rat` has a visible `Spoilage` **Value**.
+
+Spoilage increases over game time. When it reaches **100**, the Dead Rat turns into `Rotten Meat`.
+
+Whether this timed Value change is itself modeled as a Process is deliberately left open in PROCESS-04 because the existing Process model currently assumes a generic `Progress` Value.
 
 ## CARD-D04 - Master definition and card instances
 **Status:** DECIDED BY SIMON
@@ -125,7 +134,12 @@ Temporary conditions applying to Nadir are confirmed as cards. It remains undeci
 
 If an instance becomes materially different, does it switch master definition, get replaced by another card instance, or use another rule? Can an instance ever override its master's name/picture?
 
-A water container becoming empty after treating Fever is a concrete example that may need this rule; the exact representation is not yet decided.
+Concrete cases now include:
+
+- a water container becoming empty after treating Fever;
+- `Dead Rat` turning into `Rotten Meat` when Spoilage reaches 100.
+
+The gameplay transformations are decided, but their underlying instance/master-definition mechanics are not yet decided.
 
 ## CARD-12 - Card descriptions
 **Status:** DEFERRED
@@ -192,14 +206,14 @@ A `Process` is unattended work that continues while Nadir spends game time doing
 
 A `Connection` is a persistent mechanically meaningful relationship. It begins immediately, lasts until the player separates the cards, and relationship-dependent effects disappear when it is broken.
 
-Example: a machine connected to a power outlet gains `Powered`; disconnecting removes `Powered`. One outlet can power only one card at a time.
+Example: a machine connected to a power outlet gains `Powered`; disconnecting removes it. One outlet can power only one card at a time.
 
 `Action` is a separate card-on-card interaction type, not a persistent stacking form; see ACTION-D01.
 
 ## STACK-D02 - Process progress is process-specific
 **Status:** DECIDED BY SIMON
 
-Processes use a visible `Progress` Value from 0 to 100.
+Processes currently use a visible `Progress` Value from 0 to 100.
 
 There is no universal progress calculation. Each Process defines its own progression from relevant state and elapsed game time.
 
@@ -212,6 +226,8 @@ Examples:
 - `Flesh Wound` and `Burn Wound` are single-card Processes whose `Progress` represents healing,
 - `Fever` is a single-card Process that disappears when its recovery Progress reaches 100.
 
+`Dead Rat` now introduces a separate timed `Spoilage` Value. PROCESS-04 remains open so this rule is not silently generalized or contradicted.
+
 ## PROCESS-D01 - Processes are unattended
 **Status:** DECIDED BY SIMON
 
@@ -221,7 +237,20 @@ Starting a Process does not itself force game time forward to completion. It adv
 
 A Process does not have to be a multi-card stack. `Flesh Wound`, `Burn Wound`, and `Fever` are confirmed single-card Processes.
 
-Concrete example: putting `Rat Meat` on a lit camp fire starts a cooking Process. The meat cooks while the fire remains lit and Nadir spends time on other activities.
+Concrete example: putting `Rat Meat` on a lit camp fire starts a cooking Process. The meat cooks while the fire is lit and Nadir spends time on other activities.
+
+## PROCESS-04 - Timed Values outside the generic Progress model
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P1
+
+`Dead Rat` has a `Spoilage` Value that increases with elapsed game time and transforms the card into `Rotten Meat` at 100.
+
+The current Process rule says Processes use a generic `Progress 0-100` Value. Decide whether:
+
+- spoilage is a Process whose progress attribute is specifically named `Spoilage`, implying Process progress need not always be called `Progress`; or
+- ordinary card Values such as `Spoilage` may change over game time without making the card a Process.
+
+Do not infer either answer yet.
 
 ## ACTION-D01 - Nadir-involved work is an Action
 **Status:** DECIDED BY SIMON
@@ -271,7 +300,7 @@ There is no single universal Action completion transformation. An Action can ret
 ## PROCESS-D02 - Process completion is Process-specific
 **Status:** DECIDED BY SIMON
 
-There is no single universal Process completion transformation. Each Process defines its own result when `Progress` reaches 100.
+There is no single universal Process completion transformation. Each Process defines its own result when its completion state is reached.
 
 A Process may consume/transform participating cards, create output cards, change attributes, separate its participants, remove itself, or combine such results.
 
@@ -327,9 +356,31 @@ Can moving a card between Room and Inventory consume time or create consequences
 ## CORE-D04 - Eating
 **Status:** DECIDED BY SIMON
 
-Food is eaten by dragging the food card onto Body.
-
 Anything Nadir can eat or otherwise ingest must carry a visible Marker identifying it as ingestible. The exact final user-facing name of this Marker is not yet fixed.
+
+Eating currently uses **Body** as the target. The ingestion Marker is what tells the interaction algorithm that the source can legally be dropped onto Body for ingestion.
+
+## FOOD-D01 - Dead Rat spoils into Rotten Meat
+**Status:** DECIDED BY SIMON
+
+`Dead Rat` has a `Spoilage` Value that increases over game time.
+
+At `Spoilage 100`, the Dead Rat turns into a `Rotten Meat` card.
+
+The exact rate/formula for Spoilage growth and the underlying card-instance/master transformation mechanics are not yet fixed.
+
+## FOOD-D02 - Rotten Meat remains edible but has penalties
+**Status:** DECIDED BY SIMON
+
+`Rotten Meat` remains ingestible and therefore carries the ingestion Marker.
+
+If Nadir eats Rotten Meat:
+
+- the Rotten Meat is consumed;
+- a mood debuff is applied to Nadir;
+- one `Fever` card is created.
+
+The exact representation, magnitude, and duration of the mood debuff are not yet decided.
 
 ## INTERACT-D01 - All interactions are card-on-card
 **Status:** DECIDED BY SIMON
@@ -546,6 +597,8 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 - When Infection becomes too high, the wound's healing rate is reduced.
 - Severe Infection spawns a `Fever` condition card.
 
+In addition, a `Burn Wound` has another Value that accelerates Nadir's dehydration over time while the burn exists. The final name/scale of this burn-specific Value and the exact representation of dehydration are not yet fixed.
+
 The exact card/attribute representation of cleaning and dressing and their rates/durations are not yet decided. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
 
 ### Fever
@@ -575,12 +628,19 @@ If a wound's `Infection` becomes too high:
 
 The exact Infection threshold or thresholds are not yet fixed.
 
+## BURN-D01 - Burn Wounds accelerate dehydration
+**Status:** DECIDED BY SIMON
+
+A `Burn Wound` carries a Value whose effect is to accelerate Nadir's dehydration over game time.
+
+This confirms dehydration as a survival pressure in the design, but not its final representation. The burn Value's name/scale, dehydration's representation, and the exact acceleration formula remain open.
+
 ## FEVER-D01 - Three Fever cards kill Nadir
 **Status:** DECIDED BY SIMON
 
 `Fever` is a temporary condition card applying to Nadir. If Nadir accumulates **three Fever cards**, he dies.
 
-This establishes Fever accumulation as a lethal escalation path from unmanaged wound Infection.
+This establishes Fever accumulation as a lethal escalation path from unmanaged wound Infection or other effects such as eating Rotten Meat.
 
 ## FEVER-D02 - Fever recovers over time or can be removed with water
 **Status:** DECIDED BY SIMON
@@ -627,13 +687,15 @@ Aim for high decision complexity with as few exposed systems/attributes/cards as
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Candidates raised: Hunger, Health, thirst, fatigue, temperature, illness, stress, injury, morale. Listing is not approval.
+Dehydration is now confirmed as a survival pressure because Burn Wounds can accelerate it. Other candidates raised include Hunger, Health, thirst, fatigue, temperature, illness, stress, injury, and morale. Listing the other candidates is not approval.
 
 ## SURV-02 - Attribute versus condition card
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
 Which pressures deserve persistent Value/Marker attributes on Body, Mind, or Spirit, and which should appear as temporary condition cards?
+
+This now explicitly includes deciding how dehydration itself is represented.
 
 ## SURV-03 - Hidden survival state
 **Status:** OPEN - SIMON TO DECIDE
@@ -654,6 +716,8 @@ Common scale such as 0-100 or semantics-specific ranges?
 **Priority:** P2
 
 How do survival pressures change as Actions advance game time without creating arbitrary constant real-time pressure?
+
+Burn Wounds accelerating dehydration is one confirmed modifier that this eventual rule must support.
 
 ---
 
