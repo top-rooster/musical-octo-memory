@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **WOUND-03 [P2]** - What is the exact wound `Clean` change, how is `Dressed` removed, and how does boiling fabric work?
+1. **WOUND-03 [P2]** - Does wound `Clean` cap at 100, how is `Dressed` removed, and how does boiling fabric work?
 2. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
 3. **NADIR-03 [P2]** - How is equipment represented?
 4. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
@@ -617,9 +617,9 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 - Each wound has a process progress Value from 0 to 100 representing healing. Its eventual player-facing label can be process-specific; no exact label is fixed yet.
 - The wound card disappears when its process progress reaches 100.
 - Each wound has an `Infection` Value that rises over time if not adequately managed.
-- Each wound has a `Clean` Value representing how clean the wound currently is.
+- Each wound starts with `Clean 50`; `Clean` represents how clean the wound currently is.
 - A wound can carry the `Dressed` Marker to show that it is currently dressed.
-- Water in a container can be used to clean the wound and improve its `Clean` Value.
+- Water in a container can be used to clean the wound. Cleaning increases `Clean` by **40**.
 - Fabric that has the `Clean` Marker can be used to dress the wound, causing the wound to gain `Dressed`.
 - Fabric can be made clean by boiling, which gives the fabric the `Clean` Marker.
 - Cleaning a wound is an **Action** and takes **15 minutes**. The Action empties the water container used to clean the wound.
@@ -630,7 +630,7 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 
 In addition, a `Burn Wound` has another Value that accelerates Nadir's dehydration over time while the burn exists. The final name/scale of this burn-specific Value and the exact representation of dehydration are not yet fixed.
 
-Because cleaning and dressing are Actions, each advances game time through the normal Action window and active Processes update during that elapsed time. Both Actions take **15 minutes**. Cleaning consumes the container's current water by emptying the container; partial liquid amounts are intentionally deferred rather than modeled now. Dressing consumes the clean fabric card and leaves the wound carrying `Dressed`. The amount by which cleaning changes wound `Clean`, how `Dressed` is later removed, and the exact boiling interaction are not yet decided. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
+Because cleaning and dressing are Actions, each advances game time through the normal Action window and active Processes update during that elapsed time. Both Actions take **15 minutes**. Cleaning increases the wound's `Clean` Value by **40** and consumes the container's current water by emptying the container; partial liquid amounts are intentionally deferred rather than modeled now. Dressing consumes the clean fabric card and leaves the wound carrying `Dressed`. Whether `Clean` has a maximum/cap, how `Dressed` is later removed, and the exact boiling interaction are not yet decided. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
 
 ### Fever
 
@@ -676,7 +676,7 @@ Cleaning is intended to keep Infection down by improving `Clean`. A wound with `
 
 Treatment inputs are attribute/card driven:
 
-- **Water in a container** can be used to clean a wound, increasing or otherwise improving the wound's `Clean` Value.
+- **Water in a container** can be used to clean a wound, increasing the wound's `Clean` Value by **40**.
 - Any **fabric** that has the `Clean` **Marker** can be used to dress a wound. Dressing gives the wound its `Dressed` Marker.
 - Fabric can be made clean by **boiling** it; boiling gives the fabric the `Clean` Marker.
 
@@ -689,7 +689,7 @@ The exact representation that identifies a card as fabric is not yet fixed. Do n
 
 Both confirmed wound-treatment interactions require Nadir's time and use the normal **Action** model:
 
-- water in a container onto a wound starts the wound-cleaning Action, which takes **15 minutes** and empties the source water container;
+- water in a container onto a wound starts the wound-cleaning Action, which takes **15 minutes**, increases `Clean` by **40**, and empties the source water container;
 - clean fabric onto a wound starts the wound-dressing Action, which takes **15 minutes**, consumes the source fabric card, and leaves the wound carrying `Dressed`.
 
 Dropping the source onto the wound commits the Action. The Action window runs, 15 minutes of game time advances, and active Processes respond to that elapsed time.
@@ -698,13 +698,22 @@ For wound cleaning, the container is treated as simply containing water or being
 
 Boiling fabric is confirmed as a way to make fabric clean, but its exact interaction type has not yet been decided.
 
+## WOUND-D05 - Wounds start at Clean 50; cleaning adds 40
+**Status:** DECIDED BY SIMON
+
+A newly created `Flesh Wound` or `Burn Wound` starts at `Clean 50`.
+
+Completing the 15-minute wound-cleaning Action increases that wound's `Clean` Value by **40**. A fresh wound therefore becomes `Clean 90` after one cleaning.
+
+No maximum/cap for `Clean` has been decided yet.
+
 ## WOUND-03 - Remaining cleaning and dressing interaction details
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Cleaning and dressing are confirmed 15-minute Actions. Wound cleaning empties its water container, and wound dressing consumes its clean fabric card. Remaining questions are:
+Cleaning and dressing are confirmed 15-minute Actions. Wound cleaning adds 40 `Clean` and empties its water container; wound dressing consumes its clean fabric card. Remaining questions are:
 
-- how much does water change the wound's `Clean` Value;
+- whether wound `Clean` has a maximum/cap, such as 100;
 - how and when `Dressed` is removed;
 - how boiling fabric is represented and what it consumes.
 
