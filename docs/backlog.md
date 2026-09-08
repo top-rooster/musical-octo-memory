@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **INTERACT-02 [P2]** - What if one source/target pair supports several interactions?
-2. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
-3. **MOVE-02 [P2]** - Does Inventory have a capacity limit?
-4. **CARD-07 [P2]** - Can cards be contained/attached outside Stack/Process/Connection?
-5. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
+1. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
+2. **MOVE-02 [P2]** - Does Inventory have a capacity limit?
+3. **CARD-07 [P2]** - Can cards be contained/attached outside Stack/Process/Connection?
+4. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
+5. **INTERACT-06 [P2]** - How do source and target attributes determine interaction legality and effect?
 
 ---
 
@@ -305,11 +305,14 @@ Moving a card within or between zones is movement rather than interaction. Bare 
 
 An interaction may resolve immediately, start an **Action**, create/change a Stack, start/alter a Process, create/change a Connection, create cards, consume cards, or change attributes.
 
-## INTERACT-02 - Multiple plausible interactions
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
+## INTERACT-D02 - At most one interaction per card pair
+**Status:** DECIDED BY SIMON
 
-If one source/target pair supports several interactions, how does the player choose between them?
+A given source-card/target-card pair can support **at most one interaction**.
+
+If the pair is legal, there is a single interaction to perform. The game never needs to ask the player to choose between multiple Actions, Processes, Connections, or other outcomes for the same dragged source and receiving target.
+
+No interaction-selection or disambiguation UI is required for a card pair.
 
 ## INTERACT-03 - Confirmation
 **Status:** OPEN - SIMON TO DECIDE
