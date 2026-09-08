@@ -108,7 +108,9 @@ Equipment is represented by ordinary cards. An equipment card is considered **eq
 
 Within a zone, every card can be positioned to the player's liking. Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
-A legal transfer of a card between **Room** and **Inventory** is always free. The zone change itself does not advance game time, create noise, or cause another gameplay consequence. Rules such as `Anchored`, Inventory capacity, or other legality constraints may prevent a transfer, but a successful transfer has no cost.
+A legal transfer of a card between **Room** and **Inventory** is always free. The zone change itself does not advance game time, create noise, or cause another gameplay consequence.
+
+For now, **only two rules can prevent a card from coming to rest in the other top-level zone**: `Anchored` and the five-card non-anchored Inventory capacity. There are no additional contextual Room/Inventory transfer blockers.
 
 Movement is distinct from interaction.
 
@@ -397,6 +399,8 @@ The preview should appear on or immediately adjacent to the affected stat.
 Anything Nadir can eat or otherwise ingest must carry a visible ingestion Marker. The exact final name of that Marker is not yet fixed.
 
 The ingestion Marker is what makes the card a legal source for Nadir's ingestion interaction. Eating uses **Body** as the receiving card.
+
+The two food cards selected for the first interaction prototype are **Rat Meat** and **Canned Food**. Both are ingestible and are used to test that two legal sources can produce different exact Satiation previews. Their exact Satiation gains have not yet been chosen.
 
 Dropping an ingestible food card on Body applies the food's interaction-specific effects, consumes/discards the food card, and updates affected visible state immediately. Because eating is not currently an Action, it does not advance game time. If eating is later intended to consume time, it must be modeled as an Action.
 
