@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **WOUND-03 [P2]** - Are cleaning/dressing Actions, what do they consume, and how much state do they change?
+1. **WOUND-03 [P2]** - What are the cleaning/dressing Action durations, consumption rules, and exact state changes?
 2. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
 3. **NADIR-03 [P2]** - How is equipment represented?
 4. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
@@ -622,13 +622,15 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 - Water in a container can be used to clean the wound and improve its `Clean` Value.
 - Fabric that has the `Clean` Marker can be used to dress the wound, causing the wound to gain `Dress`.
 - Fabric can be made clean by boiling, which gives the fabric the `Clean` Marker.
+- Cleaning a wound is an **Action**.
+- Dressing a wound is an **Action**.
 - `Dress` improves healing over time and causes Infection to decrease over time.
 - When Infection becomes too high, the wound's healing rate is reduced.
 - Severe Infection spawns a `Fever` condition card.
 
 In addition, a `Burn Wound` has another Value that accelerates Nadir's dehydration over time while the burn exists. The final name/scale of this burn-specific Value and the exact representation of dehydration are not yet fixed.
 
-The exact Action/immediate-interaction form, Action durations, amount by which water changes wound `Clean`, whether/how much water is consumed, whether fabric is consumed when dressing, how `Dress` is later removed, and the exact boiling interaction are not yet decided. Any part that advances game time must be an Action. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
+Because cleaning and dressing are Actions, each advances game time through the normal Action window and active Processes update during that elapsed time. Their exact Action durations, amount by which water changes wound `Clean`, whether/how much water is consumed, whether fabric is consumed or changed when dressing, how `Dress` is later removed, and the exact boiling interaction are not yet decided. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
 
 ### Fever
 
@@ -682,21 +684,30 @@ The wound's `Clean` Value and a fabric card's `Clean` Marker are distinct uses o
 
 The exact representation that identifies a card as fabric is not yet fixed. Do not silently introduce a `Fabric` Marker until Simon chooses it.
 
+## WOUND-D04 - Cleaning and dressing wounds are Actions
+**Status:** DECIDED BY SIMON
+
+Both confirmed wound-treatment interactions require Nadir's time and therefore use the normal **Action** model:
+
+- water in a container onto a wound starts the wound-cleaning Action;
+- clean fabric onto a wound starts the wound-dressing Action.
+
+Dropping the source onto the wound commits the Action. The Action window runs, game time advances, and active Processes respond to that elapsed time. The exact duration of each Action is not yet fixed.
+
+Boiling fabric is confirmed as a way to make fabric clean, but its exact interaction type has not yet been decided.
+
 ## WOUND-03 - Remaining cleaning and dressing interaction details
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-The treatment sources are decided. Remaining questions are:
+Cleaning and dressing are confirmed Actions. Remaining questions are:
 
-- are cleaning and dressing immediate interactions or Actions;
-- if Actions, what are their durations;
+- what is the duration of each Action;
 - how much does water change the wound's `Clean` Value;
 - how much water is consumed;
 - whether clean fabric is consumed/changed when used to dress a wound;
 - how and when `Dress` is removed;
 - how boiling fabric is represented and what it consumes.
-
-Anything that advances game time must be an Action.
 
 ## BURN-D01 - Burn Wounds accelerate dehydration
 **Status:** DECIDED BY SIMON
