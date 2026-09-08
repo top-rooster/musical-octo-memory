@@ -105,6 +105,10 @@ An interaction always has:
 
 A given source-card/target-card pair supports **at most one interaction**. If the pair is legal, the resulting interaction is unambiguous; the player is never asked to choose between multiple Actions, Processes, Connections, or other outcomes for that same pair.
 
+A legal card-on-card drop is also the **commitment** to perform that interaction. There is no separate confirmation dialog or second "are you sure?" step, including for dangerous interactions. Whatever consequence, warning, or risk information Nadir currently understands should be communicated before the drop; once the player releases the card onto the legal target, the interaction proceeds.
+
+An Action window is part of executing and displaying an Action, not a confirmation prompt. Dropping the source card commits the Action before its window runs.
+
 Interaction legality is attribute-driven rather than hard-coded to exact card identities alone. A target may accept source cards carrying a required Marker and map that match to its interaction.
 
 Confirmed examples:
@@ -306,7 +310,8 @@ Whenever the player drags a card:
 6. Meaningful known danger may be communicated even when an exact outcome remains uncertain.
 7. Known uncertain likelihood should be communicated with calibrated plain language rather than routine percentages; exact wording remains provisional.
 8. An available Action may communicate its name on the target before commitment, as `Skin` does when a cutting tool is moved onto a dead rat.
-9. Invalid targets should not suggest that they accept the card.
+9. Releasing a card on a legal interaction target commits the interaction immediately; there is no follow-up confirmation step.
+10. Invalid targets should not suggest that they accept the card.
 
 Example: dragging an ingestible food card over **Body** should preview something like:
 
@@ -347,6 +352,7 @@ Dehydration is a survival pressure that can worsen over game time. Its exact rep
 - Preserve the physical-card analogy: when something becomes a different card identity, discard the old card and draw the replacement rather than morphing the existing card; keep the replacement in the old card's location unless a specific effect moves it.
 - Let specific visible attributes define what cards can do; avoid generic classifications such as `Reusable` when a concrete functional Marker and state Value express the behavior more directly.
 - Give Process progress a contextual player-facing name when that improves comprehension, while keeping it one common mechanic underneath.
+- Communicate understood consequences before commitment, then treat the card drop as the player's decision; avoid confirmation dialogs that interrupt the interaction flow.
 - Discovery, relational understanding, exploratory play, and knowledge unlocks are intended parts of play rather than problems for the UI to eliminate.
 - Do not turn the game into exhaustive deterministic planning by revealing every consequence before commitment.
 - Exploratory play should not cause severe, unforeseeable punishment. Meaningful danger should be reasonably telegraphed even when details remain unknown.
