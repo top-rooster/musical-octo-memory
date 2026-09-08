@@ -70,7 +70,9 @@ The previously proposed separate **Nadir** zone has been removed. Nadir remains 
 
 `Anchored` is what distinguishes Nadir's fixed Inventory cards from ordinary cards that may move between Room and Inventory.
 
-Inventory currently has a provisional capacity of **five non-anchored cards**. Anchored cards do not count toward that limit, so Body, Mind, Spirit, and anchored condition cards do not consume ordinary carrying capacity. Five is a tuning value and may change after playtesting. How a `Stack` counts toward the limit is not yet decided.
+Inventory currently has a provisional capacity of **five non-anchored cards**. Anchored cards do not count toward that limit, so Body, Mind, Spirit, and anchored condition cards do not consume ordinary carrying capacity. Every non-anchored Inventory card instance consumes one slot. Five is a tuning value and may change after playtesting.
+
+Inventory does **not** use `Stack` presentation. Identical carried cards remain separate card instances and therefore each consume one of the five ordinary Inventory slots. With the current two-zone model, Stacks are confined to Room.
 
 Within a zone, every card can be positioned to the player's liking. Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
@@ -107,6 +109,7 @@ A Stack is a visual convenience for identical cards.
 - If any Marker differs, or any Value/value differs, they cannot share a Stack.
 - The Stack shows a count.
 - It has no mechanical effect merely because it exists.
+- Stacks are not allowed in Inventory; with the current two-zone model, Stack presentation exists only in Room.
 
 Dragging a Stack peels off its top card:
 
