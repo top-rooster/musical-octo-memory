@@ -30,7 +30,7 @@ Cards created from that master are separate **card instances**. Each instance re
 
 Two identical objects are therefore still two distinct card instances. A Stack can compress their presentation, but it does not merge them into one underlying card.
 
-Whether an instance can later override its master name/picture, or how a card changes into a materially different card type, is not yet decided.
+Whether an instance can later override its master name/picture, or how a card changes into a materially different card type, is not yet decided. A water container becoming empty after use is a concrete case this rule will eventually need to cover.
 
 ### Attributes
 
@@ -87,7 +87,7 @@ A given source-card/target-card pair supports **at most one interaction**. If th
 
 Bare zone space can receive a card for legal movement/placement, but that is movement rather than an interaction.
 
-This rule applies across the game: food onto a Nadir card, medicine onto a Nadir card, a knife onto a dead rat, a machine onto a power outlet, material or tool onto a machine, and card combinations that start Actions, Processes, or Connections.
+This rule applies across the game: food onto a Nadir card, medicine onto a Nadir card, a knife onto a dead rat, a machine onto a power outlet, material or tool onto a machine, a water container onto Fever, and card combinations that start Actions, Processes, or Connections.
 
 A card-on-card interaction does not have to remain stacked afterward. It may resolve immediately, start an Action, consume a card, alter attributes, create a Stack, start a Process, create a Connection, or produce another interaction-specific result.
 
@@ -149,7 +149,7 @@ A **Process** is unattended change that can continue while Nadir spends game tim
 
 Starting a Process does **not** force time forward to completion. Instead, it progresses when game time passes because Nadir is occupied with Actions or other activities.
 
-A Process can involve several cards, as with cooking, or it can be embodied by a single card whose state changes over time, as with a wound.
+A Process can involve several cards, as with cooking, or it can be embodied by a single card whose state changes over time, as with a wound or Fever.
 
 Processes use a visible `Progress` Value from 0 to 100. There is no universal progress calculation: each Process defines its own progression from relevant state and elapsed game time. Conditions may speed up, slow down, or stop progress.
 
@@ -158,6 +158,7 @@ Concrete examples:
 - `Rat Meat` placed on a lit camp fire starts a cooking Process. It progresses while the fire remains lit and Nadir spends time doing other things.
 - A bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time while Nadir is occupied elsewhere.
 - `Flesh Wound` and `Burn Wound` are single-card Processes. Their `Progress` represents healing, and the wound card disappears when `Progress` reaches 100.
+- `Fever` is a single-card Process. Its `Progress` represents recovery over game time, and the Fever card disappears when `Progress` reaches 100.
 
 When `Progress` reaches 100, completion is Process-specific. A Process can consume or transform participating cards, create output cards, change attributes, separate participants, remove itself, or combine these effects.
 
@@ -217,7 +218,11 @@ Condition lifecycles are condition-specific rather than using one universal time
 
 `Fever` is cumulative. If Nadir has **three Fever cards**, he dies.
 
-The exact representation and card interactions for cleaning and dressing are not yet fixed. The exact Infection threshold or thresholds for impaired healing and Fever spawning are also not fixed. How Fever cards are treated or removed is still open.
+Each `Fever` card is itself a single-card Process. Its recovery `Progress` advances with game time and the card disappears at `Progress 100`.
+
+Fever can also be treated with water: dragging a water container onto a Fever card removes that Fever card and empties the container. The exact Fever recovery rate, the exact representation of an emptied container, and whether the water treatment itself consumes game time are not yet fixed.
+
+The exact representation and card interactions for cleaning and dressing are not yet fixed. The exact Infection threshold or thresholds for impaired healing and Fever spawning are also not fixed.
 
 ### Discovery, knowledge, risk, and previews
 
