@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
+1. **FOOD-03 [P0]** - How much Satiation do Rat Meat and Canned Food restore in the first prototype?
 2. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
 3. **TARGET-01 [P2]** - Should highlights differ by interaction type?
 4. **TARGET-02 [P2]** - Should dangerous legal interactions use the normal target highlight?
@@ -245,7 +245,17 @@ Changing a card's zone does not, by itself:
 - create noise,
 - or create another gameplay consequence.
 
-Rules such as `Anchored`, Inventory capacity, or other future legality constraints may prevent a zone change, but when the zone change is legal the transfer itself has no cost.
+When a transfer is legal, the transfer itself has no cost.
+
+## MOVE-D06 - Only Anchored and Inventory capacity block transfer for now
+**Status:** DECIDED BY SIMON
+
+For now, the only reasons a card can be prevented from coming to rest in the other top-level zone are:
+
+- the card has `Anchored` and the destination is not its home zone;
+- Inventory is already at its five non-anchored-card capacity.
+
+There are no additional contextual Room/Inventory transfer blockers in the current design.
 
 ## STACK-D01 - Stack, Process, Connection
 **Status:** DECIDED BY SIMON
@@ -428,12 +438,6 @@ With the current two-zone model, Stack presentation is confined to Room.
 
 If a future unattended Process needs an `Anchored` participant whose home is another zone, decide how that ongoing relationship is presented. There is no current concrete requirement; Nadir-performed work is now an Action and resolves in its window rather than remaining as an ongoing Process.
 
-## MOVE-05 - Other reasons a card cannot change zones
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-`Anchored` handles fixed-home cards. Inventory capacity is one confirmed legality constraint. Decide later whether other contextual rules can also prevent transfer.
-
 ---
 
 # Card-on-card interaction
@@ -470,6 +474,24 @@ If Nadir eats Rotten Meat by dropping it onto **Body**:
 - one `Fever` card is created.
 
 The exact representation, magnitude, and duration of the mood debuff are not yet decided.
+
+## FOOD-D03 - First prototype foods are Rat Meat and Canned Food
+**Status:** DECIDED BY SIMON
+
+The two ingestible food cards used to validate the first prototype's Satiation interaction are:
+
+- `Rat Meat`
+- `Canned Food`
+
+They must have different Satiation effects so the preview interaction demonstrates different outcomes. Their exact Satiation gains are still open and must not be invented as a product decision.
+
+## FOOD-03 - Prototype Satiation amounts
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P0
+
+How much Satiation should eating `Rat Meat` restore, and how much should eating `Canned Food` restore?
+
+The two values should differ so Milestone 1 can validate exact consequence previews.
 
 ## INTERACT-D01 - All interactions are card-on-card
 **Status:** DECIDED BY SIMON
