@@ -63,7 +63,7 @@ All attributes are visible on the card and represented by icons. There are no hi
 
 `Anchored` is a Marker. It prevents dragging the card between Room and Inventory, but does not prevent repositioning within the current zone or dragging the card onto another card.
 
-Nadir is anchored because he has this attribute, not because he belongs to a special card type.
+The new Nadir zone does not yet redefine `Anchored`; transfer restrictions involving that zone remain undecided if needed.
 
 ## CARD-D04 - Master definition and card instances
 **Status:** DECIDED BY SIMON
@@ -119,7 +119,24 @@ A description is not part of the first release. Revisit later if cards need expl
 
 ---
 
-# Positioning, movement, and card stacking
+# Zones, positioning, movement, and card stacking
+
+## ZONE-D01 - Three top-level zones
+**Status:** DECIDED BY SIMON
+
+The play space has three zones:
+
+- **Room** - the currently viewed physical space.
+- **Inventory** - persistent carried possessions.
+- **Nadir** - the cards that represent Nadir.
+
+The Nadir zone supersedes the earlier assumption that Nadir's cards live in Inventory.
+
+## ZONE-01 - Nadir zone transfer rules
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+Decide whether non-Nadir cards may ever persist in the Nadir zone and whether cards representing Nadir can ever leave it.
 
 ## MOVE-D01 - Room/Inventory transfer
 **Status:** DECIDED BY SIMON
@@ -223,7 +240,7 @@ Can moving a card between zones consume time or create consequences?
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-`Anchored` handles fixed-zone cards. Decide later whether capacity or contextual rules can also prevent transfer.
+`Anchored` handles fixed-zone cards between Room and Inventory. Decide later whether capacity, the Nadir zone, or contextual rules can also prevent transfer.
 
 ---
 
@@ -232,7 +249,7 @@ Can moving a card between zones consume time or create consequences?
 ## CORE-D04 - Eating
 **Status:** DECIDED BY SIMON
 
-Food is eaten by dragging the food card onto Nadir.
+Food is eaten by dragging the food card onto the relevant Nadir card.
 
 ## INTERACT-D01 - All interactions are card-on-card
 **Status:** DECIDED BY SIMON
@@ -246,7 +263,7 @@ An interaction therefore always has:
 
 This is the universal interaction language, not just the rule for eating. It applies to interactions such as using medicine, operating or supplying machines, creating Processes, creating Connections, and other card effects.
 
-Moving/repositioning a card within a zone or transferring it between Room and Inventory is movement rather than an interaction. A bare zone/location may receive a card for movement, but is not itself an interaction target.
+Moving/repositioning a card within a zone or transferring it between zones is movement rather than an interaction. Bare zone space may receive a card for movement when legal, but is not itself an interaction target.
 
 An interaction does not necessarily create a Stack, Process, or Connection; it may resolve immediately, as eating does.
 
@@ -316,7 +333,7 @@ Test visually.
 ## PREVIEW-D01 - Direct stat preview
 **Status:** DECIDED BY SIMON
 
-Direct visible stat consequences preview before the drop, e.g. `Hunger 67 -> 98` on Nadir.
+Direct visible stat consequences preview before the drop, e.g. `Hunger 67 -> 98` on the relevant Nadir card.
 
 ## PREVIEW-01 - Multiple affected attributes
 **Status:** OPEN - SIMON TO DECIDE
@@ -346,22 +363,22 @@ Preview only immediate effects or also known longer-term effects?
 
 # Nadir and survival
 
-## NADIR-D01 - Nadir is anchored in Inventory
+## NADIR-D01 - Nadir cards live in the Nadir zone
 **Status:** DECIDED BY SIMON
 
-Nadir's representation includes an Inventory card with `Anchored`. That card cannot transfer to Room, but can be repositioned or dragged onto another card.
+The cards that represent Nadir live in the dedicated **Nadir** zone rather than Inventory.
 
-Nadir may also be represented by additional cards. Whether every card representing Nadir is anchored is not yet decided.
+This supersedes the earlier placement of an `Anchored` Nadir card in Inventory. Whether Nadir-zone cards use `Anchored`, another transfer restriction, or no explicit restriction is not yet decided.
 
 ## NADIR-D02 - Character state uses card attributes
 **Status:** DECIDED BY SIMON
 
-Relevant character state lives as attributes on the card or cards representing Nadir rather than in a separate character-stat UI. Hunger is confirmed. Health is currently a prototype/example attribute, not yet confirmed as permanent.
+Relevant character state lives as attributes on the cards representing Nadir rather than in a separate character-stat UI. Hunger is confirmed. Health is currently a prototype/example attribute, not yet confirmed as permanent.
 
 ## NADIR-D03 - Nadir may be represented by multiple cards
 **Status:** DECIDED BY SIMON
 
-Nadir is not required to fit on a single card. His representation may span several cards simultaneously while remaining inside the same card-based interaction system.
+Nadir is not required to fit on a single card. His representation may span several cards simultaneously in the Nadir zone while remaining inside the same card-based interaction system.
 
 This allows character state to be distributed across multiple visible cards rather than requiring alternate character views merely because one card becomes too dense.
 
@@ -371,7 +388,7 @@ This allows character state to be distributed across multiple visible cards rath
 
 How should Nadir's state be divided across his cards?
 
-Decide which distinct Nadir cards should exist, which attributes belong on each, and whether all of those cards are anchored in Inventory.
+Decide which distinct Nadir cards should exist and which attributes belong on each.
 
 ## NADIR-02 - Injury representation
 **Status:** OPEN - SIMON TO DECIDE
