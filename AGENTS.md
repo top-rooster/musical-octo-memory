@@ -10,6 +10,7 @@ Before making material changes, read:
 
 - `docs/game-design.md` for current product and interaction rules.
 - `docs/roadmap.md` for the active implementation slice and acceptance criteria.
+- `docs/backlog.md` for detailed future design candidates, open questions, and rationale. Backlog items are not implementation commitments; do not implement them unless explicitly requested or promoted into the roadmap.
 
 Keep this file short. Put detailed design decisions in `docs/` rather than expanding `AGENTS.md` into an encyclopedia.
 
