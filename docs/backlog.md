@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **NADIR-01 [P1]** - How should Nadir's state be divided across multiple cards?
+1. **NADIR-05 [P1]** - What are the final names of Nadir's three persistent cards?
 2. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
 
 ---
@@ -36,50 +36,44 @@ Normally discuss only the single highest-priority open decision.
 ## CARD-D01 - All interactable entities are cards
 **Status:** DECIDED BY SIMON
 
-Every interactable entity is represented as a card. Confirmed examples: materials, machines, food, Nadir, and passages to other rooms.
+Every interactable entity is a card. Confirmed examples: materials, machines, food, Nadir, and passages to other rooms.
 
 ## CARD-D02 - Universal card presentation
 **Status:** DECIDED BY SIMON
 
-Every card has a name/title, a picture, and zero or more optional attributes.
+Every card has a title/name, a picture, and zero or more optional attributes.
 
 ## CARD-D03 - Attributes define card function
 **Status:** DECIDED BY SIMON
 
-Cards have no separate categories, tags, capability lists, or card classes in the design model. A card is functionally defined by its attributes. Add another classification mechanism only if a concrete need later proves attributes insufficient.
-
-ChatGPT previously suggested composable capabilities/tags; Simon rejected that extra layer for now.
+Cards have no separate categories, tags, capability lists, or card classes. A card is functionally defined only by its attributes unless a concrete future need proves that insufficient.
 
 ## ATTR-D01 - Attribute representation and names
 **Status:** DECIDED BY SIMON
 
-All attributes are visible on the card and represented by icons. There are no hidden/internal card attributes in the current model.
+All card attributes are visible and represented by icons. There are no hidden/internal card attributes in the current model.
 
 - **Marker** - icon only; presence carries the meaning (`Player`, `Anchored`, `Powered`).
 - **Value** - icon plus integer (`Health 100`, `Progress 42`).
 
-## ATTR-D02 - Anchored attribute
+## ATTR-D02 - Anchored
 **Status:** DECIDED BY SIMON
 
-`Anchored` is a Marker. It prevents dragging the card between Room and Inventory, but does not prevent repositioning within the current zone or dragging the card onto another card.
+`Anchored` is a Marker. It blocks transfer between Room and Inventory, but does not block repositioning within the current zone or dragging the card onto another card.
 
-The new Nadir zone does not yet redefine `Anchored`; transfer restrictions involving that zone remain undecided if needed.
+The Nadir zone does not yet redefine `Anchored`; transfer restrictions involving that zone remain open if needed.
 
 ## CARD-D04 - Master definition and card instances
 **Status:** DECIDED BY SIMON
 
 Each reusable card type has one **master definition** containing name/title, picture, and starting attributes.
 
-Cards created from the master are separate **card instances**. Each instance receives the starting attributes and maintains its own current attributes independently thereafter.
-
-Two identical objects are therefore still two separate cards. A `Stack` only compresses their presentation; it does not merge the instances.
+Each spawned card is a separate **card instance**. It receives the starting attributes and thereafter maintains its own current attributes independently.
 
 ## CARD-D05 - First-release card face
 **Status:** DECIDED BY SIMON
 
-For the first release, a normal card shows only title/name, picture, and visible attributes.
-
-Do not add description text or other permanent card-face information for the first release. Simon expects a description may become useful later, but it is deferred.
+For the first release, a normal card shows only title/name, picture, and visible attributes. Description text is deferred.
 
 ## CARD-06 - Card size
 **Status:** DEFERRED
@@ -87,11 +81,11 @@ Do not add description text or other permanent card-face information for the fir
 
 Fixed size, content-driven size, or a small standard set. Test visually first.
 
-## CARD-07 - Cards containing/attaching cards
+## CARD-07 - Contained/attached cards outside Stack/Process/Connection
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Can equipment, injuries, fuel, container contents, etc. be attached to or contained by another card outside the normal Stack/Process/Connection model?
+Can equipment, fuel, contents, etc. be attached to or contained by another card outside the normal Stack/Process/Connection model?
 
 ## CARD-09 - Durability and object-specific state
 **Status:** OPEN - SIMON TO DECIDE
@@ -99,23 +93,23 @@ Can equipment, injuries, fuel, container contents, etc. be attached to or contai
 
 Should values such as durability use ordinary attributes or another representation?
 
-## CARD-10 - Non-interactable state and temporary conditions
+## CARD-10 - Other non-interactable state and temporary conditions
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P3
 
-All interactable entities are cards. It remains undecided whether non-interactable state or temporary conditions may also be cards.
+Temporary conditions applying to Nadir are now confirmed as cards in the Nadir zone. It remains undecided whether other non-interactable state or temporary conditions elsewhere also use cards.
 
 ## CARD-11 - Instance changing identity
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-If an instance becomes materially different, does it switch master definition, get replaced by another card instance, or use another rule? Also decide whether an instance can ever override its master's name/picture.
+If an instance becomes materially different, does it switch master definition, get replaced by another card instance, or use another rule? Can an instance ever override its master's name/picture?
 
 ## CARD-12 - Card descriptions
 **Status:** DEFERRED
 **Priority:** P2
 
-A description is not part of the first release. Revisit later if cards need explanatory or narrative text beyond title, picture, and visible attributes.
+Descriptions are not part of the first release. Revisit later if cards need explanatory or narrative text beyond title, picture, and visible attributes.
 
 ---
 
@@ -128,7 +122,7 @@ The play space has three zones:
 
 - **Room** - the currently viewed physical space.
 - **Inventory** - persistent carried possessions.
-- **Nadir** - the cards that represent Nadir.
+- **Nadir** - Nadir's persistent representation cards plus temporary condition cards that currently apply to him.
 
 The Nadir zone supersedes the earlier assumption that Nadir's cards live in Inventory.
 
@@ -136,7 +130,7 @@ The Nadir zone supersedes the earlier assumption that Nadir's cards live in Inve
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Decide whether non-Nadir cards may ever persist in the Nadir zone and whether cards representing Nadir can ever leave it.
+Besides Nadir's persistent cards and temporary condition cards, can other cards persist in the Nadir zone? Can persistent Nadir cards ever leave it?
 
 ## MOVE-D01 - Room/Inventory transfer
 **Status:** DECIDED BY SIMON
@@ -153,40 +147,24 @@ Every card can be positioned within its current zone to the player's liking, inc
 
 Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
-## STACK-D01 - Three stacking forms: Stack, Process, Connection
+## STACK-D01 - Stack, Process, Connection
 **Status:** DECIDED BY SIMON
 
-The three official names are **Stack**, **Process**, and **Connection**. Do not use the older compact/passive/active/linked/permanent-stack terminology as the primary design language.
+The three official stacking forms are **Stack**, **Process**, and **Connection**.
 
 ### Stack
 
-A `Stack` is only a visual convenience for identical cards.
-
-- represented cards remain separate card instances,
-- individual cards do not all need to remain exposed,
-- the Stack shows a count,
-- it has no mechanical effect merely because it exists.
+A `Stack` is only visual compression for identical cards. Represented cards remain separate instances, individual cards need not all remain exposed, the Stack shows a count, and it has no mechanical effect merely because it exists.
 
 ### Process
 
-A `Process` is a finite mechanically meaningful combination of cards.
-
-- creating it starts it immediately,
-- every participating card remains individually identifiable and every card name stays visible,
-- the top card gets a `Progress` Value from 0 to 100,
-- at `Progress 100`, the Process is complete,
-- it may change attributes on participating cards.
+A `Process` is a finite mechanically meaningful combination of cards. Creating it starts it immediately. Every participating card remains identifiable and every name stays visible. The top card gets `Progress` from 0 to 100. At 100 the Process is complete.
 
 ### Connection
 
-A `Connection` is a persistent mechanically meaningful relationship between cards.
+A `Connection` is a persistent mechanically meaningful relationship. It begins immediately, lasts until the player separates the cards, and relationship-dependent effects disappear when it is broken.
 
-- creating it starts its effect immediately,
-- every participating card remains individually identifiable and every card name stays visible,
-- it lasts until the player breaks it by separating cards,
-- effects that depend on it disappear when broken.
-
-Example: connecting a machine to a power outlet gives the machine `Powered`. Disconnecting removes `Powered`. One outlet can power only one card at a time.
+Example: a machine connected to a power outlet gains `Powered`; disconnecting removes it. One outlet can power only one card at a time.
 
 ## STACK-D02 - Process progress is process-specific
 **Status:** DECIDED BY SIMON
@@ -198,25 +176,21 @@ Examples:
 - rat meat on a lit camp fire progresses with time while the fire is lit,
 - a bowl on a condenser progresses from room moisture, room temperature, and time.
 
-Progress can speed up, slow down, or stop as conditions change.
-
 ## STACK-D03 - Dragging from a Stack peels off one card
 **Status:** DECIDED BY SIMON
 
 Dragging a Stack separates its top card as an individual card.
 
-- Stack 3 -> one dragged card + Stack 2.
-- Stack 2 -> one dragged card + one ordinary card.
+- Stack 3 -> dragged card + Stack 2.
+- Stack 2 -> dragged card + ordinary card.
 - Count 1 is never presented as a Stack.
 
 The Stack count is presentation, not currently a normal card `Value`.
 
-## STACK-D04 - Stack members must have identical current attributes
+## STACK-D04 - Stack members must be identical now
 **Status:** DECIDED BY SIMON
 
-Cards can share a `Stack` only when they come from the same master definition and have identical current attributes.
-
-Their Marker sets, Value attributes, and Value values must all match. If one instance differs, it cannot share that Stack.
+Cards can share a `Stack` only when they come from the same master definition and have identical current attributes: same Marker set, same Values, same Value numbers.
 
 ## STACK-02 - Process completion result
 **Status:** OPEN - SIMON TO DECIDE
@@ -254,18 +228,11 @@ Food is eaten by dragging the food card onto the relevant Nadir card.
 ## INTERACT-D01 - All interactions are card-on-card
 **Status:** DECIDED BY SIMON
 
-Every gameplay interaction is initiated by putting one card on top of another card.
+Every gameplay interaction is initiated by putting one card on top of another card. An interaction always has a dragged source card and a target card.
 
-An interaction therefore always has:
+Moving a card within or between zones is movement rather than interaction. Bare zone space can receive a card for legal movement but is not an interaction target.
 
-- a source card being dragged,
-- a target card receiving it.
-
-This is the universal interaction language, not just the rule for eating. It applies to interactions such as using medicine, operating or supplying machines, creating Processes, creating Connections, and other card effects.
-
-Moving/repositioning a card within a zone or transferring it between zones is movement rather than an interaction. Bare zone space may receive a card for movement when legal, but is not itself an interaction target.
-
-An interaction does not necessarily create a Stack, Process, or Connection; it may resolve immediately, as eating does.
+An interaction may resolve immediately or create/change a Stack, Process, Connection, cards, or attributes.
 
 ## INTERACT-02 - Multiple plausible actions
 **Status:** OPEN - SIMON TO DECIDE
@@ -304,7 +271,7 @@ How do source and target attributes determine whether an interaction is legal an
 ## TARGET-D01 - Legal interaction targets highlight
 **Status:** DECIDED BY SIMON
 
-While dragging a card, every card that can legally receive it as an interaction target highlights. Legal zone destinations for movement may also use a placement affordance, but they are not card interaction targets.
+While dragging, every card that can legally receive the dragged card as an interaction target highlights. Legal movement destinations may use a placement affordance but are not interaction targets.
 
 ## TARGET-01 - Different highlights by action type
 **Status:** OPEN - SIMON TO DECIDE
@@ -366,52 +333,83 @@ Preview only immediate effects or also known longer-term effects?
 ## NADIR-D01 - Nadir cards live in the Nadir zone
 **Status:** DECIDED BY SIMON
 
-The cards that represent Nadir live in the dedicated **Nadir** zone rather than Inventory.
+Nadir's persistent representation cards live in the dedicated **Nadir** zone rather than Inventory.
 
-This supersedes the earlier placement of an `Anchored` Nadir card in Inventory. Whether Nadir-zone cards use `Anchored`, another transfer restriction, or no explicit restriction is not yet decided.
+Whether those cards use `Anchored`, another transfer restriction, or no explicit restriction remains open.
 
 ## NADIR-D02 - Character state uses card attributes
 **Status:** DECIDED BY SIMON
 
-Relevant character state lives as attributes on the cards representing Nadir rather than in a separate character-stat UI. Hunger is confirmed. Health is currently a prototype/example attribute, not yet confirmed as permanent.
+Relevant character state lives as attributes on Nadir's cards rather than in a separate character-stat UI.
 
 ## NADIR-D03 - Nadir may be represented by multiple cards
 **Status:** DECIDED BY SIMON
 
-Nadir is not required to fit on a single card. His representation may span several cards simultaneously in the Nadir zone while remaining inside the same card-based interaction system.
+Nadir is not required to fit on a single card. His representation may span several simultaneously visible cards in the Nadir zone.
 
-This allows character state to be distributed across multiple visible cards rather than requiring alternate character views merely because one card becomes too dense.
+## NADIR-D04 - Three persistent Nadir domains for now
+**Status:** DECIDED BY SIMON
 
-## NADIR-01 - Division of Nadir across cards
+For now, Nadir has three persistent representation cards covering these domains:
+
+1. **physical** - Simon proposed possible labels `Health`, `Body`, or `Physical`;
+2. **cognitive / will** - possible labels include `Mind`, `Cognition`, `Will`, or `Super Ego`;
+3. **emotional / spiritual** - possible labels include `Emotion`, `Spirit`, or `Id`.
+
+The three-domain structure is decided; the exact user-facing card names are not. More persistent Nadir cards may be added later if a concrete need appears.
+
+## NADIR-D05 - Temporary conditions are cards in the Nadir zone
+**Status:** DECIDED BY SIMON
+
+Conditions currently applying to Nadir are represented as temporary cards in the Nadir zone rather than being forced into the three persistent cards.
+
+Examples explicitly given by Simon:
+
+- `Exhausted`
+- `Flesh Wound`
+
+These are normal cards in the card system while the condition exists. How they are created, expire, heal, or otherwise disappear is not yet decided.
+
+## NADIR-05 - Names for the three persistent Nadir cards
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P1
 
-How should Nadir's state be divided across his cards?
+Choose the final card title for each decided domain:
 
-Decide which distinct Nadir cards should exist and which attributes belong on each.
+- physical,
+- cognitive / will,
+- emotional / spiritual.
 
-## NADIR-02 - Injury representation
+The slash-separated names in NADIR-D04 are candidates, not final decisions.
+
+## NADIR-02 - Injury representation beyond simple condition cards
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Attributes, attached cards, or another representation?
+`Flesh Wound` confirms that injury-like conditions can be temporary Nadir-zone cards. Decide later whether all injuries use that model or whether some persistent/complex injuries need another representation.
 
 ## NADIR-03 - Equipment representation
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Attributes, attached cards, ordinary Inventory cards, or something else?
+Attributes, Nadir-zone cards, ordinary Inventory cards, Connections, or something else?
 
-## NADIR-04 - Mental/narrative state
+## NADIR-04 - Mental/narrative state detail
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P3
 
-Numerical, qualitative, indirect through writing/behavior, or not shown?
+Beyond the decided cognitive/will and emotional/spiritual cards, how much mental/narrative state should be numerical, qualitative, or expressed through writing/behavior?
+
+## NADIR-06 - Temporary condition lifecycle
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+How are condition cards such as `Exhausted` and `Flesh Wound` created, changed, and removed?
 
 ## SURV-D01 - Keep survival complexity legible
 **Status:** DECIDED BY SIMON
 
-Aim for high decision complexity with as few exposed systems/attributes as practical.
+Aim for high decision complexity with as few exposed systems/attributes/cards as practical.
 
 ## SURV-01 - Permanent survival pressures
 **Status:** OPEN - SIMON TO DECIDE
@@ -419,11 +417,11 @@ Aim for high decision complexity with as few exposed systems/attributes as pract
 
 Candidates raised: Hunger, Health, thirst, fatigue, temperature, illness, stress, injury, morale. Listing is not approval.
 
-## SURV-02 - Attribute versus other representation
+## SURV-02 - Attribute versus condition card
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Which pressures deserve permanent Value attributes and which should use another representation?
+Which pressures deserve persistent Value/Marker attributes on one of Nadir's three persistent cards, and which should appear as temporary condition cards?
 
 ## SURV-03 - Hidden survival state
 **Status:** OPEN - SIMON TO DECIDE
