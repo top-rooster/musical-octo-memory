@@ -35,9 +35,26 @@ The data language must map directly onto the game's visible attribute model with
 - A Marker can be represented tersely as its attribute name.
 - A Value can be represented tersely as its attribute name followed by its integer value.
 
-Examples of the intended authoring feel are `Anchored`, `Cutting Tool`, `Sterilized`, `Durability 80`, and `Infection 50`.
+Examples of the intended authoring feel are `Anchored`, `Cutting Tool`, `Sterilized`, `Container`, `Contains Water`, `Durability 80`, and `Infection 50`.
 
 These examples express the desired low-boilerplate style. Do not turn them into a more verbose key/value object model during implementation.
+
+Mutable object state should prefer Markers/Values on the same card identity where appropriate. Example: a `Plastic Bottle` remains the same card whether full or empty; it always has `Container`, and it has `Contains Water` only while it contains water.
+
+## Explicit time
+
+Every authored **Action** and **Process** must include an explicit time value in the data.
+
+Examples:
+
+- `Skin 15m`
+- `Sleep 8h`
+- an instant Action must still say `0m`
+- fabric sterilization must explicitly say `1h`
+
+There is no implicit default duration. If the duration of an Action or Process has not yet been designed, that authored behavior is incomplete and should remain visibly unresolved rather than receiving a guessed time.
+
+Only Actions advance game time. A Process duration describes how much elapsed game time it requires while Actions advance time; it does not itself create that elapsed time.
 
 ## Current format draft
 
@@ -50,6 +67,7 @@ The draft currently uses:
 - the picture path as the second line;
 - Marker names as plain lines;
 - Values as `name integer`;
+- explicit time tokens such as `0m`, `15m`, `1h`, or `8h` on every Action/Process;
 - short behavior verbs only where the data needs to express an Action, Process, input, output, or state change.
 
 This file exists so the format can be judged against real Safe Room data. The syntax in `data/cards.txt` is **not yet a locked design decision**. Keep changing it if doing so removes boilerplate or ambiguity while preserving phone-friendly authoring.
