@@ -21,7 +21,9 @@ Build a small browser prototype whose only purpose is to validate the core card 
 - Reaching `Hydration 0` or `Satiation 0` is a game-over condition, although Milestone 1 does not need to implement the ongoing Processes that reduce those Values over time.
 - Physical injury/health state is represented through injury and condition cards rather than a separate Body `Health` Value.
 - Temporary Nadir condition cards such as `Exhausted` and `Flesh Wound` are part of the design and also live in Inventory, but their lifecycle mechanics are not required in Milestone 1.
-- Seed the prototype with **Rat Meat** and **Canned Food** as the two ingestible food cards. They must have different Satiation effects. The exact gains remain a design input and must not be silently invented as permanent product values.
+- Seed the prototype with **Rat Meat** and **Canned Food** as the two ingestible food cards.
+  - Eating Rat Meat applies `Satiation +15` to Body.
+  - Eating Canned Food applies `Satiation +25` to Body.
 - Seed at least one non-ingestible movable item as a negative interaction example.
 - Give every card Nadir can eat/ingest a visible ingestion **Marker**. The final product-facing name of this Marker is not yet fixed; use one consistent prototype identifier without treating that identifier as locked design terminology.
 - Non-anchored cards can be dragged between Room and Inventory when the destination is legal.
@@ -29,8 +31,8 @@ Build a small browser prototype whose only purpose is to validate the core card 
 - Gameplay interactions are card-on-card: dragging one card onto another card initiates the interaction.
 - Interaction legality must be driven by card attributes rather than by a hard-coded list of specific food card IDs. For the prototype, **Body** accepts cards carrying the ingestion Marker for the eating interaction.
 - While dragging a card, all legal card interaction targets highlight.
-- Dragging an ingestible food card over **Body** previews the exact resulting Satiation value in the form `67 → 98` before the drop.
-- Dropping an ingestible food card on **Body** applies the effect and consumes the food card.
+- Dragging Rat Meat or Canned Food over **Body** previews the exact resulting Satiation value before the drop.
+- Dropping Rat Meat or Canned Food on **Body** applies its Satiation effect and consumes the food card.
 - The non-ingestible item must not be accepted by **Body** merely because it is a movable card.
 - Invalid drops leave state unchanged. An anchored card released outside its home zone without a legal accepting interaction returns home.
 - The prototype's initial card definitions and initial Room/Inventory setup are loaded from the project's authored text data rather than being declared as TypeScript/React constants.
@@ -50,7 +52,7 @@ Build a small browser prototype whose only purpose is to validate the core card 
 - Keep state transition/game-rule functions separate from React rendering where practical.
 - Keep the text-data parser/loader separate from rendering and validate malformed authored data with useful errors rather than silently accepting ambiguity.
 - Avoid a heavy state-management library for this prototype unless there is a demonstrated need.
-- Add lightweight automated tests for the pure game-rule logic, especially ingestion-Marker matching, rejection of a non-ingestible card by Body, food consumption, Value clamping, invalid interactions, Inventory-capacity rejection, and anchored-card return-to-home behavior after a foreign-zone release.
+- Add lightweight automated tests for the pure game-rule logic, especially ingestion-Marker matching, rejection of a non-ingestible card by Body, Rat Meat `+15` Satiation, Canned Food `+25` Satiation, food consumption, Value clamping, invalid interactions, Inventory-capacity rejection, and anchored-card return-to-home behavior after a foreign-zone release.
 - Add lightweight tests that prove the prototype card masters and starting level state are actually loaded from text data.
 
 ### Done means
