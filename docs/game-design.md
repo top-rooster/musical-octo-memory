@@ -158,7 +158,7 @@ This gives the Nadir zone two kinds of content without introducing a separate UI
 - persistent cards that describe ongoing parts of Nadir,
 - temporary cards that describe current conditions affecting him.
 
-### Discovery, knowledge, and previews
+### Discovery, knowledge, risk, and previews
 
 Safe Room should preserve substantial discovery rather than revealing the complete causal future of an interaction before commitment. Understanding can come from two sources:
 
@@ -171,7 +171,11 @@ However, exploratory play should not unexpectedly inflict severe punishment that
 
 Example: a flooded room containing exposed electrical outlets is likely to electrocute Nadir. The danger does not need an exact numerical preview because the relevant elements are visible and their relationship is understandable; Nadir may also explicitly recognize that the room is dangerous.
 
-Uncertainty can remain after the danger is understood. Attempting to repair an exposed electrical outlet may carry a known risk of electric shock. A shock can result in a burn wound, while a successful risk outcome can leave a functional outlet. The player should be able to understand that the repair is dangerous without necessarily being shown the exact result or probability before acting.
+Uncertainty can remain after the danger is understood. Attempting to repair an exposed electrical outlet may carry a known risk of electric shock. A shock can result in a burn wound, while a successful risk outcome can leave a functional outlet. The player should be able to understand that the repair is dangerous without being shown the exact result in advance.
+
+When Nadir understands an uncertain risk, the UI should communicate **likelihood clearly but normally without numerical probability**. The wording must have enough resolution that the player can distinguish materially different odds — for example, a roughly even gamble from an outcome that is clearly favored — without displaying percentages such as `50%` or `75%`.
+
+Coarse labels such as only `Low`, `Moderate`, and `High` are not precise enough for this purpose. The exact user-facing wording can be tested later, but it should let the player make an informed judgment about how strongly the odds lean while keeping the game out of spreadsheet/chess territory.
 
 The intended information progression is therefore closer to **unknown → suspected → understood** than to either complete opacity or complete prediction.
 
@@ -182,8 +186,9 @@ Whenever the player drags a card:
 1. Every card that can legally receive it as an interaction target highlights.
 2. Legal zone placement for movement should remain legible without being confused with a card interaction target.
 3. Consequences that Nadir/the player currently understands may be previewed before the drop is committed.
-4. Meaningful known danger may be communicated qualitatively even when an exact outcome remains uncertain.
-5. Invalid targets should not suggest that they accept the card.
+4. Meaningful known danger may be communicated even when an exact outcome remains uncertain.
+5. Known uncertain likelihood should be communicated with calibrated plain language rather than routine percentages.
+6. Invalid targets should not suggest that they accept the card.
 
 Example: dragging food over **Body** should preview something like:
 
@@ -207,7 +212,7 @@ For the first prototype, do **not** add a second hidden stomach/fullness system.
 - Do not turn the game into exhaustive deterministic planning by revealing every consequence before commitment.
 - Exploratory play should not cause severe, unforeseeable punishment. Meaningful danger should be reasonably telegraphed even when details remain unknown.
 - A player's uncertainty should come from the situation, incomplete knowledge, discovery, and genuine risk — not from unclear UI rules.
-- Known danger does not imply known probability or known outcome.
+- Known danger does not imply known outcome, but when Nadir understands the likelihood the player should receive a clear non-numeric sense of how strongly the odds lean.
 - Avoid adding systems merely because comparable survival games have them.
 - Keep the play area readable; complexity should emerge from combinations of cards and attributes.
 - No direct player violence is part of the broader concept; defensive violence, if present later, is indirect/automated.
