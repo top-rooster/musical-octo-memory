@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **MOVE-03 [P2]** - Can moving a card between Room and Inventory consume time or create consequences?
-2. **INTERACT-03 [P2]** - Do some drops need confirmation?
-3. **INTERACT-04 [P2]** - How do immediate interactions handle time/noise consequences?
-4. **WOUND-03 [P2]** - Which interactions change `Clean` and `Dress`, and how?
-5. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
+1. **INTERACT-03 [P2]** - Do some drops need confirmation?
+2. **INTERACT-04 [P2]** - How do immediate interactions handle time/noise consequences?
+3. **WOUND-03 [P2]** - Which interactions change `Clean` and `Dress`, and how?
+4. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
+5. **NADIR-03 [P2]** - How is equipment represented?
 
 ---
 
@@ -189,6 +189,19 @@ Every non-anchored card instance in Inventory occupies one of the five slots. In
 
 The number five is a tuning value rather than a permanent constant and may be changed later if playtesting shows a better number.
 
+## MOVE-D05 - Card zone changes are always free
+**Status:** DECIDED BY SIMON
+
+A legal card transfer between **Room** and **Inventory** is always free.
+
+Changing a card's zone does not, by itself:
+
+- advance game time,
+- create noise,
+- or create another gameplay consequence.
+
+Rules such as `Anchored`, Inventory capacity, or other future legality constraints may prevent a zone change, but when the zone change is legal the transfer itself has no cost.
+
 ## STACK-D01 - Stack, Process, Connection
 **Status:** DECIDED BY SIMON
 
@@ -338,12 +351,6 @@ With the current two-zone model, Stack presentation is confined to Room.
 **Priority:** P3
 
 If a future unattended Process needs an `Anchored` participant whose home is another zone, decide how that ongoing relationship is presented. There is no current concrete requirement; Nadir-performed work is now an Action and resolves in its window rather than remaining as an ongoing Process.
-
-## MOVE-03 - Cost of taking/dropping
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Can moving a card between Room and Inventory consume time or create consequences?
 
 ## MOVE-05 - Other reasons a card cannot change zones
 **Status:** OPEN - SIMON TO DECIDE
