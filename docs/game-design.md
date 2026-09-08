@@ -113,23 +113,48 @@ A single remaining card is shown normally rather than as Stack 1. The Stack coun
 
 #### Process
 
-A Process is a finite mechanically meaningful combination of cards. Creating it starts the Process immediately.
+A Process is a finite mechanically meaningful combination of cards. Processes have **two execution kinds**, distinguished by whether Nadir must personally perform the work.
 
-Every participating card remains individually identifiable and every card name stays visible.
+The official names for those two kinds are not yet decided.
 
-- The top card gets a `Progress` Value.
-- `Progress` ranges from 0 to 100.
-- When `Progress` reaches 100, the Process is complete.
-- The Process may change attributes on participating cards.
+##### Nadir-involved Process
 
-There is no universal progress rate. Each Process defines its own calculation from relevant game state and elapsed game time.
+If Nadir is personally involved, committing the Process immediately advances game time until that Process is complete. The player does not continue performing other actions during that interval.
 
-Examples:
+Concrete example: skinning a dead rat.
 
-- Rat meat on a camp fire progresses with elapsed time while the camp fire is lit.
-- A bowl on a condenser progresses according to room moisture, room temperature, and elapsed time.
+1. The player moves a knife onto a `Dead Rat`.
+2. The rat card displays `Skin`, the name of the available Process.
+3. Dropping the knife commits it.
+4. A window appears displaying `Skinning` and the two participating cards: the knife and the dead rat.
+5. Game time immediately advances **15 minutes**.
+6. The knife returns to where it came from.
+7. The `Dead Rat` dissolves/is consumed.
+8. A `Rat Skin` card and a `Rat Meat` card are created.
 
-An anchored Inventory card, including one of Nadir's cards, can be dragged onto a Room card to start a Process without changing its home zone. The visual representation of that cross-zone participation is still open.
+The 15-minute duration and outputs belong to this Process; other Nadir-involved Processes can have different durations and completion behavior.
+
+##### Unattended Process
+
+If Nadir does not need to remain personally involved, committing the Process does **not** force time forward to completion.
+
+Instead, the Process advances as game time passes **while Nadir is doing something else**.
+
+Concrete example: putting `Rat Meat` on a lit camp fire starts a cooking Process. The meat progresses while the fire remains lit and Nadir spends time on other activities. Starting the cooking Process itself does not jump time forward until the meat is done.
+
+A bowl on a condenser is another example of an unattended Process: its progress can depend on room moisture, room temperature, and the game time that passes while Nadir is occupied elsewhere.
+
+##### Process progression and completion
+
+There is no universal progress calculation or universal completion transformation. Each Process defines what it needs.
+
+For unattended Processes, progress can depend on relevant world state and elapsed game time. Conditions can therefore speed up, slow down, or stop progress.
+
+Completion is also process-specific. A Process may preserve and return tools, consume input cards, create output cards, change attributes, or combine those effects.
+
+`Skinning` is the confirmed example: the knife returns, the dead rat is consumed, and `Rat Skin` plus `Rat Meat` are created.
+
+An anchored Inventory card, including one of Nadir's cards, can be dragged onto a Room card to start a legal Process without changing its home zone. How an **ongoing unattended** cross-zone Process with an anchored participant is visually represented remains open. Nadir-involved Processes use the temporary Process window while time advances to completion.
 
 #### Connection
 
@@ -196,7 +221,8 @@ Whenever the player drags a card:
 3. Consequences that Nadir/the player currently understands may be previewed before the drop is committed.
 4. Meaningful known danger may be communicated even when an exact outcome remains uncertain.
 5. Known uncertain likelihood should be communicated with calibrated plain language rather than routine percentages; exact wording remains provisional.
-6. Invalid targets should not suggest that they accept the card.
+6. An available Process may communicate its action name on the target before commitment, as `Skin` does when a knife is moved onto a dead rat.
+7. Invalid targets should not suggest that they accept the card.
 
 Example: dragging food over **Body** should preview something like:
 
@@ -221,6 +247,7 @@ For the first prototype, do **not** add a second hidden stomach/fullness system.
 - Exploratory play should not cause severe, unforeseeable punishment. Meaningful danger should be reasonably telegraphed even when details remain unknown.
 - A player's uncertainty should come from the situation, incomplete knowledge, discovery, and genuine risk — not from unclear UI rules.
 - Known danger does not imply known outcome, but when Nadir understands the likelihood the player should receive a clear non-numeric sense of how strongly the odds lean.
+- Game time should primarily advance through Nadir's activities; unattended Processes can progress concurrently with time Nadir spends doing something else rather than creating an independent real-time pressure loop.
 - Avoid adding systems merely because comparable survival games have them.
 - Keep the play area readable; complexity should emerge from combinations of cards and attributes.
 - No direct player violence is part of the broader concept; defensive violence, if present later, is indirect/automated.
