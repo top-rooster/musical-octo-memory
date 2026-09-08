@@ -26,10 +26,9 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **CARD-05 [P1]** - Is anything besides title, picture, and attributes shown on a card?
-2. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
-3. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
-4. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
+1. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
+2. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
+3. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
 
 ---
 
@@ -80,11 +79,18 @@ Cards created from the master are separate **card instances**. Each instance rec
 
 Two identical objects are therefore still two separate cards. A `Stack` only compresses their presentation; it does not merge the instances.
 
-## CARD-05 - Additional card-face information
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P1
+## CARD-D05 - First-release card face
+**Status:** DECIDED BY SIMON
 
-Title, picture, and all attributes are visible. Decide whether anything else is ever shown permanently, on hover/selection, or only during interactions.
+For the first release, a normal card shows only:
+
+- title/name,
+- picture,
+- visible attributes.
+
+Do not add description text or other permanent card-face information for the first release.
+
+Simon expects that a description may become useful later, but that is explicitly deferred rather than part of the first-release card model.
 
 ## CARD-06 - Card size
 **Status:** DEFERRED
@@ -115,6 +121,12 @@ All interactable entities are cards. It remains undecided whether non-interactab
 **Priority:** P2
 
 If an instance becomes materially different, does it switch master definition, get replaced by another card instance, or use another rule? Also decide whether an instance can ever override its master's name/picture.
+
+## CARD-12 - Card descriptions
+**Status:** DEFERRED
+**Priority:** P2
+
+A description is not part of the first release. Revisit later if cards need explanatory or narrative text beyond title, picture, and visible attributes.
 
 ---
 
@@ -193,17 +205,24 @@ Dragging a Stack separates its top card as an individual card.
 
 The Stack count is presentation, not currently a normal card `Value`.
 
+## STACK-D04 - Stack members must be identical in current attributes
+**Status:** DECIDED BY SIMON
+
+Cards can share a `Stack` only when they are the same card type and have identical current attributes.
+
+In practice this means:
+
+- they come from the same master definition,
+- their current Marker sets are identical,
+- their current Value attributes and values are identical.
+
+If one instance has different attributes from another, they are no longer identical for stacking and cannot share the same Stack.
+
 ## STACK-02 - Process completion result
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
 When a Process reaches `Progress 100`, how is its result specified: attribute changes, consumed cards, transformed cards, separation, created cards, or some combination? This may be process-specific.
-
-## STACK-03 - What counts as identical for a Stack?
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Does sharing the same master definition suffice, or must instances also have identical current attributes/state before they can be compressed into one Stack?
 
 ## MOVE-02 - Inventory capacity
 **Status:** OPEN - SIMON TO DECIDE
