@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
-2. **NADIR-03 [P2]** - How is equipment represented?
-3. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
-4. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
-5. **TARGET-01 [P2]** - Should highlights differ by interaction type?
+1. **NADIR-03 [P2]** - How is equipment represented?
+2. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
+3. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
+4. **TARGET-01 [P2]** - Should highlights differ by interaction type?
+5. **TARGET-02 [P2]** - Should dangerous legal interactions use the normal target highlight?
 
 ---
 
@@ -136,6 +136,24 @@ Confirmed example:
 This is distinct from ordinary state changes. A card can still change its own Values or Markers in place without being discarded when it remains the same card identity.
 
 Do not model a material identity change by silently switching an existing instance to another master definition or overriding its master name/picture.
+
+## DATA-D01 - Card master data is authored in terse text files
+**Status:** DECIDED BY SIMON
+
+All authored card data is stored in plain text files and loaded by the game code. Card master definitions must not be duplicated as hard-coded TypeScript/React constants.
+
+The authoring format follows the earlier Safe Room **Data language** direction: extremely low boilerplate, easy to edit from a phone, no required tabs or braces, no explicit list/array lengths, and no repeated field names such as `name` or `damage` where context already makes them obvious.
+
+The detailed authoring constraints live in `docs/data-language.md`. Code may parse, validate, index, and transform this data into runtime structures, but the text files remain the authored source of truth.
+
+## DATA-D02 - Level design is loaded from the same text-data system
+**Status:** DECIDED BY SIMON
+
+The game's authored level design is also stored as text data and read by the code rather than being embedded in room-specific setup code.
+
+At minimum this includes rooms and the card instances/starting state placed in them. As more authored world relationships become implementation-relevant, extend the text-data format rather than moving level facts into application code.
+
+Card data and level design should share the same low-boilerplate authoring philosophy and parser/tooling family described in `docs/data-language.md`.
 
 ## CARD-10 - Other non-interactable state and temporary conditions
 **Status:** OPEN - SIMON TO DECIDE
@@ -343,7 +361,7 @@ There is no single universal Action completion transformation. An Action can ret
 
 There is no single universal Process completion transformation. Each Process defines its own result when its progress reaches the completion state.
 
-A Process may discard cards, draw replacement/output cards, change attributes, separate participants, remove itself, or combine such results.
+A Process may discard cards, draw replacement/output cards, change attributes, separate its participants, remove itself, or combine such results.
 
 Confirmed examples include:
 
@@ -783,11 +801,14 @@ A water container can be dragged onto a Fever card. That interaction:
 
 The exact Fever recovery rate, the exact player-facing name of Fever's process progress, and the exact representation of an emptied water container are not yet decided.
 
-## NADIR-02 - Injury representation beyond simple condition cards
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
+## NADIR-D08 - All injuries are Processes for now
+**Status:** DECIDED BY SIMON
 
-`Flesh Wound` and `Burn Wound` are confirmed single-card Processes. Decide later whether all injuries use a similar condition-Process model or whether some persistent/complex injuries need another representation.
+For now, every injury is represented as a **Process**.
+
+`Flesh Wound` and `Burn Wound` remain concrete single-card examples. Future injury types should use the Process model unless a later concrete design need causes Simon to revise this rule.
+
+This is a current design rule rather than a claim that no future exception can ever exist.
 
 ## NADIR-03 - Equipment representation
 **Status:** OPEN - SIMON TO DECIDE
@@ -1009,7 +1030,7 @@ How much is objectively fixed versus left to interpretation/discovery order?
 These are ChatGPT suggestions, not Simon decisions.
 
 - **IMPL-01:** keep interaction legality/state transitions outside one-off presentation code.
-- **IMPL-02:** use concise data-driven card definitions where it reduces boilerplate.
+- **IMPL-02:** keep the parser/runtime model simple and let the text data remain the authored source of truth.
 - **IMPL-03:** highlighting and committing should use the same legality rules.
 - **IMPL-04:** preview and commit should use the same deterministic effect calculation for information the preview actually reveals.
 - **IMPL-05:** knowledge state should gate what the preview layer reveals without changing the underlying interaction result.
