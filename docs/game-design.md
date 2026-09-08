@@ -45,9 +45,19 @@ Examples: `Player`, `Anchored`, `Powered`, `Health 100`, `Progress 42`.
 
 #### Anchored
 
-`Anchored` is a Marker that prevents a card from being transferred between Room and Inventory. It does not prevent repositioning within the current zone or dragging the card onto another card for an interaction.
+`Anchored` is a Marker that prevents a card from being persistently transferred out of its current/home zone.
 
-The introduction of the Nadir zone does not yet redefine `Anchored`; exact transfer restrictions involving that zone remain open if needed.
+Anchored does **not** mean the card cannot be dragged. An anchored card can still:
+
+- be repositioned within its home zone,
+- be dragged onto another card for an interaction,
+- cross a zone boundary during that interaction drag when the target card is in another zone.
+
+Crossing a zone boundary during an interaction drag does not transfer the anchored card to that zone. Its persistent home remains unchanged.
+
+For Nadir specifically, all cards representing or currently applying to him in the Nadir zone are `Anchored`. They cannot be persistently moved out of the Nadir zone, but they can be dragged onto cards in another zone to start a Process when that interaction is legal.
+
+Exactly how a cross-zone Process is visually presented while an anchored Nadir card remains owned by the Nadir zone is not yet decided.
 
 ### Zones and positioning
 
@@ -59,7 +69,7 @@ The main play space has three zones:
 
 The Nadir zone replaces the earlier assumption that Nadir's representation lives in Inventory. Nadir remains represented through cards rather than through a separate character sheet or alternate character views.
 
-Cards can be moved between zones when the relevant rules allow it. The exact transfer rules for the Nadir zone are not yet fully decided.
+All of Nadir's cards in the Nadir zone are `Anchored` and cannot persist outside that zone. It remains undecided whether non-Nadir cards may ever persist in the Nadir zone.
 
 Within a zone, every card can be positioned to the player's liking. Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
@@ -120,6 +130,8 @@ Examples:
 - Rat meat on a camp fire progresses with elapsed time while the camp fire is lit.
 - A bowl on a condenser progresses according to room moisture, room temperature, and elapsed time.
 
+An anchored Nadir card can be dragged onto a target card in another zone to start a Process without changing its persistent home zone. The visual representation of that cross-zone participation is still open.
+
 #### Connection
 
 A Connection is a persistent mechanically meaningful relationship between cards. Creating it starts the effect immediately.
@@ -153,6 +165,8 @@ Confirmed examples include:
 
 These condition cards exist while the condition applies. Their creation, progression, healing, expiry, and removal rules are not yet decided.
 
+All of Nadir's persistent and temporary condition cards are `Anchored` to the Nadir zone. They cannot persist in Room or Inventory, but can still be dragged onto a card in another zone for a legal interaction, explicitly including starting a Process.
+
 This gives the Nadir zone two kinds of content without introducing a separate UI model:
 
 - persistent cards that describe ongoing parts of Nadir,
@@ -175,7 +189,7 @@ Uncertainty can remain after the danger is understood. Attempting to repair an e
 
 When Nadir understands an uncertain risk, the UI should communicate **likelihood clearly but normally without numerical probability**. The wording must have enough resolution that the player can distinguish materially different odds — for example, a roughly even gamble from an outcome that is clearly favored — without displaying percentages such as `50%` or `75%`.
 
-Coarse labels such as only `Low`, `Moderate`, and `High` are not precise enough for this purpose. The exact user-facing wording can be tested later, but it should let the player make an informed judgment about how strongly the odds lean while keeping the game out of spreadsheet/chess territory.
+Coarse labels such as only `Low`, `Moderate`, and `High` are not precise enough for this purpose. The exact user-facing wording remains provisional and can be revisited after UI testing; it is not locked yet.
 
 The intended information progression is therefore closer to **unknown → suspected → understood** than to either complete opacity or complete prediction.
 
@@ -187,7 +201,7 @@ Whenever the player drags a card:
 2. Legal zone placement for movement should remain legible without being confused with a card interaction target.
 3. Consequences that Nadir/the player currently understands may be previewed before the drop is committed.
 4. Meaningful known danger may be communicated even when an exact outcome remains uncertain.
-5. Known uncertain likelihood should be communicated with calibrated plain language rather than routine percentages.
+5. Known uncertain likelihood should be communicated with calibrated plain language rather than routine percentages; exact wording remains provisional.
 6. Invalid targets should not suggest that they accept the card.
 
 Example: dragging food over **Body** should preview something like:
