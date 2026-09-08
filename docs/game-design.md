@@ -90,6 +90,8 @@ Inventory cards, including Nadir's anchored cards and condition cards, may still
 
 Within a zone, every card can be positioned to the player's liking. Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
+A legal transfer of a card between **Room** and **Inventory** is always free. The zone change itself does not advance game time, create noise, or cause another gameplay consequence. Rules such as `Anchored`, Inventory capacity, or other legality constraints may prevent a transfer, but a successful transfer has no cost.
+
 Movement is distinct from interaction.
 
 ### Universal interaction language
