@@ -33,6 +33,24 @@ Cards do not currently have separate categories, tags, or capabilities. A card i
 
 Whether non-interactable state or temporary conditions should also use card representation is not yet decided.
 
+### Attributes
+
+All card attributes are visible on the card. There are no hidden/internal card attributes in the current model.
+
+Every attribute is represented by an icon.
+
+There are two attribute forms:
+
+- **icon only** — the presence of the attribute itself carries the meaning,
+- **icon plus integer** — the attribute also has a numerical value.
+
+Examples on Nadir:
+
+- `Player` — icon only,
+- `Health 100` — icon plus integer.
+
+Working terminology for these two forms is still undecided. ChatGPT has suggested **Marker attribute** for icon-only attributes and **Value attribute** for icon-plus-integer attributes; these names are not yet a design decision.
+
 ### Zones
 
 The main play space has at least two conceptual zones:
