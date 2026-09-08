@@ -53,6 +53,8 @@ Do not implement these during Milestone 1:
 - the `Skinning` Action, `Cutting Tool`, tool Durability behavior, or other Action-specific completion transformations,
 - unattended **Process** progression while Nadir performs Actions or other time-consuming activities,
 - Process completion transformations,
+- `Spoilage`, `Dead Rat` → `Rotten Meat`, rotten-food penalties, or other timed food decay,
+- dehydration simulation or Burn Wound effects on dehydration,
 - ongoing cross-zone Process presentation for anchored participants,
 - temporary condition creation/removal/healing rules,
 - complete survival simulation,
