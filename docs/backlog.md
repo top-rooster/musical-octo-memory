@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **INTERACT-04 [P2]** - How do immediate interactions handle time/noise consequences?
-2. **WOUND-03 [P2]** - Which interactions change `Clean` and `Dress`, and how?
-3. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
-4. **NADIR-03 [P2]** - How is equipment represented?
-5. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
+1. **WOUND-03 [P2]** - Which interactions change `Clean` and `Dress`, and how?
+2. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
+3. **NADIR-03 [P2]** - How is equipment represented?
+4. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
+5. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
 
 ---
 
@@ -234,13 +234,13 @@ Mechanically/code-wise, this is the same Process progress concept regardless of 
 
 There is no universal progress calculation. Each Process defines its own progression from relevant state and elapsed game time.
 
-A Process progresses as game time passes while Nadir is occupied with Actions or other activities. Relevant conditions can speed up, slow down, or stop it.
+A Process progresses only when game time advances through an **Action**. Relevant conditions can speed up, slow down, or stop it.
 
 Examples:
 
 - `Dead Rat` is a single-card Process whose visible progress is `Spoilage`; at 100 the Dead Rat is discarded and `Rotten Meat` is drawn at the same location,
-- `Rat Meat` on a lit camp fire progresses while the fire is lit and Nadir spends time doing something else,
-- a bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time,
+- `Rat Meat` on a lit camp fire progresses while the fire is lit and Actions advance game time,
+- a bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time created by Actions,
 - `Flesh Wound` and `Burn Wound` are single-card Processes whose progress represents healing,
 - `Fever` is a single-card Process whose progress represents recovery and that disappears when complete.
 
@@ -249,11 +249,11 @@ Examples:
 
 The name **Process** is reserved for ongoing change that does not require Nadir's continuous personal involvement.
 
-Starting or existing as a Process does not itself force game time forward to completion. It advances when game time passes because Nadir is doing something else.
+Starting or existing as a Process does not itself advance game time. A Process advances when an **Action** advances game time.
 
 A Process does not have to be a multi-card stack. `Dead Rat` spoilage, `Flesh Wound`, `Burn Wound`, and `Fever` are confirmed single-card Processes.
 
-Concrete multi-card example: putting `Rat Meat` on a lit camp fire starts a cooking Process. The meat cooks while the fire is lit and Nadir spends time on other activities.
+Concrete multi-card example: putting `Rat Meat` on a lit camp fire starts a cooking Process. The meat cooks while the fire is lit as Nadir performs Actions that advance game time.
 
 ## PROCESS-D03 - Process progress labels are UI names over the same mechanic
 **Status:** DECIDED BY SIMON
@@ -271,14 +271,17 @@ Work that requires Nadir's personal involvement is called an **Action**, not a P
 
 An Action is initiated through the same universal card-on-card interaction language, but it does not remain as an ongoing card stack.
 
+**Actions are the only mechanism that advances game time.** If something is intended to consume game time, it must be represented as an Action.
+
 When an Action is committed:
 
 1. an Action window opens,
 2. the window shows the Action and its participating cards,
 3. the window animation represents the Action's duration,
 4. the corresponding amount of game time advances,
-5. the Action completes when the window animation terminates,
-6. its Action-specific completion result is applied.
+5. all active Processes update from that elapsed game time,
+6. the Action completes when the window animation terminates,
+7. its Action-specific completion result is applied.
 
 Actions do **not** use a Process progress attribute. The Action window itself communicates the ongoing completion/time passage.
 
@@ -374,7 +377,7 @@ Eating currently uses **Body** as the target. The ingestion Marker is what tells
 
 `Dead Rat` is a single-card Process whose visible progress Value is named `Spoilage`.
 
-Spoilage increases over game time. At `Spoilage 100`:
+Spoilage increases as Actions advance game time. At `Spoilage 100`:
 
 1. discard the `Dead Rat` card;
 2. draw a `Rotten Meat` card;
@@ -449,11 +452,16 @@ The player should receive whatever preview, warning, or risk information Nadir c
 
 An `Action` window is part of executing and displaying an Action, not a confirmation prompt. Dropping the source card commits the Action before that window runs.
 
-## INTERACT-04 - Time/noise consequences
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
+## INTERACT-D06 - Only Actions advance game time
+**Status:** DECIDED BY SIMON
 
-Action time behavior is decided by ACTION-D01. Processes consume elapsed game time indirectly as Nadir does other things. Other immediate interactions may still need separate time/noise rules.
+All game-time advancement requires an **Action**.
+
+Immediate interactions, movement, Stack changes, Process creation, and Connection changes do not advance game time by themselves. If an interaction needs to consume time, it must be modeled as an Action.
+
+Processes respond to elapsed game time but never create that elapsed time themselves.
+
+This resolves the time portion of the earlier INTERACT-04 question. Noise behavior is intentionally deferred with the rest of the noise mechanic.
 
 ---
 
@@ -622,11 +630,11 @@ The exact interactions, source cards, Action durations, rates, and formulas that
 
 `Fever` is a **single-card Process**.
 
-- It has a process progress Value from 0 to 100 representing recovery over game time. Its eventual player-facing label can be process-specific; no exact label is fixed yet.
+- It has a process progress Value from 0 to 100 representing recovery as Actions advance game time. Its eventual player-facing label can be process-specific; no exact label is fixed yet.
 - The Fever card disappears when its process progress reaches 100.
 - Dragging a water container onto a Fever card removes that Fever card and empties the water container.
 
-The exact Fever recovery rate/duration is not yet fixed. The exact representation of the now-empty container is also not yet decided. Whether treating Fever with water consumes game time has not yet been separately decided.
+The water-on-Fever interaction does not advance game time unless it is later redesigned as an Action. The exact Fever recovery rate/duration and exact representation of the now-empty container are not yet fixed.
 
 ## NADIR-D07 - All Nadir cards are Anchored to Inventory
 **Status:** DECIDED BY SIMON
@@ -663,12 +671,14 @@ The exact card interactions, materials, Action durations, Value changes, and rul
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Which source cards can clean or dress a wound, are those interactions Actions, how much do they change `Clean`, when is `Dress` added/removed, and do those interventions consume materials or time?
+Which source cards can clean or dress a wound, are those interactions Actions, how much do they change `Clean`, when is `Dress` added/removed`, and do those interventions consume materials?
+
+Any cleaning or dressing interaction that advances game time must be an Action.
 
 ## BURN-D01 - Burn Wounds accelerate dehydration
 **Status:** DECIDED BY SIMON
 
-A `Burn Wound` carries a Value whose effect is to accelerate Nadir's dehydration over game time.
+A `Burn Wound` carries a Value whose effect is to accelerate Nadir's dehydration as Actions advance game time.
 
 This confirms dehydration as a survival pressure in the design, but not its final representation. The burn Value's name/scale, dehydration's representation, and the exact acceleration formula remain open.
 
@@ -682,14 +692,15 @@ This establishes Fever accumulation as a lethal escalation path from unmanaged w
 ## FEVER-D02 - Fever recovers over time or can be removed with water
 **Status:** DECIDED BY SIMON
 
-`Fever` is a single-card Process that recovers as game time passes and removes itself when its process progress reaches 100.
+`Fever` is a single-card Process that recovers as Actions advance game time and removes itself when its process progress reaches 100.
 
 A water container can be dragged onto a Fever card. That interaction:
 
 - removes the targeted Fever card;
-- empties the water container.
+- empties the water container;
+- does not itself advance game time unless it is later redesigned as an Action.
 
-The exact Fever recovery rate is not yet fixed. The exact player-facing name of Fever's process progress, the exact representation of an emptied water container, and whether the water treatment itself consumes game time are not yet decided.
+The exact Fever recovery rate, the exact player-facing name of Fever's process progress, and the exact representation of an emptied water container are not yet decided.
 
 ## NADIR-02 - Injury representation beyond simple condition cards
 **Status:** OPEN - SIMON TO DECIDE
@@ -746,7 +757,7 @@ Common scale such as 0-100 or semantics-specific ranges?
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-How do survival pressures change as Actions advance game time without creating arbitrary constant real-time pressure?
+How do survival pressures respond when Actions advance game time?
 
 Burn Wounds accelerating dehydration is one confirmed modifier that this eventual rule must support.
 
@@ -762,7 +773,7 @@ Risk should often come from player-chosen actions/exposure rather than an artifi
 ## THREAT-D02 - Noise can make productive actions dangerous
 **Status:** DECIDED BY SIMON
 
-The player should know before deliberately choosing a meaningfully noisy action.
+The high-level possibility that noise can make productive actions dangerous remains part of the broader concept, but its mechanics are intentionally shelved for now.
 
 ## THREAT-D03 - Search pressure requires a credible reason
 **Status:** DECIDED BY SIMON
@@ -775,40 +786,40 @@ Attacks/searches do not happen merely to tax progress. Genuinely silent periods 
 Violent defense, if present, is indirect/automated.
 
 ## NOISE-01 - Mechanical representation
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Numerical value, discrete event, spatial signal, or combination?
-
-## NOISE-02 - Accumulation/decay/propagation
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-How does noise persist and travel?
-
-## NOISE-03 - Risk information visible to player
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-How much detectability/search risk is visible, subject to the knowledge-dependent preview rules above?
-
-## NOISE-04 - Environmental masking
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-How can weather/external conditions create safer windows for noisy actions?
-
-## NOISE-05 - Persistent enemy learning
-**Status:** OPEN - SIMON TO DECIDE
+**Status:** DEFERRED
 **Priority:** P3
 
-Can repeated noise teach searchers where to investigate?
+Noise mechanics are shelved until the design direction is clearer. Do not choose a representation yet.
+
+## NOISE-02 - Accumulation/decay/propagation
+**Status:** DEFERRED
+**Priority:** P3
+
+Shelved with the noise mechanic.
+
+## NOISE-03 - Risk information visible to player
+**Status:** DEFERRED
+**Priority:** P3
+
+Shelved with the noise mechanic.
+
+## NOISE-04 - Environmental masking
+**Status:** DEFERRED
+**Priority:** P3
+
+Shelved with the noise mechanic.
+
+## NOISE-05 - Persistent enemy learning
+**Status:** DEFERRED
+**Priority:** P3
+
+Shelved with the noise mechanic.
 
 ## NOISE-06 - Avoid disguised danger meter
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
+**Status:** DEFERRED
+**Priority:** P3
 
-Mechanics must preserve the credible-threat rule rather than making attacks inevitable through meter filling.
+Shelved with the noise mechanic. Preserve the earlier concern against turning threat into an inevitable meter when noise is revisited.
 
 ---
 
