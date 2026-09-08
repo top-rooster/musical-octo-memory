@@ -26,13 +26,12 @@ Normally discuss only the single highest-priority open decision. Do not dump the
 
 # Current decision queue
 
-1. **CARD-02 [P0]** - What information must every card contain or display?
-2. **CARD-03 [P0]** - Do cards use categories, composable capabilities/tags, or both?
-3. **CARD-04 [P1]** - How does a specific card instance differ from its reusable definition?
-4. **CARD-05 [P1]** - What belongs permanently on a card face versus contextual reveal?
-5. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
-6. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
-7. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
+1. **CARD-03 [P0]** - Do cards use categories, composable capabilities/tags, or both?
+2. **CARD-04 [P1]** - How does a specific card instance differ from its reusable definition?
+3. **CARD-05 [P1]** - What belongs permanently on a card face versus contextual reveal?
+4. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
+5. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
+6. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
 
 Everything else is preserved below and should not compete for attention yet.
 
@@ -94,6 +93,18 @@ This means card representation is broader than inventory items. It also means na
 
 This decision does **not yet** decide whether non-interactable state or temporary conditions may also use card visuals.
 
+### CARD-D02 - Every card has a title and picture; attributes are optional
+**Status:** DECIDED BY SIMON
+
+Every card must display:
+
+- a name/title,
+- a picture.
+
+A card may additionally display any number of attributes, including none.
+
+No other universal card information has been decided. In particular, descriptions, categories, locations, capabilities, interaction rules, identifiers, and other state are not automatically required merely because a thing is a card.
+
 ## Threat and pacing
 
 ### THREAT-D01 - No mandatory constant real-time pressure
@@ -148,21 +159,16 @@ His notes can reflect troubling player actions from Nadir's perspective rather t
 All interactable entities are cards. Confirmed examples: materials, machines, food, Nadir, and passages to other rooms.
 
 ## CARD-02 - What must every card contain or display?
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P0
+**Status:** DECIDED BY SIMON
 
-Candidate concepts suggested by ChatGPT:
+Every card must have:
 
-- unique instance identity,
-- player-facing name,
-- reusable definition/type reference,
-- current zone or anchored location,
-- capabilities or tags,
-- visible attributes,
-- interaction rules,
-- entity-specific state.
+- a name/title,
+- a picture.
 
-**Suggested by ChatGPT:** stable identity and player-facing name are likely universal; most other information should be optional.
+Every card may optionally have zero or more attributes.
+
+Nothing else is currently required on every card.
 
 ## CARD-03 - Categories, capabilities/tags, or both?
 **Status:** OPEN - SIMON TO DECIDE
@@ -193,9 +199,11 @@ Questions:
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P1
 
-Questions:
+Simon has decided that the title and picture are always present and attributes are optional.
 
-- What is permanently visible?
+Still open:
+
+- What, if anything, besides title/picture/attributes is permanently visible?
 - What appears on hover or selection?
 - What appears only during drag/action preview?
 - How visually different may card kinds become while retaining one common grammar?
