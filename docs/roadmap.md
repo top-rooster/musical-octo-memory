@@ -7,14 +7,15 @@ Build a small browser prototype whose only purpose is to validate the core card 
 ### Required behavior
 
 - Use React + TypeScript + Vite.
-- Show a **Room** area and an **Inventory** area on one screen.
-- Show an anchored **Nadir** card in Inventory.
-- Nadir has visible `Hunger` and `Health` attributes.
+- Show three zones on one screen: **Room**, **Inventory**, and **Nadir**.
+- The **Nadir** zone contains the card or cards that represent Nadir.
+- For Milestone 1, use one Nadir card with visible `Hunger` and `Health` attributes. This is a prototype simplification and does not decide the final multi-card division of Nadir.
 - Seed the prototype with a few movable cards, including at least two food cards with different hunger effects and one non-food item.
 - Cards can be dragged between Room and Inventory when the destination is legal.
-- While dragging a card, all legal drop targets highlight.
-- Dragging food over Nadir previews the exact resulting hunger value in the form `67 → 98` before the drop.
-- Dropping food on Nadir applies the effect and consumes the food card.
+- Gameplay interactions are card-on-card: dragging one card onto another card initiates the interaction.
+- While dragging a card, all legal card interaction targets highlight.
+- Dragging food over the Nadir card previews the exact resulting hunger value in the form `67 → 98` before the drop.
+- Dropping food on the Nadir card applies the effect and consumes the food card.
 - Hunger is clamped to 0–100.
 - Invalid drops leave state unchanged.
 - The UI should be plain and readable. Do not spend time on final art, animation polish, sound, narrative content, persistence, combat, crafting, or world simulation yet.
@@ -34,6 +35,7 @@ A developer can clone the repo, install dependencies, start the app, and immedia
 
 Do not implement these during Milestone 1:
 
+- the final division of Nadir across multiple cards,
 - complete survival simulation,
 - hidden stomach/fullness mechanics,
 - NPC schedules,
