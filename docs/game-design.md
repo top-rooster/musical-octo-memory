@@ -93,7 +93,7 @@ A card-on-card interaction does not have to remain stacked afterward. It may res
 
 ### Stack, Action, Process, and Connection
 
-There are three persistent forms of deliberate card combination: **Stack**, **Process**, and **Connection**. **Action** is a separate interaction type for work Nadir personally performs; it resolves through a temporary Action window instead of remaining as an ongoing card combination.
+There are three persistent forms of deliberate card state/combination: **Stack**, **Process**, and **Connection**. **Action** is a separate interaction type for work Nadir personally performs; it resolves through a temporary Action window instead of remaining as an ongoing card combination.
 
 #### Stack
 
@@ -145,9 +145,11 @@ The duration and result belong to the specific Action. Other Actions may use dif
 
 #### Process
 
-A **Process** is unattended work that can continue while Nadir spends game time doing something else.
+A **Process** is unattended change that can continue while Nadir spends game time doing something else.
 
 Starting a Process does **not** force time forward to completion. Instead, it progresses when game time passes because Nadir is occupied with Actions or other activities.
+
+A Process can involve several cards, as with cooking, or it can be embodied by a single card whose state changes over time, as with a wound.
 
 Processes use a visible `Progress` Value from 0 to 100. There is no universal progress calculation: each Process defines its own progression from relevant state and elapsed game time. Conditions may speed up, slow down, or stop progress.
 
@@ -155,8 +157,9 @@ Concrete examples:
 
 - `Rat Meat` placed on a lit camp fire starts a cooking Process. It progresses while the fire remains lit and Nadir spends time doing other things.
 - A bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time while Nadir is occupied elsewhere.
+- `Flesh Wound` and `Burn Wound` are single-card Processes. Their `Progress` represents healing, and the wound card disappears when `Progress` reaches 100.
 
-When `Progress` reaches 100, completion is Process-specific. A Process can consume or transform participating cards, create output cards, change attributes, separate participants, or combine these effects.
+When `Progress` reaches 100, completion is Process-specific. A Process can consume or transform participating cards, create output cards, change attributes, separate participants, remove itself, or combine these effects.
 
 If a future Process needs an `Anchored` participant whose home is another zone, its ongoing visual presentation still needs to be decided. There is no current concrete example requiring this.
 
@@ -190,10 +193,26 @@ Confirmed examples include:
 
 - `Exhausted`
 - `Flesh Wound`
-
-These condition cards exist while the condition applies. Their creation, progression, healing, expiry, and removal rules are not yet decided.
+- `Burn Wound`
 
 All of Nadir's persistent cards and temporary condition cards are `Anchored` to Inventory. They cannot come to rest in Room as ordinary placement, but they can cross the boundary while being dragged and can be dropped onto a Room card for a legal interaction. If released in Room without a legal accepting interaction, they return to Inventory.
+
+#### Condition lifecycles
+
+Condition lifecycles are condition-specific rather than using one universal timer/removal rule.
+
+**Exhausted** is removed by sleeping. Dragging `Exhausted` onto **Body** exposes the `Sleep` Action. Committing it advances game time through the normal Action window, and when the Action completes the `Exhausted` card disappears. The exact sleep duration and any additional effects of sleep are not yet decided.
+
+**Flesh Wound** and **Burn Wound** are single-card Processes:
+
+- each has `Progress 0–100`, representing healing;
+- each disappears when `Progress` reaches 100;
+- each has an `Infection` Value that rises over time if the wound is not adequately managed;
+- wounds need cleaning to keep Infection down;
+- wounds can be dressed to improve their healing rate;
+- a dressed wound also causes Infection to decrease over time.
+
+The exact representation and card interactions for cleaning and dressing are not yet fixed. The consequences of severe Infection are also still open.
 
 ### Discovery, knowledge, risk, and previews
 
