@@ -22,12 +22,13 @@ Confirmed examples include:
 
 A card is therefore not synonymous with an inventory item. Some cards can be carried, some are anchored, and some represent fixed world entities or navigation possibilities.
 
-Every card must display:
+For the first release, every normal card face shows only:
 
 - a name/title,
-- a picture.
+- a picture,
+- zero or more visible attributes.
 
-A card may additionally have zero or more attributes. Attributes are optional rather than a universal requirement.
+Do not add description text or other permanent card-face information for the first release. A description may become relevant later and should be revisited then.
 
 Cards do not currently have separate categories, tags, or capabilities. A card is functionally defined only by its attributes. Do not introduce another classification or capability system unless a concrete design need appears later that attributes cannot satisfy.
 
@@ -95,6 +96,9 @@ There are three forms of deliberate card stacking: **Stack**, **Process**, and *
 A Stack is a visual convenience for identical cards that would otherwise occupy unnecessary space.
 
 - The cards remain separate card instances.
+- All cards in the Stack must come from the same master definition.
+- All cards in the Stack must have identical current attributes.
+- If any Marker differs, or any Value/value differs, the cards are not identical and cannot share a Stack.
 - The cards do not all need to remain individually exposed.
 - The Stack shows a count of how many cards it represents.
 - It has no mechanical effect merely because it exists.
