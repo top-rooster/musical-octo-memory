@@ -41,7 +41,11 @@ Every attribute is represented by an icon. There are two official forms:
 - **Marker** — icon only; presence carries the meaning.
 - **Value** — icon plus an integer value.
 
-Examples: `Player`, `Anchored`, `Powered`, `Health 100`, `Progress 42`.
+Examples: `Player`, `Anchored`, `Powered`, `Cutting Tool`, `Health 100`, `Progress 42`, `Durability 80`.
+
+Markers may describe functional roles used by interaction matching. `Cutting Tool` is a confirmed example. Anything Nadir can eat or otherwise ingest must also carry an ingestion Marker; its final user-facing name has not yet been fixed.
+
+`Durability` is an ordinary Value. A tool therefore does not need a generic `Reusable` Marker: a knife can be a `Cutting Tool` with a current `Durability` value. The scale and wear rules are still open.
 
 #### Anchored
 
@@ -91,19 +95,30 @@ An interaction always has:
 
 A given source-card/target-card pair supports **at most one interaction**. If the pair is legal, the resulting interaction is unambiguous; the player is never asked to choose between multiple Actions, Processes, Connections, or other outcomes for that same pair.
 
+Interaction legality is attribute-driven rather than hard-coded to exact card identities alone. A target may accept source cards carrying a required Marker and map that match to its interaction.
+
+Confirmed examples:
+
+- `Dead Rat` accepts a source carrying `Cutting Tool` and maps it to `Skin` / the `Skinning` Action. A knife works because it has the `Cutting Tool` Marker, not because the rat specifically recognizes a knife master definition.
+- Nadir's ingestion interaction accepts cards carrying the ingestion Marker. That Marker tells the interaction logic that the card can be dropped onto the relevant Nadir ingestion target; eating currently uses **Body**.
+
+The exact data syntax for target requirements and interaction effects is not yet fixed.
+
 Bare zone space can receive a card for legal movement/placement, but that is movement rather than an interaction.
 
-This rule applies across the game: food onto a Nadir card, medicine onto a Nadir card, a knife onto a dead rat, a machine onto a power outlet, material or tool onto a machine, a water container onto Fever, and card combinations that start Actions, Processes, or Connections.
+This rule applies across the game: food onto a Nadir card, medicine onto a Nadir card, a cutting tool onto a dead rat, a machine onto a power outlet, material or tool onto a machine, a water container onto Fever, and card combinations that start Actions, Processes, or Connections.
 
 A card-on-card interaction does not have to remain stacked afterward. It may resolve immediately, start an Action, consume a card, alter attributes, create a Stack, start a Process, create a Connection, or produce another interaction-specific result.
 
+Consumption or continued use is an interaction outcome rather than a universal `Consumable`/`Reusable` classification. For example, Skinning returns the cutting tool but consumes the dead rat; eating consumes the ingested card. Specific functional Markers and Values describe what a card can do and its current state.
+
 ### Stack, Action, Process, and Connection
 
-There are three persistent forms of deliberate card state/combination: **Stack**, **Process**, and **Connection**. **Action** is a separate interaction type for work Nadir personally performs; it resolves through a temporary Action window instead of remaining as an ongoing card combination.
+For now, the defined relationship model is considered complete. There are three persistent forms of deliberate card state/combination: **Stack**, **Process**, and **Connection**. **Action** is a separate interaction type for work Nadir personally performs; it resolves through a temporary Action window instead of remaining as an ongoing card combination. Do not introduce a fourth containment/attachment/equipment relationship unless a concrete future need cannot be represented by this model.
 
 #### Stack
 
-A Stack is a visual convenience for identical cards.
+A Stack exists solely to reduce visual card clutter in Room by compressing identical cards.
 
 - The cards remain separate card instances.
 - All cards in the Stack come from the same master definition.
@@ -124,7 +139,7 @@ A single remaining card is shown normally rather than as Stack 1. The Stack coun
 
 An **Action** is work that requires Nadir's personal involvement.
 
-The initiating cards do not have to include a Nadir card. What matters is that Nadir must personally spend the time doing the work. `Skinning` is an Action even though the initiating cards are a knife and a dead rat.
+The initiating cards do not have to include a Nadir card. What matters is that Nadir must personally spend the time doing the work. `Skinning` is an Action even though the initiating cards are a cutting tool and a dead rat.
 
 When an Action is committed:
 
@@ -139,14 +154,17 @@ Actions do **not** use a `Progress` attribute. Their progress/time passage is al
 
 Concrete example: skinning a dead rat.
 
-1. The player moves a knife onto a `Dead Rat`.
-2. The rat card displays `Skin`, the available Action.
-3. Dropping the knife commits it.
-4. A window appears displaying `Skinning` and the knife and dead rat cards.
-5. The Action represents **15 minutes** of game time.
-6. When the window animation terminates, the knife returns to where it came from.
-7. The `Dead Rat` dissolves/is consumed.
-8. A `Rat Skin` card and a `Rat Meat` card are created.
+1. `Dead Rat` accepts a source card carrying `Cutting Tool` as the starter for `Skin`.
+2. The player moves a cutting tool, such as a knife, onto `Dead Rat`.
+3. The rat card displays `Skin`, the available Action.
+4. Dropping the cutting tool commits it.
+5. A window appears displaying `Skinning` and the cutting tool and dead rat cards.
+6. The Action represents **15 minutes** of game time.
+7. When the window animation terminates, the cutting tool returns to where it came from.
+8. The `Dead Rat` dissolves/is consumed.
+9. A `Rat Skin` card and a `Rat Meat` card are created.
+
+A knife is a concrete `Cutting Tool` and has a `Durability` Value. The exact effect of Skinning on Durability has not yet been fixed.
 
 The duration and result belong to the specific Action. Other Actions may use different durations and completion effects.
 
@@ -263,15 +281,16 @@ The intended information progression is therefore closer to **unknown → suspec
 Whenever the player drags a card:
 
 1. Every card that can legally receive it as an interaction target highlights.
-2. Each legal source/target pair has at most one interaction, so a highlighted target never requires a follow-up interaction chooser.
-3. Legal zone placement for movement should remain legible without being confused with a card interaction target.
-4. Consequences that Nadir/the player currently understands may be previewed before the drop is committed.
-5. Meaningful known danger may be communicated even when an exact outcome remains uncertain.
-6. Known uncertain likelihood should be communicated with calibrated plain language rather than routine percentages; exact wording remains provisional.
-7. An available Action may communicate its name on the target before commitment, as `Skin` does when a knife is moved onto a dead rat.
-8. Invalid targets should not suggest that they accept the card.
+2. Attribute matching is part of legality: targets may accept a dragged card because it carries a required Marker such as `Cutting Tool` or the ingestion Marker.
+3. Each legal source/target pair has at most one interaction, so a highlighted target never requires a follow-up interaction chooser.
+4. Legal zone placement for movement should remain legible without being confused with a card interaction target.
+5. Consequences that Nadir/the player currently understands may be previewed before the drop is committed.
+6. Meaningful known danger may be communicated even when an exact outcome remains uncertain.
+7. Known uncertain likelihood should be communicated with calibrated plain language rather than routine percentages; exact wording remains provisional.
+8. An available Action may communicate its name on the target before commitment, as `Skin` does when a cutting tool is moved onto a dead rat.
+9. Invalid targets should not suggest that they accept the card.
 
-Example: dragging food over **Body** should preview something like:
+Example: dragging an ingestible food card over **Body** should preview something like:
 
 `Hunger 67 → 98`
 
@@ -279,9 +298,11 @@ The preview should appear on or immediately adjacent to the affected stat.
 
 ### Eating
 
-Food is consumed by dragging the food card onto **Body**.
+Anything Nadir can eat or otherwise ingest must carry a visible ingestion Marker. The exact final name of that Marker is not yet fixed.
 
-Dropping the food applies the food's hunger effect, consumes the food card, clamps Hunger to its valid range, and updates the visible Hunger value immediately.
+The ingestion Marker is what makes the card a legal source for Nadir's ingestion interaction. Eating currently uses **Body** as the receiving card.
+
+Dropping an ingestible food card on Body applies the food's hunger effect, consumes the food card, clamps Hunger to its valid range, and updates the visible Hunger value immediately.
 
 For the first prototype, do **not** add a second hidden stomach/fullness system. This remains a prototype simplification rather than a permanent design rule.
 
@@ -289,6 +310,7 @@ For the first prototype, do **not** add a second hidden stomach/fullness system.
 
 - Prefer direct manipulation over nested menus.
 - Prefer visible consequences over hidden arithmetic, while preserving meaningful discovery.
+- Let specific visible attributes define what cards can do; avoid generic classifications such as `Reusable` when a concrete functional Marker and state Value express the behavior more directly.
 - Discovery, relational understanding, exploratory play, and knowledge unlocks are intended parts of play rather than problems for the UI to eliminate.
 - Do not turn the game into exhaustive deterministic planning by revealing every consequence before commitment.
 - Exploratory play should not cause severe, unforeseeable punishment. Meaningful danger should be reasonably telegraphed even when details remain unknown.
