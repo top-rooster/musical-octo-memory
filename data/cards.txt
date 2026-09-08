@@ -5,8 +5,13 @@
 # Remaining plain lines are attributes or behavior statements.
 # Marker: name only. Value: name followed by integer.
 #
+# Every Action and Process must state an explicit duration.
+# Instant Actions use 0m.
+# If a Process duration is still undecided, the card is intentionally left
+# incomplete here rather than inventing a number.
+#
 # The data below reflects current design decisions where concrete.
-# Comments call out values/names that are still undecided.
+# Comments call out values/names/times that are still undecided.
 # The syntax itself is not yet a locked design decision.
 
 Body
@@ -24,21 +29,18 @@ Anchored
 Exhausted
 images/exhausted.png
 Anchored
-action Body Sleep
+action Body Sleep 8h
 remove self
-# Sleep duration is undecided.
 
 Flesh Wound
 images/flesh-wound.png
 Anchored
 Infection 50
-process
-clean Water Container
-15m
+# TODO: healing Process duration is undecided; Process data is incomplete until explicit.
+action Contains Water Clean 15m
 Infection -40
-empty source
-dress Sterilized
-15m
+remove Contains Water source
+action Sterilized Dress 15m
 consume source
 Dressed
 # Healing progress UI name/rate and Infection-over-time rates are undecided.
@@ -47,13 +49,11 @@ Burn Wound
 images/burn-wound.png
 Anchored
 Infection 50
-process
-clean Water Container
-15m
+# TODO: healing Process duration is undecided; Process data is incomplete until explicit.
+action Contains Water Clean 15m
 Infection -40
-empty source
-dress Sterilized
-15m
+remove Contains Water source
+action Sterilized Dress 15m
 consume source
 Dressed
 # Burn-specific dehydration Value name/starting value are undecided.
@@ -62,21 +62,20 @@ Dressed
 Fever
 images/fever.png
 Anchored
-process
-water Water Container
+# TODO: recovery Process duration is undecided; Process data is incomplete until explicit.
+accept Contains Water
 remove self
-empty source
-# Recovery progress UI name/rate are undecided.
+remove Contains Water source
+# Water-on-Fever remains an immediate interaction, not currently an Action.
 
 Dead Rat
 images/dead-rat.png
-process Spoilage
+# TODO: Spoilage Process duration is undecided; Process data is incomplete until explicit.
 accept Cutting Tool
 Skin 15m
 discard self
 draw Rat Skin
 draw Rat Meat
-# Spoilage rate and initial visible value are undecided.
 # Cutting-tool Durability cost is undecided.
 
 Rotten Meat
@@ -92,7 +91,7 @@ images/rat-skin.png
 
 Rat Meat
 images/rat-meat.png
-# Cooking behavior exists but its exact process data is not yet fixed.
+# Cooking is a Process, but its explicit duration is still undecided.
 
 Knife
 images/knife.png
@@ -104,11 +103,14 @@ images/campfire.png
 # Qualifies as the heat source for boiling/sterilization.
 # The heat-source Marker name is still undecided.
 
-Water Container
-images/water-container.png
-# Represents a container currently filled with water.
+Plastic Bottle
+images/plastic-bottle.png
+Container
+Contains Water
+# Emptying the bottle removes Contains Water; it remains the same Plastic Bottle card.
 # Partial liquid amounts are deferred.
 
-Empty Container
-images/empty-container.png
-# Exact empty-container identity/state representation is still undecided.
+# Sterilization Process sketch; exact syntax for multi-card Processes is still draft:
+# process <heat-source> + Contains Water + <non-Sterilized fabric> Sterilize 1h
+# remove Contains Water container
+# add Sterilized fabric
