@@ -12,6 +12,8 @@
 #
 # Compound requirements use +. Example: Fabric+Sterilized means the accepted
 # source card must carry both Markers.
+# Hyphens in parser-facing attribute names display as spaces in the UI.
+# Example: Contains-Water is shown as "Contains Water".
 #
 # The data below reflects current design decisions where concrete.
 # Comments call out values/names/times that are still undecided.
@@ -20,6 +22,9 @@
 Body
 images/body.png
 Anchored
+# TODO: starting Hydration value and cap are still undecided.
+process 15m
+Hydration -2
 
 Mind
 images/mind.png
@@ -45,9 +50,9 @@ if Infection 25..49 progress +1
 if Infection 50..75 progress +0
 if Infection >75 progress -1
 at progress 100 discard self
-action Contains Water Clean 15m
+action Contains-Water Clean 15m
 Infection -40
-remove Contains Water source
+remove Contains-Water source
 action Fabric+Sterilized Dress 15m
 consume source
 Dressed
@@ -59,9 +64,9 @@ images/burn-wound.png
 Anchored
 Infection 50
 # TODO: healing Process rate/duration is still undecided for Burn Wound.
-action Contains Water Clean 15m
+action Contains-Water Clean 15m
 Infection -40
-remove Contains Water source
+remove Contains-Water source
 action Fabric+Sterilized Dress 15m
 consume source
 Dressed
@@ -72,9 +77,9 @@ Fever
 images/fever.png
 Anchored
 # TODO: recovery Process duration is undecided; Process data is incomplete until explicit.
-accept Contains Water
+accept Contains-Water
 discard self
-remove Contains Water source
+remove Contains-Water source
 # Water-on-Fever remains an immediate interaction, not currently an Action.
 
 Dead Rat
@@ -90,7 +95,7 @@ draw Rat Meat
 Rotten Meat
 images/rotten-meat.png
 # Carries the ingestion Marker; its final Marker name is undecided.
-eat
+eat Body
 consume self
 draw Fever
 # Mood debuff representation/magnitude/duration are undecided.
@@ -115,12 +120,16 @@ images/campfire.png
 Plastic Bottle
 images/plastic-bottle.png
 Container
-# Contains Water is instance state, not a permanent master attribute.
-# A filled bottle instance gains Contains Water.
-# Emptying it removes Contains Water from that same card instance.
+action Body Drink 0m
+requires Contains-Water self
+Hydration +25 target
+remove Contains-Water self
+# Contains-Water is instance state, not a permanent master attribute.
+# A filled bottle instance gains Contains-Water.
+# Emptying it removes Contains-Water from that same card instance.
 # Partial liquid amounts are deferred.
 
 # Sterilization Process sketch; exact syntax for multi-card Processes is still draft:
-# process <heat-source> + Contains Water + Fabric-Sterilized Sterilize 1h
-# remove Contains Water container
+# process <heat-source> + Contains-Water + Fabric-Sterilized Sterilize 1h
+# remove Contains-Water container
 # add Sterilized fabric
