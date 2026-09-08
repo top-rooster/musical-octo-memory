@@ -41,7 +41,7 @@ Every attribute is represented by an icon. There are two official forms:
 - **Marker** — icon only; presence carries the meaning.
 - **Value** — icon plus an integer value.
 
-Examples: `Player`, `Anchored`, `Powered`, `Cutting Tool`, `Dressed`, `Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`, `Clean 70`.
+Examples: `Player`, `Anchored`, `Powered`, `Cutting Tool`, `Dress`, `Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`, `Clean 70`.
 
 Markers may describe functional roles used by interaction matching. `Cutting Tool` is a confirmed example. Anything Nadir can eat or otherwise ingest must also carry an ingestion Marker; its final user-facing name has not yet been fixed.
 
@@ -49,7 +49,7 @@ Markers may describe functional roles used by interaction matching. `Cutting Too
 
 Process progress is also represented as a normal visible Value, but its **player-facing name may be specific to the Process**. Mechanically/code-wise, these are the same progress concept. `Spoilage` on `Dead Rat` is the confirmed example: it is the visible name of that card's Process progress, not a separate timed-state system.
 
-Wounds keep treatment state in the same attribute model: `Clean` is a Value representing current wound cleanliness, while `Dressed` is a Marker whose presence means the wound is currently dressed.
+Wounds keep treatment state in the same attribute model: `Clean` is a Value representing current wound cleanliness, while `Dress` is a Marker whose presence means the wound is currently dressed.
 
 A `Burn Wound` also carries a Value whose effect is to accelerate Nadir's dehydration over time. The final name and scale of that burn-specific Value are not yet fixed, and the exact card/attribute representation of dehydration itself is still open.
 
@@ -253,15 +253,15 @@ Condition lifecycles are condition-specific rather than using one universal time
 - each disappears when its Process progress reaches 100;
 - each has an `Infection` Value that rises over time if the wound is not adequately managed;
 - each has a `Clean` Value representing current wound cleanliness;
-- a wound may carry the `Dressed` Marker; its presence means the wound is currently dressed;
+- a wound may carry the `Dress` Marker; its presence means the wound is currently dressed;
 - cleaning improves `Clean` and helps keep Infection down;
-- `Dressed` improves healing over time and causes Infection to decrease over time;
+- `Dress` improves healing over time and causes Infection to decrease over time;
 - when Infection becomes too high, healing over time is reduced;
 - severe Infection spawns a `Fever` condition card.
 
 In addition, each `Burn Wound` has another Value that accelerates Nadir's dehydration over time. The exact name/scale of that Value and the exact representation of dehydration are not yet fixed.
 
-The exact source cards, interactions, Action durations, Value changes, and rules for adding/removing `Dressed` are not yet decided. The exact Infection threshold or thresholds for impaired healing and Fever spawning are also not fixed.
+The exact source cards, interactions, Action durations, Value changes, and rules for adding/removing `Dress` are not yet decided. The exact Infection threshold or thresholds for impaired healing and Fever spawning are also not fixed.
 
 `Fever` is cumulative. If Nadir has **three Fever cards**, he dies.
 
