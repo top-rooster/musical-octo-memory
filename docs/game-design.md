@@ -134,17 +134,17 @@ Example: connecting a machine to a power outlet gives the machine the `Powered` 
 
 Nadir Veylan is represented in the dedicated **Nadir** zone rather than by a separate character sheet.
 
-For now, his persistent representation is divided across **three cards**, each covering a different domain:
+For now, his persistent representation is divided across three cards:
 
-1. **physical** — candidate names include `Health`, `Body`, `Physical`;
-2. **cognitive / will** — candidate names include `Mind`, `Cognition`, `Will`, `Super Ego`;
-3. **emotional / spiritual** — candidate names include `Emotion`, `Spirit`, `Id`.
+- **Body** — physical state,
+- **Mind** — cognitive / will state,
+- **Spirit** — emotional / spiritual state.
 
-The three-domain structure is decided. The exact user-facing card names are not. More persistent Nadir cards may be added later if a concrete need appears.
+More persistent Nadir cards may be added later if a concrete need appears.
 
 Relevant persistent character state is expressed as attributes on those cards.
 
-Conditions that currently apply to Nadir are represented as **temporary cards in the Nadir zone** rather than being forced into one of the three persistent cards.
+Conditions that currently apply to Nadir are represented as **temporary cards in the Nadir zone** rather than being forced into Body, Mind, or Spirit.
 
 Confirmed examples include:
 
@@ -167,7 +167,7 @@ Whenever the player drags a card:
 3. Potential state changes should be previewed before the drop is committed.
 4. Invalid targets should not suggest that they accept the card.
 
-Example: dragging food over the physical Nadir card should preview something like:
+Example: dragging food over **Body** should preview something like:
 
 `Hunger 67 → 98`
 
@@ -175,7 +175,7 @@ The preview should appear on or immediately adjacent to the affected stat.
 
 ### Eating
 
-Food is consumed by dragging a food card onto the relevant physical Nadir card.
+Food is consumed by dragging a food card onto **Body**.
 
 Dropping the food applies the food's hunger effect, consumes the food card, clamps Hunger to its valid range, and updates the visible Hunger value immediately.
 
