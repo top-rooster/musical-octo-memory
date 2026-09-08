@@ -35,7 +35,9 @@ The data language must map directly onto the game's visible attribute model with
 - A Marker can be represented tersely as its attribute name.
 - A Value can be represented tersely as its attribute name followed by its integer value.
 
-Examples of the intended authoring feel are `Anchored`, `Cutting Tool`, `Sterilized`, `Container`, `Contains-Water`, `Durability 80`, `Infection 50`, and `Hydration 75`.
+Examples of the intended authoring feel are `Anchored`, `Cutting Tool`, `Sterilized`, `Container`, `Contains-Water`, `Durability 80`, `Infection 50`, and `Hydration 50`.
+
+Unless Simon explicitly defines a different range for a specific Value, every Value is bounded from **0 to 100**. Value changes are clamped at those bounds by default.
 
 Parser-facing attribute names may use hyphens to avoid spaces. The UI renders those hyphens as spaces. For example, `Contains-Water` is displayed to the player as **Contains Water**.
 
@@ -88,6 +90,19 @@ There is no implicit default duration. If the duration or tick interval of an Ac
 
 Only Actions advance game time. A Process time describes how much elapsed game time must accumulate before that Process evaluates/progresses; it does not itself create elapsed time.
 
+## Conditional ranges
+
+For parser-friendly conditional data, numeric bands use explicit `start..end` syntax instead of comparison operators.
+
+Current Flesh Wound example:
+
+- `if Infection 0..25 progress +2`
+- `if Infection 25..49 progress +1`
+- `if Infection 50..75 progress +0`
+- `if Infection 75..100 progress -1`
+
+These exact ranges are Simon's current authored form. They overlap at `25` and `75`; the precedence/inclusivity semantics at those two shared boundaries are not yet fixed. Do not silently change the authored ranges or invent a precedence rule until Simon decides it.
+
 ## Current format draft
 
 `data/cards.txt` contains the first concrete draft of the card-data format using current Safe Room card decisions.
@@ -99,9 +114,11 @@ The draft currently uses:
 - the picture path as the second line;
 - Marker names as plain lines;
 - Values as `name integer`;
+- Values bounded to `0..100` by default unless explicitly overridden;
 - hyphens inside parser-facing attribute names where spaces would make parsing awkward; the UI displays those hyphens as spaces;
 - `+` between Marker names when a source must satisfy all listed Markers;
 - explicit time tokens such as `0m`, `15m`, `1h`, or `8h` on every Action/Process;
+- `start..end` numeric bands for conditional ranges;
 - `discard` for removing cards from play and `remove` for removing attributes from a surviving card;
 - short behavior verbs only where the data needs to express an Action, Process, input, output, condition, or state change.
 
