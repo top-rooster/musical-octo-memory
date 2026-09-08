@@ -5,6 +5,8 @@
 # Remaining plain lines are attributes or behavior statements.
 # Marker: name only. Value: name followed by integer.
 #
+# Unless explicitly overridden, all Values are capped from 0 to 100.
+#
 # Every Action and Process must state an explicit duration.
 # Instant Actions use 0m.
 # If a Process duration is still undecided, the card is intentionally left
@@ -22,9 +24,14 @@
 Body
 images/body.png
 Anchored
-# TODO: starting Hydration value and cap are still undecided.
+Hydration 50
+Satiation 50
+Health 80
 process 15m
 Hydration -2
+at Hydration 0 game-over
+at Satiation 0 game-over
+at Health 0 game-over
 
 Mind
 images/mind.png
@@ -45,10 +52,11 @@ images/flesh-wound.png
 Anchored
 Infection 50
 process 15m
-if Infection <25 progress +2
+if Infection 0..25 progress +2
 if Infection 25..49 progress +1
 if Infection 50..75 progress +0
-if Infection >75 progress -1
+if Infection 75..100 progress -1
+# TODO: exact boundary semantics for overlapping 25 and 75 are still unresolved.
 at progress 100 discard self
 action Contains-Water Clean 15m
 Infection -40
