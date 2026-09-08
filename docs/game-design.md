@@ -162,7 +162,7 @@ A single remaining card is shown normally rather than as Stack 1. The Stack coun
 
 An **Action** is work that requires Nadir's personal involvement and is the **only mechanism that advances game time**. If something is meant to take game time, it must be an Action.
 
-The initiating cards do not have to include a Nadir card. What matters is that Nadir must personally spend the time doing the work. `Skinning` is an Action even though the initiating cards are a cutting tool and a dead rat. Cleaning and dressing wounds are also confirmed Actions.
+The initiating cards do not have to include a Nadir card. What matters is that Nadir must personally spend the time doing the work. `Skinning` is an Action even though the initiating cards are a cutting tool and a dead rat. Cleaning and dressing wounds are also confirmed Actions; each takes **15 minutes**.
 
 When an Action is committed:
 
@@ -275,15 +275,15 @@ Condition lifecycles are condition-specific rather than using one universal time
 - water in a container can be used to clean a wound, improving the wound's `Clean` Value;
 - any fabric carrying the `Clean` Marker can be used to dress a wound; dressing gives the wound the `Dress` Marker;
 - fabric can be made clean by boiling it, which gives that fabric the `Clean` Marker;
-- cleaning a wound is an **Action**;
-- dressing a wound is an **Action**;
+- cleaning a wound is a **15-minute Action**;
+- dressing a wound is a **15-minute Action**;
 - `Dress` improves healing over time and causes Infection to decrease over time;
 - when Infection becomes too high, healing over time is reduced;
 - severe Infection spawns a `Fever` condition card.
 
 In addition, each `Burn Wound` has another Value that accelerates Nadir's dehydration as game time advances. The exact name/scale of that Value and the exact representation of dehydration are not yet fixed.
 
-Because cleaning and dressing are Actions, each runs through the normal Action window, advances game time, and causes active Processes to update during that elapsed time. Their exact Action durations, amount by which water changes wound `Clean`, whether/how much water is consumed, whether clean fabric is consumed or changed when dressing, how `Dress` is later removed, and the exact boiling interaction are not yet decided. The exact Infection threshold or thresholds for impaired healing and Fever spawning are also not fixed.
+Because cleaning and dressing are Actions, each runs through the normal Action window, advances **15 minutes** of game time, and causes active Processes to update during that elapsed time. The amount by which water changes wound `Clean`, whether/how much water is consumed, whether clean fabric is consumed or changed when dressing, how `Dress` is later removed, and the exact boiling interaction are not yet decided. The exact Infection threshold or thresholds for impaired healing and Fever spawning are also not fixed.
 
 `Fever` is cumulative. If Nadir has **three Fever cards**, he dies.
 
