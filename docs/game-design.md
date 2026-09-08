@@ -63,7 +63,7 @@ Anchored does **not** mean immovable. An anchored card can still:
 
 This is ordinary attribute-driven behavior, not a special anchored card type.
 
-### Zones
+### Zones and positioning
 
 The main play space has at least two conceptual zones:
 
@@ -71,6 +71,32 @@ The main play space has at least two conceptual zones:
 - **Inventory area** — persistent carried possessions and anchored character information.
 
 Cards without a rule preventing transfer can be dragged between appropriate zones. A card with `Anchored` remains in its current zone.
+
+Within a zone, every card can be positioned to the player's liking, including anchored cards.
+
+Cards may not overlap in ordinary placement. If cards are deliberately stacked, they should snap into a neat, aligned stack rather than overlap arbitrarily.
+
+### Stacks
+
+A stack is either **active** or **passive**.
+
+#### Active stack
+
+An active stack represents a process.
+
+- Every card participating in the stack remains individually identifiable.
+- The name of every card in the stack remains visible.
+- The process may influence attributes on the cards in the stack.
+
+The exact process lifecycle — how it starts, progresses, completes, and changes cards — is not yet decided.
+
+#### Passive stack
+
+A passive stack is a visual convenience for identical cards that would otherwise occupy unnecessary space.
+
+- The cards do not all need to remain individually exposed.
+- The stack shows a count of how many identical cards it contains.
+- The stack does not represent a process merely by existing.
 
 ### Nadir
 
