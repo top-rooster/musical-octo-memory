@@ -1,0 +1,114 @@
+# FORMAT DRAFT FOR REVIEW
+#
+# Blank lines separate card masters.
+# First line is the card title, second line is its picture path.
+# Remaining plain lines are attributes or behavior statements.
+# Marker: name only. Value: name followed by integer.
+#
+# The data below reflects current design decisions where concrete.
+# Comments call out values/names that are still undecided.
+# The syntax itself is not yet a locked design decision.
+
+Body
+images/body.png
+Anchored
+
+Mind
+images/mind.png
+Anchored
+
+Spirit
+images/spirit.png
+Anchored
+
+Exhausted
+images/exhausted.png
+Anchored
+action Body Sleep
+remove self
+# Sleep duration is undecided.
+
+Flesh Wound
+images/flesh-wound.png
+Anchored
+Infection 50
+process
+clean Water Container
+15m
+Infection -40
+empty source
+dress Sterilized
+15m
+consume source
+Dressed
+# Healing progress UI name/rate and Infection-over-time rates are undecided.
+
+Burn Wound
+images/burn-wound.png
+Anchored
+Infection 50
+process
+clean Water Container
+15m
+Infection -40
+empty source
+dress Sterilized
+15m
+consume source
+Dressed
+# Burn-specific dehydration Value name/starting value are undecided.
+# Healing progress UI name/rate and Infection-over-time rates are undecided.
+
+Fever
+images/fever.png
+Anchored
+process
+water Water Container
+remove self
+empty source
+# Recovery progress UI name/rate are undecided.
+
+Dead Rat
+images/dead-rat.png
+process Spoilage
+accept Cutting Tool
+Skin 15m
+discard self
+draw Rat Skin
+draw Rat Meat
+# Spoilage rate and initial visible value are undecided.
+# Cutting-tool Durability cost is undecided.
+
+Rotten Meat
+images/rotten-meat.png
+# Carries the ingestion Marker; its final Marker name is undecided.
+eat
+consume self
+draw Fever
+# Mood debuff representation/magnitude/duration are undecided.
+
+Rat Skin
+images/rat-skin.png
+
+Rat Meat
+images/rat-meat.png
+# Cooking behavior exists but its exact process data is not yet fixed.
+
+Knife
+images/knife.png
+Cutting Tool
+# Knife has a Durability Value; its starting scale/value is undecided.
+
+Campfire
+images/campfire.png
+# Qualifies as the heat source for boiling/sterilization.
+# The heat-source Marker name is still undecided.
+
+Water Container
+images/water-container.png
+# Represents a container currently filled with water.
+# Partial liquid amounts are deferred.
+
+Empty Container
+images/empty-container.png
+# Exact empty-container identity/state representation is still undecided.
