@@ -70,6 +70,8 @@ The previously proposed separate **Nadir** zone has been removed. Nadir remains 
 
 `Anchored` is what distinguishes Nadir's fixed Inventory cards from ordinary cards that may move between Room and Inventory.
 
+Inventory currently has a provisional capacity of **five non-anchored cards**. Anchored cards do not count toward that limit, so Body, Mind, Spirit, and anchored condition cards do not consume ordinary carrying capacity. Five is a tuning value and may change after playtesting. How a `Stack` counts toward the limit is not yet decided.
+
 Within a zone, every card can be positioned to the player's liking. Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
 Movement is distinct from interaction.
