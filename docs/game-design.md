@@ -53,7 +53,7 @@ Process progress is also represented as a normal visible Value, but its **player
 
 Wounds keep treatment state in the same attribute model: `Clean` is a Value representing current wound cleanliness, while `Dress` is a Marker whose presence means the wound is currently dressed.
 
-A `Burn Wound` also carries a Value whose effect is to accelerate Nadir's dehydration over time. The final name and scale of that burn-specific Value are not yet fixed, and the exact card/attribute representation of dehydration itself is still open.
+A `Burn Wound` also carries a Value whose effect is to accelerate Nadir's dehydration as game time advances. The final name and scale of that burn-specific Value are not yet fixed, and the exact card/attribute representation of dehydration itself is still open.
 
 #### Anchored
 
@@ -124,6 +124,8 @@ This rule applies across the game: food onto a Nadir card, medicine onto a Nadir
 
 A card-on-card interaction does not have to remain stacked afterward. It may resolve immediately, start an Action, discard a card, draw a card, alter attributes, create a Stack, start a Process, create a Connection, or produce another interaction-specific result.
 
+**Only Actions advance game time.** Immediate interactions, movement, Stack changes, Process creation, and Connection changes do not consume game time by themselves. If an interaction is intended to consume time, it must be represented as an Action.
+
 Consumption or continued use is an interaction outcome rather than a universal `Consumable`/`Reusable` classification. For example, Skinning returns the cutting tool but discards the dead rat; eating consumes/discards the ingested card. Specific functional Markers and Values describe what a card can do and its current state.
 
 ### Stack, Action, Process, and Connection
@@ -151,7 +153,7 @@ A single remaining card is shown normally rather than as Stack 1. The Stack coun
 
 #### Action
 
-An **Action** is work that requires Nadir's personal involvement.
+An **Action** is work that requires Nadir's personal involvement and is the **only mechanism that advances game time**. If something is meant to take game time, it must be an Action.
 
 The initiating cards do not have to include a Nadir card. What matters is that Nadir must personally spend the time doing the work. `Skinning` is an Action even though the initiating cards are a cutting tool and a dead rat.
 
@@ -161,8 +163,9 @@ When an Action is committed:
 2. the window displays the Action and its participating cards,
 3. the window animation represents the Action's duration,
 4. the corresponding amount of game time advances,
-5. the Action completes as soon as the window animation terminates,
-6. the Action-specific result is applied.
+5. active Processes update from that elapsed game time,
+6. the Action completes as soon as the window animation terminates,
+7. the Action-specific result is applied.
 
 Actions do **not** use Process progress. Their progress/time passage is already represented by the Action window.
 
@@ -184,9 +187,9 @@ The duration and result belong to the specific Action. Other Actions may use dif
 
 #### Process
 
-A **Process** is unattended change that can continue while Nadir spends game time doing something else.
+A **Process** is unattended change that can continue while Nadir performs Actions.
 
-Starting or existing as a Process does **not** force time forward to completion. Instead, it progresses when game time passes because Nadir is occupied with Actions or other activities.
+Starting or existing as a Process does **not** advance game time. Instead, it progresses when an Action advances game time.
 
 A Process can involve several cards, as with cooking, or it can be embodied by a single card whose state changes over time, as with spoilage, a wound, or Fever.
 
@@ -201,8 +204,8 @@ There is no universal progress calculation: each Process defines its own progres
 Concrete examples:
 
 - `Dead Rat` is a single-card Process whose visible progress is `Spoilage`. At 100, discard the Dead Rat and draw `Rotten Meat` at exactly the same location.
-- `Rat Meat` placed on a lit camp fire starts a cooking Process. It progresses while the fire remains lit and Nadir spends time doing other things.
-- A bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time while Nadir is occupied elsewhere.
+- `Rat Meat` placed on a lit camp fire starts a cooking Process. It progresses while the fire remains lit as Actions advance game time.
+- A bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time created by Actions.
 - `Flesh Wound` and `Burn Wound` are single-card Processes whose progress represents healing.
 - `Fever` is a single-card Process whose progress represents recovery.
 
@@ -259,7 +262,7 @@ Condition lifecycles are condition-specific rather than using one universal time
 
 - each has a Process progress Value from 0 to 100 representing healing; its eventual player-facing label can be process-specific, but no exact label is fixed yet;
 - each disappears when its Process progress reaches 100;
-- each has an `Infection` Value that rises over time if the wound is not adequately managed;
+- each has an `Infection` Value that rises as game time advances if the wound is not adequately managed;
 - each has a `Clean` Value representing current wound cleanliness;
 - a wound may carry the `Dress` Marker; its presence means the wound is currently dressed;
 - cleaning improves `Clean` and helps keep Infection down;
@@ -267,15 +270,15 @@ Condition lifecycles are condition-specific rather than using one universal time
 - when Infection becomes too high, healing over time is reduced;
 - severe Infection spawns a `Fever` condition card.
 
-In addition, each `Burn Wound` has another Value that accelerates Nadir's dehydration over time. The exact name/scale of that Value and the exact representation of dehydration are not yet fixed.
+In addition, each `Burn Wound` has another Value that accelerates Nadir's dehydration as game time advances. The exact name/scale of that Value and the exact representation of dehydration are not yet fixed.
 
-The exact source cards, interactions, Action durations, Value changes, and rules for adding/removing `Dress` are not yet decided. The exact Infection threshold or thresholds for impaired healing and Fever spawning are also not fixed.
+The exact source cards, interactions, Action durations, Value changes, and rules for adding/removing `Dress` are not yet decided. Any wound treatment that consumes game time must be an Action. The exact Infection threshold or thresholds for impaired healing and Fever spawning are also not fixed.
 
 `Fever` is cumulative. If Nadir has **three Fever cards**, he dies.
 
-Each `Fever` card is itself a single-card Process. Its Process progress represents recovery over game time and the card disappears when that progress reaches 100. Its eventual player-facing progress label is not yet fixed.
+Each `Fever` card is itself a single-card Process. Its Process progress represents recovery as Actions advance game time and the card disappears when that progress reaches 100. Its eventual player-facing progress label is not yet fixed.
 
-Fever can also be treated with water: dragging a water container onto a Fever card removes that Fever card and empties the container. The exact Fever recovery rate, the exact representation of an emptied container, and whether the water treatment itself consumes game time are not yet fixed.
+Fever can also be treated with water: dragging a water container onto a Fever card removes that Fever card and empties the container. As currently described this is an immediate interaction, so it does not advance game time. If it is later intended to consume time, it must instead be represented as an Action. The exact Fever recovery rate and exact representation of an emptied container are not yet fixed.
 
 ### Discovery, knowledge, risk, and previews
 
@@ -325,9 +328,9 @@ Anything Nadir can eat or otherwise ingest must carry a visible ingestion Marker
 
 The ingestion Marker is what makes the card a legal source for Nadir's ingestion interaction. Eating currently uses **Body** as the receiving card.
 
-Dropping an ingestible food card on Body applies the food's interaction-specific effects, consumes/discards the food card, and updates affected visible state immediately. Ordinary food can, for example, change Hunger; Hunger is clamped to its valid range.
+Dropping an ingestible food card on Body applies the food's interaction-specific effects, consumes/discards the food card, and updates affected visible state immediately. Because this is not currently an Action, eating does not advance game time. If eating is later intended to consume time, it must be modeled as an Action.
 
-`Dead Rat` is a single-card Process whose visible progress is named `Spoilage`. Spoilage increases over game time. When it reaches **100**, discard the Dead Rat and draw a `Rotten Meat` card in exactly the same position.
+`Dead Rat` is a single-card Process whose visible progress is named `Spoilage`. Spoilage increases only as Actions advance game time. When it reaches **100**, discard the Dead Rat and draw a `Rotten Meat` card in exactly the same position.
 
 `Rotten Meat` remains ingestible. If Nadir eats it:
 
@@ -341,9 +344,13 @@ For the first prototype, do **not** add a second hidden stomach/fullness system.
 
 ### Dehydration
 
-Dehydration is a survival pressure that can worsen over game time. Its exact representation has not yet been fixed.
+Dehydration is a survival pressure that can worsen as Actions advance game time. Its exact representation has not yet been fixed.
 
 `Burn Wound` cards carry a Value that accelerates Nadir's dehydration rate while the wound exists. The name and scale of that wound Value and the dehydration formula remain open.
+
+### Noise
+
+The noise mechanic is intentionally **shelved for now**. The broader possibility that noisy Actions may matter later is preserved, but its representation, propagation, risk model, masking, and relationship to search behavior should not be designed or implemented until the mechanic is explicitly revisited.
 
 ## Product principles
 
@@ -353,16 +360,17 @@ Dehydration is a survival pressure that can worsen over game time. Its exact rep
 - Let specific visible attributes define what cards can do; avoid generic classifications such as `Reusable` when a concrete functional Marker and state Value express the behavior more directly.
 - Give Process progress a contextual player-facing name when that improves comprehension, while keeping it one common mechanic underneath.
 - Communicate understood consequences before commitment, then treat the card drop as the player's decision; avoid confirmation dialogs that interrupt the interaction flow.
+- **Game time advances only through Actions.** Processes react to that elapsed time; other interactions and movement do not create elapsed game time themselves.
 - Discovery, relational understanding, exploratory play, and knowledge unlocks are intended parts of play rather than problems for the UI to eliminate.
 - Do not turn the game into exhaustive deterministic planning by revealing every consequence before commitment.
 - Exploratory play should not cause severe, unforeseeable punishment. Meaningful danger should be reasonably telegraphed even when details remain unknown.
 - A player's uncertainty should come from the situation, incomplete knowledge, discovery, and genuine risk — not from unclear UI rules.
 - Known danger does not imply known outcome, but when Nadir understands the likelihood the player should receive a clear non-numeric sense of how strongly the odds lean.
-- Game time should primarily advance through Nadir's **Actions** and other explicit time-consuming activities. Processes progress concurrently with that elapsed game time rather than creating an independent real-time pressure loop.
 - Avoid adding systems merely because comparable survival games have them.
 - Keep the play area readable; complexity should emerge from combinations of cards and attributes.
 - No direct player violence is part of the broader concept; defensive violence, if present later, is indirect/automated.
-- Do not introduce artificial real-time pressure by default. Risk should often come from player-chosen actions, noise, exposure, or external windows.
+- Do not introduce artificial real-time pressure by default. Risk should often come from player-chosen actions, exposure, or external windows.
+- Keep noise mechanics shelved until their role is clearer rather than forcing an early danger-meter design.
 
 ## Narrative context
 
