@@ -28,7 +28,7 @@ Normally discuss only the single highest-priority open decision.
 
 1. **ATTR-02 [P0]** - What names should the two attribute forms use?
 2. **CARD-04 [P1]** - How does a card instance differ from its reusable definition?
-3. **STACK-01 [P1]** - How does an active stack's process execute and finish?
+3. **STACK-01 [P1]** - What advances a finite process stack's `Progress` attribute?
 4. **CARD-05 [P1]** - Is anything besides title, picture, and attributes shown on a card?
 5. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
 6. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
@@ -81,14 +81,9 @@ Examples on Nadir:
 
 `Anchored` is an icon-only attribute.
 
-A card with `Anchored` cannot be transferred by dragging between the Room and Inventory zones.
+A card with `Anchored` cannot be transferred by dragging between Room and Inventory. It can still be repositioned within its current zone and dragged onto other cards.
 
-`Anchored` does **not** mean immovable. The card can still:
-
-- be repositioned within its current zone,
-- be dragged onto other cards for interactions.
-
-Nadir is anchored because his card has the `Anchored` attribute, not because he belongs to a special card category.
+Nadir is anchored because he has this attribute, not because he belongs to a special card type.
 
 ## ATTR-02 - Names for the two attribute forms
 **Status:** OPEN - SIMON TO DECIDE
@@ -96,8 +91,8 @@ Nadir is anchored because his card has the `Anchored` attribute, not because he 
 
 **Suggested by ChatGPT:**
 
-- **Marker attribute** - icon only; presence carries the meaning (`Player`, `Anchored`).
-- **Value attribute** - icon plus integer (`Health 100`).
+- **Marker attribute** - icon only; presence carries the meaning (`Player`, `Anchored`, `Powered`).
+- **Value attribute** - icon plus integer (`Health 100`, `Progress 42`).
 
 ## CARD-04 - Card instance versus reusable definition
 **Status:** OPEN - SIMON TO DECIDE
@@ -108,7 +103,7 @@ Decide:
 - whether identical objects always have distinct instances,
 - what state belongs to the reusable definition versus the instance,
 - whether transformation changes a definition or replaces an instance,
-- what exactly counts as "identical" for passive stacking.
+- what exactly counts as identical for passive stacking.
 
 **Suggested by ChatGPT:** shared name/picture/base data in a reusable definition; changing state on the instance.
 
@@ -128,12 +123,7 @@ Fixed size, content-driven size, or a small standard set. Test visually first.
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Can equipment, injuries, fuel, container contents, etc. be attached to or contained by another card?
-
-## CARD-D08 - Cards can be stacked
-**Status:** DECIDED BY SIMON
-
-Cards may deliberately form a stack. Stacked cards snap into a neat aligned presentation rather than overlapping arbitrarily.
+Can equipment, injuries, fuel, container contents, etc. be attached to or contained by another card outside the ordinary stack model?
 
 ## CARD-09 - Durability and object-specific state
 **Status:** OPEN - SIMON TO DECIDE
@@ -154,52 +144,76 @@ All interactable entities are cards. It remains undecided whether non-interactab
 ## MOVE-D01 - Room/Inventory transfer
 **Status:** DECIDED BY SIMON
 
-Cards can normally be dragged between Room and Inventory when legal. The `Anchored` attribute specifically prevents transfer between those zones while still allowing dragging within the current zone and onto other cards.
+Cards can normally be dragged between Room and Inventory when legal. `Anchored` prevents that transfer while preserving other dragging.
 
 ## MOVE-D02 - Free positioning within a zone
 **Status:** DECIDED BY SIMON
 
 Every card can be positioned within its current zone to the player's liking, including anchored cards.
 
-## MOVE-D03 - Cards cannot overlap accidentally
+## MOVE-D03 - No accidental overlap
 **Status:** DECIDED BY SIMON
 
-Cards may not overlap in ordinary placement. Overlap is only allowed through a deliberate stack, in which case the cards snap into a neat stack presentation.
+Cards may not overlap in ordinary placement. Deliberately stacked cards snap into a neat aligned stack.
 
-## STACK-D01 - Two stack modes
+## STACK-D01 - Active and passive stacks
 **Status:** DECIDED BY SIMON
 
 A stack is either **active** or **passive**.
 
-### Active stack
-
-An active stack represents a process.
-
-- The stacked cards remain individually legible.
-- Every card in the stack must keep its name visible so the player can see which cards participate.
-- The process can influence attributes on cards in the stack.
-
 ### Passive stack
 
-A passive stack is only a visual convenience for identical cards that would otherwise consume unnecessary space.
+A passive stack is only a visual convenience for identical cards.
 
-- Individual cards do not all need to remain visibly exposed.
-- The stack displays how many cards it contains.
-- It does not represent a process merely by existing.
+- The individual cards do not all need to remain exposed.
+- The stack shows a count.
+- It has no process effect merely because it exists.
 
-## STACK-01 - Active-stack process lifecycle
+### Active stack
+
+An active stack is mechanically meaningful. Creating the active stack immediately starts its effect.
+
+All cards participating in an active stack remain individually identifiable: every card name stays visible.
+
+An active stack has one of two forms: **process** or **permanent**.
+
+## STACK-D02 - Process active stack
+**Status:** DECIDED BY SIMON
+
+A process stack is finite.
+
+- Creating the stack starts the process.
+- The top card receives a `Progress` integer attribute.
+- `Progress` ranges from 0 to 100.
+- When `Progress` reaches 100, the process is complete.
+- The process can influence attributes on cards in the stack.
+
+## STACK-D03 - Permanent active stack
+**Status:** DECIDED BY SIMON
+
+A permanent active stack does not complete by itself.
+
+- Its effect exists while the stack relationship exists.
+- The player can break the stack by removing a card.
+- Breaking the stack removes effects that depend on that relationship.
+
+Example: stacking a machine on a power outlet gives the machine the `Powered` icon-only attribute. Removing the machine from the outlet removes `Powered`.
+
+One power outlet can power only one card at a time.
+
+## STACK-01 - Progress advancement
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P1
 
-How does an active stack's process operate?
+What advances `Progress` on a process stack: elapsed game time, player actions, a process-specific rule, or another mechanism?
 
-Decide later:
+## STACK-02 - Completion result
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
 
-- what makes a particular combination of cards an active process,
-- when the process starts,
-- whether it progresses through time, actions, or another trigger,
-- when it completes or stops,
-- how cards leave or change as a result.
+When a process reaches `Progress 100`, how is its particular result specified: attribute changes, consumed cards, transformed cards, unstacking, created cards, or some combination?
+
+This may be process-specific rather than one universal rule.
 
 ## MOVE-02 - Inventory capacity
 **Status:** OPEN - SIMON TO DECIDE
@@ -217,7 +231,7 @@ Can moving a card between zones consume time or create consequences?
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-`Anchored` handles fixed-zone cards. Decide later whether other rules can also prevent zone transfer, such as capacity or contextual restrictions.
+`Anchored` handles fixed-zone cards. Decide later whether capacity or contextual rules can also prevent transfer.
 
 ---
 
@@ -335,7 +349,7 @@ Preview only immediate effects or also known longer-term effects?
 ## NADIR-D01 - Nadir is anchored in Inventory
 **Status:** DECIDED BY SIMON
 
-Nadir is an Inventory card with the `Anchored` attribute. He cannot be transferred to Room, but can still be repositioned within Inventory or dragged onto another card.
+Nadir is an Inventory card with `Anchored`. He cannot transfer to Room, but can be repositioned or dragged onto another card.
 
 ## NADIR-D02 - Character state uses card attributes
 **Status:** DECIDED BY SIMON
@@ -387,7 +401,7 @@ Which pressures deserve permanent value attributes and which should use another 
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Current card attributes are never hidden. Decide whether survival simulation may nevertheless contain hidden state outside the card-attribute model.
+Current card attributes are never hidden. Decide whether simulation may nevertheless contain hidden state outside the card-attribute model.
 
 **Suggested by ChatGPT:** no hidden stomach/fullness system in the first food prototype.
 
