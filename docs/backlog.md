@@ -30,7 +30,7 @@ Normally discuss only the single highest-priority open decision.
 2. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
 3. **TARGET-01 [P2]** - Should highlights differ by interaction type?
 4. **TARGET-02 [P2]** - Should dangerous legal interactions use the normal target highlight?
-5. **SURV-01 [P2]** - Which survival pressures should be permanent?
+5. **SURV-01 [P2]** - Are there other permanent survival pressures beyond Hydration, Satiation, and Health?
 
 ---
 
@@ -56,10 +56,14 @@ Cards have no separate categories, tags, capability lists, or card classes. A ca
 
 All card attributes are visible and represented by icons. There are no hidden/internal card attributes in the current model.
 
-- **Marker** - icon only; presence carries meaning (`Player`, `Anchored`, `Powered`, `Cutting Tool`, `Dressed`, and `Sterilized` on fabric).
-- **Value** - icon plus integer (`Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`, `Infection 50`).
+- **Marker** - icon only; presence carries meaning (`Player`, `Anchored`, `Powered`, `Cutting Tool`, `Dressed`, `Fabric`, `Container`, `Contains-Water`, and `Sterilized`).
+- **Value** - icon plus integer (`Health 80`, `Hydration 50`, `Satiation 50`, `Progress 42`, `Durability 80`, `Spoilage 63`, `Infection 50`).
 
-`Sterilized` is the Marker used on fabric that is safe to use as wound dressing. Wounds do not have a separate cleanliness Value; their cleanliness/infection state is represented by the `Infection` Value.
+Unless Simon explicitly states a different range for a specific Value, every Value is bounded and clamped from **0 to 100**.
+
+`Sterilized` is the Marker used on fabric that is safe to use as wound dressing. `Fabric+Sterilized` therefore means a source card must carry both Markers. Wounds do not have a separate cleanliness Value; their cleanliness/infection state is represented by the `Infection` Value.
+
+Parser-facing Marker names may use hyphens for ease of parsing. `Contains-Water` is displayed in the UI as **Contains Water**.
 
 ## ATTR-D02 - Anchored
 **Status:** DECIDED BY SIMON
@@ -83,7 +87,7 @@ Durability is represented through the normal visible attribute system as a `Dura
 
 A tool does not need a generic `Reusable` Marker. Its functional role is represented by specific capability Markers such as `Cutting Tool`, while its current wear/state can be represented by `Durability`.
 
-The exact scale, wear rate, zero-durability behavior, and which interactions change Durability are not yet fixed.
+The exact wear rate, zero-durability behavior, and which interactions change Durability are not yet fixed. Durability uses the default 0-100 Value bounds unless Simon later states otherwise.
 
 ## ATTR-D04 - Process progress may have a process-specific visible name
 **Status:** DECIDED BY SIMON
@@ -113,7 +117,7 @@ For the first release, a normal card shows only title/name, picture, and visible
 ## CARD-D06 - Current relationship model is complete for now
 **Status:** DECIDED BY SIMON
 
-For now, the game assumes the currently defined card relationship forms are sufficient. Do not add a separate containment, attachment, equipment, fuel, or similar relationship mechanism unless a concrete future design need cannot be expressed with the existing model.
+For now, the game assumes the currently defined card relationship forms are sufficient. Do not add a separate containment, attachment, equipment, fuel, or similar relationship mechanism unless a concrete future need cannot be expressed with the existing model.
 
 - **Stack** exists only to visually reduce card clutter in the **Room** zone. It has no mechanical meaning.
 - **Process** represents unattended ongoing change/work and may exist in Room or Inventory.
@@ -154,6 +158,27 @@ The game's authored level design is also stored as text data and read by the cod
 At minimum this includes rooms and the card instances/starting state placed in them. As more authored world relationships become implementation-relevant, extend the text-data format rather than moving level facts into application code.
 
 Card data and level design should share the same low-boilerplate authoring philosophy and parser/tooling family described in `docs/data-language.md`.
+
+## DATA-D03 - Actions and Processes have explicit time
+**Status:** DECIDED BY SIMON
+
+Every Action and Process must explicitly state its time in authored data. Instant Actions use `0m`; there is no implicit duration.
+
+Confirmed examples include `Sleep 8h`, `Skin 15m`, `Drink 0m`, and a repeating Body Hydration Process evaluated every `15m`.
+
+## DATA-D04 - Conditional numeric bands use explicit range syntax
+**Status:** DECIDED BY SIMON
+
+Conditional Value bands are written using `start..end` rather than comparison operators.
+
+The current Flesh Wound data uses:
+
+- `if Infection 0..25 progress +2`
+- `if Infection 25..49 progress +1`
+- `if Infection 50..75 progress +0`
+- `if Infection 75..100 progress -1`
+
+These exact authored ranges are decided. Their boundary precedence/inclusivity at the overlapping values `25` and `75` remains unresolved and must not be silently invented by the parser.
 
 ## CARD-10 - Other non-interactable state and temporary conditions
 **Status:** OPEN - SIMON TO DECIDE
@@ -246,7 +271,7 @@ Example: a machine connected to a power outlet gains `Powered`; disconnecting re
 ## STACK-D02 - Process progress is mechanically common but player-facing names may differ
 **Status:** DECIDED BY SIMON
 
-Most Processes use a visible progress Value on a 0-100 scale.
+Most Processes use a visible progress Value on a 0-100 scale unless a specific Process states otherwise.
 
 Mechanically/code-wise, this is the same Process progress concept regardless of the player-facing label. The visible name can be chosen per Process to make its meaning clearer.
 
@@ -254,7 +279,7 @@ Mechanically/code-wise, this is the same Process progress concept regardless of 
 
 There is no universal progress calculation. Each Process defines its own progression from relevant state and elapsed game time.
 
-A Process progresses only when game time advances through an **Action**. Relevant conditions can speed up, slow down, or stop it.
+A Process progresses only when game time advances through an **Action**. Relevant conditions can speed up, slow down, stop, or reverse it.
 
 Examples:
 
@@ -263,7 +288,8 @@ Examples:
 - fabric sterilization progresses while its required cards form the Process and Actions advance game time,
 - a bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time created by Actions,
 - `Flesh Wound` and `Burn Wound` are single-card Processes whose progress represents healing,
-- `Fever` is a single-card Process whose progress represents recovery and that disappears when complete.
+- `Fever` is a single-card Process whose progress represents recovery and is discarded when complete,
+- Body has a repeating Process that reduces `Hydration` by 2 every 15 minutes of elapsed game time.
 
 ## PROCESS-D01 - Processes are unattended
 **Status:** DECIDED BY SIMON
@@ -272,7 +298,7 @@ The name **Process** is reserved for ongoing change that does not require Nadir'
 
 Starting or existing as a Process does not itself advance game time. A Process advances when an **Action** advances game time.
 
-A Process does not have to be a multi-card stack. `Dead Rat` spoilage, `Flesh Wound`, `Burn Wound`, and `Fever` are confirmed single-card Processes.
+A Process does not have to be a multi-card stack. `Dead Rat` spoilage, `Flesh Wound`, `Burn Wound`, `Fever`, and Body's Hydration loss are confirmed single-card Processes.
 
 Concrete multi-card examples include putting `Rat Meat` on a lit camp fire to start cooking, and combining an appropriate heat-source card, a water-filled container, and non-sterilized fabric to sterilize the fabric. These Processes continue unattended as Nadir performs Actions that advance game time.
 
@@ -285,6 +311,8 @@ A Process may expose that same underlying mechanical progress through a context-
 
 `Dead Rat` is the confirmed example: its single-card Process exposes progress as `Spoilage`, and at `Spoilage 100` the Dead Rat is discarded and `Rotten Meat` is drawn at the same location.
 
+A Process can also directly change another Value on its card rather than using a separate completion progress Value. Body's Hydration loss is a confirmed example: every `15m` of elapsed game time it applies `Hydration -2`.
+
 ## PROCESS-D04 - Fabric sterilization is a one-hour Process
 **Status:** DECIDED BY SIMON
 
@@ -293,8 +321,8 @@ Sterilizing fabric by boiling is a **Process**, not an Action.
 The Process requires three participating cards:
 
 1. a `Campfire` or another card carrying the appropriate heat-source Marker;
-2. a water-filled container;
-3. a fabric card that does **not** already have `Sterilized`.
+2. a card carrying `Contains-Water`;
+3. a card carrying `Fabric` that does not already have `Sterilized`.
 
 The exact player-facing name of the heat-source Marker is not yet fixed. `Campfire` is one confirmed qualifying card.
 
@@ -302,9 +330,9 @@ The Process requires **one hour of elapsed game time**. Because only Actions adv
 
 When the Process completes after one hour:
 
-- the water container becomes empty;
+- the water-containing card loses `Contains-Water`;
 - the fabric gains the `Sterilized` Marker;
-- the fabric remains the same card identity rather than being discarded/replaced.
+- both remain the same card identities.
 
 No partial liquid-volume system is implied by this rule.
 
@@ -315,7 +343,7 @@ Work that requires Nadir's personal involvement is called an **Action**, not a P
 
 An Action is initiated through the same universal card-on-card interaction language, but it does not remain as an ongoing card stack.
 
-**Actions are the only mechanism that advances game time.** If something is intended to consume game time, it must be represented as an Action.
+**Actions are the only mechanism that advances game time.** If something is intended to consume game time, it must be represented as an Action. Instant Actions still explicitly state `0m`.
 
 When an Action is committed:
 
@@ -342,7 +370,7 @@ Concrete Action example - skinning a dead rat:
 4. A window appears showing `Skinning` and the two participating cards: the cutting tool and the dead rat.
 5. The Action represents **15 minutes** of game time.
 6. When the Action window animation terminates, the cutting tool returns to where it came from.
-7. The `Dead Rat` is consumed/discarded.
+7. The `Dead Rat` is discarded.
 8. A `Rat Skin` card and a `Rat Meat` card are drawn/created as the Action outputs.
 
 A knife is one concrete `Cutting Tool` and has a `Durability` Value. The exact effect of Skinning on Durability has not yet been fixed.
@@ -361,13 +389,13 @@ There is no single universal Action completion transformation. An Action can ret
 
 There is no single universal Process completion transformation. Each Process defines its own result when its progress reaches the completion state.
 
-A Process may discard cards, draw replacement/output cards, change attributes, separate its participants, remove itself, or combine such results.
+A Process may discard cards, draw replacement/output cards, change attributes, separate its participants, or combine such results.
 
 Confirmed examples include:
 
 - at `Spoilage 100`, `Dead Rat` is discarded and `Rotten Meat` is drawn at the same location;
-- fabric sterilization empties its water container and adds `Sterilized` to the fabric after one hour;
-- `Flesh Wound`, `Burn Wound`, and `Fever` remove themselves when their recovery/healing progress reaches 100.
+- fabric sterilization removes `Contains-Water` from its water card and adds `Sterilized` to the fabric after one hour;
+- `Flesh Wound`, `Burn Wound`, and `Fever` are discarded when their recovery/healing progress reaches 100.
 
 ## STACK-D03 - Dragging from a Stack peels off one card
 **Status:** DECIDED BY SIMON
@@ -404,7 +432,7 @@ If a future unattended Process needs an `Anchored` participant whose home is ano
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-`Anchored` handles fixed-home cards. Decide later whether capacity or contextual rules can also prevent transfer.
+`Anchored` handles fixed-home cards. Inventory capacity is one confirmed legality constraint. Decide later whether other contextual rules can also prevent transfer.
 
 ---
 
@@ -415,7 +443,7 @@ If a future unattended Process needs an `Anchored` participant whose home is ano
 
 Anything Nadir can eat or otherwise ingest must carry a visible Marker identifying it as ingestible. The exact final user-facing name of this Marker is not yet fixed.
 
-Eating currently uses **Body** as the target. The ingestion Marker is what tells the interaction algorithm that the source can legally be dropped onto Body for ingestion.
+Eating uses **Body** as the receiving card. The ingestion Marker is what tells the interaction algorithm that the source can legally be dropped onto Body for ingestion. Authored interaction data should name `Body` as the receiver where needed; `Rotten Meat` currently uses `eat Body`.
 
 ## FOOD-D01 - Dead Rat spoils into Rotten Meat
 **Status:** DECIDED BY SIMON
@@ -435,7 +463,7 @@ The exact rate/formula for Spoilage growth is not yet fixed.
 
 `Rotten Meat` remains ingestible and therefore carries the ingestion Marker.
 
-If Nadir eats Rotten Meat:
+If Nadir eats Rotten Meat by dropping it onto **Body**:
 
 - the Rotten Meat is consumed;
 - a mood debuff is applied to Nadir;
@@ -466,14 +494,14 @@ No interaction-selection or disambiguation UI is required for a card pair.
 
 Card interaction legality is driven by attributes rather than by hard-coded card identity alone.
 
-A target may define an interaction that accepts source cards carrying a required Marker. When the dragged source satisfies that requirement, the target can legally receive it and starts/resolves its one interaction for that pair.
+A target may define an interaction that accepts source cards carrying one or more required Markers. Compound requirements use `+` in authored data.
 
 Confirmed examples:
 
 - `Dead Rat` accepts the `Cutting Tool` Marker as the starter for `Skin` / the `Skinning` Action. A knife works because it has `Cutting Tool`, not because the interaction specifically names the knife master definition.
-- Nadir's ingestion interaction accepts cards carrying an ingestion Marker. That Marker is how the interaction algorithm knows the card can be dropped onto the relevant Nadir ingestion target; eating currently uses **Body**.
-
-The exact data/configuration syntax for expressing target requirements and interaction effects remains undecided.
+- Body accepts ingestible cards for eating.
+- A wound accepts a source carrying `Contains-Water` for `Clean`.
+- A wound accepts a source carrying both `Fabric` and `Sterilized` for `Dress`, authored as `Fabric+Sterilized`.
 
 ## INTERACT-D04 - Consumption/reuse is an interaction result, not a generic reusable classification
 **Status:** DECIDED BY SIMON
@@ -484,9 +512,8 @@ Cards instead describe what they can do through specific functional attributes, 
 
 - a knife is a `Cutting Tool` with a `Durability` Value;
 - the Skinning Action returns the cutting tool and discards the dead rat;
-- an ingestible card may be discarded/consumed by the ingestion interaction.
-
-This replaces the earlier open question about a universal consumable-versus-reusable classification. Specific consumption rules remain interaction-specific.
+- an ingestible card may be discarded/consumed by the ingestion interaction;
+- drinking from a Plastic Bottle removes `Contains-Water` from the bottle without replacing the bottle card.
 
 ## INTERACT-D05 - Drops commit without confirmation
 **Status:** DECIDED BY SIMON
@@ -502,7 +529,7 @@ An `Action` window is part of executing and displaying an Action, not a confirma
 
 All game-time advancement requires an **Action**.
 
-Immediate interactions, movement, Stack changes, Process creation, and Connection changes do not advance game time by themselves. If an interaction needs to consume time, it must be modeled as an Action.
+Immediate interactions, movement, Stack changes, Process creation, and Connection changes do not advance game time by themselves. If an interaction needs to consume time, it must be modeled as an Action. An instant Action explicitly uses `0m` and therefore advances zero minutes.
 
 Processes respond to elapsed game time but never create that elapsed time themselves.
 
@@ -536,7 +563,7 @@ Design example: a flooded room with exposed electrical outlets is obviously dang
 ## PREVIEW-D01 - Direct known stat preview
 **Status:** DECIDED BY SIMON
 
-Direct visible stat consequences can preview before the drop, e.g. `Hunger 67 -> 98` on Body.
+Direct visible stat consequences can preview before the drop, e.g. `Satiation 67 -> 98` or `Hydration 50 -> 75` on Body.
 
 ## PREVIEW-D02 - Previews are knowledge-dependent, not omniscient
 **Status:** DECIDED BY SIMON
@@ -648,43 +675,47 @@ Temporary Nadir conditions do not share one universal expiry rule.
 
 1. drag `Exhausted` onto **Body**,
 2. the interaction is `Sleep`,
-3. `Sleep` advances game time as an Action,
-4. when the Action completes, the `Exhausted` card terminates/disappears.
+3. `Sleep` is an **8-hour Action**,
+4. when the Action completes, the `Exhausted` card is discarded.
 
-The exact sleep duration and any effects beyond removing `Exhausted` are not yet decided.
+Any effects of sleep beyond removing `Exhausted` are not yet decided.
 
 ### Flesh Wound and Burn Wound
 
 `Flesh Wound` and `Burn Wound` are **single-card Processes**.
 
 - Each wound has a process progress Value from 0 to 100 representing healing. Its eventual player-facing label can be process-specific; no exact label is fixed yet.
-- The wound card disappears when its process progress reaches 100.
+- The wound card is discarded when its process progress reaches 100.
 - Each wound starts at `Infection 50`.
-- `Infection` is bounded from **0 to 100**. Lower is better; higher is worse.
-- Infection rises as game time advances if the wound is not adequately managed.
-- A wound can carry the `Dressed` Marker to show that it is currently dressed. Once added, `Dressed` remains for the lifetime of that wound card.
-- Water in a container can be used to clean the wound. Cleaning reduces `Infection` by **40**, never below 0.
-- Fabric that has the `Sterilized` Marker can be used to dress the wound, causing the wound to gain `Dressed`.
-- Fabric can be sterilized by a one-hour boiling Process requiring an appropriate heat-source card, a water-filled container, and non-sterilized fabric. On completion, the container is empty and the fabric gains `Sterilized`.
-- Cleaning a wound is an **Action** and takes **15 minutes**. The Action empties the water container used to clean the wound.
-- Dressing a wound is an **Action** and takes **15 minutes**. The sterilized fabric used for the dressing is consumed when the Action completes.
-- `Dressed` improves healing over time and causes Infection to decrease over time.
-- When Infection becomes too high, the wound's healing rate is reduced.
-- Severe Infection spawns a `Fever` condition card.
+- `Infection` uses the default **0 to 100** Value bounds. Lower is better; higher is worse.
+- A wound can carry the `Dressed` Marker. Once added, `Dressed` remains for the lifetime of that wound card.
+- Water is represented by a `Contains-Water` Marker on a container card such as a `Plastic Bottle`.
+- Cleaning a wound is a **15-minute Action**. It reduces `Infection` by 40, clamped at 0, and removes `Contains-Water` from the source card.
+- Dressing a wound is a **15-minute Action** requiring a source carrying both `Fabric` and `Sterilized`. It consumes the fabric card and adds `Dressed` to the wound.
+- Fabric can be sterilized by a one-hour boiling Process requiring an appropriate heat-source card, a card with `Contains-Water`, and non-sterilized `Fabric`. On completion, the water card loses `Contains-Water` and the fabric gains `Sterilized`.
+- `Dressed` improves healing over time and causes Infection to decrease over time; the exact rates are still open.
+- Severe Infection can spawn `Fever`; the exact threshold remains open.
 
-In addition, a `Burn Wound` has another Value that accelerates Nadir's dehydration over time while the burn exists. The final name/scale of this burn-specific Value and the exact representation of dehydration are not yet fixed.
+`Flesh Wound` has a confirmed repeating healing Process evaluated every **15 minutes** of elapsed game time:
 
-Because cleaning and dressing are Actions, each advances game time through the normal Action window and active Processes update during that elapsed time. Both Actions take **15 minutes**. Cleaning reduces `Infection` by **40** and consumes the container's current water by emptying the container; partial liquid amounts are intentionally deferred rather than modeled now. Dressing consumes the sterilized fabric card and leaves the wound carrying `Dressed` permanently until the wound card itself disappears. Fabric sterilization itself is a Process and therefore progresses only as other Actions advance game time. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
+- `Infection 0..25` -> progress `+2`
+- `Infection 25..49` -> progress `+1`
+- `Infection 50..75` -> progress `+0`
+- `Infection 75..100` -> progress `-1`
+
+The exact authored ranges intentionally overlap at 25 and 75. Parser precedence/inclusivity at those boundary values remains unresolved.
+
+`Burn Wound` uses the injury Process model but its exact healing rate is still undecided. It also carries another Value/effect that accelerates loss of Body `Hydration`; the exact burn modifier is still open.
 
 ### Fever
 
 `Fever` is a **single-card Process**.
 
 - It has a process progress Value from 0 to 100 representing recovery as Actions advance game time. Its eventual player-facing label can be process-specific; no exact label is fixed yet.
-- The Fever card disappears when its process progress reaches 100.
-- Dragging a water container onto a Fever card removes that Fever card and empties the water container.
+- The Fever card is discarded when its process progress reaches 100.
+- Dragging a card carrying `Contains-Water` onto a Fever card discards that Fever card and removes `Contains-Water` from the source card.
 
-The water-on-Fever interaction does not advance game time unless it is later redesigned as an Action. The exact Fever recovery rate/duration and exact representation of the now-empty container are not yet fixed.
+The water-on-Fever interaction does not advance game time unless it is later redesigned as an Action. The exact Fever recovery rate/duration is not yet fixed.
 
 ## NADIR-D07 - All Nadir cards are Anchored to Inventory
 **Status:** DECIDED BY SIMON
@@ -698,63 +729,57 @@ They can cross into Room while being dragged but cannot come to rest there as or
 
 If a wound's `Infection` becomes too high:
 
-- healing over time is reduced;
+- healing over time can be reduced or reversed;
 - severe Infection spawns a `Fever` condition card.
 
-The exact Infection threshold or thresholds are not yet fixed.
+Flesh Wound now has explicit Infection-dependent healing bands. The exact Infection threshold for Fever spawning is not yet fixed.
 
 ## WOUND-D02 - Wound treatment state uses Infection Value and Dressed Marker
 **Status:** DECIDED BY SIMON
 
 Wound treatment state is represented directly on the wound card:
 
-- `Infection` is a **Value** from **0 to 100**, where lower is better and higher is worse;
+- `Infection` is a **Value** from 0 to 100 by the default Value rule, where lower is better and higher is worse;
 - `Dressed` is a **Marker** whose presence means the wound is currently dressed.
 
 There is no separate wound `Clean` Value. Cleaning, dressing, natural worsening, and severe-infection effects all operate on the single `Infection` axis.
 
-Once a wound gains `Dressed`, it keeps that Marker until the wound card itself disappears. There is no dressing-expiry/removal mechanic in the current design.
+Once a wound gains `Dressed`, it keeps that Marker until the wound card itself is discarded. There is no dressing-expiry/removal mechanic in the current design.
 
-A wound with `Dressed` improves healing over time and causes Infection to decrease over time.
-
-## WOUND-D03 - Water cleans wounds; sterilized fabric dresses them
+## WOUND-D03 - Contains-Water cleans wounds; Fabric+Sterilized dresses them
 **Status:** DECIDED BY SIMON
 
 Treatment inputs are attribute/card driven:
 
-- **Water in a container** can be used to clean a wound, reducing its `Infection` Value by **40**, to a minimum of 0.
-- Any **fabric** that has the `Sterilized` **Marker** can be used to dress a wound. Dressing gives the wound its `Dressed` Marker.
-- Fabric is sterilized by a boiling Process requiring an appropriate heat source, a water-filled container, and non-sterilized fabric. After one hour of elapsed game time, the container is empty and the fabric gains `Sterilized`.
-
-The exact representation that identifies a card as fabric is not yet fixed. Do not silently introduce a `Fabric` Marker until Simon chooses it.
+- A source card carrying `Contains-Water` can be used to clean a wound, reducing its `Infection` Value by **40**, to a minimum of 0, and losing `Contains-Water` on completion.
+- A source card must carry both `Fabric` and `Sterilized` to dress a wound. Dressing gives the wound its `Dressed` Marker and consumes the source fabric card.
+- Fabric is sterilized by a boiling Process requiring an appropriate heat source, a card with `Contains-Water`, and a `Fabric` card without `Sterilized`. After one hour of elapsed game time, the water card loses `Contains-Water` and the fabric gains `Sterilized`.
 
 ## WOUND-D04 - Cleaning and dressing wounds are 15-minute Actions
 **Status:** DECIDED BY SIMON
 
 Both confirmed wound-treatment interactions require Nadir's time and use the normal **Action** model:
 
-- water in a container onto a wound starts the wound-cleaning Action, which takes **15 minutes**, reduces `Infection` by **40** to a minimum of 0, and empties the source water container;
-- sterilized fabric onto a wound starts the wound-dressing Action, which takes **15 minutes**, consumes the source fabric card, and leaves the wound carrying `Dressed` permanently for the rest of that wound card's lifetime.
+- `action Contains-Water Clean 15m`
+- `action Fabric+Sterilized Dress 15m`
 
 Dropping the source onto the wound commits the Action. The Action window runs, 15 minutes of game time advances, and active Processes respond to that elapsed time.
 
-For wound cleaning, the container is treated as simply containing water or being empty. Partial liquid/container amounts are deferred and are not required by the current design.
+Partial liquid/container amounts are deferred and are not required by the current design.
 
 ## WOUND-D05 - Wounds start at Infection 50; cleaning reduces by 40
 **Status:** DECIDED BY SIMON
 
 A newly created `Flesh Wound` or `Burn Wound` starts at `Infection 50`.
 
-`Infection` is capped at both ends: minimum **0**, maximum **100**.
-
-Completing the 15-minute wound-cleaning Action reduces that wound's `Infection` Value by **40**, never below 0. A fresh wound therefore becomes `Infection 10` after one cleaning.
+Completing the 15-minute wound-cleaning Action reduces that wound's `Infection` Value by **40**, clamped at the default minimum 0. A fresh wound therefore becomes `Infection 10` after one cleaning.
 
 ## WOUND-D06 - Dressed is permanent; sterilized fabric is required
 **Status:** DECIDED BY SIMON
 
-Once a wound has the `Dressed` Marker, it never loses that Marker during the lifetime of that wound card. The Marker disappears only because the wound card itself disappears.
+Once a wound has the `Dressed` Marker, it never loses that Marker during the lifetime of that wound card. The Marker disappears only because the wound card itself is discarded.
 
-The former fabric `Clean` Marker is renamed to `Sterilized`. A fabric card must have `Sterilized` to be usable as wound dressing.
+A fabric card must have both `Fabric` and `Sterilized` to be usable as wound dressing.
 
 ## WOUND-D07 - Boiling sterilizes fabric through a one-hour Process
 **Status:** DECIDED BY SIMON
@@ -762,24 +787,38 @@ The former fabric `Clean` Marker is renamed to `Sterilized`. A fabric card must 
 Boiling fabric is a **Process** requiring:
 
 - a `Campfire`, or another card carrying the appropriate heat-source Marker;
-- a water-filled container;
-- a fabric card that does not already carry `Sterilized`.
+- a card carrying `Contains-Water`;
+- a `Fabric` card that does not already carry `Sterilized`.
 
 The Process takes **one hour of elapsed game time**. It progresses only as Actions advance game time.
 
 When the hour completes:
 
-- the water container is empty;
+- the water card loses `Contains-Water`;
 - the fabric remains the same card and gains the `Sterilized` Marker.
 
 The exact name of the heat-source Marker is still open; no specific Marker name should be inferred yet.
 
-## BURN-D01 - Burn Wounds accelerate dehydration
+## WOUND-D08 - Flesh Wound healing rate depends on Infection
 **Status:** DECIDED BY SIMON
 
-A `Burn Wound` carries a Value whose effect is to accelerate Nadir's dehydration as Actions advance game time.
+`Flesh Wound` evaluates its healing Process every **15 minutes** of elapsed game time.
 
-This confirms dehydration as a survival pressure in the design, but not its final representation. The burn Value's name/scale, dehydration's representation, and the exact acceleration formula remain open.
+Current authored bands:
+
+- `if Infection 0..25 progress +2`
+- `if Infection 25..49 progress +1`
+- `if Infection 50..75 progress +0`
+- `if Infection 75..100 progress -1`
+
+The exact boundary semantics at the overlapping values 25 and 75 are still open.
+
+## BURN-D01 - Burn Wounds accelerate Hydration loss
+**Status:** DECIDED BY SIMON
+
+A `Burn Wound` carries a Value/effect whose purpose is to accelerate the rate at which Body loses `Hydration` as Actions advance game time.
+
+Hydration itself is now a confirmed Body Value. The exact burn Value name/scale and acceleration formula remain open.
 
 ## FEVER-D01 - Three Fever cards kill Nadir
 **Status:** DECIDED BY SIMON
@@ -791,15 +830,15 @@ This establishes Fever accumulation as a lethal escalation path from unmanaged w
 ## FEVER-D02 - Fever recovers over time or can be removed with water
 **Status:** DECIDED BY SIMON
 
-`Fever` is a single-card Process that recovers as Actions advance game time and removes itself when its process progress reaches 100.
+`Fever` is a single-card Process that recovers as Actions advance game time and is discarded when its process progress reaches 100.
 
-A water container can be dragged onto a Fever card. That interaction:
+A source card carrying `Contains-Water` can be dragged onto a Fever card. That interaction:
 
-- removes the targeted Fever card;
-- empties the water container;
+- discards the targeted Fever card;
+- removes `Contains-Water` from the source card;
 - does not itself advance game time unless it is later redesigned as an Action.
 
-The exact Fever recovery rate, the exact player-facing name of Fever's process progress, and the exact representation of an emptied water container are not yet decided.
+The exact Fever recovery rate and the exact player-facing name of Fever's process progress are not yet decided.
 
 ## NADIR-D08 - All injuries are Processes for now
 **Status:** DECIDED BY SIMON
@@ -821,6 +860,26 @@ There is no separate equipment zone, equipment-slot system, attachment relations
 
 Any effect that depends on equipment being equipped should derive that state from the equipment card being present in Inventory.
 
+## SURV-D02 - Body survival Values and starting state
+**Status:** DECIDED BY SIMON
+
+Body carries three confirmed permanent survival Values:
+
+- `Hydration 50`
+- `Satiation 50`
+- `Health 80`
+
+If any of `Hydration`, `Satiation`, or `Health` reaches **0**, the game ends.
+
+Body has a repeating Process evaluated every **15 minutes** of elapsed game time that applies `Hydration -2`.
+
+A `Plastic Bottle` is a `Container`. A filled bottle instance carries `Contains-Water`. Its instant `Drink` Action targets Body, requires `Contains-Water` on the bottle, adds `Hydration +25` to Body, and removes `Contains-Water` from the bottle.
+
+## SURV-D04 - Values default to 0-100
+**Status:** DECIDED BY SIMON
+
+Every Value is bounded and clamped from **0 to 100** unless Simon explicitly states a different range for that specific Value.
+
 ## NADIR-04 - Mental/narrative state detail
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P3
@@ -832,19 +891,19 @@ Beyond Mind and Spirit, how much mental/narrative state should be numerical, qua
 
 Aim for high decision complexity with as few exposed systems/attributes/cards as practical.
 
-## SURV-01 - Permanent survival pressures
+## SURV-01 - Other permanent survival pressures
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Dehydration is now confirmed as a survival pressure because Burn Wounds can accelerate it. Other candidates raised include Hunger, Health, thirst, fatigue, temperature, illness, stress, injury, and morale. Listing the other candidates is not approval.
+`Hydration`, `Satiation`, and `Health` are now confirmed permanent Body Values. Decide later whether any additional permanent survival pressures are needed.
 
-## SURV-02 - Attribute versus condition card
+Candidates previously raised include fatigue, temperature, illness, stress, injury, and morale. Listing them is not approval.
+
+## SURV-02 - Attribute versus condition card for other pressures
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Which pressures deserve persistent Value/Marker attributes on Body, Mind, or Spirit, and which should appear as temporary condition cards?
-
-This now explicitly includes deciding how dehydration itself is represented.
+For future pressures beyond the confirmed Body Values, decide which deserve persistent Value/Marker attributes on Body, Mind, or Spirit and which should appear as temporary condition cards.
 
 ## SURV-03 - Hidden survival state
 **Status:** OPEN - SIMON TO DECIDE
@@ -854,19 +913,11 @@ Current card attributes are never hidden. Decide whether simulation may neverthe
 
 **Suggested by ChatGPT:** no hidden stomach/fullness system in the first food prototype.
 
-## SURV-04 - Attribute scales
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P3
-
-Common scale such as 0-100 or semantics-specific ranges?
-
 ## SURV-05 - Change over time/actions
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-How do survival pressures respond when Actions advance game time?
-
-Burn Wounds accelerating dehydration is one confirmed modifier that this eventual rule must support.
+Body loses **2 Hydration per 15 minutes** of elapsed game time. Decide the corresponding time behavior for Satiation and Health, plus remaining modifiers such as Burn Wound acceleration.
 
 ---
 
