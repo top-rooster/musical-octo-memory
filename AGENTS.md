@@ -11,6 +11,7 @@ Before making material changes, read:
 - `docs/game-design.md` for current product and interaction context.
 - `docs/roadmap.md` for the active implementation slice and acceptance criteria.
 - `docs/backlog.md` for the design decision register, future candidates, open questions, priorities, and rationale.
+- `docs/data-language.md` for the authoring rules for card data and level design.
 
 The status labels in `docs/backlog.md` are authoritative for design ownership:
 
@@ -26,7 +27,8 @@ Keep this file short. Put detailed design decisions in `docs/` rather than expan
 - Inspect the repository before making changes and preserve unrelated user work.
 - Keep changes focused on the current request; do not add frameworks, dependencies, or broad scaffolding without a concrete need.
 - Prefer small vertical slices that can be run and evaluated immediately.
-- Make game rules data-driven where that reduces boilerplate without hiding behavior.
+- Card master data and authored level design belong in the project's text data files, not duplicated as TypeScript/React constants. Code may parse, validate, and transform that data into runtime structures.
+- Preserve the terse, low-boilerplate, phone-friendly authoring direction in `docs/data-language.md`; do not replace it with JSON, YAML, TOON, or another verbose object format for convenience.
 - Prioritize player legibility: state changes should be visible before an action is committed when the design calls for a preview.
 - Follow the existing project structure and toolchain once one exists.
 - Run the narrowest relevant checks after changes. If no checks exist or cannot be run, state that clearly.
