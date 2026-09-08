@@ -26,9 +26,8 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
-2. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
-3. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
+1. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
+2. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
 
 ---
 
@@ -42,7 +41,7 @@ Every interactable entity is represented as a card. Confirmed examples: material
 ## CARD-D02 - Universal card presentation
 **Status:** DECIDED BY SIMON
 
-Every card has a name/title, a picture, and zero or more optional attributes. Nothing else is universally required.
+Every card has a name/title, a picture, and zero or more optional attributes.
 
 ## CARD-D03 - Attributes define card function
 **Status:** DECIDED BY SIMON
@@ -69,11 +68,7 @@ Nadir is anchored because he has this attribute, not because he belongs to a spe
 ## CARD-D04 - Master definition and card instances
 **Status:** DECIDED BY SIMON
 
-Each reusable card type has one **master definition** containing:
-
-- name/title,
-- picture,
-- starting attributes.
+Each reusable card type has one **master definition** containing name/title, picture, and starting attributes.
 
 Cards created from the master are separate **card instances**. Each instance receives the starting attributes and maintains its own current attributes independently thereafter.
 
@@ -82,15 +77,9 @@ Two identical objects are therefore still two separate cards. A `Stack` only com
 ## CARD-D05 - First-release card face
 **Status:** DECIDED BY SIMON
 
-For the first release, a normal card shows only:
+For the first release, a normal card shows only title/name, picture, and visible attributes.
 
-- title/name,
-- picture,
-- visible attributes.
-
-Do not add description text or other permanent card-face information for the first release.
-
-Simon expects that a description may become useful later, but that is explicitly deferred rather than part of the first-release card model.
+Do not add description text or other permanent card-face information for the first release. Simon expects a description may become useful later, but it is deferred.
 
 ## CARD-06 - Card size
 **Status:** DEFERRED
@@ -156,29 +145,29 @@ The three official names are **Stack**, **Process**, and **Connection**. Do not 
 
 A `Stack` is only a visual convenience for identical cards.
 
-- The represented cards remain separate card instances.
-- Individual cards do not all need to remain exposed.
-- The Stack shows a count.
-- It has no mechanical effect merely because it exists.
+- represented cards remain separate card instances,
+- individual cards do not all need to remain exposed,
+- the Stack shows a count,
+- it has no mechanical effect merely because it exists.
 
 ### Process
 
 A `Process` is a finite mechanically meaningful combination of cards.
 
-- Creating it starts it immediately.
-- Every participating card remains individually identifiable and every card name stays visible.
-- The top card gets a `Progress` Value from 0 to 100.
-- At `Progress 100`, the Process is complete.
-- It may change attributes on participating cards.
+- creating it starts it immediately,
+- every participating card remains individually identifiable and every card name stays visible,
+- the top card gets a `Progress` Value from 0 to 100,
+- at `Progress 100`, the Process is complete,
+- it may change attributes on participating cards.
 
 ### Connection
 
 A `Connection` is a persistent mechanically meaningful relationship between cards.
 
-- Creating it starts its effect immediately.
-- Every participating card remains individually identifiable and every card name stays visible.
-- It lasts until the player breaks it by separating cards.
-- Effects that depend on it disappear when broken.
+- creating it starts its effect immediately,
+- every participating card remains individually identifiable and every card name stays visible,
+- it lasts until the player breaks it by separating cards,
+- effects that depend on it disappear when broken.
 
 Example: connecting a machine to a power outlet gives the machine `Powered`. Disconnecting removes `Powered`. One outlet can power only one card at a time.
 
@@ -205,18 +194,12 @@ Dragging a Stack separates its top card as an individual card.
 
 The Stack count is presentation, not currently a normal card `Value`.
 
-## STACK-D04 - Stack members must be identical in current attributes
+## STACK-D04 - Stack members must have identical current attributes
 **Status:** DECIDED BY SIMON
 
-Cards can share a `Stack` only when they are the same card type and have identical current attributes.
+Cards can share a `Stack` only when they come from the same master definition and have identical current attributes.
 
-In practice this means:
-
-- they come from the same master definition,
-- their current Marker sets are identical,
-- their current Value attributes and values are identical.
-
-If one instance has different attributes from another, they are no longer identical for stacking and cannot share the same Stack.
+Their Marker sets, Value attributes, and Value values must all match. If one instance differs, it cannot share that Stack.
 
 ## STACK-02 - Process completion result
 **Status:** OPEN - SIMON TO DECIDE
@@ -251,13 +234,21 @@ Can moving a card between zones consume time or create consequences?
 
 Food is eaten by dragging the food card onto Nadir.
 
-## INTERACT-01 - General card-on-card action language
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P1
+## INTERACT-D01 - All interactions are card-on-card
+**Status:** DECIDED BY SIMON
 
-Should card-on-card dragging also be the standard interaction for medicine, tools, machines, giving, equipping, repairing, etc.?
+Every gameplay interaction is initiated by putting one card on top of another card.
 
-**Suggested by ChatGPT:** use it as the common action language where the meaning is clear.
+An interaction therefore always has:
+
+- a source card being dragged,
+- a target card receiving it.
+
+This is the universal interaction language, not just the rule for eating. It applies to interactions such as using medicine, operating or supplying machines, creating Processes, creating Connections, and other card effects.
+
+Moving/repositioning a card within a zone or transferring it between Room and Inventory is movement rather than an interaction. A bare zone/location may receive a card for movement, but is not itself an interaction target.
+
+An interaction does not necessarily create a Stack, Process, or Connection; it may resolve immediately, as eating does.
 
 ## INTERACT-02 - Multiple plausible actions
 **Status:** OPEN - SIMON TO DECIDE
@@ -293,10 +284,10 @@ How do source and target attributes determine whether an interaction is legal an
 
 # Target highlighting and previews
 
-## TARGET-D01 - Legal targets highlight
+## TARGET-D01 - Legal interaction targets highlight
 **Status:** DECIDED BY SIMON
 
-While dragging, every currently legal target card/destination highlights.
+While dragging a card, every card that can legally receive it as an interaction target highlights. Legal zone destinations for movement may also use a placement affordance, but they are not card interaction targets.
 
 ## TARGET-01 - Different highlights by action type
 **Status:** OPEN - SIMON TO DECIDE
