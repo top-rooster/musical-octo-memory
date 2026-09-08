@@ -2,11 +2,27 @@
 
 ## Design goal
 
-Safe Room is a narrative survival/stealth game about isolation, preparation, and risk. The interface should feel like a physical workspace: cards represent people, items, and other manipulable objects; rooms are stable spatial contexts; the player learns the world by moving and combining things rather than navigating menus.
+Safe Room is a narrative survival/stealth game about isolation, preparation, and risk. The interface should feel like a physical workspace: **all interactable entities are represented as cards**. Rooms are stable spatial contexts; the player learns and acts on the world primarily through cards rather than navigating separate interaction menus.
 
 The game should create complexity from interactions between a relatively small number of visible systems. Avoid exposing many redundant bars, sub-stats, or overlapping resource models when the same decision can be expressed directly on cards.
 
 ## Current interaction model
+
+### Cards
+
+All interactable entities are cards.
+
+Confirmed examples include:
+
+- materials,
+- machines,
+- food,
+- Nadir,
+- passages to other rooms.
+
+A card is therefore not synonymous with an inventory item. Some cards can be carried, some are anchored, and some represent fixed world entities or navigation possibilities.
+
+Whether non-interactable state or temporary conditions should also use card representation is not yet decided.
 
 ### Zones
 
@@ -28,7 +44,7 @@ For the first prototype, expose at least:
 - Hunger
 - Health
 
-Other attributes can be added later only when they create meaningful decisions.
+Health is part of the current prototype scope, not yet a confirmed permanent survival attribute.
 
 ### Drag affordances
 
@@ -55,7 +71,7 @@ Dropping the food on Nadir:
 - clamps Hunger to its valid range,
 - updates the visible Hunger value immediately.
 
-For now, do **not** add a second hidden stomach/fullness system. The goal of the prototype is to test whether a small number of legible attributes can still create interesting decisions.
+For the first prototype, do **not** add a second hidden stomach/fullness system. This is a prototype simplification, not yet a permanent design decision.
 
 ## Product principles
 
