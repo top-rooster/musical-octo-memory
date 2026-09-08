@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **INTERACT-03 [P2]** - Do some drops need confirmation?
-2. **INTERACT-04 [P2]** - How do immediate interactions handle time/noise consequences?
-3. **WOUND-03 [P2]** - Which interactions change `Clean` and `Dress`, and how?
-4. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
-5. **NADIR-03 [P2]** - How is equipment represented?
+1. **INTERACT-04 [P2]** - How do immediate interactions handle time/noise consequences?
+2. **WOUND-03 [P2]** - Which interactions change `Clean` and `Dress`, and how?
+3. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
+4. **NADIR-03 [P2]** - How is equipment represented?
+5. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
 
 ---
 
@@ -440,11 +440,14 @@ Cards instead describe what they can do through specific functional attributes, 
 
 This replaces the earlier open question about a universal consumable-versus-reusable classification. Specific consumption rules remain interaction-specific.
 
-## INTERACT-03 - Confirmation
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
+## INTERACT-D05 - Drops commit without confirmation
+**Status:** DECIDED BY SIMON
 
-Should some drops require confirmation beyond the Action window or normal drop commitment?
+A legal card-on-card drop commits its interaction immediately. The game does **not** add confirmation dialogs or a second "are you sure?" step, including for dangerous interactions.
+
+The player should receive whatever preview, warning, or risk information Nadir currently understands **before** the drop. Once the player drops the card on the legal target, that is the decision.
+
+An `Action` window is part of executing and displaying an Action, not a confirmation prompt. Dropping the source card commits the Action before that window runs.
 
 ## INTERACT-04 - Time/noise consequences
 **Status:** OPEN - SIMON TO DECIDE
