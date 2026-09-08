@@ -57,19 +57,18 @@ If an anchored card is released onto bare space in another zone, or otherwise re
 
 A legal cross-zone interaction does not transfer the anchored card's persistent home. Exactly how an anchored card is visually represented while participating in an ongoing cross-zone Process is not yet decided.
 
-For Nadir specifically, all cards representing or currently applying to him in the Nadir zone are `Anchored` to that zone.
+All cards representing Nadir or conditions currently applying to him are `Anchored` to Inventory.
 
 ### Zones and positioning
 
-The main play space has three zones:
+The main play space has two zones:
 
-- **Room** — the currently viewed physical space.
-- **Inventory** — persistent carried possessions.
-- **Nadir** — Nadir's persistent representation cards plus temporary condition cards that currently apply to him.
+- **Room** — the currently viewed physical space. Its contents change when Nadir moves to another room.
+- **Inventory** — persistent cards that remain on screen when Nadir moves to another room.
 
-The Nadir zone replaces the earlier assumption that Nadir's representation lives in Inventory. Nadir remains represented through cards rather than through a separate character sheet or alternate character views.
+The previously proposed separate **Nadir** zone has been removed. Nadir remains represented entirely through cards, but those cards now live in Inventory alongside other persistent cards.
 
-All of Nadir's cards in the Nadir zone are `Anchored` and cannot persist outside that zone. They may nevertheless be dragged across zone boundaries to interact with cards elsewhere. It remains undecided whether non-Nadir cards may ever persist in the Nadir zone.
+`Anchored` is what distinguishes Nadir's fixed Inventory cards from ordinary cards that may move between Room and Inventory. This avoids needing a separate spatial zone solely for Nadir.
 
 Within a zone, every card can be positioned to the player's liking. Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
@@ -130,7 +129,7 @@ Examples:
 - Rat meat on a camp fire progresses with elapsed time while the camp fire is lit.
 - A bowl on a condenser progresses according to room moisture, room temperature, and elapsed time.
 
-An anchored Nadir card can be dragged onto a target card in another zone to start a Process without changing its home zone. The visual representation of that cross-zone participation is still open.
+An anchored Inventory card, including one of Nadir's cards, can be dragged onto a Room card to start a Process without changing its home zone. The visual representation of that cross-zone participation is still open.
 
 #### Connection
 
@@ -144,7 +143,7 @@ Example: connecting a machine to a power outlet gives the machine the `Powered` 
 
 ### Nadir
 
-Nadir Veylan is represented in the dedicated **Nadir** zone rather than by a separate character sheet.
+Nadir Veylan is represented by cards in **Inventory**, not by a separate character sheet or zone.
 
 For now, his persistent representation is divided across three cards:
 
@@ -156,7 +155,7 @@ More persistent Nadir cards may be added later if a concrete need appears.
 
 Relevant persistent character state is expressed as attributes on those cards.
 
-Conditions that currently apply to Nadir are represented as **temporary cards in the Nadir zone** rather than being forced into Body, Mind, or Spirit.
+Conditions that currently apply to Nadir are represented as **temporary cards in Inventory** rather than being forced into Body, Mind, or Spirit.
 
 Confirmed examples include:
 
@@ -165,12 +164,7 @@ Confirmed examples include:
 
 These condition cards exist while the condition applies. Their creation, progression, healing, expiry, and removal rules are not yet decided.
 
-All of Nadir's persistent and temporary condition cards are `Anchored` to the Nadir zone. They cannot persist in Room or Inventory. They can cross zone boundaries while being dragged, and can be dropped onto another card in another zone to start a legal Process. If released elsewhere without a legal accepting interaction, they return to the Nadir zone.
-
-This gives the Nadir zone two kinds of content without introducing a separate UI model:
-
-- persistent cards that describe ongoing parts of Nadir,
-- temporary cards that describe current conditions affecting him.
+All of Nadir's persistent cards and temporary condition cards are `Anchored` to Inventory. They cannot come to rest in Room as ordinary placement, but they can cross the boundary while being dragged and can be dropped onto a Room card for a legal interaction or Process. If released in Room without a legal accepting interaction, they return to Inventory.
 
 ### Discovery, knowledge, risk, and previews
 
