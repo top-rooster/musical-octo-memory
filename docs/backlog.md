@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision. Do not dump the
 
 # Current decision queue
 
-1. **CARD-03 [P0]** - Do cards use categories, composable capabilities/tags, or both?
+1. **ATTR-01 [P0]** - What is the basic structure and meaning of a card attribute?
 2. **CARD-04 [P1]** - How does a specific card instance differ from its reusable definition?
 3. **CARD-05 [P1]** - What belongs permanently on a card face versus contextual reveal?
 4. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
@@ -101,9 +101,18 @@ Every card must display:
 - a name/title,
 - a picture.
 
-A card may additionally display any number of attributes, including none.
+A card may additionally have any number of attributes, including none.
 
-No other universal card information has been decided. In particular, descriptions, categories, locations, capabilities, interaction rules, identifiers, and other state are not automatically required merely because a thing is a card.
+No other universal card information has been decided.
+
+### CARD-D03 - Cards have no categories, tags, or capabilities unless a need appears
+**Status:** DECIDED BY SIMON
+
+A card is functionally defined only by its attributes.
+
+Do not add separate card categories, tags, capability lists, or equivalent classification systems unless a concrete need appears later that cannot be handled cleanly through attributes.
+
+ChatGPT previously suggested composable capabilities/tags. Simon rejected that extra layer for now in favor of the simpler attribute-only model.
 
 ## Threat and pacing
 
@@ -171,17 +180,26 @@ Every card may optionally have zero or more attributes.
 Nothing else is currently required on every card.
 
 ## CARD-03 - Categories, capabilities/tags, or both?
+**Status:** DECIDED BY SIMON
+
+None for now. A card is functionally defined only by its attributes.
+
+Do not introduce categories, tags, capabilities, or similar metadata unless a concrete need appears later.
+
+## ATTR-01 - Basic attribute model
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P0
 
-Options:
+Because attributes now define both card state and card function, we need a minimal shared understanding of what an attribute actually is.
 
-- mutually exclusive categories,
-- composable tags/capabilities,
-- both,
-- another model.
+Questions:
 
-**Suggested by ChatGPT:** prefer composable capabilities for behavior, possibly with broad categories for organization/presentation. This avoids rigid hierarchies such as FoodCard, ToolCard, CharacterCard, MachineCard when behaviors overlap.
+- Does every attribute have a name and value?
+- Are attributes always visible on the card, or can some be internal/hidden?
+- Can an attribute represent behavior as well as state, or are behaviors derived from specific attribute names/values?
+- What value forms are needed initially: number, boolean, text, reference, or something simpler?
+
+Do not answer more than needed for the first prototype.
 
 ## CARD-04 - Card instance versus reusable definition
 **Status:** OPEN - SIMON TO DECIDE
@@ -199,14 +217,14 @@ Questions:
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P1
 
-Simon has decided that the title and picture are always present and attributes are optional.
+Simon has decided that title and picture are always present and attributes are optional.
 
 Still open:
 
 - What, if anything, besides title/picture/attributes is permanently visible?
 - What appears on hover or selection?
 - What appears only during drag/action preview?
-- How visually different may card kinds become while retaining one common grammar?
+- How visually different may cards become while retaining one common grammar?
 
 **Suggested by ChatGPT:** prioritize identity, immediately important state, interaction-relevant information, then secondary detail contextually.
 
@@ -234,7 +252,7 @@ How are multiple identical objects represented without flooding the play area? I
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P3
 
-Should durability and similar values use visible attributes, specialized state, conditions, or another representation?
+Should durability and similar values use ordinary attributes or require another representation?
 
 ## CARD-10 - Non-interactable state and temporary conditions
 **Status:** OPEN - SIMON TO DECIDE
@@ -313,15 +331,17 @@ Can a drop initiate an action that takes time or creates noise rather than resol
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-How does the interaction model distinguish things consumed by use from reusable things?
+How do attributes distinguish things consumed by use from reusable things?
 
-## INTERACT-06 - Where interaction rules live
+## INTERACT-06 - How interaction rules are derived from attributes
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Dragged card, target card, separate pair rule, capabilities/tags, or another model?
+Simon has decided that cards have no separate categories/tags/capabilities and are functionally defined only by attributes.
 
-**Suggested by ChatGPT:** keep legality/effect rules outside presentation code and data-driven where that remains readable.
+The remaining question is how source and target attributes combine to determine whether an interaction is legal and what it does.
+
+**Suggested by ChatGPT:** keep legality/effect calculation outside presentation code even if all functional input comes from card attributes.
 
 ---
 
