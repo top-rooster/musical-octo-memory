@@ -74,20 +74,25 @@ Anchored does **not** mean immovable. An anchored card can still:
 
 This is ordinary attribute-driven behavior, not a special anchored card type.
 
+The introduction of the Nadir zone does not yet redefine `Anchored`; exact transfer restrictions involving the Nadir zone remain to be decided if needed.
+
 ### Zones and positioning
 
-The main play space has at least two conceptual zones:
+The main play space has three conceptual zones:
 
-- **Room area** — the currently viewed physical space.
-- **Inventory area** — persistent carried possessions and anchored character information.
+- **Room** — the currently viewed physical space.
+- **Inventory** — persistent carried possessions.
+- **Nadir** — the cards that represent Nadir.
 
-Cards without a rule preventing transfer can be dragged between appropriate zones. A card with `Anchored` remains in its current zone.
+The Nadir zone replaces the earlier assumption that Nadir's representation lives in Inventory. Nadir remains represented entirely through cards rather than through a separate character sheet or alternate character view.
+
+Cards can be moved between zones when the relevant rules allow it. The exact rules for which cards may persist in the Nadir zone, and whether Nadir-representing cards can leave it, are not yet decided.
 
 Within a zone, every card can be positioned to the player's liking, including anchored cards.
 
 Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat, aligned presentation.
 
-Movement is distinct from interaction. Repositioning a card within a zone or transferring it between Room and Inventory does not itself count as interacting with another game entity.
+Movement is distinct from interaction. Repositioning a card within a zone or transferring it between zones does not itself count as interacting with another game entity.
 
 ### Universal interaction language
 
@@ -98,7 +103,7 @@ An interaction therefore always has:
 - a source card being dragged,
 - a target card receiving it.
 
-There are no non-card interaction targets in the current design. Bare Room or Inventory space can receive a card for movement/placement, but that is movement rather than an interaction.
+There are no non-card interaction targets in the current design. Bare zone space can receive a card for movement/placement when that placement is legal, but that is movement rather than an interaction.
 
 This rule applies across the game rather than only to eating. Examples include:
 
@@ -171,13 +176,13 @@ A single power outlet can power only one card at a time.
 
 ### Nadir
 
-Nadir Veylan is not required to fit on a single card. His representation may consist of several cards in Inventory while remaining fully inside the same card-based interaction system.
+Nadir Veylan is represented by one or more cards in the dedicated **Nadir** zone.
 
-The representation includes an Inventory card with the `Anchored` Marker. That card cannot be transferred into the Room zone, but it can still be repositioned within Inventory or dragged onto other cards when an interaction allows it. Whether every card representing Nadir is also anchored is not yet decided.
-
-Character state is expressed primarily as attributes on the card or cards representing Nadir rather than through a separate character-stat subsystem or alternate character views.
+Character state is expressed primarily as attributes on those cards rather than through a separate character-stat subsystem or alternate character views.
 
 The exact division of state across Nadir's cards is not yet decided.
+
+The earlier design placed an `Anchored` Nadir card in Inventory. The dedicated Nadir zone supersedes that placement. Whether Nadir-zone cards use `Anchored`, another transfer restriction, or no explicit restriction is not yet decided.
 
 For the first prototype, expose at least:
 
@@ -205,7 +210,7 @@ The preview should appear on or immediately adjacent to the affected stat so the
 
 Food is consumed by dragging a food card onto the relevant Nadir card.
 
-Dropping the food on Nadir:
+Dropping the food on that card:
 
 - applies the food's hunger effect,
 - removes or consumes the food card,
