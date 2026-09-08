@@ -10,6 +10,9 @@
 # If a Process duration is still undecided, the card is intentionally left
 # incomplete here rather than inventing a number.
 #
+# Compound requirements use +. Example: Fabric+Sterilized means the accepted
+# source card must carry both Markers.
+#
 # The data below reflects current design decisions where concrete.
 # Comments call out values/names/times that are still undecided.
 # The syntax itself is not yet a locked design decision.
@@ -30,30 +33,36 @@ Exhausted
 images/exhausted.png
 Anchored
 action Body Sleep 8h
-remove self
+discard self
 
 Flesh Wound
 images/flesh-wound.png
 Anchored
 Infection 50
-# TODO: healing Process duration is undecided; Process data is incomplete until explicit.
+process 15m
+if Infection <25 progress +2
+if Infection 25..49 progress +1
+if Infection 50..75 progress +0
+if Infection >75 progress -1
+at progress 100 discard self
 action Contains Water Clean 15m
 Infection -40
 remove Contains Water source
-action Sterilized Dress 15m
+action Fabric+Sterilized Dress 15m
 consume source
 Dressed
-# Healing progress UI name/rate and Infection-over-time rates are undecided.
+# Player-facing name of the healing progress Value is still undecided.
+# Infection-over-time behavior is still undecided.
 
 Burn Wound
 images/burn-wound.png
 Anchored
 Infection 50
-# TODO: healing Process duration is undecided; Process data is incomplete until explicit.
+# TODO: healing Process rate/duration is still undecided for Burn Wound.
 action Contains Water Clean 15m
 Infection -40
 remove Contains Water source
-action Sterilized Dress 15m
+action Fabric+Sterilized Dress 15m
 consume source
 Dressed
 # Burn-specific dehydration Value name/starting value are undecided.
@@ -64,7 +73,7 @@ images/fever.png
 Anchored
 # TODO: recovery Process duration is undecided; Process data is incomplete until explicit.
 accept Contains Water
-remove self
+discard self
 remove Contains Water source
 # Water-on-Fever remains an immediate interaction, not currently an Action.
 
@@ -112,6 +121,6 @@ Container
 # Partial liquid amounts are deferred.
 
 # Sterilization Process sketch; exact syntax for multi-card Processes is still draft:
-# process <heat-source> + Contains Water + <non-Sterilized fabric> Sterilize 1h
+# process <heat-source> + Contains Water + Fabric-Sterilized Sterilize 1h
 # remove Contains Water container
 # add Sterilized fabric
