@@ -106,7 +106,16 @@ A process stack is finite.
 - When `Progress` reaches 100, the process is complete.
 - The process may change attributes on cards in the stack.
 
-What advances `Progress` is not yet decided; this must not be assumed to be real-time until the design explicitly chooses that.
+There is no universal progress rate. Each process defines its own calculation for how `Progress` changes from relevant current game state.
+
+Time may be one input, but not necessarily the only one.
+
+Examples:
+
+- Rat meat stacked on a camp fire progresses with elapsed time while the camp fire is lit.
+- A bowl stacked on a condenser progresses according to a combination of room moisture, room temperature, and elapsed time.
+
+This means process progress can accelerate, slow, or stop as relevant conditions change.
 
 ##### Permanent active stack
 
