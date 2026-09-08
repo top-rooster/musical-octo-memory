@@ -29,21 +29,28 @@ Build a small browser prototype whose only purpose is to validate the core card 
 - The non-ingestible item must not be accepted by **Body** merely because it is a movable card.
 - Hunger is clamped to 0–100.
 - Invalid drops leave state unchanged. An anchored card released outside its home zone without a legal accepting interaction returns home.
+- The prototype's initial card definitions and initial Room/Inventory setup are loaded from the project's authored text data rather than being declared as TypeScript/React constants.
 - The UI should be plain and readable. Do not spend time on final art, animation polish, sound, narrative content, persistence beyond the visible Inventory behavior, combat, crafting, or world simulation yet.
 
 ### Architecture constraints
 
+- Follow `docs/data-language.md` for authored game data.
+- **All card master data is authored in text files.** Runtime code may parse, validate, and transform it, but card masters must not be duplicated as hard-coded TypeScript/React objects.
+- **Level design is also authored in text files.** The prototype's starting Room/Inventory contents must come from level data, not room-specific setup code.
+- Preserve the terse data-language direction: low boilerplate, phone-friendly, no required braces/tabs/list lengths, and no unnecessary repeated field labels. Do not substitute JSON, YAML, TOON, or a verbose generic object format as the primary authoring source.
 - Keep card definitions and effects as data rather than hard-coding each individual card in UI components.
 - Implement source/target interaction matching so a target can accept a source based on visible source attributes. Milestone 1 only needs the ingestion-Marker → Body example, but do not couple the rule to specific food master definitions.
 - Do not introduce generic `Consumable` or `Reusable` classifications for the prototype. Whether a card is consumed or remains is part of the interaction result.
 - Implement `Anchored` as an attribute-driven home-zone rule, not as a special Nadir card type. It prevents the card from coming to rest outside its home zone while preserving cross-zone dragging and legal card-on-card interaction.
 - Keep state transition/game-rule functions separate from React rendering where practical.
+- Keep the text-data parser/loader separate from rendering and validate malformed authored data with useful errors rather than silently accepting ambiguity.
 - Avoid a heavy state-management library for this prototype unless there is a demonstrated need.
 - Add lightweight automated tests for the pure game-rule logic, especially ingestion-Marker matching, rejection of a non-ingestible card by Body, food consumption, hunger clamping, invalid interactions, and anchored-card return-to-home behavior after a foreign-zone release.
+- Add lightweight tests that prove the prototype card masters and starting level state are actually loaded from text data.
 
 ### Done means
 
-A developer can clone the repo, install dependencies, start the app, and immediately test the full interaction loop above in a browser. `README.md` and `AGENTS.md` contain the exact commands needed.
+A developer can clone the repo, install dependencies, start the app, and immediately test the full interaction loop above in a browser. `README.md` and `AGENTS.md` contain the exact commands needed. The seed cards and starting level shown by the prototype originate from the authored text data, so changing those data files changes the loaded prototype content without rewriting React components.
 
 ## Not yet
 
