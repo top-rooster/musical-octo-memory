@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **PROCESS-04 [P1]** - Is timed card state such as Spoilage itself a Process, or can ordinary Values change over time outside Processes?
-2. **WOUND-02 [P2]** - How are cleaning and dressing represented?
-3. **CARD-11 [P2]** - How does a card instance change identity?
-4. **MOVE-03 [P2]** - Can moving a card between Room and Inventory consume time or create consequences?
-5. **INTERACT-03 [P2]** - Do some drops need confirmation?
+1. **WOUND-02 [P2]** - How are cleaning and dressing represented?
+2. **CARD-11 [P2]** - How does a card instance change identity?
+3. **MOVE-03 [P2]** - Can moving a card between Room and Inventory consume time or create consequences?
+4. **INTERACT-03 [P2]** - Do some drops need confirmation?
+5. **INTERACT-04 [P2]** - How do immediate interactions handle time/noise consequences?
 
 ---
 
@@ -83,14 +83,18 @@ A tool does not need a generic `Reusable` Marker. Its functional role is represe
 
 The exact scale, wear rate, zero-durability behavior, and which interactions change Durability are not yet fixed.
 
-## ATTR-D04 - Spoilage is an ordinary Value
+## ATTR-D04 - Process progress may have a process-specific visible name
 **Status:** DECIDED BY SIMON
 
-`Dead Rat` has a visible `Spoilage` **Value**.
+Most Processes use a visible progress Value, but the player-facing name of that Value should be specific to the Process when that improves understanding.
 
-Spoilage increases over game time. When it reaches **100**, the Dead Rat turns into `Rotten Meat`.
+The different labels do **not** create different mechanics or attribute types. Code-wise/mechanically, they are the same Process progress concept.
 
-Whether this timed Value change is itself modeled as a Process is deliberately left open in PROCESS-04 because the existing Process model currently assumes a generic `Progress` Value.
+Confirmed example:
+
+- `Dead Rat` is a single-card Process whose progress Value is shown to the player as `Spoilage`. Spoilage increases over game time, and at **100** the Dead Rat turns into `Rotten Meat`.
+
+Other Processes may likewise use a contextual player-facing name instead of the generic word `Progress`. Their exact UI labels are not fixed unless explicitly decided.
 
 ## CARD-D04 - Master definition and card instances
 **Status:** DECIDED BY SIMON
@@ -200,7 +204,7 @@ A `Stack` exists solely to reduce visual card clutter in the Room zone by compre
 
 ### Process
 
-A `Process` is unattended work that continues while Nadir spends game time doing other things. A Process may involve multiple cards or may be embodied by a single card whose state changes over time.
+A `Process` is unattended work/change that continues while Nadir spends game time doing other things. A Process may involve multiple cards or may be embodied by a single card whose state changes over time.
 
 ### Connection
 
@@ -210,10 +214,14 @@ Example: a machine connected to a power outlet gains `Powered`; disconnecting re
 
 `Action` is a separate card-on-card interaction type, not a persistent stacking form; see ACTION-D01.
 
-## STACK-D02 - Process progress is process-specific
+## STACK-D02 - Process progress is mechanically common but player-facing names may differ
 **Status:** DECIDED BY SIMON
 
-Processes currently use a visible `Progress` Value from 0 to 100.
+Most Processes use a visible progress Value on a 0-100 scale.
+
+Mechanically/code-wise, this is the same Process progress concept regardless of the player-facing label. The visible name can be chosen per Process to make its meaning clearer.
+
+`Spoilage` on `Dead Rat` is the confirmed example of a process-specific progress label. Other contextual labels may be chosen later as needed; do not treat any suggested label as decided until Simon chooses it.
 
 There is no universal progress calculation. Each Process defines its own progression from relevant state and elapsed game time.
 
@@ -221,36 +229,33 @@ A Process progresses as game time passes while Nadir is occupied with Actions or
 
 Examples:
 
+- `Dead Rat` is a single-card Process whose visible progress is `Spoilage`; at 100 it becomes `Rotten Meat`,
 - `Rat Meat` on a lit camp fire progresses while the fire is lit and Nadir spends time doing something else,
 - a bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time,
-- `Flesh Wound` and `Burn Wound` are single-card Processes whose `Progress` represents healing,
-- `Fever` is a single-card Process that disappears when its recovery Progress reaches 100.
-
-`Dead Rat` now introduces a separate timed `Spoilage` Value. PROCESS-04 remains open so this rule is not silently generalized or contradicted.
+- `Flesh Wound` and `Burn Wound` are single-card Processes whose progress represents healing,
+- `Fever` is a single-card Process whose progress represents recovery and that disappears when complete.
 
 ## PROCESS-D01 - Processes are unattended
 **Status:** DECIDED BY SIMON
 
 The name **Process** is reserved for ongoing change that does not require Nadir's continuous personal involvement.
 
-Starting a Process does not itself force game time forward to completion. It advances when game time passes because Nadir is doing something else.
+Starting or existing as a Process does not itself force game time forward to completion. It advances when game time passes because Nadir is doing something else.
 
-A Process does not have to be a multi-card stack. `Flesh Wound`, `Burn Wound`, and `Fever` are confirmed single-card Processes.
+A Process does not have to be a multi-card stack. `Dead Rat` spoilage, `Flesh Wound`, `Burn Wound`, and `Fever` are confirmed single-card Processes.
 
-Concrete example: putting `Rat Meat` on a lit camp fire starts a cooking Process. The meat cooks while the fire is lit and Nadir spends time on other activities.
+Concrete multi-card example: putting `Rat Meat` on a lit camp fire starts a cooking Process. The meat cooks while the fire is lit and Nadir spends time on other activities.
 
-## PROCESS-04 - Timed Values outside the generic Progress model
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P1
+## PROCESS-D03 - Process progress labels are UI names over the same mechanic
+**Status:** DECIDED BY SIMON
 
-`Dead Rat` has a `Spoilage` Value that increases with elapsed game time and transforms the card into `Rotten Meat` at 100.
+Most Processes need a progress Value, but the generic word `Progress` is not required as the player-facing label.
 
-The current Process rule says Processes use a generic `Progress 0-100` Value. Decide whether:
+A Process may expose that same underlying mechanical progress through a context-specific Value name that helps the player understand what is changing. This is a UI/player-facing naming difference only; it does not create a separate progress system in code.
 
-- spoilage is a Process whose progress attribute is specifically named `Spoilage`, implying Process progress need not always be called `Progress`; or
-- ordinary card Values such as `Spoilage` may change over game time without making the card a Process.
+`Dead Rat` is the confirmed example: its single-card Process exposes progress as `Spoilage`, and at `Spoilage 100` it transforms into `Rotten Meat`.
 
-Do not infer either answer yet.
+This resolves the earlier PROCESS-04 question: Spoilage is Process progress with a specific visible name, not a separate timed-Value system outside Processes.
 
 ## ACTION-D01 - Nadir-involved work is an Action
 **Status:** DECIDED BY SIMON
@@ -268,7 +273,7 @@ When an Action is committed:
 5. the Action completes when the window animation terminates,
 6. its Action-specific completion result is applied.
 
-Actions do **not** use a `Progress` attribute. The Action window itself communicates the ongoing completion/time passage.
+Actions do **not** use a Process progress attribute. The Action window itself communicates the ongoing completion/time passage.
 
 The presence of a Nadir card is not required for something to be an Action. `Skinning` is an Action because Nadir personally performs the work even though the initiating cards are a cutting tool and a dead rat.
 
@@ -300,11 +305,14 @@ There is no single universal Action completion transformation. An Action can ret
 ## PROCESS-D02 - Process completion is Process-specific
 **Status:** DECIDED BY SIMON
 
-There is no single universal Process completion transformation. Each Process defines its own result when its completion state is reached.
+There is no single universal Process completion transformation. Each Process defines its own result when its progress reaches the completion state.
 
 A Process may consume/transform participating cards, create output cards, change attributes, separate its participants, remove itself, or combine such results.
 
-`Flesh Wound`, `Burn Wound`, and `Fever` remove themselves when their recovery `Progress` reaches 100.
+Confirmed examples include:
+
+- `Dead Rat` transforms into `Rotten Meat` when its `Spoilage` progress reaches 100;
+- `Flesh Wound`, `Burn Wound`, and `Fever` remove themselves when their recovery/healing progress reaches 100.
 
 ## STACK-D03 - Dragging from a Stack peels off one card
 **Status:** DECIDED BY SIMON
@@ -363,9 +371,9 @@ Eating currently uses **Body** as the target. The ingestion Marker is what tells
 ## FOOD-D01 - Dead Rat spoils into Rotten Meat
 **Status:** DECIDED BY SIMON
 
-`Dead Rat` has a `Spoilage` Value that increases over game time.
+`Dead Rat` is a single-card Process whose visible progress Value is named `Spoilage`.
 
-At `Spoilage 100`, the Dead Rat turns into a `Rotten Meat` card.
+Spoilage increases over game time. At `Spoilage 100`, the Dead Rat turns into a `Rotten Meat` card.
 
 The exact rate/formula for Spoilage growth and the underlying card-instance/master transformation mechanics are not yet fixed.
 
@@ -588,8 +596,8 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 
 `Flesh Wound` and `Burn Wound` are **single-card Processes**.
 
-- Each wound has `Progress` from 0 to 100 representing healing.
-- The wound card disappears when `Progress` reaches 100.
+- Each wound has a process progress Value from 0 to 100 representing healing. Its eventual player-facing label can be process-specific; no exact label is fixed yet.
+- The wound card disappears when its process progress reaches 100.
 - Each wound has an `Infection` numerical counter, represented under the current attribute model as an `Infection` Value.
 - `Infection` rises over time if not adequately managed.
 - Wounds need cleaning to keep Infection down.
@@ -605,8 +613,8 @@ The exact card/attribute representation of cleaning and dressing and their rates
 
 `Fever` is a **single-card Process**.
 
-- It has `Progress` from 0 to 100 representing recovery over game time.
-- The Fever card disappears when its `Progress` reaches 100.
+- It has a process progress Value from 0 to 100 representing recovery over game time. Its eventual player-facing label can be process-specific; no exact label is fixed yet.
+- The Fever card disappears when its process progress reaches 100.
 - Dragging a water container onto a Fever card removes that Fever card and empties the water container.
 
 The exact Fever recovery rate/duration is not yet fixed. The exact representation of the now-empty container is also not yet decided. Whether treating Fever with water consumes game time has not yet been separately decided.
@@ -645,14 +653,14 @@ This establishes Fever accumulation as a lethal escalation path from unmanaged w
 ## FEVER-D02 - Fever recovers over time or can be removed with water
 **Status:** DECIDED BY SIMON
 
-`Fever` is a single-card Process that recovers as game time passes and removes itself when its `Progress` reaches 100.
+`Fever` is a single-card Process that recovers as game time passes and removes itself when its process progress reaches 100.
 
 A water container can be dragged onto a Fever card. That interaction:
 
 - removes the targeted Fever card;
 - empties the water container.
 
-The exact Fever recovery rate is not yet fixed. The exact representation of an emptied water container, and whether the water treatment itself consumes game time, are not yet decided.
+The exact Fever recovery rate is not yet fixed. The exact player-facing name of Fever's process progress, the exact representation of an emptied water container, and whether the water treatment itself consumes game time are not yet decided.
 
 ## WOUND-02 - Cleaning and dressing representation
 **Status:** OPEN - SIMON TO DECIDE
