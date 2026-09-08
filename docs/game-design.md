@@ -184,7 +184,7 @@ Concrete example: skinning a dead rat.
 4. Dropping the cutting tool commits it.
 5. A window appears displaying `Skinning` and the cutting tool and dead rat cards.
 6. The Action represents **15 minutes** of game time.
-7. When the Action window animation terminates, the cutting tool returns to where it came from.
+7. When the window animation terminates, the cutting tool returns to where it came from.
 8. The `Dead Rat` is discarded.
 9. A `Rat Skin` card and a `Rat Meat` card are drawn as the Action outputs.
 
@@ -276,14 +276,14 @@ Condition lifecycles are condition-specific rather than using one universal time
 - any fabric carrying the `Clean` Marker can be used to dress a wound; dressing gives the wound the `Dress` Marker;
 - fabric can be made clean by boiling it, which gives that fabric the `Clean` Marker;
 - cleaning a wound is a **15-minute Action** and empties the water container used for the Action;
-- dressing a wound is a **15-minute Action**;
+- dressing a wound is a **15-minute Action** and consumes the clean fabric card used for the Action;
 - `Dress` improves healing over time and causes Infection to decrease over time;
 - when Infection becomes too high, healing over time is reduced;
 - severe Infection spawns a `Fever` condition card.
 
 In addition, each `Burn Wound` has another Value that accelerates Nadir's dehydration as game time advances. The exact name/scale of that Value and the exact representation of dehydration are not yet fixed.
 
-Because cleaning and dressing are Actions, each runs through the normal Action window, advances **15 minutes** of game time, and causes active Processes to update during that elapsed time. The cleaning Action empties its water container. The amount by which water changes wound `Clean`, whether clean fabric is consumed or changed when dressing, how `Dress` is later removed, and the exact boiling interaction are not yet decided. Partial liquid/container quantities are deferred; this interaction does not require a volume system.
+Because cleaning and dressing are Actions, each runs through the normal Action window, advances **15 minutes** of game time, and causes active Processes to update during that elapsed time. The cleaning Action empties its water container. The dressing Action consumes its clean fabric card and leaves the wound carrying `Dress`. The amount by which water changes wound `Clean`, how `Dress` is later removed, and the exact boiling interaction are not yet decided. Partial liquid/container quantities are deferred; this interaction does not require a volume system.
 
 `Fever` is cumulative. If Nadir has **three Fever cards**, he dies.
 
