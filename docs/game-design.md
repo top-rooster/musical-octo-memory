@@ -27,7 +27,9 @@ Every card must display:
 - a name/title,
 - a picture.
 
-A card may additionally display zero or more attributes. Attributes are optional rather than a universal requirement.
+A card may additionally have zero or more attributes. Attributes are optional rather than a universal requirement.
+
+Cards do not currently have separate categories, tags, or capabilities. A card is functionally defined only by its attributes. Do not introduce another classification or capability system unless a concrete design need appears later that attributes cannot satisfy.
 
 Whether non-interactable state or temporary conditions should also use card representation is not yet decided.
 
