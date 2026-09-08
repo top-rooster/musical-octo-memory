@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **MOVE-02 [P2]** - Does Inventory have a capacity limit?
+1. **MOVE-06 [P2]** - How does a Stack count toward the five-card Inventory limit?
 2. **CARD-07 [P2]** - Can cards be contained/attached outside Stack/Process/Connection?
 3. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
 4. **INTERACT-06 [P2]** - How do source and target attributes determine interaction legality and effect?
@@ -155,6 +155,23 @@ Every card can be positioned within its current zone to the player's liking, inc
 
 Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
+## MOVE-D04 - Inventory capacity is five non-anchored cards for now
+**Status:** DECIDED BY SIMON
+
+Inventory has a capacity limit. For now, it can contain at most **five non-anchored cards**.
+
+`Anchored` cards do not count toward this limit. This means Nadir's Body, Mind, Spirit, and temporary anchored condition cards do not consume the ordinary carrying capacity.
+
+The number five is a tuning value rather than a permanent constant and may be changed later if playtesting shows a better number.
+
+How a `Stack` counts toward this limit is not yet decided.
+
+## MOVE-06 - Stack counting against Inventory capacity
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+If several identical card instances are compressed into one `Stack`, does that Stack count as one of the five non-anchored Inventory cards, or does each underlying card instance count separately?
+
 ## STACK-D01 - Stack, Process, Connection
 **Status:** DECIDED BY SIMON
 
@@ -276,12 +293,6 @@ Cards can share a `Stack` only when they come from the same master definition an
 **Priority:** P3
 
 If a future unattended Process needs an `Anchored` participant whose home is another zone, decide how that ongoing relationship is presented. There is no current concrete requirement; Nadir-performed work is now an Action and resolves in its window rather than remaining as an ongoing Process.
-
-## MOVE-02 - Inventory capacity
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Does Inventory have a capacity limit? If yes: slots, weight, bulk, containers, or something else?
 
 ## MOVE-03 - Cost of taking/dropping
 **Status:** OPEN - SIMON TO DECIDE
