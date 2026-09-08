@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **WOUND-03 [P2]** - How does boiling fabric work?
-2. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
-3. **NADIR-03 [P2]** - How is equipment represented?
-4. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
-5. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
+1. **NADIR-02 [P2]** - Do all injuries use the condition-Process model?
+2. **NADIR-03 [P2]** - How is equipment represented?
+3. **MOVE-05 [P2]** - Are there other reasons a card cannot change zones?
+4. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
+5. **TARGET-01 [P2]** - Should highlights differ by interaction type?
 
 ---
 
@@ -242,6 +242,7 @@ Examples:
 
 - `Dead Rat` is a single-card Process whose visible progress is `Spoilage`; at 100 the Dead Rat is discarded and `Rotten Meat` is drawn at the same location,
 - `Rat Meat` on a lit camp fire progresses while the fire is lit and Actions advance game time,
+- fabric sterilization progresses while its required cards form the Process and Actions advance game time,
 - a bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time created by Actions,
 - `Flesh Wound` and `Burn Wound` are single-card Processes whose progress represents healing,
 - `Fever` is a single-card Process whose progress represents recovery and that disappears when complete.
@@ -255,7 +256,7 @@ Starting or existing as a Process does not itself advance game time. A Process a
 
 A Process does not have to be a multi-card stack. `Dead Rat` spoilage, `Flesh Wound`, `Burn Wound`, and `Fever` are confirmed single-card Processes.
 
-Concrete multi-card example: putting `Rat Meat` on a lit camp fire starts a cooking Process. The meat cooks while the fire is lit as Nadir performs Actions that advance game time.
+Concrete multi-card examples include putting `Rat Meat` on a lit camp fire to start cooking, and combining an appropriate heat-source card, a water-filled container, and non-sterilized fabric to sterilize the fabric. These Processes continue unattended as Nadir performs Actions that advance game time.
 
 ## PROCESS-D03 - Process progress labels are UI names over the same mechanic
 **Status:** DECIDED BY SIMON
@@ -265,6 +266,29 @@ Most Processes need a progress Value, but the generic word `Progress` is not req
 A Process may expose that same underlying mechanical progress through a context-specific Value name that helps the player understand what is changing. This is a UI/player-facing naming difference only; it does not create a separate progress system in code.
 
 `Dead Rat` is the confirmed example: its single-card Process exposes progress as `Spoilage`, and at `Spoilage 100` the Dead Rat is discarded and `Rotten Meat` is drawn at the same location.
+
+## PROCESS-D04 - Fabric sterilization is a one-hour Process
+**Status:** DECIDED BY SIMON
+
+Sterilizing fabric by boiling is a **Process**, not an Action.
+
+The Process requires three participating cards:
+
+1. a `Campfire` or another card carrying the appropriate heat-source Marker;
+2. a water-filled container;
+3. a fabric card that does **not** already have `Sterilized`.
+
+The exact player-facing name of the heat-source Marker is not yet fixed. `Campfire` is one confirmed qualifying card.
+
+The Process requires **one hour of elapsed game time**. Because only Actions advance game time, sterilization progresses as Nadir performs Actions elsewhere; starting or existing as the Process does not itself advance time.
+
+When the Process completes after one hour:
+
+- the water container becomes empty;
+- the fabric gains the `Sterilized` Marker;
+- the fabric remains the same card identity rather than being discarded/replaced.
+
+No partial liquid-volume system is implied by this rule.
 
 ## ACTION-D01 - Nadir-involved work is an Action
 **Status:** DECIDED BY SIMON
@@ -319,11 +343,12 @@ There is no single universal Action completion transformation. An Action can ret
 
 There is no single universal Process completion transformation. Each Process defines its own result when its progress reaches the completion state.
 
-A Process may discard cards, draw replacement/output cards, change attributes, separate its participants, remove itself, or combine such results.
+A Process may discard cards, draw replacement/output cards, change attributes, separate participants, remove itself, or combine such results.
 
 Confirmed examples include:
 
 - at `Spoilage 100`, `Dead Rat` is discarded and `Rotten Meat` is drawn at the same location;
+- fabric sterilization empties its water container and adds `Sterilized` to the fabric after one hour;
 - `Flesh Wound`, `Burn Wound`, and `Fever` remove themselves when their recovery/healing progress reaches 100.
 
 ## STACK-D03 - Dragging from a Stack peels off one card
@@ -519,7 +544,7 @@ The exact user-facing vocabulary is provisional and not locked. Revisit after UI
 ## TARGET-D01 - Legal interaction targets highlight
 **Status:** DECIDED BY SIMON
 
-While dragging, every card that can legally receive the dragged card as an interaction target highlights. Legal movement destinations may use a placement affordance but are not interaction targets.
+While dragging, every card that can legally receive it as an interaction target highlights. Legal movement destinations may use a placement affordance but are not interaction targets.
 
 ## PREVIEW-01 - Multiple affected attributes
 **Status:** OPEN - SIMON TO DECIDE
@@ -622,7 +647,7 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 - A wound can carry the `Dressed` Marker to show that it is currently dressed. Once added, `Dressed` remains for the lifetime of that wound card.
 - Water in a container can be used to clean the wound. Cleaning reduces `Infection` by **40**, never below 0.
 - Fabric that has the `Sterilized` Marker can be used to dress the wound, causing the wound to gain `Dressed`.
-- Fabric can be sterilized by boiling, which gives the fabric the `Sterilized` Marker.
+- Fabric can be sterilized by a one-hour boiling Process requiring an appropriate heat-source card, a water-filled container, and non-sterilized fabric. On completion, the container is empty and the fabric gains `Sterilized`.
 - Cleaning a wound is an **Action** and takes **15 minutes**. The Action empties the water container used to clean the wound.
 - Dressing a wound is an **Action** and takes **15 minutes**. The sterilized fabric used for the dressing is consumed when the Action completes.
 - `Dressed` improves healing over time and causes Infection to decrease over time.
@@ -631,7 +656,7 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 
 In addition, a `Burn Wound` has another Value that accelerates Nadir's dehydration over time while the burn exists. The final name/scale of this burn-specific Value and the exact representation of dehydration are not yet fixed.
 
-Because cleaning and dressing are Actions, each advances game time through the normal Action window and active Processes update during that elapsed time. Both Actions take **15 minutes**. Cleaning reduces `Infection` by **40** and consumes the container's current water by emptying the container; partial liquid amounts are intentionally deferred rather than modeled now. Dressing consumes the sterilized fabric card and leaves the wound carrying `Dressed` permanently until the wound card itself disappears. The exact boiling interaction is not yet decided. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
+Because cleaning and dressing are Actions, each advances game time through the normal Action window and active Processes update during that elapsed time. Both Actions take **15 minutes**. Cleaning reduces `Infection` by **40** and consumes the container's current water by emptying the container; partial liquid amounts are intentionally deferred rather than modeled now. Dressing consumes the sterilized fabric card and leaves the wound carrying `Dressed` permanently until the wound card itself disappears. Fabric sterilization itself is a Process and therefore progresses only as other Actions advance game time. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
 
 ### Fever
 
@@ -681,7 +706,7 @@ Treatment inputs are attribute/card driven:
 
 - **Water in a container** can be used to clean a wound, reducing its `Infection` Value by **40**, to a minimum of 0.
 - Any **fabric** that has the `Sterilized` **Marker** can be used to dress a wound. Dressing gives the wound its `Dressed` Marker.
-- Fabric can be sterilized by **boiling** it; boiling gives the fabric the `Sterilized` Marker.
+- Fabric is sterilized by a boiling Process requiring an appropriate heat source, a water-filled container, and non-sterilized fabric. After one hour of elapsed game time, the container is empty and the fabric gains `Sterilized`.
 
 The exact representation that identifies a card as fabric is not yet fixed. Do not silently introduce a `Fabric` Marker until Simon chooses it.
 
@@ -697,8 +722,6 @@ Dropping the source onto the wound commits the Action. The Action window runs, 1
 
 For wound cleaning, the container is treated as simply containing water or being empty. Partial liquid/container amounts are deferred and are not required by the current design.
 
-Boiling fabric is confirmed as a way to give fabric `Sterilized`, but its exact interaction type has not yet been decided.
-
 ## WOUND-D05 - Wounds start at Infection 50; cleaning reduces by 40
 **Status:** DECIDED BY SIMON
 
@@ -713,13 +736,25 @@ Completing the 15-minute wound-cleaning Action reduces that wound's `Infection` 
 
 Once a wound has the `Dressed` Marker, it never loses that Marker during the lifetime of that wound card. The Marker disappears only because the wound card itself disappears.
 
-The former fabric `Clean` Marker is renamed to `Sterilized`. A fabric card must have `Sterilized` to be usable as wound dressing, and boiling fabric is a confirmed way to add that Marker.
+The former fabric `Clean` Marker is renamed to `Sterilized`. A fabric card must have `Sterilized` to be usable as wound dressing.
 
-## WOUND-03 - Remaining cleaning and dressing interaction details
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
+## WOUND-D07 - Boiling sterilizes fabric through a one-hour Process
+**Status:** DECIDED BY SIMON
 
-The remaining wound-treatment question is how boiling fabric is represented and what it consumes.
+Boiling fabric is a **Process** requiring:
+
+- a `Campfire`, or another card carrying the appropriate heat-source Marker;
+- a water-filled container;
+- a fabric card that does not already carry `Sterilized`.
+
+The Process takes **one hour of elapsed game time**. It progresses only as Actions advance game time.
+
+When the hour completes:
+
+- the water container is empty;
+- the fabric remains the same card and gains the `Sterilized` Marker.
+
+The exact name of the heat-source Marker is still open; no specific Marker name should be inferred yet.
 
 ## BURN-D01 - Burn Wounds accelerate dehydration
 **Status:** DECIDED BY SIMON
