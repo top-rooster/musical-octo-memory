@@ -74,56 +74,51 @@ Cards without a rule preventing transfer can be dragged between appropriate zone
 
 Within a zone, every card can be positioned to the player's liking, including anchored cards.
 
-Cards may not overlap in ordinary placement. If cards are deliberately stacked, they snap into a neat, aligned stack rather than overlap arbitrarily.
+Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat, aligned presentation.
 
-### Stacks
+### Stack, Process, and Connection
 
-A stack is either **active** or **passive**.
+There are three forms of deliberate card stacking: **Stack**, **Process**, and **Connection**.
 
-#### Passive stack
+#### Stack
 
-A passive stack is a visual convenience for identical cards that would otherwise occupy unnecessary space.
+A Stack is a visual convenience for identical cards that would otherwise occupy unnecessary space.
 
 - The cards do not all need to remain individually exposed.
-- The stack shows a count of how many identical cards it contains.
-- The stack does not represent a process merely by existing.
+- The Stack shows a count of how many identical cards it contains.
+- It has no mechanical effect merely because it exists.
 
-#### Active stack
+#### Process
 
-An active stack is mechanically meaningful. Creating the active stack starts its effect immediately.
+A Process is a finite mechanically meaningful combination of cards. Creating it starts the Process immediately.
 
-Every participating card remains individually identifiable: the name of every card in the stack stays visible.
+Every participating card remains individually identifiable: the name of every card remains visible.
 
-Active stacks have two forms: **process** and **permanent**.
-
-##### Process active stack
-
-A process stack is finite.
-
-- Creating the stack starts the process.
 - The top card gets a `Progress` integer attribute.
 - `Progress` ranges from 0 to 100.
-- When `Progress` reaches 100, the process is complete.
-- The process may change attributes on cards in the stack.
+- When `Progress` reaches 100, the Process is complete.
+- The Process may change attributes on participating cards.
 
-There is no universal progress rate. Each process defines its own calculation for how `Progress` changes from relevant current game state.
-
-Time may be one input, but not necessarily the only one.
+There is no universal progress rate. Each Process defines its own calculation for how `Progress` changes from relevant current game state. Time may be one input, but not necessarily the only one.
 
 Examples:
 
-- Rat meat stacked on a camp fire progresses with elapsed time while the camp fire is lit.
-- A bowl stacked on a condenser progresses according to a combination of room moisture, room temperature, and elapsed time.
+- Rat meat on a camp fire progresses with elapsed time while the camp fire is lit.
+- A bowl on a condenser progresses according to a combination of room moisture, room temperature, and elapsed time.
 
-This means process progress can accelerate, slow, or stop as relevant conditions change.
+Process progress can therefore accelerate, slow, or stop as relevant conditions change.
 
-##### Permanent active stack
+#### Connection
 
-A permanent active stack does not complete by itself. Its effect exists for as long as the stack relationship exists.
+A Connection is a persistent mechanically meaningful relationship between cards. Creating it starts the effect immediately.
 
-The player can break the relationship by removing a card from the stack. Effects granted by the relationship disappear when it is broken.
+Every participating card remains individually identifiable: the name of every card remains visible.
 
-Example: stacking a machine on a power outlet gives the machine the icon-only `Powered` attribute. Removing the machine from the power outlet removes `Powered`.
+A Connection does not complete by itself. Its effect exists for as long as the relationship exists.
+
+The player can break a Connection by separating its cards. Effects granted by the Connection disappear when it is broken.
+
+Example: connecting a machine to a power outlet gives the machine the icon-only `Powered` attribute. Disconnecting it removes `Powered`.
 
 A single power outlet can power only one card at a time.
 
