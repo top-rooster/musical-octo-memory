@@ -74,6 +74,8 @@ Inventory currently has a provisional capacity of **five non-anchored cards**. A
 
 Inventory does **not** use `Stack` presentation. Identical carried cards remain separate card instances and therefore each consume one of the five ordinary Inventory slots. With the current two-zone model, Stacks are confined to Room.
 
+Inventory cards, including Nadir's anchored cards and condition cards, may still participate in **Processes** and **Connections**. The restriction is specifically against `Stack` compression in Inventory; it does not prohibit mechanically meaningful Process or Connection relationships there.
+
 Within a zone, every card can be positioned to the player's liking. Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
 Movement is distinct from interaction.
@@ -156,6 +158,8 @@ Starting a Process does **not** force time forward to completion. Instead, it pr
 
 A Process can involve several cards, as with cooking, or it can be embodied by a single card whose state changes over time, as with a wound or Fever.
 
+Processes are allowed in both Room and Inventory, including on or between Nadir-related cards in Inventory.
+
 Processes use a visible `Progress` Value from 0 to 100. There is no universal progress calculation: each Process defines its own progression from relevant state and elapsed game time. Conditions may speed up, slow down, or stop progress.
 
 Concrete examples:
@@ -172,6 +176,8 @@ If a future Process needs an `Anchored` participant whose home is another zone, 
 #### Connection
 
 A Connection is a persistent mechanically meaningful relationship between cards. Creating it starts the effect immediately.
+
+Connections are allowed in both Room and Inventory, including relationships involving Nadir-related cards in Inventory.
 
 Every participating card remains individually identifiable and every card name stays visible.
 
@@ -203,6 +209,8 @@ Confirmed examples include:
 - `Fever`
 
 All of Nadir's persistent cards and temporary condition cards are `Anchored` to Inventory. They cannot come to rest in Room as ordinary placement, but they can cross the boundary while being dragged and can be dropped onto a Room card for a legal interaction. If released in Room without a legal accepting interaction, they return to Inventory.
+
+Nadir-related cards may participate in **Processes** and **Connections** while remaining in Inventory. They may not be compressed into `Stacks` there.
 
 #### Condition lifecycles
 
