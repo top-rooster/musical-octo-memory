@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
-2. **INTERACT-06 [P2]** - How do source and target attributes determine interaction legality and effect?
-3. **WOUND-02 [P2]** - How are cleaning and dressing represented?
-4. **CARD-11 [P2]** - How does a card instance change identity?
-5. **MOVE-03 [P2]** - Can moving a card between Room and Inventory consume time or create consequences?
+1. **WOUND-02 [P2]** - How are cleaning and dressing represented?
+2. **CARD-11 [P2]** - How does a card instance change identity?
+3. **MOVE-03 [P2]** - Can moving a card between Room and Inventory consume time or create consequences?
+4. **INTERACT-03 [P2]** - Do some drops need confirmation?
+5. **INTERACT-04 [P2]** - How do immediate interactions handle time/noise consequences?
 
 ---
 
@@ -56,8 +56,8 @@ Cards have no separate categories, tags, capability lists, or card classes. A ca
 
 All card attributes are visible and represented by icons. There are no hidden/internal card attributes in the current model.
 
-- **Marker** - icon only; presence carries meaning (`Player`, `Anchored`, `Powered`).
-- **Value** - icon plus integer (`Health 100`, `Progress 42`).
+- **Marker** - icon only; presence carries meaning (`Player`, `Anchored`, `Powered`, `Cutting Tool`).
+- **Value** - icon plus integer (`Health 100`, `Progress 42`, `Durability 80`).
 
 ## ATTR-D02 - Anchored
 **Status:** DECIDED BY SIMON
@@ -73,6 +73,15 @@ Anchored does not prevent:
 If an anchored card is released onto bare space in another zone, or otherwise released without a legal interaction that accepts it, it returns to its home zone.
 
 A legal cross-zone interaction does not transfer the anchored card's home zone.
+
+## ATTR-D03 - Durability is an ordinary Value
+**Status:** DECIDED BY SIMON
+
+Durability is represented through the normal visible attribute system as a `Durability` **Value**.
+
+A tool does not need a generic `Reusable` Marker. Its functional role is represented by specific capability Markers such as `Cutting Tool`, while its current wear/state can be represented by `Durability`.
+
+The exact scale, wear rate, zero-durability behavior, and which interactions change Durability are not yet fixed.
 
 ## CARD-D04 - Master definition and card instances
 **Status:** DECIDED BY SIMON
@@ -103,12 +112,6 @@ For now, the game assumes the currently defined card relationship forms are suff
 - **Action** is not a persistent relationship; it is Nadir-performed work resolved through the Action window.
 
 This closes the earlier CARD-07 question for now rather than asserting that every conceivable future relationship must fit these forever.
-
-## CARD-09 - Durability and object-specific state
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P3
-
-Should values such as durability use ordinary attributes or another representation?
 
 ## CARD-10 - Other non-interactable state and temporary conditions
 **Status:** OPEN - SIMON TO DECIDE
@@ -238,21 +241,23 @@ When an Action is committed:
 
 Actions do **not** use a `Progress` attribute. The Action window itself communicates the ongoing completion/time passage.
 
-The presence of a Nadir card is not required for something to be an Action. `Skinning` is an Action because Nadir personally performs the work even though the initiating cards are a knife and a dead rat.
+The presence of a Nadir card is not required for something to be an Action. `Skinning` is an Action because Nadir personally performs the work even though the initiating cards are a cutting tool and a dead rat.
 
 ## ACTION-D02 - Skinning example
 **Status:** DECIDED BY SIMON
 
 Concrete Action example - skinning a dead rat:
 
-1. Dragging a knife onto a `Dead Rat` exposes `Skin` on the rat card.
-2. Dropping the knife commits the Action.
-3. A window appears showing `Skinning` and the two participating cards: the knife and the dead rat.
-4. The Action represents **15 minutes** of game time.
-5. When the Action window animation terminates, the Action completes.
-6. The knife returns to where it came from.
+1. `Dead Rat` accepts a source card carrying the `Cutting Tool` Marker as the starter for its `Skin` Action.
+2. Dragging a cutting tool such as a knife onto `Dead Rat` exposes `Skin` on the rat card.
+3. Dropping the cutting tool commits the Action.
+4. A window appears showing `Skinning` and the two participating cards: the cutting tool and the dead rat.
+5. The Action represents **15 minutes** of game time.
+6. When the Action window animation terminates, the cutting tool returns to where it came from.
 7. The `Dead Rat` is consumed/dissolves.
 8. A `Rat Skin` card and a `Rat Meat` card are created.
+
+A knife is one concrete `Cutting Tool` and has a `Durability` Value. The exact effect of Skinning on Durability has not yet been fixed.
 
 The 15-minute duration and outputs belong to this Action; other Actions can have different durations and results.
 
@@ -324,6 +329,8 @@ Can moving a card between Room and Inventory consume time or create consequences
 
 Food is eaten by dragging the food card onto Body.
 
+Anything Nadir can eat or otherwise ingest must carry a visible Marker identifying it as ingestible. The exact final user-facing name of this Marker is not yet fixed.
+
 ## INTERACT-D01 - All interactions are card-on-card
 **Status:** DECIDED BY SIMON
 
@@ -342,6 +349,33 @@ If the pair is legal, there is a single interaction to perform. The game never n
 
 No interaction-selection or disambiguation UI is required for a card pair.
 
+## INTERACT-D03 - Interaction legality can match source attributes against target requirements
+**Status:** DECIDED BY SIMON
+
+Card interaction legality is driven by attributes rather than by hard-coded card identity alone.
+
+A target may define an interaction that accepts source cards carrying a required Marker. When the dragged source satisfies that requirement, the target can legally receive it and starts/resolves its one interaction for that pair.
+
+Confirmed examples:
+
+- `Dead Rat` accepts the `Cutting Tool` Marker as the starter for `Skin` / the `Skinning` Action. A knife works because it has `Cutting Tool`, not because the interaction specifically names the knife master definition.
+- Nadir's ingestion interaction accepts cards carrying an ingestion Marker. That Marker is how the interaction algorithm knows the card can be dropped onto the relevant Nadir ingestion target; eating currently uses **Body**.
+
+The exact data/configuration syntax for expressing target requirements and interaction effects remains undecided.
+
+## INTERACT-D04 - Consumption/reuse is an interaction result, not a generic reusable classification
+**Status:** DECIDED BY SIMON
+
+There is no need for a generic `Reusable` Marker on tools.
+
+Cards instead describe what they can do through specific functional attributes, while each interaction decides what happens to its participants:
+
+- a knife is a `Cutting Tool` with a `Durability` Value;
+- the Skinning Action returns the cutting tool and consumes the dead rat;
+- an ingestible card may be consumed by the ingestion interaction.
+
+This replaces the earlier open question about a universal consumable-versus-reusable classification. Specific consumption rules remain interaction-specific.
+
 ## INTERACT-03 - Confirmation
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
@@ -353,18 +387,6 @@ Should some drops require confirmation beyond the Action window or normal drop c
 **Priority:** P2
 
 Action time behavior is decided by ACTION-D01. Processes consume elapsed game time indirectly as Nadir does other things. Other immediate interactions may still need separate time/noise rules.
-
-## INTERACT-05 - Consumable versus reusable
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-How do attributes distinguish things consumed by use from reusable things?
-
-## INTERACT-06 - Deriving interaction rules from attributes
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-How do source and target attributes determine whether an interaction is legal and what it does?
 
 ---
 
