@@ -74,21 +74,11 @@ Cards without a rule preventing transfer can be dragged between appropriate zone
 
 Within a zone, every card can be positioned to the player's liking, including anchored cards.
 
-Cards may not overlap in ordinary placement. If cards are deliberately stacked, they should snap into a neat, aligned stack rather than overlap arbitrarily.
+Cards may not overlap in ordinary placement. If cards are deliberately stacked, they snap into a neat, aligned stack rather than overlap arbitrarily.
 
 ### Stacks
 
 A stack is either **active** or **passive**.
-
-#### Active stack
-
-An active stack represents a process.
-
-- Every card participating in the stack remains individually identifiable.
-- The name of every card in the stack remains visible.
-- The process may influence attributes on the cards in the stack.
-
-The exact process lifecycle — how it starts, progresses, completes, and changes cards — is not yet decided.
 
 #### Passive stack
 
@@ -97,6 +87,36 @@ A passive stack is a visual convenience for identical cards that would otherwise
 - The cards do not all need to remain individually exposed.
 - The stack shows a count of how many identical cards it contains.
 - The stack does not represent a process merely by existing.
+
+#### Active stack
+
+An active stack is mechanically meaningful. Creating the active stack starts its effect immediately.
+
+Every participating card remains individually identifiable: the name of every card in the stack stays visible.
+
+Active stacks have two forms: **process** and **permanent**.
+
+##### Process active stack
+
+A process stack is finite.
+
+- Creating the stack starts the process.
+- The top card gets a `Progress` integer attribute.
+- `Progress` ranges from 0 to 100.
+- When `Progress` reaches 100, the process is complete.
+- The process may change attributes on cards in the stack.
+
+What advances `Progress` is not yet decided; this must not be assumed to be real-time until the design explicitly chooses that.
+
+##### Permanent active stack
+
+A permanent active stack does not complete by itself. Its effect exists for as long as the stack relationship exists.
+
+The player can break the relationship by removing a card from the stack. Effects granted by the relationship disappear when it is broken.
+
+Example: stacking a machine on a power outlet gives the machine the icon-only `Powered` attribute. Removing the machine from the power outlet removes `Powered`.
+
+A single power outlet can power only one card at a time.
 
 ### Nadir
 
