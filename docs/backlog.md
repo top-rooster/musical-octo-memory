@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
+1. **WOUND-01 [P2]** - What happens when a wound's Infection becomes severe?
 2. **MOVE-02 [P2]** - Does Inventory have a capacity limit?
 3. **CARD-07 [P2]** - Can cards be contained/attached outside Stack/Process/Connection?
 4. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
@@ -164,11 +164,11 @@ A `Stack` is visual compression for identical cards. Represented cards remain se
 
 ### Process
 
-A `Process` is unattended work that continues while Nadir spends game time doing other things. Participating cards remain mechanically combined while the Process is running.
+A `Process` is unattended work that continues while Nadir spends game time doing other things. A Process may involve multiple cards or may be embodied by a single card whose state changes over time.
 
 ### Connection
 
-A `Connection` is a persistent mechanically meaningful relationship. It begins immediately, lasts until the player separates the cards, and relationship-dependent effects disappear when it is broken.
+A `Connection` is a persistent mechanically meaningful relationship. It begins immediately, lasts until the player separates its cards, and relationship-dependent effects disappear when it is broken.
 
 Example: a machine connected to a power outlet gains `Powered`; disconnecting removes it. One outlet can power only one card at a time.
 
@@ -186,14 +186,17 @@ A Process progresses as game time passes while Nadir is occupied with Actions or
 Examples:
 
 - `Rat Meat` on a lit camp fire progresses while the fire is lit and Nadir spends time doing something else,
-- a bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time.
+- a bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time,
+- `Flesh Wound` and `Burn Wound` are single-card Processes whose `Progress` represents healing.
 
 ## PROCESS-D01 - Processes are unattended
 **Status:** DECIDED BY SIMON
 
-The name **Process** is reserved for card combinations that do not require Nadir's continuous personal involvement.
+The name **Process** is reserved for ongoing change that does not require Nadir's continuous personal involvement.
 
 Starting a Process does not itself force game time forward to completion. It advances when game time passes because Nadir is doing something else.
+
+A Process does not have to be a multi-card stack. `Flesh Wound` and `Burn Wound` are confirmed single-card Processes.
 
 Concrete example: putting `Rat Meat` on a lit camp fire starts a cooking Process. The meat cooks while the fire remains lit and Nadir spends time on other activities.
 
@@ -245,7 +248,9 @@ There is no single universal Action completion transformation. An Action can ret
 
 There is no single universal Process completion transformation. Each Process defines its own result when `Progress` reaches 100.
 
-A Process may consume/transform participating cards, create output cards, change attributes, separate its participants, or combine such results.
+A Process may consume/transform participating cards, create output cards, change attributes, separate its participants, remove itself, or combine such results.
+
+`Flesh Wound` and `Burn Wound` remove themselves when their healing `Progress` reaches 100.
 
 ## STACK-D03 - Dragging from a Stack peels off one card
 **Status:** DECIDED BY SIMON
@@ -256,7 +261,7 @@ Dragging a Stack separates its top card as an individual card.
 - Stack 2 -> dragged card + ordinary card.
 - Count 1 is never presented as a Stack.
 
-The Stack count is presentation, not currently a normal card `Value`.
+The Stack count is presentation, not currently a normal `Value` attribute.
 
 ## STACK-D04 - Stack members must be identical now
 **Status:** DECIDED BY SIMON
@@ -465,22 +470,63 @@ More persistent Nadir cards may be added later if a concrete need appears.
 
 Conditions currently applying to Nadir are represented as temporary cards in Inventory rather than being forced into Body, Mind, or Spirit.
 
-Examples explicitly given by Simon include `Exhausted` and `Flesh Wound`. A burn wound from an electrical shock is another concrete condition example; its exact final card title is not yet fixed.
+Examples explicitly given by Simon include `Exhausted`, `Flesh Wound`, and `Burn Wound`.
 
-These cards exist while the condition applies. How they are created, progress, heal, expire, or otherwise disappear is not yet decided.
+## NADIR-D06 - Condition lifecycle is condition-specific
+**Status:** DECIDED BY SIMON
 
-## NADIR-D06 - All Nadir cards are Anchored to Inventory
+Temporary Nadir conditions do not share one universal expiry rule.
+
+### Exhausted
+
+`Exhausted` is removed through sleep:
+
+1. drag `Exhausted` onto **Body**,
+2. the interaction is `Sleep`,
+3. `Sleep` advances game time as an Action,
+4. when the Action completes, the `Exhausted` card terminates/disappears.
+
+The exact sleep duration and any effects beyond removing `Exhausted` are not yet decided.
+
+### Flesh Wound and Burn Wound
+
+`Flesh Wound` and `Burn Wound` are **single-card Processes**.
+
+- Each wound has `Progress` from 0 to 100 representing healing.
+- The wound card disappears when `Progress` reaches 100.
+- Each wound has an `Infection` numerical counter, represented under the current attribute model as an `Infection` Value.
+- `Infection` rises over time if not adequately managed.
+- Wounds need cleaning to keep Infection down.
+- Wounds can be dressed; dressing improves healing over time and causes Infection to decrease over time.
+
+The exact card/attribute representation of cleaning and dressing, their rates/durations, and the consequences of severe Infection are not yet decided.
+
+## NADIR-D07 - All Nadir cards are Anchored to Inventory
 **Status:** DECIDED BY SIMON
 
 All of Nadir's cards, including Body, Mind, Spirit and temporary condition cards, have `Anchored` with **Inventory** as their home zone.
 
 They can cross into Room while being dragged but cannot come to rest there as ordinary placement. If released in Room without a legal accepting card interaction, they return to Inventory. They may be dropped onto a Room card for a legal interaction without changing home zone.
 
+## WOUND-01 - Severe Infection consequences
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+What happens as a wound's `Infection` becomes severe? Does it slow/stop healing, create another condition, damage Body/Health, transform the wound, or use some other consequence?
+
+Do not infer thresholds or outcomes yet.
+
+## WOUND-02 - Cleaning and dressing representation
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+Cleaning and dressing are confirmed wound interventions. Decide later exactly which cards initiate them, whether they are Actions, and whether dressing is represented by an attribute, another card relationship, or another mechanism.
+
 ## NADIR-02 - Injury representation beyond simple condition cards
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-Injury-like conditions can be temporary Inventory cards applying to Nadir. Decide later whether all injuries use that model or whether some persistent/complex injuries need another representation.
+`Flesh Wound` and `Burn Wound` are confirmed single-card Processes. Decide later whether all injuries use a similar condition-Process model or whether some persistent/complex injuries need another representation.
 
 ## NADIR-03 - Equipment representation
 **Status:** OPEN - SIMON TO DECIDE
@@ -493,12 +539,6 @@ Ordinary Inventory cards, Connections, attributes, or something else?
 **Priority:** P3
 
 Beyond Mind and Spirit, how much mental/narrative state should be numerical, qualitative, or expressed through writing/behavior?
-
-## NADIR-06 - Temporary condition lifecycle
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-How are condition cards such as `Exhausted`, `Flesh Wound`, and burn-wound conditions created, changed, and removed?
 
 ## SURV-D01 - Keep survival complexity legible
 **Status:** DECIDED BY SIMON
