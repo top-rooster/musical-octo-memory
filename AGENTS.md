@@ -12,14 +12,14 @@ Before making material changes, read:
 - `docs/roadmap.md` for the active implementation slice and acceptance criteria.
 - `docs/backlog.md` for the design decision register, future candidates, open questions, priorities, and rationale.
 - `docs/data-language.md` for the authoring rules for card data and level design.
-- `docs/wound-process.md` for the latest explicit Flesh Wound Process rules and compound `Fabric+Sterilized` requirement.
 
-The status labels in `docs/backlog.md` are authoritative for design ownership. `docs/wound-process.md` contains newer explicit Simon decisions that supplement the broader wound entries until those broader summaries are consolidated.
+The status labels in `docs/backlog.md` are authoritative for design ownership.
 
 - **DECIDED BY SIMON** means an explicit design decision and may be treated as a constraint.
 - **OPEN - SIMON TO DECIDE**, **DEFERRED**, and **SUGGESTED BY CHATGPT** are not design commitments.
 - Never promote a suggestion or open question into an accepted design rule merely because it appears in repository documentation.
 - Backlog items are not implementation commitments; implement them only when explicitly requested or promoted into `docs/roadmap.md`.
+- Older focused design notes may remain in `docs/` for history, but they do not override the four sources of truth listed above.
 
 Keep this file short. Put detailed design decisions in `docs/` rather than expanding `AGENTS.md` into an encyclopedia.
 
