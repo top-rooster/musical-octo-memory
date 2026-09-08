@@ -43,7 +43,12 @@ Every attribute is represented by an icon. There are two official forms:
 - **Marker** — icon only; presence carries the meaning.
 - **Value** — icon plus an integer value.
 
-Examples: `Player`, `Anchored`, `Powered`, `Cutting Tool`, `Dress`, `Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`, `Clean 70`.
+Examples include `Player`, `Anchored`, `Powered`, `Cutting Tool`, `Dress`, `Clean` as a Marker on fabric, `Health 100`, `Progress 42`, `Durability 80`, `Spoilage 63`, and `Clean 70` as a Value on a wound.
+
+The label `Clean` is currently used for two different attribute forms on different cards:
+
+- a wound has a `Clean` **Value** representing how clean the wound is;
+- fabric may have a `Clean` **Marker** meaning the fabric is clean enough to be used as a dressing.
 
 Markers may describe functional roles used by interaction matching. `Cutting Tool` is a confirmed example. Anything Nadir can eat or otherwise ingest must also carry an ingestion Marker; its final user-facing name has not yet been fixed.
 
@@ -115,6 +120,8 @@ Confirmed examples:
 
 - `Dead Rat` accepts a source carrying `Cutting Tool` and maps it to `Skin` / the `Skinning` Action. A knife works because it has the `Cutting Tool` Marker, not because the rat specifically recognizes a knife master definition.
 - Nadir's ingestion interaction accepts cards carrying the ingestion Marker. That Marker tells the interaction logic that the card can be dropped onto the relevant Nadir ingestion target; eating currently uses **Body**.
+- a wound can accept water in a container for cleaning;
+- a wound can accept clean fabric for dressing. The fabric must carry the `Clean` Marker. The exact attribute rule that identifies a card as fabric is not yet fixed.
 
 The exact data syntax for target requirements and interaction effects is not yet fixed.
 
@@ -265,14 +272,16 @@ Condition lifecycles are condition-specific rather than using one universal time
 - each has an `Infection` Value that rises as game time advances if the wound is not adequately managed;
 - each has a `Clean` Value representing current wound cleanliness;
 - a wound may carry the `Dress` Marker; its presence means the wound is currently dressed;
-- cleaning improves `Clean` and helps keep Infection down;
+- water in a container can be used to clean a wound, improving the wound's `Clean` Value;
+- any fabric carrying the `Clean` Marker can be used to dress a wound; dressing gives the wound the `Dress` Marker;
+- fabric can be made clean by boiling it, which gives that fabric the `Clean` Marker;
 - `Dress` improves healing over time and causes Infection to decrease over time;
 - when Infection becomes too high, healing over time is reduced;
 - severe Infection spawns a `Fever` condition card.
 
 In addition, each `Burn Wound` has another Value that accelerates Nadir's dehydration as game time advances. The exact name/scale of that Value and the exact representation of dehydration are not yet fixed.
 
-The exact source cards, interactions, Action durations, Value changes, and rules for adding/removing `Dress` are not yet decided. Any wound treatment that consumes game time must be an Action. The exact Infection threshold or thresholds for impaired healing and Fever spawning are also not fixed.
+The exact amount by which water changes wound `Clean`, whether/how much water is consumed, whether clean fabric is consumed or changed when dressing, how `Dress` is later removed, and the exact boiling interaction are not yet decided. It is also not yet decided whether cleaning or dressing are immediate interactions or Actions. Any wound treatment that consumes game time must be an Action. The exact Infection threshold or thresholds for impaired healing and Fever spawning are also not fixed.
 
 `Fever` is cumulative. If Nadir has **three Fever cards**, he dies.
 
