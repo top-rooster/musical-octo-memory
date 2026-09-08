@@ -10,17 +10,7 @@ The game should create complexity from interactions between a relatively small n
 
 ### Cards
 
-All interactable entities are cards.
-
-Confirmed examples include:
-
-- materials,
-- machines,
-- food,
-- Nadir,
-- passages to other rooms.
-
-A card is therefore not synonymous with an inventory item. Some cards can be carried, some are anchored, and some represent fixed world entities or navigation possibilities.
+All interactable entities are cards. Confirmed examples include materials, machines, food, Nadir, and passages to other rooms.
 
 For the first release, every normal card face shows only:
 
@@ -28,90 +18,65 @@ For the first release, every normal card face shows only:
 - a picture,
 - zero or more visible attributes.
 
-Do not add description text or other permanent card-face information for the first release. A description may become relevant later and should be revisited then.
+Description text is deferred.
 
-Cards do not currently have separate categories, tags, or capabilities. A card is functionally defined only by its attributes. Do not introduce another classification or capability system unless a concrete design need appears later that attributes cannot satisfy.
+Cards do not currently have separate categories, tags, or capabilities. A card is functionally defined only by its attributes unless a concrete future need proves that insufficient.
 
 #### Master definitions and instances
 
-Each reusable card type has one **master definition**. The master definition supplies:
+Each reusable card type has one **master definition** supplying name/title, picture, and starting attributes.
 
-- name/title,
-- picture,
-- starting attributes.
-
-Cards created from that master are separate **card instances**. Each instance receives the starting attributes and thereafter maintains its own current attributes independently of the master and of sibling instances.
+Cards created from that master are separate **card instances**. Each instance receives the starting attributes and thereafter maintains its own current attributes independently.
 
 Two identical objects are therefore still two distinct card instances. A Stack can compress their presentation, but it does not merge them into one underlying card.
 
-Whether an individual instance can later override its master name/picture, or how a card changes into a materially different card type, is not yet decided.
-
-Whether non-interactable state or temporary conditions should also use card representation is not yet decided.
+Whether an instance can later override its master name/picture, or how a card changes into a materially different card type, is not yet decided.
 
 ### Attributes
 
 All card attributes are visible on the card. There are no hidden/internal card attributes in the current model.
 
-Every attribute is represented by an icon. There are two official attribute forms:
+Every attribute is represented by an icon. There are two official forms:
 
-- **Marker** — icon only; the presence of the attribute itself carries the meaning.
+- **Marker** — icon only; presence carries the meaning.
 - **Value** — icon plus an integer value.
 
-Examples on Nadir:
-
-- `Player` — Marker,
-- `Anchored` — Marker,
-- `Health 100` — Value.
+Examples: `Player`, `Anchored`, `Powered`, `Health 100`, `Progress 42`.
 
 #### Anchored
 
-`Anchored` is a Marker that prevents a card from being transferred by dragging between the Room and Inventory zones.
+`Anchored` is a Marker that prevents a card from being transferred between Room and Inventory. It does not prevent repositioning within the current zone or dragging the card onto another card for an interaction.
 
-Anchored does **not** mean immovable. An anchored card can still:
-
-- be repositioned within its current zone,
-- be dragged onto another card for an interaction.
-
-This is ordinary attribute-driven behavior, not a special anchored card type.
-
-The introduction of the Nadir zone does not yet redefine `Anchored`; exact transfer restrictions involving the Nadir zone remain to be decided if needed.
+The introduction of the Nadir zone does not yet redefine `Anchored`; exact transfer restrictions involving that zone remain open if needed.
 
 ### Zones and positioning
 
-The main play space has three conceptual zones:
+The main play space has three zones:
 
 - **Room** — the currently viewed physical space.
 - **Inventory** — persistent carried possessions.
-- **Nadir** — the cards that represent Nadir.
+- **Nadir** — Nadir's persistent representation cards plus temporary condition cards that currently apply to him.
 
-The Nadir zone replaces the earlier assumption that Nadir's representation lives in Inventory. Nadir remains represented entirely through cards rather than through a separate character sheet or alternate character view.
+The Nadir zone replaces the earlier assumption that Nadir's representation lives in Inventory. Nadir remains represented through cards rather than through a separate character sheet or alternate character views.
 
-Cards can be moved between zones when the relevant rules allow it. The exact rules for which cards may persist in the Nadir zone, and whether Nadir-representing cards can leave it, are not yet decided.
+Cards can be moved between zones when the relevant rules allow it. The exact transfer rules for the Nadir zone are not yet fully decided.
 
-Within a zone, every card can be positioned to the player's liking, including anchored cards.
+Within a zone, every card can be positioned to the player's liking. Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
 
-Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat, aligned presentation.
-
-Movement is distinct from interaction. Repositioning a card within a zone or transferring it between zones does not itself count as interacting with another game entity.
+Movement is distinct from interaction.
 
 ### Universal interaction language
 
 **Every gameplay interaction is initiated by putting one card on top of another card.**
 
-An interaction therefore always has:
+An interaction always has:
 
 - a source card being dragged,
 - a target card receiving it.
 
-There are no non-card interaction targets in the current design. Bare zone space can receive a card for movement/placement when that placement is legal, but that is movement rather than an interaction.
+Bare zone space can receive a card for legal movement/placement, but that is movement rather than an interaction.
 
-This rule applies across the game rather than only to eating. Examples include:
-
-- food onto the relevant Nadir card,
-- medicine onto the relevant Nadir card,
-- a machine onto a power outlet,
-- material or a tool onto a machine,
-- any card combination that starts a Process or Connection.
+This rule applies across the game: food onto a Nadir card, medicine onto a Nadir card, machine onto a power outlet, material or tool onto a machine, and any card combination that starts a Process or Connection.
 
 A card-on-card interaction does not have to remain stacked afterward. It may resolve immediately, consume a card, alter attributes, create a Stack, start a Process, create a Connection, or produce another process-specific result.
 
@@ -121,103 +86,100 @@ There are three forms of deliberate card stacking: **Stack**, **Process**, and *
 
 #### Stack
 
-A Stack is a visual convenience for identical cards that would otherwise occupy unnecessary space.
+A Stack is a visual convenience for identical cards.
 
 - The cards remain separate card instances.
-- All cards in the Stack must come from the same master definition.
-- All cards in the Stack must have identical current attributes.
-- If any Marker differs, or any Value/value differs, the cards are not identical and cannot share a Stack.
-- The cards do not all need to remain individually exposed.
-- The Stack shows a count of how many cards it represents.
+- All cards in the Stack come from the same master definition.
+- All cards have identical current attributes.
+- If any Marker differs, or any Value/value differs, they cannot share a Stack.
+- The Stack shows a count.
 - It has no mechanical effect merely because it exists.
 
-Dragging a Stack peels off its top card as an individual card:
+Dragging a Stack peels off its top card:
 
-- Stack 3 → one dragged card + Stack 2,
-- Stack 2 → one dragged card + one ordinary card.
+- Stack 3 → dragged card + Stack 2,
+- Stack 2 → dragged card + ordinary card.
 
-A single remaining card is shown as a normal card rather than as a Stack with count 1.
-
-The Stack count is presentation for how many card instances are compressed into the Stack; it is not currently defined as a normal `Value` attribute.
+A single remaining card is shown normally rather than as Stack 1. The Stack count is presentation, not currently a normal `Value` attribute.
 
 #### Process
 
 A Process is a finite mechanically meaningful combination of cards. Creating it starts the Process immediately.
 
-Every participating card remains individually identifiable: the name of every card remains visible.
+Every participating card remains individually identifiable and every card name stays visible.
 
 - The top card gets a `Progress` Value.
 - `Progress` ranges from 0 to 100.
 - When `Progress` reaches 100, the Process is complete.
 - The Process may change attributes on participating cards.
 
-There is no universal progress rate. Each Process defines its own calculation for how `Progress` changes from relevant current game state. Time may be one input, but not necessarily the only one.
+There is no universal progress rate. Each Process defines its own calculation from relevant game state and elapsed game time.
 
 Examples:
 
 - Rat meat on a camp fire progresses with elapsed time while the camp fire is lit.
-- A bowl on a condenser progresses according to a combination of room moisture, room temperature, and elapsed time.
-
-Process progress can therefore accelerate, slow, or stop as relevant conditions change.
+- A bowl on a condenser progresses according to room moisture, room temperature, and elapsed time.
 
 #### Connection
 
 A Connection is a persistent mechanically meaningful relationship between cards. Creating it starts the effect immediately.
 
-Every participating card remains individually identifiable: the name of every card remains visible.
+Every participating card remains individually identifiable and every card name stays visible.
 
-A Connection does not complete by itself. Its effect exists for as long as the relationship exists.
+A Connection lasts until the player separates its cards. Effects granted by the Connection disappear when it is broken.
 
-The player can break a Connection by separating its cards. Effects granted by the Connection disappear when it is broken.
-
-Example: connecting a machine to a power outlet gives the machine the `Powered` Marker. Disconnecting it removes `Powered`.
-
-A single power outlet can power only one card at a time.
+Example: connecting a machine to a power outlet gives the machine the `Powered` Marker. Disconnecting removes `Powered`. One outlet can power only one card at a time.
 
 ### Nadir
 
-Nadir Veylan is represented by one or more cards in the dedicated **Nadir** zone.
+Nadir Veylan is represented in the dedicated **Nadir** zone rather than by a separate character sheet.
 
-Character state is expressed primarily as attributes on those cards rather than through a separate character-stat subsystem or alternate character views.
+For now, his persistent representation is divided across **three cards**, each covering a different domain:
 
-The exact division of state across Nadir's cards is not yet decided.
+1. **physical** — candidate names include `Health`, `Body`, `Physical`;
+2. **cognitive / will** — candidate names include `Mind`, `Cognition`, `Will`, `Super Ego`;
+3. **emotional / spiritual** — candidate names include `Emotion`, `Spirit`, `Id`.
 
-The earlier design placed an `Anchored` Nadir card in Inventory. The dedicated Nadir zone supersedes that placement. Whether Nadir-zone cards use `Anchored`, another transfer restriction, or no explicit restriction is not yet decided.
+The three-domain structure is decided. The exact user-facing card names are not. More persistent Nadir cards may be added later if a concrete need appears.
 
-For the first prototype, expose at least:
+Relevant persistent character state is expressed as attributes on those cards.
 
-- Hunger
-- Health
+Conditions that currently apply to Nadir are represented as **temporary cards in the Nadir zone** rather than being forced into one of the three persistent cards.
 
-Health is part of the current prototype scope, not yet a confirmed permanent survival attribute.
+Confirmed examples include:
+
+- `Exhausted`
+- `Flesh Wound`
+
+These condition cards exist while the condition applies. Their creation, progression, healing, expiry, and removal rules are not yet decided.
+
+This gives the Nadir zone two kinds of content without introducing a separate UI model:
+
+- persistent cards that describe ongoing parts of Nadir,
+- temporary cards that describe current conditions affecting him.
 
 ### Drag affordances
 
 Whenever the player drags a card:
 
-1. Every card that can legally receive the dragged card as an interaction target should highlight.
+1. Every card that can legally receive it as an interaction target highlights.
 2. Legal zone placement for movement should remain legible without being confused with a card interaction target.
 3. Potential state changes should be previewed before the drop is committed.
 4. Invalid targets should not suggest that they accept the card.
 
-Example: dragging food over the Nadir card that accepts it should preview something like:
+Example: dragging food over the physical Nadir card should preview something like:
 
 `Hunger 67 → 98`
 
-The preview should appear on or immediately adjacent to the affected stat so the player does not need to mentally translate hidden effects.
+The preview should appear on or immediately adjacent to the affected stat.
 
 ### Eating
 
-Food is consumed by dragging a food card onto the relevant Nadir card.
+Food is consumed by dragging a food card onto the relevant physical Nadir card.
 
-Dropping the food on that card:
+Dropping the food applies the food's hunger effect, consumes the food card, clamps Hunger to its valid range, and updates the visible Hunger value immediately.
 
-- applies the food's hunger effect,
-- removes or consumes the food card,
-- clamps Hunger to its valid range,
-- updates the visible Hunger value immediately.
-
-For the first prototype, do **not** add a second hidden stomach/fullness system. This is a prototype simplification, not yet a permanent design decision.
+For the first prototype, do **not** add a second hidden stomach/fullness system. This remains a prototype simplification rather than a permanent design rule.
 
 ## Product principles
 
