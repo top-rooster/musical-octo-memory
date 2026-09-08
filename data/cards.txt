@@ -106,8 +106,9 @@ images/campfire.png
 Plastic Bottle
 images/plastic-bottle.png
 Container
-Contains Water
-# Emptying the bottle removes Contains Water; it remains the same Plastic Bottle card.
+# Contains Water is instance state, not a permanent master attribute.
+# A filled bottle instance gains Contains Water.
+# Emptying it removes Contains Water from that same card instance.
 # Partial liquid amounts are deferred.
 
 # Sterilization Process sketch; exact syntax for multi-card Processes is still draft:
