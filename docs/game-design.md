@@ -47,7 +47,7 @@ Markers may describe functional roles used by interaction matching. `Cutting Too
 
 `Durability` is an ordinary Value. A tool therefore does not need a generic `Reusable` Marker: a knife can be a `Cutting Tool` with a current `Durability` value. The scale and wear rules are still open.
 
-`Spoilage` is also an ordinary Value. `Dead Rat` has a Spoilage value that increases over time and transforms the card into `Rotten Meat` at 100.
+Process progress is also represented as a normal visible Value, but its **player-facing name may be specific to the Process**. Mechanically/code-wise, these are the same progress concept. `Spoilage` on `Dead Rat` is the confirmed example: it is the visible name of that card's Process progress, not a separate timed-state system.
 
 A `Burn Wound` also carries a Value whose effect is to accelerate Nadir's dehydration over time. The final name and scale of that burn-specific Value are not yet fixed, and the exact card/attribute representation of dehydration itself is still open.
 
@@ -154,7 +154,7 @@ When an Action is committed:
 5. the Action completes as soon as the window animation terminates,
 6. the Action-specific result is applied.
 
-Actions do **not** use a `Progress` attribute. Their progress/time passage is already represented by the Action window.
+Actions do **not** use Process progress. Their progress/time passage is already represented by the Action window.
 
 Concrete example: skinning a dead rat.
 
@@ -176,24 +176,27 @@ The duration and result belong to the specific Action. Other Actions may use dif
 
 A **Process** is unattended change that can continue while Nadir spends game time doing something else.
 
-Starting a Process does **not** force time forward to completion. Instead, it progresses when game time passes because Nadir is occupied with Actions or other activities.
+Starting or existing as a Process does **not** force time forward to completion. Instead, it progresses when game time passes because Nadir is occupied with Actions or other activities.
 
-A Process can involve several cards, as with cooking, or it can be embodied by a single card whose state changes over time, as with a wound or Fever.
+A Process can involve several cards, as with cooking, or it can be embodied by a single card whose state changes over time, as with spoilage, a wound, or Fever.
 
 Processes are allowed in both Room and Inventory, including on or between Nadir-related cards in Inventory.
 
-Processes currently use a visible `Progress` Value from 0 to 100. There is no universal progress calculation: each Process defines its own progression from relevant state and elapsed game time. Conditions may speed up, slow down, or stop progress.
+Most Processes use a visible progress Value on a 0–100 scale. Mechanically/code-wise, this is the same Process progress concept regardless of the player-facing label. The visible Value name may be specific to the Process when that makes the changing state easier to understand.
+
+`Spoilage` on `Dead Rat` is the confirmed example of a process-specific progress label. Other Processes may later use other contextual names; no such names are fixed until explicitly decided.
+
+There is no universal progress calculation: each Process defines its own progression from relevant state and elapsed game time. Conditions may speed up, slow down, or stop progress.
 
 Concrete examples:
 
+- `Dead Rat` is a single-card Process whose visible progress is `Spoilage`. Spoilage rises over game time and at 100 transforms the card into `Rotten Meat`.
 - `Rat Meat` placed on a lit camp fire starts a cooking Process. It progresses while the fire remains lit and Nadir spends time doing other things.
 - A bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time while Nadir is occupied elsewhere.
-- `Flesh Wound` and `Burn Wound` are single-card Processes. Their `Progress` represents healing, and the wound card disappears when `Progress` reaches 100.
-- `Fever` is a single-card Process. Its `Progress` represents recovery over game time, and the Fever card disappears when `Progress` reaches 100.
+- `Flesh Wound` and `Burn Wound` are single-card Processes whose progress represents healing.
+- `Fever` is a single-card Process whose progress represents recovery.
 
-`Dead Rat` introduces a related unresolved case: its visible `Spoilage` Value rises over time and transforms it into `Rotten Meat` at 100. Simon specified `Spoilage`, not a generic `Progress` attribute. It remains open whether such timed state change should itself be treated as a Process, or whether ordinary Values may evolve over game time outside the Process model.
-
-When `Progress` reaches 100, completion is Process-specific. A Process can consume or transform participating cards, create output cards, change attributes, separate participants, remove itself, or combine these effects.
+When a Process reaches its completion state, the result is Process-specific. A Process can consume or transform participating cards, create output cards, change attributes, separate participants, remove itself, or combine these effects.
 
 If a future Process needs an `Anchored` participant whose home is another zone, its ongoing visual presentation still needs to be decided. There is no current concrete example requiring this.
 
@@ -244,8 +247,8 @@ Condition lifecycles are condition-specific rather than using one universal time
 
 **Flesh Wound** and **Burn Wound** are single-card Processes:
 
-- each has `Progress 0–100`, representing healing;
-- each disappears when `Progress` reaches 100;
+- each has a Process progress Value from 0 to 100 representing healing; its eventual player-facing label can be process-specific, but no exact label is fixed yet;
+- each disappears when its Process progress reaches 100;
 - each has an `Infection` Value that rises over time if the wound is not adequately managed;
 - wounds need cleaning to keep Infection down;
 - wounds can be dressed to improve their healing rate;
@@ -257,7 +260,7 @@ In addition, each `Burn Wound` has another Value that accelerates Nadir's dehydr
 
 `Fever` is cumulative. If Nadir has **three Fever cards**, he dies.
 
-Each `Fever` card is itself a single-card Process. Its recovery `Progress` advances with game time and the card disappears at `Progress 100`.
+Each `Fever` card is itself a single-card Process. Its Process progress represents recovery over game time and the card disappears when that progress reaches 100. Its eventual player-facing progress label is not yet fixed.
 
 Fever can also be treated with water: dragging a water container onto a Fever card removes that Fever card and empties the container. The exact Fever recovery rate, the exact representation of an emptied container, and whether the water treatment itself consumes game time are not yet fixed.
 
@@ -312,7 +315,7 @@ The ingestion Marker is what makes the card a legal source for Nadir's ingestion
 
 Dropping an ingestible food card on Body applies the food's interaction-specific effects, consumes the food card, and updates affected visible state immediately. Ordinary food can, for example, change Hunger; Hunger is clamped to its valid range.
 
-`Dead Rat` has a `Spoilage` Value that increases over game time. When Spoilage reaches **100**, the Dead Rat turns into a `Rotten Meat` card.
+`Dead Rat` is a single-card Process whose visible progress is named `Spoilage`. Spoilage increases over game time. When it reaches **100**, the Dead Rat turns into a `Rotten Meat` card.
 
 `Rotten Meat` remains ingestible. If Nadir eats it:
 
@@ -335,6 +338,7 @@ Dehydration is a survival pressure that can worsen over game time. Its exact rep
 - Prefer direct manipulation over nested menus.
 - Prefer visible consequences over hidden arithmetic, while preserving meaningful discovery.
 - Let specific visible attributes define what cards can do; avoid generic classifications such as `Reusable` when a concrete functional Marker and state Value express the behavior more directly.
+- Give Process progress a contextual player-facing name when that improves comprehension, while keeping it one common mechanic underneath.
 - Discovery, relational understanding, exploratory play, and knowledge unlocks are intended parts of play rather than problems for the UI to eliminate.
 - Do not turn the game into exhaustive deterministic planning by revealing every consequence before commitment.
 - Exploratory play should not cause severe, unforeseeable punishment. Meaningful danger should be reasonably telegraphed even when details remain unknown.
