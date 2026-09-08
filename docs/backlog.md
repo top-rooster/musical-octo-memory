@@ -26,11 +26,10 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **PREVIEW-03 [P2]** - How should known-but-uncertain risk be communicated before an interaction?
-2. **ZONE-01 [P2]** - What may persist in the Nadir zone, and can Nadir cards leave it?
-3. **STACK-02 [P2]** - What happens when a Process completes?
-4. **INTERACT-02 [P2]** - What if one source/target pair supports several actions?
-5. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
+1. **ZONE-01 [P2]** - What may persist in the Nadir zone, and can Nadir cards leave it?
+2. **STACK-02 [P2]** - What happens when a Process completes?
+3. **INTERACT-02 [P2]** - What if one source/target pair supports several actions?
+4. **NADIR-06 [P2]** - How do temporary condition cards change and disappear?
 
 ---
 
@@ -309,6 +308,15 @@ Previews reflect what Nadir/the player currently understands.
 
 Design example: repairing an exposed electrical outlet can carry a known risk of shock. A shock can produce a burn-wound condition; if the risk outcome does not produce a shock, the repair can instead result in a functional outlet. The player can understand that the attempt is dangerous without necessarily knowing the exact roll result in advance.
 
+## PREVIEW-D03 - Uncertain likelihoods are calibrated but non-numeric
+**Status:** DECIDED BY SIMON
+
+When Nadir understands an uncertain risk, the UI should communicate the likelihood clearly enough for the player to distinguish materially different odds such as roughly even chances from a clearly favored outcome.
+
+Do not normally expose the underlying percentage or numerical odds. The communication should use sufficiently precise plain-language likelihoods rather than only coarse labels such as `Low`, `Moderate`, and `High`.
+
+The exact user-facing vocabulary is not yet fixed and can be tested in UI, but the player should be able to make a meaningfully informed risk judgment without seeing numbers.
+
 ## TARGET-D01 - Legal interaction targets highlight
 **Status:** DECIDED BY SIMON
 
@@ -319,14 +327,6 @@ While dragging, every card that can legally receive the dragged card as an inter
 **Priority:** P2
 
 How much should be shown when several known attributes change?
-
-## PREVIEW-03 - Known but uncertain outcomes
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-When Nadir understands that an interaction carries risk but the result is uncertain, what should the player see: only a qualitative warning, an approximate risk level, an exact probability when known, or something else?
-
-The exposed-outlet repair establishes that understood danger can coexist with a hidden roll outcome; it does not yet decide how much probability information the UI should reveal.
 
 ## PREVIEW-04 - Long-term deterministic consequences
 **Status:** OPEN - SIMON TO DECIDE
