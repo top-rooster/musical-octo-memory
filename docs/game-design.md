@@ -47,9 +47,21 @@ There are two attribute forms:
 Examples on Nadir:
 
 - `Player` — icon only,
+- `Anchored` — icon only,
 - `Health 100` — icon plus integer.
 
 Working terminology for these two forms is still undecided. ChatGPT has suggested **Marker attribute** for icon-only attributes and **Value attribute** for icon-plus-integer attributes; these names are not yet a design decision.
+
+#### Anchored
+
+`Anchored` is an icon-only attribute that prevents a card from being transferred by dragging between the Room and Inventory zones.
+
+Anchored does **not** mean immovable. An anchored card can still:
+
+- be repositioned within its current zone,
+- be dragged onto another card for an interaction.
+
+This is ordinary attribute-driven behavior, not a special anchored card type.
 
 ### Zones
 
@@ -58,11 +70,11 @@ The main play space has at least two conceptual zones:
 - **Room area** — the currently viewed physical space.
 - **Inventory area** — persistent carried possessions and anchored character information.
 
-Movable cards can be dragged back and forth between appropriate zones.
+Cards without a rule preventing transfer can be dragged between appropriate zones. A card with `Anchored` remains in its current zone.
 
 ### Nadir
 
-Nadir Veylan is represented by an **anchored card in the inventory**. His card is not dragged around like an ordinary item.
+Nadir Veylan is represented by a card in Inventory with the `Anchored` attribute. He therefore cannot be transferred into the Room zone, but his card can still be repositioned within Inventory or dragged onto other cards when an interaction allows it.
 
 Character state is expressed primarily as attributes on Nadir's card rather than through a separate character-stat subsystem.
 
