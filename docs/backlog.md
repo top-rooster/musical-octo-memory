@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **MOVE-06 [P2]** - How does a Stack count toward the five-card Inventory limit?
-2. **CARD-07 [P2]** - Can cards be contained/attached outside Stack/Process/Connection?
-3. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
-4. **INTERACT-06 [P2]** - How do source and target attributes determine interaction legality and effect?
-5. **WOUND-02 [P2]** - How are cleaning and dressing represented?
+1. **CARD-07 [P2]** - Can cards be contained/attached outside Stack/Process/Connection?
+2. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
+3. **INTERACT-06 [P2]** - How do source and target attributes determine interaction legality and effect?
+4. **WOUND-02 [P2]** - How are cleaning and dressing represented?
+5. **CARD-11 [P2]** - How does a card instance change identity?
 
 ---
 
@@ -162,15 +162,9 @@ Inventory has a capacity limit. For now, it can contain at most **five non-ancho
 
 `Anchored` cards do not count toward this limit. This means Nadir's Body, Mind, Spirit, and temporary anchored condition cards do not consume the ordinary carrying capacity.
 
+Every non-anchored card instance in Inventory occupies one of the five slots. Inventory does not use Stacks, so identical carried cards remain separate and each consumes one slot.
+
 The number five is a tuning value rather than a permanent constant and may be changed later if playtesting shows a better number.
-
-How a `Stack` counts toward this limit is not yet decided.
-
-## MOVE-06 - Stack counting against Inventory capacity
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-If several identical card instances are compressed into one `Stack`, does that Stack count as one of the five non-anchored Inventory cards, or does each underlying card instance count separately?
 
 ## STACK-D01 - Stack, Process, Connection
 **Status:** DECIDED BY SIMON
@@ -287,6 +281,15 @@ The Stack count is presentation, not currently a normal card `Value` attribute.
 **Status:** DECIDED BY SIMON
 
 Cards can share a `Stack` only when they come from the same master definition and have identical current attributes: same Marker set, same Values, same Value numbers.
+
+## STACK-D05 - No Stacks in Inventory
+**Status:** DECIDED BY SIMON
+
+`Stack` presentation is not used in the Inventory zone.
+
+Identical cards carried in Inventory remain separate visible card instances. Each non-anchored instance therefore counts separately against the provisional five-card Inventory capacity.
+
+With the current two-zone model, Stack presentation is confined to Room.
 
 ## STACK-05 - Anchored participant in an ongoing Process
 **Status:** DEFERRED
