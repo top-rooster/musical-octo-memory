@@ -389,7 +389,8 @@ Whenever the player drags a card:
 
 Examples of direct known previews include:
 
-- `Satiation 67 → 98`
+- Rat Meat at `Satiation 67`: `67 → 82`
+- Canned Food at `Satiation 67`: `67 → 92`
 - `Hydration 50 → 75`
 
 The preview should appear on or immediately adjacent to the affected stat.
@@ -400,7 +401,10 @@ Anything Nadir can eat or otherwise ingest must carry a visible ingestion Marker
 
 The ingestion Marker is what makes the card a legal source for Nadir's ingestion interaction. Eating uses **Body** as the receiving card.
 
-The two food cards selected for the first interaction prototype are **Rat Meat** and **Canned Food**. Both are ingestible and are used to test that two legal sources can produce different exact Satiation previews. Their exact Satiation gains have not yet been chosen.
+The two food cards selected for the first interaction prototype are **Rat Meat** and **Canned Food**. Both are ingestible and are used to test that two legal sources can produce different exact Satiation previews:
+
+- eating Rat Meat applies `Satiation +15` to Body;
+- eating Canned Food applies `Satiation +25` to Body.
 
 Dropping an ingestible food card on Body applies the food's interaction-specific effects, consumes/discards the food card, and updates affected visible state immediately. Because eating is not currently an Action, it does not advance game time. If eating is later intended to consume time, it must be modeled as an Action.
 
