@@ -28,11 +28,10 @@ Normally discuss only the single highest-priority open decision.
 
 1. **ATTR-02 [P0]** - What names should the two attribute forms use?
 2. **CARD-04 [P1]** - How does a card instance differ from its reusable definition?
-3. **STACK-01 [P1]** - What advances a finite process stack's `Progress` attribute?
-4. **CARD-05 [P1]** - Is anything besides title, picture, and attributes shown on a card?
-5. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
-6. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
-7. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
+3. **CARD-05 [P1]** - Is anything besides title, picture, and attributes shown on a card?
+4. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
+5. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
+6. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
 
 ---
 
@@ -46,13 +45,7 @@ Every interactable entity is represented as a card. Confirmed examples: material
 ## CARD-D02 - Universal card presentation
 **Status:** DECIDED BY SIMON
 
-Every card has:
-
-- a name/title,
-- a picture,
-- zero or more optional attributes.
-
-Nothing else is universally required.
+Every card has a name/title, a picture, and zero or more optional attributes. Nothing else is universally required.
 
 ## CARD-D03 - Attributes define card function
 **Status:** DECIDED BY SIMON
@@ -71,17 +64,12 @@ There are two forms:
 - icon only,
 - icon plus an integer value.
 
-Examples on Nadir:
-
-- `Player` - icon only,
-- `Health 100` - icon plus integer.
+Examples on Nadir: `Player`, `Anchored`, `Health 100`.
 
 ## ATTR-D02 - Anchored attribute
 **Status:** DECIDED BY SIMON
 
-`Anchored` is an icon-only attribute.
-
-A card with `Anchored` cannot be transferred by dragging between Room and Inventory. It can still be repositioned within its current zone and dragged onto other cards.
+`Anchored` is an icon-only attribute. It prevents dragging the card between Room and Inventory, but does not prevent repositioning within the current zone or dragging the card onto another card.
 
 Nadir is anchored because he has this attribute, not because he belongs to a special card type.
 
@@ -98,12 +86,7 @@ Nadir is anchored because he has this attribute, not because he belongs to a spe
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P1
 
-Decide:
-
-- whether identical objects always have distinct instances,
-- what state belongs to the reusable definition versus the instance,
-- whether transformation changes a definition or replaces an instance,
-- what exactly counts as identical for passive stacking.
+Decide whether identical objects always have distinct instances, what state belongs to the reusable definition versus the instance, whether transformation changes/replaces an instance, and what counts as identical for passive stacking.
 
 **Suggested by ChatGPT:** shared name/picture/base data in a reusable definition; changing state on the instance.
 
@@ -163,19 +146,13 @@ A stack is either **active** or **passive**.
 
 ### Passive stack
 
-A passive stack is only a visual convenience for identical cards.
-
-- The individual cards do not all need to remain exposed.
-- The stack shows a count.
-- It has no process effect merely because it exists.
+A passive stack is only a visual convenience for identical cards. Individual cards do not all need to remain exposed; the stack shows a count and has no process effect merely because it exists.
 
 ### Active stack
 
-An active stack is mechanically meaningful. Creating the active stack immediately starts its effect.
+An active stack is mechanically meaningful. Creating it immediately starts its effect. Every participating card remains individually identifiable and every card name stays visible.
 
-All cards participating in an active stack remain individually identifiable: every card name stays visible.
-
-An active stack has one of two forms: **process** or **permanent**.
+An active stack is either **process** or **permanent**.
 
 ## STACK-D02 - Process active stack
 **Status:** DECIDED BY SIMON
@@ -183,29 +160,30 @@ An active stack has one of two forms: **process** or **permanent**.
 A process stack is finite.
 
 - Creating the stack starts the process.
-- The top card receives a `Progress` integer attribute.
-- `Progress` ranges from 0 to 100.
-- When `Progress` reaches 100, the process is complete.
-- The process can influence attributes on cards in the stack.
+- The top card gets a `Progress` integer attribute from 0 to 100.
+- At `Progress 100`, the process is complete.
+- The process may change attributes on cards in the stack.
 
 ## STACK-D03 - Permanent active stack
 **Status:** DECIDED BY SIMON
 
-A permanent active stack does not complete by itself.
+A permanent active stack remains active until the player breaks the stack. Effects that depend on the relationship disappear when it is broken.
 
-- Its effect exists while the stack relationship exists.
-- The player can break the stack by removing a card.
-- Breaking the stack removes effects that depend on that relationship.
+Example: stacking a machine on a power outlet gives the machine `Powered`. Removing it removes `Powered`. One outlet can power only one card at a time.
 
-Example: stacking a machine on a power outlet gives the machine the `Powered` icon-only attribute. Removing the machine from the outlet removes `Powered`.
+## STACK-D04 - Progress calculation is process-specific
+**Status:** DECIDED BY SIMON
 
-One power outlet can power only one card at a time.
+There is no universal progress rate. Each process defines its own calculation for how `Progress` changes.
 
-## STACK-01 - Progress advancement
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P1
+A progress calculation can combine relevant conditions and elapsed game time.
 
-What advances `Progress` on a process stack: elapsed game time, player actions, a process-specific rule, or another mechanism?
+Examples:
+
+- **Rat meat on a camp fire:** progresses with time while the camp fire is lit. If the fire is not lit, that condition for progress is absent.
+- **Bowl on a condenser:** progress depends on a combination of room moisture, room temperature, and elapsed time.
+
+The system should therefore support progress rates that vary with current game state rather than assuming a fixed amount per tick/action.
 
 ## STACK-02 - Completion result
 **Status:** OPEN - SIMON TO DECIDE
