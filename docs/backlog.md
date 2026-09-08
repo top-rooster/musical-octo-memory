@@ -26,7 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
+1. **NADIR-01 [P1]** - How should Nadir's state be divided across multiple cards?
 2. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
 
 ---
@@ -349,18 +349,29 @@ Preview only immediate effects or also known longer-term effects?
 ## NADIR-D01 - Nadir is anchored in Inventory
 **Status:** DECIDED BY SIMON
 
-Nadir is an Inventory card with `Anchored`. He cannot transfer to Room, but can be repositioned or dragged onto another card.
+Nadir's representation includes an Inventory card with `Anchored`. That card cannot transfer to Room, but can be repositioned or dragged onto another card.
+
+Nadir may also be represented by additional cards. Whether every card representing Nadir is anchored is not yet decided.
 
 ## NADIR-D02 - Character state uses card attributes
 **Status:** DECIDED BY SIMON
 
-Relevant character state lives on Nadir as attributes rather than in a separate character-stat UI. Hunger is confirmed. Health is currently a prototype/example attribute, not yet confirmed as permanent.
+Relevant character state lives as attributes on the card or cards representing Nadir rather than in a separate character-stat UI. Hunger is confirmed. Health is currently a prototype/example attribute, not yet confirmed as permanent.
 
-## NADIR-01 - Attribute count/readability
+## NADIR-D03 - Nadir may be represented by multiple cards
+**Status:** DECIDED BY SIMON
+
+Nadir is not required to fit on a single card. His representation may span several cards simultaneously while remaining inside the same card-based interaction system.
+
+This allows character state to be distributed across multiple visible cards rather than requiring alternate character views merely because one card becomes too dense.
+
+## NADIR-01 - Division of Nadir across cards
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P1
 
-How many visible attributes can Nadir expose while remaining readable?
+How should Nadir's state be divided across his cards?
+
+Decide which distinct Nadir cards should exist, which attributes belong on each, and whether all of those cards are anchored in Inventory.
 
 ## NADIR-02 - Injury representation
 **Status:** OPEN - SIMON TO DECIDE
