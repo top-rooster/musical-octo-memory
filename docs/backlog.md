@@ -28,10 +28,11 @@ Normally discuss only the single highest-priority open decision.
 
 1. **ATTR-02 [P0]** - What names should the two attribute forms use?
 2. **CARD-04 [P1]** - How does a card instance differ from its reusable definition?
-3. **CARD-05 [P1]** - Is anything besides title, picture, and attributes shown on a card?
-4. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
-5. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
-6. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
+3. **STACK-01 [P1]** - How does an active stack's process execute and finish?
+4. **CARD-05 [P1]** - Is anything besides title, picture, and attributes shown on a card?
+5. **INTERACT-01 [P1]** - Is card-on-card interaction the general action language beyond eating?
+6. **NADIR-01 [P1]** - How many attributes can Nadir expose legibly?
+7. **PREVIEW-02 [P1]** - Should indirect deterministic consequences such as noise appear in previews?
 
 ---
 
@@ -106,7 +107,8 @@ Decide:
 
 - whether identical objects always have distinct instances,
 - what state belongs to the reusable definition versus the instance,
-- whether transformation changes a definition or replaces an instance.
+- whether transformation changes a definition or replaces an instance,
+- what exactly counts as "identical" for passive stacking.
 
 **Suggested by ChatGPT:** shared name/picture/base data in a reusable definition; changing state on the instance.
 
@@ -128,11 +130,10 @@ Fixed size, content-driven size, or a small standard set. Test visually first.
 
 Can equipment, injuries, fuel, container contents, etc. be attached to or contained by another card?
 
-## CARD-08 - Stacks and quantities
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
+## CARD-D08 - Cards can be stacked
+**Status:** DECIDED BY SIMON
 
-How are multiple identical objects represented without flooding the play area?
+Cards may deliberately form a stack. Stacked cards snap into a neat aligned presentation rather than overlapping arbitrarily.
 
 ## CARD-09 - Durability and object-specific state
 **Status:** OPEN - SIMON TO DECIDE
@@ -148,12 +149,57 @@ All interactable entities are cards. It remains undecided whether non-interactab
 
 ---
 
-# Moving cards and zones
+# Positioning, movement, and stacks
 
 ## MOVE-D01 - Room/Inventory transfer
 **Status:** DECIDED BY SIMON
 
 Cards can normally be dragged between Room and Inventory when legal. The `Anchored` attribute specifically prevents transfer between those zones while still allowing dragging within the current zone and onto other cards.
+
+## MOVE-D02 - Free positioning within a zone
+**Status:** DECIDED BY SIMON
+
+Every card can be positioned within its current zone to the player's liking, including anchored cards.
+
+## MOVE-D03 - Cards cannot overlap accidentally
+**Status:** DECIDED BY SIMON
+
+Cards may not overlap in ordinary placement. Overlap is only allowed through a deliberate stack, in which case the cards snap into a neat stack presentation.
+
+## STACK-D01 - Two stack modes
+**Status:** DECIDED BY SIMON
+
+A stack is either **active** or **passive**.
+
+### Active stack
+
+An active stack represents a process.
+
+- The stacked cards remain individually legible.
+- Every card in the stack must keep its name visible so the player can see which cards participate.
+- The process can influence attributes on cards in the stack.
+
+### Passive stack
+
+A passive stack is only a visual convenience for identical cards that would otherwise consume unnecessary space.
+
+- Individual cards do not all need to remain visibly exposed.
+- The stack displays how many cards it contains.
+- It does not represent a process merely by existing.
+
+## STACK-01 - Active-stack process lifecycle
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P1
+
+How does an active stack's process operate?
+
+Decide later:
+
+- what makes a particular combination of cards an active process,
+- when the process starts,
+- whether it progresses through time, actions, or another trigger,
+- when it completes or stops,
+- how cards leave or change as a result.
 
 ## MOVE-02 - Inventory capacity
 **Status:** OPEN - SIMON TO DECIDE
@@ -166,12 +212,6 @@ Does Inventory have a capacity limit? If yes: slots, weight, bulk, containers, o
 **Priority:** P2
 
 Can moving a card between zones consume time or create consequences?
-
-## MOVE-04 - Exact placement inside a room
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Does exact position inside a zone ever matter mechanically?
 
 ## MOVE-05 - Other reasons a card cannot change zones
 **Status:** OPEN - SIMON TO DECIDE
