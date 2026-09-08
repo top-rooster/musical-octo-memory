@@ -11,6 +11,7 @@ The backlog is allowed to contain unresolved questions. Where a rule has not bee
 ## Index
 
 ### Core card interaction
+- Card
 - Drag cards between Room and Inventory
 - Card-on-card interactions
 - Valid-target highlighting
@@ -30,6 +31,155 @@ The backlog is allowed to contain unresolved questions. Where a rule has not bee
 ---
 
 # Core card interaction
+
+## Card
+
+### Purpose
+
+Cards are the primary visible building blocks of Safe Room. They should let the game represent many different kinds of things through one consistent interface instead of creating a separate UI system for every category of object or state.
+
+A card is not synonymous with an inventory item. A card can represent something the player carries, something that exists in a room, a person such as Nadir, a machine, or another persistent thing that benefits from being visible and directly interactable.
+
+The card system should carry a large part of the game's mechanical complexity while keeping the play space readable. Complexity should come from the attributes, capabilities, relationships, and interactions of a relatively small number of cards rather than from exposing many separate menus and subsystems.
+
+### Player experience
+
+The player should quickly learn that a card means: "this is a thing in the game I can inspect and may be able to act with or act upon."
+
+Cards should share a recognizable visual and interaction grammar even when they represent very different things. The player should not have to relearn the interface for food, tools, Nadir, machinery, and later card types.
+
+A card should expose the information necessary to make immediate decisions while avoiding unnecessary detail. When more detail is required, the design should prefer contextual reveal over permanently crowding every card.
+
+### Current direction
+
+- A card is a general-purpose representation of a game entity or persistent game state that should be visible in the workspace.
+- Every card has an identity and a player-facing name.
+- Cards may have attributes. Attributes belong to the represented thing and can be shown directly on the card when relevant.
+- Cards may have capabilities that determine what can be done with them and what they can accept.
+- Some cards are movable between zones.
+- Some cards are anchored to a zone or position, such as Nadir in Inventory.
+- A card may be a valid target for another card.
+- A card may itself be dragged and used on another target when its rules allow it.
+- Card behavior should be determined by game rules and card data rather than by one-off behavior embedded in presentation components.
+- Different card categories may present different information, but they should remain variations of the same basic interaction language rather than unrelated widgets.
+- The existence of a card does not imply that it can be carried, consumed, or moved.
+- Avoid putting an attribute on every card merely because the card system supports attributes. Show only state that matters.
+
+### Conceptual properties
+
+The exact data format is not decided, but the design currently implies that a card may need concepts such as:
+
+- identity,
+- player-facing name,
+- card kind or capabilities,
+- current zone or anchored location,
+- movable or anchored state,
+- visible attributes,
+- interaction rules or tags used to derive interactions,
+- state specific to the represented entity.
+
+These are conceptual requirements, not a required TypeScript interface. The implementation should not create fields for concepts that are not yet needed.
+
+### Examples
+
+**Tin of beans**
+
+A movable item card. It can exist in Room or Inventory. It can be dragged onto Nadir, where it is consumed and changes Hunger.
+
+**Screwdriver**
+
+A movable tool card. It can be carried between Room and Inventory. Later it may be accepted by machines or other objects without being consumed.
+
+**Nadir**
+
+An anchored character card in Inventory. It cannot be moved like an item. It exposes relevant character attributes and accepts compatible cards such as food.
+
+**Generator**
+
+A possible future anchored room card. It might expose operational state, accept fuel or tools, and create consequences such as power and noise.
+
+These examples should use the same core card model even though their capabilities differ substantially.
+
+### Card identity versus card type
+
+Two cards that look like the same kind of object may still be distinct game entities. For example, two tins of beans can occupy different places or potentially acquire different state.
+
+The design should therefore distinguish the identity of a specific card instance from the reusable definition or data that describes what kind of thing it is.
+
+Exactly how much state is shared through definitions versus stored per instance is an implementation decision to make when the content format is designed.
+
+### Attributes
+
+Cards can display numerical or qualitative attributes when those values are important to decisions.
+
+Attributes are intended to be one of the main ways Safe Room creates system depth without multiplying the number of visible systems. Nadir's Hunger and Health are the first examples, but the concept should not be character-specific.
+
+Attribute presentation should follow these principles:
+
+- Do not show a value merely because the simulation has one.
+- Prefer values the player can understand and act on.
+- Changes caused by a direct card interaction should be previewable when the outcome is meant to be known.
+- Different card kinds do not need identical attribute layouts.
+- Avoid turning every card into a dense spreadsheet.
+
+### Capabilities rather than rigid categories
+
+The system should avoid assuming that every card belongs to one mutually exclusive behavioral class such as `FoodCard`, `ToolCard`, `CharacterCard`, or `MachineCard` if combinations of capabilities would describe the game more naturally.
+
+For example, a card might be movable, consumable by Nadir, and also useful as an ingredient. A machine might be anchored, accept fuel, accept tools, and expose attributes. The design should remain open to composing these behaviors rather than forcing an increasingly deep inheritance hierarchy.
+
+This is a design preference, not yet a commitment to a particular component/entity architecture.
+
+### Information hierarchy
+
+The face of a card should prioritize information needed for the current decision. Not every property needs to be permanently visible.
+
+A likely hierarchy is:
+
+1. identity: what is this?
+2. immediately important state: what condition is it in?
+3. interaction-relevant information: what will happen if I use it here?
+4. secondary detail available through contextual inspection when needed.
+
+The direct manipulation workflow should remain usable without requiring the player to open a detailed card view for routine actions.
+
+### Open questions
+
+- Which things deserve to become cards, and which should remain properties of a room, card, or global state?
+- What is the minimum universal information every card must display besides its identity/name?
+- Do cards need explicit categories, composable tags/capabilities, or both?
+- Should card size be fixed, vary by content, or have a small number of standard sizes?
+- Can cards contain or visually attach other cards, for example equipment, injuries, fuel, or containers?
+- Can a card change its fundamental capabilities over time, or should transformations replace it with another card definition?
+- How are stacks of identical objects represented without flooding the play area with duplicate cards?
+- Do quantity and durability belong as attributes, specialized card state, or something else?
+- When should information appear on the card face versus on hover, selection, inspection, or during a drag interaction?
+- Can cards represent temporary conditions, or should conditions use a lighter-weight visual language?
+- Should rooms themselves ever be cards, or should they remain spatial containers for cards?
+- How much visual distinction between card kinds is useful before the shared card grammar starts to break down?
+
+### Dependencies
+
+This is a foundational concept. Most other interaction backlog items depend on it, including:
+
+- Drag cards between Room and Inventory
+- Card-on-card interactions
+- Valid-target highlighting
+- Action previews
+- Nadir and character attributes
+- Future item, machine, condition, and resource systems
+
+### Acceptance criteria before treating the card model as mature
+
+- A single card abstraction can represent at least a movable consumable, a reusable tool, an anchored character, and an anchored machine without special-casing each one in the UI architecture.
+- Card identity is distinct from reusable card definition/content data.
+- Cards can expose only the attributes relevant to their represented entity.
+- Movability, targetability, and other capabilities are not assumed merely from the existence of a card.
+- New card kinds can participate in the existing drag, targeting, and preview language without inventing parallel interaction systems.
+- The model remains simple enough that adding ordinary game content does not require large amounts of boilerplate.
+- The visual card remains readable even as the underlying model supports richer state.
+
+---
 
 ## Drag cards between Room and Inventory
 
