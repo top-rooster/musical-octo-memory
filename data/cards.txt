@@ -110,7 +110,18 @@ images/rat-skin.png
 
 Rat Meat
 images/rat-meat.png
+# First-prototype ingestible food. Carries the ingestion Marker once its parser token is chosen.
+eat Body
+# TODO: Satiation gain for first prototype is still undecided.
+consume self
 # Cooking is a Process, but its explicit duration is still undecided.
+
+Canned Food
+images/canned-food.png
+# First-prototype ingestible food. Carries the ingestion Marker once its parser token is chosen.
+eat Body
+# TODO: Satiation gain for first prototype is still undecided and must differ from Rat Meat.
+consume self
 
 Knife
 images/knife.png
