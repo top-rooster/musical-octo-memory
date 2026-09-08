@@ -26,11 +26,11 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **FEVER-01 [P2]** - How are Fever cards treated or removed?
-2. **MOVE-02 [P2]** - Does Inventory have a capacity limit?
-3. **CARD-07 [P2]** - Can cards be contained/attached outside Stack/Process/Connection?
-4. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
-5. **INTERACT-06 [P2]** - How do source and target attributes determine interaction legality and effect?
+1. **MOVE-02 [P2]** - Does Inventory have a capacity limit?
+2. **CARD-07 [P2]** - Can cards be contained/attached outside Stack/Process/Connection?
+3. **INTERACT-05 [P2]** - How are consumable and reusable cards distinguished?
+4. **INTERACT-06 [P2]** - How do source and target attributes determine interaction legality and effect?
+5. **WOUND-02 [P2]** - How are cleaning and dressing represented?
 
 ---
 
@@ -116,6 +116,8 @@ Temporary conditions applying to Nadir are confirmed as cards. It remains undeci
 
 If an instance becomes materially different, does it switch master definition, get replaced by another card instance, or use another rule? Can an instance ever override its master's name/picture?
 
+A water container becoming empty after treating Fever is a concrete example that may need this rule; the exact representation is not yet decided.
+
 ## CARD-12 - Card descriptions
 **Status:** DEFERRED
 **Priority:** P2
@@ -187,7 +189,8 @@ Examples:
 
 - `Rat Meat` on a lit camp fire progresses while the fire is lit and Nadir spends time doing something else,
 - a bowl on a condenser can progress according to room moisture, room temperature, and elapsed game time,
-- `Flesh Wound` and `Burn Wound` are single-card Processes whose `Progress` represents healing.
+- `Flesh Wound` and `Burn Wound` are single-card Processes whose `Progress` represents healing,
+- `Fever` is a single-card Process that disappears when its recovery Progress reaches 100.
 
 ## PROCESS-D01 - Processes are unattended
 **Status:** DECIDED BY SIMON
@@ -196,7 +199,7 @@ The name **Process** is reserved for ongoing change that does not require Nadir'
 
 Starting a Process does not itself force game time forward to completion. It advances when game time passes because Nadir is doing something else.
 
-A Process does not have to be a multi-card stack. `Flesh Wound` and `Burn Wound` are confirmed single-card Processes.
+A Process does not have to be a multi-card stack. `Flesh Wound`, `Burn Wound`, and `Fever` are confirmed single-card Processes.
 
 Concrete example: putting `Rat Meat` on a lit camp fire starts a cooking Process. The meat cooks while the fire remains lit and Nadir spends time on other activities.
 
@@ -250,7 +253,7 @@ There is no single universal Process completion transformation. Each Process def
 
 A Process may consume/transform participating cards, create output cards, change attributes, separate its participants, remove itself, or combine such results.
 
-`Flesh Wound` and `Burn Wound` remove themselves when their healing `Progress` reaches 100.
+`Flesh Wound`, `Burn Wound`, and `Fever` remove themselves when their recovery `Progress` reaches 100.
 
 ## STACK-D03 - Dragging from a Stack peels off one card
 **Status:** DECIDED BY SIMON
@@ -261,7 +264,7 @@ Dragging a Stack separates its top card as an individual card.
 - Stack 2 -> dragged card + ordinary card.
 - Count 1 is never presented as a Stack.
 
-The Stack count is presentation, not currently a normal `Value` attribute.
+The Stack count is presentation, not currently a normal card `Value` attribute.
 
 ## STACK-D04 - Stack members must be identical now
 **Status:** DECIDED BY SIMON
@@ -470,7 +473,7 @@ More persistent Nadir cards may be added later if a concrete need appears.
 
 Conditions currently applying to Nadir are represented as temporary cards in Inventory rather than being forced into Body, Mind, or Spirit.
 
-Examples explicitly given by Simon include `Exhausted`, `Flesh Wound`, and `Burn Wound`.
+Examples explicitly given by Simon include `Exhausted`, `Flesh Wound`, `Burn Wound`, and `Fever`.
 
 ## NADIR-D06 - Condition lifecycle is condition-specific
 **Status:** DECIDED BY SIMON
@@ -503,6 +506,16 @@ The exact sleep duration and any effects beyond removing `Exhausted` are not yet
 
 The exact card/attribute representation of cleaning and dressing and their rates/durations are not yet decided. The exact Infection threshold for reduced healing / Fever spawning is also not yet decided.
 
+### Fever
+
+`Fever` is a **single-card Process**.
+
+- It has `Progress` from 0 to 100 representing recovery over game time.
+- The Fever card disappears when its `Progress` reaches 100.
+- Dragging a water container onto a Fever card removes that Fever card and empties the water container.
+
+The exact Fever recovery rate/duration is not yet fixed. The exact representation of the now-empty container is also not yet decided. Whether treating Fever with water consumes game time has not yet been separately decided.
+
 ## NADIR-D07 - All Nadir cards are Anchored to Inventory
 **Status:** DECIDED BY SIMON
 
@@ -527,11 +540,17 @@ The exact Infection threshold or thresholds are not yet fixed.
 
 This establishes Fever accumulation as a lethal escalation path from unmanaged wound Infection.
 
-## FEVER-01 - Fever treatment and removal
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
+## FEVER-D02 - Fever recovers over time or can be removed with water
+**Status:** DECIDED BY SIMON
 
-How are `Fever` cards reduced, treated, or removed? Do not infer a treatment or automatic expiry yet.
+`Fever` is a single-card Process that recovers as game time passes and removes itself when its `Progress` reaches 100.
+
+A water container can be dragged onto a Fever card. That interaction:
+
+- removes the targeted Fever card;
+- empties the water container.
+
+The exact Fever recovery rate is not yet fixed. The exact representation of an emptied water container, and whether the water treatment itself consumes game time, are not yet decided.
 
 ## WOUND-02 - Cleaning and dressing representation
 **Status:** OPEN - SIMON TO DECIDE
