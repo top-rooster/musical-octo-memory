@@ -12,7 +12,8 @@ Build a small browser prototype whose only purpose is to validate the core card 
   - **Body**,
   - **Mind**,
   - **Spirit**.
-- All three persistent Nadir cards have `Anchored` and remain persistently in the Nadir zone. `Anchored` does not prevent dragging a card onto another card for an interaction.
+- All three persistent Nadir cards have `Anchored`. They may be dragged across zone boundaries, but cannot come to rest outside the Nadir zone. If released onto bare space in Room or Inventory, they return to the Nadir zone.
+- `Anchored` does not prevent dragging a card onto another card for a legal interaction. Cross-zone Processes are part of the design, although their ongoing visual presentation is not required in Milestone 1.
 - Put visible `Hunger` and `Health` attributes on **Body** for the prototype. `Health` remains prototype scope rather than a confirmed permanent survival attribute.
 - Temporary Nadir condition cards such as `Exhausted` and `Flesh Wound` are part of the design, but their lifecycle mechanics are not required in Milestone 1.
 - Seed the prototype with a few movable cards, including at least two food cards with different hunger effects and one non-food item.
@@ -22,16 +23,16 @@ Build a small browser prototype whose only purpose is to validate the core card 
 - Dragging food over **Body** previews the exact resulting hunger value in the form `67 → 98` before the drop.
 - Dropping food on **Body** applies the effect and consumes the food card.
 - Hunger is clamped to 0–100.
-- Invalid drops leave state unchanged.
+- Invalid drops leave state unchanged. An anchored card released in a foreign zone without a legal accepting interaction returns to its home zone.
 - The UI should be plain and readable. Do not spend time on final art, animation polish, sound, narrative content, persistence, combat, crafting, or world simulation yet.
 
 ### Architecture constraints
 
 - Keep card definitions and effects as data rather than hard-coding each individual card in UI components.
-- Implement `Anchored` as an attribute-driven rule, not as a special Nadir card type. It prevents persistent zone transfer while preserving legal card-on-card dragging.
+- Implement `Anchored` as an attribute-driven home-zone rule, not as a special Nadir card type. It prevents the card from coming to rest outside its home zone while preserving cross-zone dragging and legal card-on-card interaction.
 - Keep state transition/game-rule functions separate from React rendering where practical.
 - Avoid a heavy state-management library for this prototype unless there is a demonstrated need.
-- Add lightweight automated tests for the pure game-rule logic, especially food consumption, hunger clamping, invalid interactions, and the fact that anchored cards cannot be persistently transferred out of their home zone.
+- Add lightweight automated tests for the pure game-rule logic, especially food consumption, hunger clamping, invalid interactions, and anchored-card return-to-home behavior after a foreign-zone release.
 
 ### Done means
 
@@ -41,7 +42,7 @@ A developer can clone the repo, install dependencies, start the app, and immedia
 
 Do not implement these during Milestone 1:
 
-- cross-zone Process presentation for anchored Nadir cards,
+- ongoing cross-zone Process presentation for anchored Nadir cards,
 - temporary condition creation/removal/healing rules,
 - complete survival simulation,
 - hidden stomach/fullness mechanics,
