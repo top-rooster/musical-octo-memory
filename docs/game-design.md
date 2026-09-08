@@ -87,6 +87,29 @@ Within a zone, every card can be positioned to the player's liking, including an
 
 Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat, aligned presentation.
 
+Movement is distinct from interaction. Repositioning a card within a zone or transferring it between Room and Inventory does not itself count as interacting with another game entity.
+
+### Universal interaction language
+
+**Every gameplay interaction is initiated by putting one card on top of another card.**
+
+An interaction therefore always has:
+
+- a source card being dragged,
+- a target card receiving it.
+
+There are no non-card interaction targets in the current design. Bare Room or Inventory space can receive a card for movement/placement, but that is movement rather than an interaction.
+
+This rule applies across the game rather than only to eating. Examples include:
+
+- food onto Nadir,
+- medicine onto Nadir,
+- a machine onto a power outlet,
+- material or a tool onto a machine,
+- any card combination that starts a Process or Connection.
+
+A card-on-card interaction does not have to remain stacked afterward. It may resolve immediately, consume a card, alter attributes, create a Stack, start a Process, create a Connection, or produce another process-specific result.
+
 ### Stack, Process, and Connection
 
 There are three forms of deliberate card stacking: **Stack**, **Process**, and **Connection**.
@@ -163,9 +186,10 @@ Health is part of the current prototype scope, not yet a confirmed permanent sur
 
 Whenever the player drags a card:
 
-1. Every card or location that can legally accept the dragged card should highlight.
-2. Potential state changes should be previewed before the drop is committed.
-3. Invalid targets should not suggest that they accept the card.
+1. Every card that can legally receive the dragged card as an interaction target should highlight.
+2. Legal zone placement for movement should remain legible without being confused with a card interaction target.
+3. Potential state changes should be previewed before the drop is committed.
+4. Invalid targets should not suggest that they accept the card.
 
 Example: dragging food over Nadir should preview something like:
 
