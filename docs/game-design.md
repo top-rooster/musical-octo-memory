@@ -22,6 +22,13 @@ Confirmed examples include:
 
 A card is therefore not synonymous with an inventory item. Some cards can be carried, some are anchored, and some represent fixed world entities or navigation possibilities.
 
+Every card must display:
+
+- a name/title,
+- a picture.
+
+A card may additionally display zero or more attributes. Attributes are optional rather than a universal requirement.
+
 Whether non-interactable state or temporary conditions should also use card representation is not yet decided.
 
 ### Zones
