@@ -8,9 +8,16 @@ This repository contains **Safe Room**, a narrative survival/stealth game center
 
 Before making material changes, read:
 
-- `docs/game-design.md` for current product and interaction rules.
+- `docs/game-design.md` for current product and interaction context.
 - `docs/roadmap.md` for the active implementation slice and acceptance criteria.
-- `docs/backlog.md` for detailed future design candidates, open questions, and rationale. Backlog items are not implementation commitments; do not implement them unless explicitly requested or promoted into the roadmap.
+- `docs/backlog.md` for the design decision register, future candidates, open questions, priorities, and rationale.
+
+The status labels in `docs/backlog.md` are authoritative for design ownership:
+
+- **DECIDED BY SIMON** means an explicit design decision and may be treated as a constraint.
+- **OPEN - SIMON TO DECIDE**, **DEFERRED**, and **SUGGESTED BY CHATGPT** are not design commitments.
+- Never promote a suggestion or open question into an accepted design rule merely because it appears in repository documentation.
+- Backlog items are not implementation commitments; implement them only when explicitly requested or promoted into `docs/roadmap.md`.
 
 Keep this file short. Put detailed design decisions in `docs/` rather than expanding `AGENTS.md` into an encyclopedia.
 
