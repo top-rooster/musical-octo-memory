@@ -18,15 +18,17 @@ The hover state therefore overrides the ordinary legal-target presentation for t
 
 As soon as a card starts being dragged, every legal accepting target should show any known direct attribute changes that would result from that source/target interaction. The player should not need to hover the dragged card over the target before seeing the preview.
 
-The preview belongs on or immediately adjacent to the affected attribute on the accepting card. Examples include:
+If one interaction has several known direct attribute changes, **all of those changes should be shown simultaneously** on the affected cards/attributes. Do not collapse them to a single representative change or wait for hover to reveal additional effects.
+
+The preview belongs on or immediately adjacent to each affected attribute on the accepting card. Examples include:
 
 - dragging Rat Meat while Body has `Satiation 67` shows `67 → 82` on Body immediately;
 - dragging Canned Food while Body has `Satiation 67` shows `67 → 92` on Body immediately;
-- dragging a water source for a known hydration interaction may show `Hydration 50 → 75` on the accepting card immediately.
+- dragging a source with several known direct effects shows every affected Value change at once, potentially across more than one accepting/affected card.
 
 This applies only to consequences that Nadir/the player currently understands. Knowledge-dependent uncertainty and undiscovered consequences remain governed by the broader preview rules in `docs/game-design.md`.
 
-Hovering a legal target changes its target-state highlight to yellow, but does not control whether its known stat preview is visible.
+Hovering a legal target changes its target-state highlight to yellow, but does not control whether its known stat previews are visible.
 
 ### Zone state
 
@@ -48,7 +50,7 @@ If the dragged card is currently over another card, the card-under-pointer feedb
 ### Intended visual language
 
 - normal legal-target highlight: this card *can* accept the dragged card;
-- known stat preview on a legal target: this is the understood direct effect if that interaction is committed;
+- known stat previews on legal targets: these are the understood direct effects if the interaction is committed;
 - yellow hovered target: releasing *here now* will commit the interaction;
 - subtle zone highlight: releasing *here now* will place the card in this zone;
 - red hovered card: releasing *here now* is not accepted by the card below.
