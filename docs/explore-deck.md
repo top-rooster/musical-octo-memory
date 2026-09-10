@@ -6,6 +6,8 @@ This document records the current decided Explore-deck behavior for Safe Room.
 
 The **Tunnels** room contains a deck of cards labeled `Explore`.
 
+A search deck is **not a card**. It is a separate room-local interactive object that contains and produces cards. Card-instance rules, card attributes, Anchored behavior, stacking, card inspection, and discard behavior do not automatically apply to decks unless explicitly defined for decks later.
+
 The player interacts with the deck by clicking it. Clicking the deck commits a **15-minute Action** and draws one card from the deck when that Action resolves.
 
 Because Explore is an Action, those 15 minutes advance game time and all active Processes update from that elapsed time, including Processes in rooms where Nadir is not present.
@@ -22,9 +24,11 @@ For now, the Tunnels Explore deck starts with **10 cards**.
 
 Each successful Explore draw removes exactly one card from the deck. A drawn card does not automatically return to the deck and the deck does not automatically refill or reshuffle.
 
+The player is **not shown a remaining-card count** for search decks for now.
+
 When the final card is drawn, the now-empty Explore deck is removed from the room entirely. The deck itself uses **no removal animation** when this happens.
 
-The empty-deck presentation problem may be revisited later; for now there is no persistent Empty deck card or placeholder.
+This exhausted-deck behavior is provisional and may be replaced by different deck behavior later. For now there is no persistent Empty deck object or placeholder.
 
 ### Draw order
 
@@ -68,4 +72,5 @@ The remaining mechanics of `Pipe`, `Squatter`, `Puddle of Water`, and `Service C
 The following details are not yet decided:
 
 - whether an explicit future rule can ever return a drawn card to the deck;
+- the future representation/behavior of an exhausted deck;
 - the exact animation timing and visual treatment beyond the requirement that the card visibly draws out from the deck.
