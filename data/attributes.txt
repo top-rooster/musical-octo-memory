@@ -1,0 +1,53 @@
+Anchored
+This card belongs to a fixed home location or part of Nadir and cannot come to rest elsewhere through ordinary placement.
+
+Hydration
+How well hydrated Nadir is. Reaching zero is fatal.
+
+Satiation
+How well fed Nadir is. Reaching zero is fatal.
+
+Vision
+How well Nadir can see well enough to act. Room light and active equipment modify the effective value used for tasks, searching, and travel.
+
+Infection
+How infected a wound is. Lower is better.
+
+Dressed
+The wound has been covered with a sterile dressing.
+
+Sterilized
+This material has been sterilized and can be used where sterile fabric is required.
+
+Fabric
+This card can be used as fabric in interactions that require it.
+
+Container
+This card can hold a substance such as water.
+
+Contains-Water
+This container currently contains water.
+
+Cutting Tool
+This card can perform interactions that require a cutting tool.
+
+Durability
+How much usable life remains in the item before wear makes it unusable.
+
+Spoilage
+How far food or organic material has progressed toward spoiling.
+
+Fuel
+How much usable fuel remains.
+
+Battery
+How much battery charge remains.
+
+Locked
+This object is currently locked.
+
+Powered
+This object currently has electrical power.
+
+Progress
+How far an ongoing Process has progressed toward completion.
