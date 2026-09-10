@@ -21,3 +21,11 @@ For now, the survival simulation should not contain hidden character-state varia
 If a survival state matters mechanically, represent it through visible cards, Markers, Values, Processes, or other already-established visible game state rather than through an invisible accumulator such as hidden fullness, fatigue, immunity, or similar state.
 
 This is a current constraint, not a permanent prohibition. Reopen the decision only if a concrete future mechanic cannot be expressed cleanly without hidden state.
+
+### Satiation over time
+
+Body has a repeating survival Process that applies `Satiation -1` for every `30m` of elapsed game time.
+
+As with all Processes, this does not create elapsed time itself. The Satiation decrease is evaluated from game time advanced by Actions.
+
+This intentionally gives Satiation a slower rhythm than Hydration, which currently decreases by 2 every 15 minutes.
