@@ -265,39 +265,6 @@ For now, his persistent representation is divided across three cards:
 
 More persistent Nadir cards may be added later if a concrete need appears.
 
-Relevant persistent character state is expressed as attributes on those cards.
-
-#### Body survival state
-
-Body starts with:
-
-- `Hydration 50`,
-- `Satiation 50`.
-
-Both use the default 0–100 Value bounds.
-
-If **Hydration or Satiation reaches 0, the game ends**.
-
-There is no separate Body `Health` Value. Physical injury and health consequences are represented through injury/condition cards instead, avoiding a redundant parallel health system.
-
-Body continuously participates in a repeating Process evaluated every **15 minutes of elapsed game time**:
-
-- `Hydration -2`.
-
-The corresponding ongoing Satiation rule has not yet been decided.
-
-A `Plastic Bottle` has the `Container` Marker. When filled, that bottle instance also carries `Contains-Water`. Its `Drink` interaction is an instant Action:
-
-- target: **Body**,
-- duration: `0m`,
-- requires `Contains-Water` on the bottle,
-- applies `Hydration +25` to Body,
-- removes `Contains-Water` from the bottle.
-
-Because Values default to 0–100, drinking cannot raise Hydration above 100 unless that Value's range is explicitly changed later.
-
-#### Condition cards
-
 Conditions that currently apply to Nadir are represented as **temporary cards in Inventory** rather than being forced into Body, Mind, or Spirit.
 
 Confirmed examples include:
@@ -372,6 +339,8 @@ Coarse labels such as only `Low`, `Moderate`, and `High` are not precise enough 
 
 The intended information progression is therefore closer to **unknown → suspected → understood** than to either complete opacity or complete prediction.
 
+A legal interaction does not change target-highlight colors merely because it is dangerous. Green/yellow/red remain a legality language: a dangerous but legal interaction uses the normal legal-target and release-to-commit states, while known danger or uncertainty is communicated separately through previews, warnings, or risk presentation.
+
 ### Drag affordances
 
 Whenever the player drags a card:
@@ -386,6 +355,7 @@ Whenever the player drags a card:
 8. An available Action may communicate its name on the target before commitment, as `Skin` does when a cutting tool is moved onto a dead rat.
 9. Releasing a card on a legal interaction target commits the interaction immediately; there is no follow-up confirmation step.
 10. Invalid targets should not suggest that they accept the card.
+11. Danger does not alter target legality colors; dangerous-but-legal interactions still use the normal legal highlight and release-to-commit state, with risk signaled separately.
 
 Examples of direct known previews include:
 
@@ -428,44 +398,3 @@ The confirmed permanent Body survival Values are:
 - Satiation.
 
 They both start at 50. Reaching 0 in either causes game over.
-
-There is no general Body Health Value. Physical health is represented through injury/condition cards instead.
-
-Hydration currently decreases by **2 every 15 minutes of elapsed game time** through Body's Process. The ongoing Satiation rate remains to be designed.
-
-Burn Wounds accelerate Hydration loss; the exact acceleration formula remains open.
-
-### Noise
-
-The noise mechanic is intentionally **shelved for now**. The broader possibility that noisy Actions may matter later is preserved, but its representation, propagation, risk model, masking, and relationship to search behavior should not be designed or implemented until the mechanic is explicitly revisited.
-
-## Product principles
-
-- Prefer direct manipulation over nested menus.
-- Prefer visible consequences over hidden arithmetic, while preserving meaningful discovery.
-- Preserve the physical-card analogy: when something becomes a different card identity, discard the old card and draw the replacement rather than morphing the existing card; keep the replacement in the old card's location unless a specific effect moves it.
-- Let specific visible attributes define what cards can do; avoid generic classifications such as `Reusable` when a concrete functional Marker and state Value express the behavior more directly.
-- Author card masters and level design in terse text data files and keep those files as the source of truth rather than duplicating authored game content in application code.
-- Give Process progress a contextual player-facing name when that improves comprehension, while keeping it one common mechanic underneath.
-- Communicate understood consequences before commitment, then treat the card drop as the player's decision; avoid confirmation dialogs that interrupt the interaction flow.
-- **Game time advances only through Actions.** Processes react to that elapsed time; other interactions and movement do not create elapsed game time themselves.
-- Every Action/Process explicitly states its time in authored data; instant Actions use `0m`.
-- Values default to a 0–100 range unless a specific exception is explicitly designed.
-- Discovery, relational understanding, exploratory play, and knowledge unlocks are intended parts of play rather than problems for the UI to eliminate.
-- Do not turn the game into exhaustive deterministic planning by revealing every consequence before commitment.
-- Exploratory play should not cause severe, unforeseeable punishment. Meaningful danger should be reasonably telegraphed even when details remain unknown.
-- A player's uncertainty should come from the situation, incomplete knowledge, discovery, and genuine risk — not from unclear UI rules.
-- Known danger does not imply known outcome, but when Nadir understands the likelihood the player should receive a clear non-numeric sense of how strongly the odds lean.
-- Avoid adding systems merely because comparable survival games have them.
-- Keep the play area readable; complexity should emerge from combinations of cards and attributes.
-- No direct player violence is part of the broader concept; defensive violence, if present later, is indirect/automated.
-- Do not introduce artificial real-time pressure by default. Risk should often come from player-chosen actions, exposure, or external windows.
-- Keep noise mechanics shelved until their role is clearer rather than forcing an early danger-meter design.
-
-## Narrative context
-
-The protagonist is Nadir Veylan. He is a fundamentally decent man damaged by a coercive and corrupt military culture. He has survived partly by lying to himself about things he cannot live with. The story should not frame him as stupid or casually manipulative.
-
-His relationship with Elina is intended to be a genuine love story complicated by concealment, fear, and his past — not a reveal that he was simply using her.
-
-Detailed narrative material should live in separate narrative documentation as it becomes implementation-relevant.
