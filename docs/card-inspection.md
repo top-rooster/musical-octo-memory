@@ -59,4 +59,6 @@ Anchored
 This card belongs permanently to its home zone.
 ```
 
+If a visible attribute has no matching master entry in `data/attributes.txt`, the inspection textbox must still list that attribute and display exactly `missing description` as its explanation. Missing authored help must never cause a visible attribute to disappear from inspection.
+
 Attribute descriptions are authored data, not hard-coded tooltip prose in React components.
