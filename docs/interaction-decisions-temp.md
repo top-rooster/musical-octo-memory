@@ -1,0 +1,1 @@
+Temporary safeguard while restoring the backlog after an over-broad documentation update. Current interaction decisions are recorded in docs/drag-feedback.md and docs/game-design.md.
