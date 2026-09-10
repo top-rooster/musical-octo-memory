@@ -87,7 +87,14 @@ A Flashlight is **not an absolute requirement** for entering or travelling to De
 
 Deep Tunnels are instead soft-gated by the normal Vision rules. Nadir may go there without a Flashlight or Torch, but at his unmodified effective Vision of 1 he is severely constrained: travel takes 2x normal time, searching takes 3x normal time, and he cannot perform low-light, normal-light, or precision tasks.
 
-The intent is that entering Deep Tunnels without preparing for the lighting conditions remains technically possible but may be practically useless. Glasses, a Flashlight, a Torch, or combinations of these improve the situation through the same general Vision system rather than through a special item requirement.
+The intent is that entering Deep Tunnels without preparing for the lighting conditions remains technically possible but may be practically useless.
+
+If the player did not take either the `Glasses` or `Flashlight` during the opening evacuation, the game still has recovery paths rather than becoming hard-locked:
+
+- a `Torch` can be crafted and used for `Vision +1`;
+- a `Flashlight` can be found by searching in **Deep Tunnels**.
+
+Finding that Flashlight is deliberately somewhat self-rescuing: reaching and searching Deep Tunnels without good Vision is inefficient, but success can improve future trips to the same area.
 
 ### Task light requirements
 
@@ -145,6 +152,7 @@ The following remain undecided:
 
 - exact flashlight battery consumption rate;
 - exact Torch burn duration;
+- the exact crafting recipe for a Torch beyond the current concept of an oil rag on a stick;
 - whether Vision can exceed the currently useful threshold of 4 and, if so, whether values above 4 have any additional effect;
 - how daylight changes over time in rooms such as Abandoned Office;
 - exact stationary-versus-moving consequences for light-source compatibility;
