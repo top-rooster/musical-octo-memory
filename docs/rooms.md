@@ -10,13 +10,15 @@ The generic room currently shown by the prototype should be treated as that Safe
 
 Rooms are navigable locations. Passage/exit points are represented as ordinary interactable cards in the Room zone, consistent with the universal card-on-card interaction language.
 
+All travel/navigation cards are `Anchored` to their home room. They may be interacted with by dragging Nadir's **Body** onto them, but they cannot be carried away or permanently moved into another zone.
+
 The Safe Room contains a navigation card titled:
 
 `To the tunnels`
 
 Dragging Nadir's **Body** card onto `To the tunnels` commits a **15-minute Action** that moves Nadir from **Safe Room** to **Tunnels**.
 
-Because traversal is an Action, those 15 minutes advance game time and all active Processes update from that elapsed time under the normal Action rules.
+Because traversal is an Action, those minutes advance game time and all active Processes update from that elapsed time under the normal Action rules.
 
 ### Tunnels navigation
 
@@ -24,7 +26,14 @@ The **Tunnels** room contains a navigation card titled:
 
 `To the safe room`
 
-Dragging Nadir's **Body** card onto `To the safe room` commits the corresponding room-traversal Action and returns Nadir to **Safe Room**. Room traversal currently takes **15 minutes**.
+Dragging Nadir's **Body** card onto `To the safe room` commits a **15-minute Action** and returns Nadir to **Safe Room**.
+
+The Tunnels Explore deck can also reveal two additional travel cards. Once drawn, they remain as persistent room-local navigation cards in Tunnels:
+
+- `Go to abandoned office` — dragging Body onto it commits a **15-minute Action** and moves Nadir to **Abandoned Office**.
+- `Go to deep tunnels` — dragging Body onto it commits a **30-minute Action** and moves Nadir to **Deep Tunnels**.
+
+Both cards are `Anchored` to Tunnels, consistent with the rule that all travel cards are anchored to their home room.
 
 ### Room-local cards
 
@@ -59,6 +68,6 @@ The Explore deck is a room-local interactive deck rather than an ordinary loose 
 
 Drawing from the deck must be presented with a visible **card draw animation** so the result feels like a physical card being drawn rather than a card simply appearing instantaneously.
 
-The exact contents of the Explore deck, draw ordering/randomization, whether cards can return to the deck, and what happens when the deck becomes empty are not yet decided.
+Detailed Explore-deck rules and current composition are recorded in `docs/explore-deck.md`.
 
 The exact authored level-data syntax for rooms, exits, destination references, room-local card state, and deck definitions should follow the existing low-boilerplate text-data direction and be fixed when the first navigable rooms are implemented.
