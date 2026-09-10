@@ -18,6 +18,14 @@ Dragging Nadir's **Body** card onto `To the tunnels` commits a **15-minute Actio
 
 Because traversal is an Action, those 15 minutes advance game time and all active Processes update from that elapsed time under the normal Action rules.
 
+### Tunnels navigation
+
+The **Tunnels** room contains a navigation card titled:
+
+`To the safe room`
+
+Dragging Nadir's **Body** card onto `To the safe room` commits the corresponding room-traversal Action and returns Nadir to **Safe Room**. Room traversal currently takes **15 minutes**.
+
 ### Room-local cards
 
 Cards in the Room zone belong to the current room. They do not follow Nadir when he changes rooms.
@@ -41,4 +49,16 @@ Rooms are off-screen, not paused. Processes continue to progress according to el
 
 For example, spoilage or another unattended Process may continue while Nadir is in Tunnels and may have changed or completed before he returns to Safe Room.
 
-The exact authored level-data syntax for rooms, exits, destination references, and room-local card state should follow the existing low-boilerplate text-data direction and be fixed when the first navigable rooms are implemented.
+### Explore deck in Tunnels
+
+The **Tunnels** room contains a deck of cards labeled:
+
+`Explore`
+
+The Explore deck is a room-local interactive deck rather than an ordinary loose card. When the player clicks the Explore deck, one card is drawn from it.
+
+Drawing from the deck must be presented with a visible **card draw animation** so the result feels like a physical card being drawn rather than a card simply appearing instantaneously.
+
+The exact contents of the Explore deck, draw ordering/randomization, whether cards can return to the deck, and what happens when the deck becomes empty are not yet decided.
+
+The exact authored level-data syntax for rooms, exits, destination references, room-local card state, and deck definitions should follow the existing low-boilerplate text-data direction and be fixed when the first navigable rooms are implemented.
