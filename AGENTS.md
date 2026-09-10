@@ -37,8 +37,11 @@ Keep this file short. Put detailed design decisions in `docs/` rather than expan
 - Update documentation when behavior, setup, or important decisions change.
 - Never commit credentials, tokens, private keys, or generated secrets. Use environment variables or workspace secret configuration instead.
 
-## Current implementation direction
+## Toolchain
 
-For the first interaction prototype, prefer a browser-based React + TypeScript + Vite implementation. This is a prototyping choice, not an irreversible engine decision. Keep dependencies minimal and isolate game rules from presentation so the design can evolve.
+The Milestone 1 prototype uses React, TypeScript, Vite, Vitest, and pnpm. This is a prototyping choice, not an irreversible engine decision. Keep dependencies minimal and isolate game rules from presentation so the design can evolve.
 
-When the prototype has a toolchain, replace this paragraph with the exact install, run, test, and build commands.
+- Install: `pnpm install`
+- Run: `pnpm dev`
+- Test: `pnpm test`
+- Build: `pnpm build`
