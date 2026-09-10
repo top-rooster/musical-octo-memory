@@ -80,7 +80,7 @@ For example, spoilage or another unattended Process may continue while Nadir is 
 
 Search decks are room-local. They stay with their room and do not follow Nadir.
 
-All current room search decks use the same basic interaction:
+All search decks use the same basic interaction:
 
 1. the player clicks the deck;
 2. clicking commits a **15-minute Action**;
@@ -89,7 +89,11 @@ All current room search decks use the same basic interaction:
 
 Because searching is an Action, those 15 minutes advance game time and all active Processes everywhere receive the elapsed time under the normal rules.
 
-Each room may define its own search-deck size, contents, and label. Sharing the interaction model does not imply that different rooms use the same card pool.
+All search decks are finite and depletable. Each deck has an authored finite set of cards and does not automatically refill.
+
+Every search deck is shuffled once when a new game starts. The resulting order becomes that deck's fixed hidden draw order for the entire run. Search decks are not reshuffled between draws, and drawing a card does not reroll the result. This means two new games may produce different discovery sequences while a single run remains deterministic after its initial shuffle.
+
+Each room may define its own search-deck size, contents, and label. Sharing the interaction, depletion, and shuffle rules does not imply that different rooms use the same card pool or the same number of cards.
 
 The **Tunnels** room contains the currently defined `Explore` deck. Detailed rules and current composition for that deck are recorded in `docs/explore-deck.md`.
 
