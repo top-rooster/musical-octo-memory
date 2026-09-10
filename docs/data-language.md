@@ -137,3 +137,17 @@ This makes the data files the place where Simon can both design cards and author
 Do not pre-design a large general-purpose configuration language. Add syntax only when a concrete Safe Room data need requires it, and choose the shortest unambiguous form that remains readable.
 
 When the parser gains new syntax, document that syntax here with a small real game-data example.
+
+## Milestone 1 parser subset
+
+The interaction prototype intentionally parses only the useful subset needed to render the known card masters and validate eating. This is an implementation boundary for the prototype, not a permanent decision about the language.
+
+It currently interprets:
+
+- the first two non-comment lines of each blank-line-separated block as title and picture path;
+- Marker lines and `Name integer` Value lines that appear before behavior statements;
+- `eat Body` as a source-authored interaction target;
+- signed target Value effects such as `Satiation +15 target`;
+- `consume self` as the eating result.
+
+An eating block is exposed as a Milestone 1 interaction only when its effect set is fully supported by that subset. Other authored Action, Process, condition, draw, and attribute-mutation statements remain in `data/cards.txt` but are not executed by the prototype. Malformed lines within the supported eating syntax produce a line-numbered parser error.
