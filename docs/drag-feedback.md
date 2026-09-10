@@ -26,6 +26,12 @@ The semantic distinction is therefore:
 - yellow = release here now to commit a mechanically meaningful legal interaction;
 - red = the card below rejects the dragged card.
 
+### Dangerous but legal interactions
+
+Danger does not change the legality color language. A dangerous interaction that is still legal uses the same green-while-available and yellow-when-hovered states as any other mechanically meaningful legal interaction.
+
+The target highlight answers **whether the interaction is valid**, not whether it is safe. Any known danger, uncertainty, or risk should be communicated separately through the relevant preview, warning, or risk presentation. Do not overload green/yellow/red target colors to encode danger severity.
+
 ### Known effect previews
 
 As soon as a card starts being dragged, every legal accepting target should show any known direct attribute changes that would result from that source/target interaction. The player should not need to hover the dragged card over the target before seeing the preview.
@@ -67,6 +73,7 @@ If the dragged card is currently over another card, the card-under-pointer feedb
 - known stat previews on legal targets: these are the understood direct effects if the interaction is committed;
 - yellow hovered target: releasing *here now* will commit a mechanically meaningful interaction;
 - subtle zone highlight: releasing *here now* will place the card in this zone;
-- red hovered card: releasing *here now* is not accepted by the card below.
+- red hovered card: releasing *here now* is not accepted by the card below;
+- danger/risk presentation: separate from legality colors.
 
 Exact colors, opacity, border treatment, glow, and animation strength are presentation details and may be tuned during playtesting. The semantic distinction above is the design rule.
