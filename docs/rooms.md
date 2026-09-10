@@ -99,10 +99,10 @@ Each room may define its own search-deck size, contents, and label. Sharing the 
 
 The **Tunnels** room contains the currently defined `Explore` deck. Detailed rules and current composition for that deck are recorded in `docs/explore-deck.md`.
 
-The **Abandoned Office** has its own search deck, separate from the Tunnels deck.
+The **Abandoned Office** has its own search deck, separate from the Tunnels deck. For now, it contains **10 blank placeholder cards**. These placeholders exist only so the room and search-deck mechanics can be implemented and tested; their eventual identities and mechanics remain undecided.
 
-The **Deep Tunnels** has its own search deck, separate from both the Tunnels and Abandoned Office decks.
+The **Deep Tunnels** has its own search deck, separate from both the Tunnels and Abandoned Office decks. For now, it also contains **10 blank placeholder cards** for the same provisional purpose.
 
-The exact labels, sizes, and compositions of the Abandoned Office and Deep Tunnels search decks have not yet been decided.
+The exact labels and eventual real compositions of the Abandoned Office and Deep Tunnels search decks remain open and will be designed later.
 
 The exact authored level-data syntax for rooms, backgrounds, exits, destination references, room-local card state, and deck definitions should follow the existing low-boilerplate text-data direction and be fixed when the first navigable rooms are implemented.
