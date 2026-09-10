@@ -33,4 +33,4 @@ The absence of a description must therefore never suppress the inspection textbo
 
 Attribute explanatory text is defined centrally as a **master description for each attribute** and reused on every card carrying that attribute. The same `Hydration`, `Anchored`, `Satiation`, `Cutting Tool`, etc. explanation should not be copied into individual card definitions.
 
-The exact text-file layout/name for the attribute-description master data is not fixed by this decision. It should remain part of the authored text-data system rather than being hard-coded into React presentation components.
+This master attribute-description data belongs in the authored text-data system rather than in React presentation code. The exact filename and syntax for that master data remain open until chosen explicitly.
