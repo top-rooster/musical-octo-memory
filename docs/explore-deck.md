@@ -22,6 +22,10 @@ For now, the Tunnels Explore deck starts with **10 cards**.
 
 Each successful Explore draw removes exactly one card from the deck. A drawn card does not automatically return to the deck and the deck does not automatically refill or reshuffle.
 
+When the final card is drawn, the now-empty Explore deck is removed from the room entirely. The deck itself uses **no removal animation** when this happens.
+
+The empty-deck presentation problem may be revisited later; for now there is no persistent Empty deck card or placeholder.
+
 ### Draw order
 
 The Explore deck is shuffled once when a new game starts. That shuffled result becomes the deck's fixed hidden draw order for that run.
@@ -64,5 +68,4 @@ The remaining mechanics of `Pipe`, `Squatter`, `Puddle of Water`, and `Service C
 The following details are not yet decided:
 
 - whether an explicit future rule can ever return a drawn card to the deck;
-- what happens when the deck is exhausted;
 - the exact animation timing and visual treatment beyond the requirement that the card visibly draws out from the deck.
