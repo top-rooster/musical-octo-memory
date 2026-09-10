@@ -22,14 +22,17 @@ For now, the Tunnels Explore deck starts with **10 cards**.
 
 Each successful Explore draw removes exactly one card from the deck. A drawn card does not automatically return to the deck and the deck does not automatically refill or reshuffle.
 
-The exact composition and order of those ten cards remain separate design decisions.
+### Draw order
+
+The Explore deck is shuffled once when a new game starts. That shuffled result becomes the deck's fixed hidden draw order for that run.
+
+The deck is not reshuffled between draws and an individual draw does not reroll its result. Different new games should therefore produce different Explore sequences, while a single run preserves the order established at game start.
 
 ## OPEN
 
 The following details are not yet decided:
 
 - the exact ten cards that can be drawn from Explore;
-- whether draw order is random, weighted, or fixed;
 - where the drawn card is initially placed in the room;
 - whether an explicit future rule can ever return a drawn card to the deck;
 - what happens when the deck is exhausted;
