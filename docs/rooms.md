@@ -45,6 +45,14 @@ The **Deep Tunnels** contains an Anchored travel card back to **Tunnels**. Dragg
 
 For these links, the return trip therefore uses the same travel time as the outbound trip.
 
+### World existence and discovery
+
+Rooms exist from the beginning of a new game whether or not Nadir has discovered a route to them yet.
+
+Discovery controls access and what travel options become visible to the player. It does not create, instantiate, or activate the destination room.
+
+Safe Room, Tunnels, Abandoned Office, and Deep Tunnels therefore all exist from game start. Their room-local state can exist and evolve before Nadir first gains access to them, subject to the normal rules for off-screen room state and Processes.
+
 ### Room backgrounds
 
 Each room has its own background image.
@@ -99,10 +107,12 @@ Each room may define its own search-deck size, contents, and label. Sharing the 
 
 The **Tunnels** room contains the currently defined `Explore` deck. Detailed rules and current composition for that deck are recorded in `docs/explore-deck.md`.
 
-The **Abandoned Office** has its own search deck, separate from the Tunnels deck. For now, it contains **10 blank placeholder cards**. These placeholders exist only so the room and search-deck mechanics can be implemented and tested; their eventual identities and mechanics remain undecided.
+The **Abandoned Office** has its own search deck, separate from the Tunnels deck. For now, it contains **10 blank placeholder cards** so the room and search mechanics can be implemented before its actual contents are designed.
 
-The **Deep Tunnels** has its own search deck, separate from both the Tunnels and Abandoned Office decks. For now, it also contains **10 blank placeholder cards** for the same provisional purpose.
+The **Deep Tunnels** has its own search deck, separate from both the Tunnels and Abandoned Office decks. For now, it also contains **10 blank placeholder cards**.
 
-The exact labels and eventual real compositions of the Abandoned Office and Deep Tunnels search decks remain open and will be designed later.
+Those blank cards are temporary implementation scaffolding rather than final game content. Their real compositions remain open and should be designed later.
+
+The exact labels of the Abandoned Office and Deep Tunnels search decks have not yet been decided.
 
 The exact authored level-data syntax for rooms, backgrounds, exits, destination references, room-local card state, and deck definitions should follow the existing low-boilerplate text-data direction and be fixed when the first navigable rooms are implemented.
