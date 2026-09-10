@@ -13,3 +13,11 @@ Examples include fatigue, temperature-related problems, illness, injury, stress,
 The purpose is to keep Nadir's permanent state compact and legible while allowing complexity to appear through condition cards when it is actually relevant.
 
 This remains consistent with the current injury model, where wounds and Fever are represented as condition cards/Processes rather than through a general Health Value.
+
+### Hidden survival state
+
+For now, the survival simulation should not contain hidden character-state variables outside the visible card/attribute model.
+
+If a survival state matters mechanically, represent it through visible cards, Markers, Values, Processes, or other already-established visible game state rather than through an invisible accumulator such as hidden fullness, fatigue, immunity, or similar state.
+
+This is a current constraint, not a permanent prohibition. Reopen the decision only if a concrete future mechanic cannot be expressed cleanly without hidden state.
