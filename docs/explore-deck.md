@@ -6,7 +6,9 @@ This document records the current decided Explore-deck behavior for Safe Room.
 
 The **Tunnels** room contains a deck of cards labeled `Explore`.
 
-The player interacts with the deck by clicking it. Clicking the deck draws one card from the deck.
+The player interacts with the deck by clicking it. Clicking the deck commits a **15-minute Action** and draws one card from the deck when that Action resolves.
+
+Because Explore is an Action, those 15 minutes advance game time and all active Processes update from that elapsed time, including Processes in rooms where Nadir is not present.
 
 The draw must use a visible card-draw animation so the new card is presented as being drawn from the deck rather than simply appearing.
 
@@ -18,7 +20,6 @@ The following details are not yet decided:
 
 - the exact cards that can be drawn from Explore;
 - whether draw order is random, weighted, or fixed;
-- whether drawing itself advances game time;
 - where the drawn card is initially placed in the room;
 - whether drawn cards are removed permanently from the deck;
 - whether cards can ever return to the deck;
