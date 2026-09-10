@@ -25,11 +25,11 @@ The current opening offer is:
 - `Canned Food` ×2.
 - `T-Shirt` ×1 — can be ripped into `Fabric`.
 - `Simple Lighter` ×1 — starts half empty.
-- `Flashlight` ×1 — starts with 20% battery. A flashlight is required for going to the Deep Tunnels.
+- `Flashlight` ×1 — starts with 20% battery. It provides `Vision +1` while in use and is particularly valuable in Deep Tunnels, but it is not an absolute requirement for entering them.
 - `Spare Batteries` ×1 — for the flashlight.
 - `Pain Killers` ×1.
 - `Simple Backpack` ×1 — starts empty. Once Nadir is in the Tunnels, it occupies Back and provides capacity for five additional carried cards in the flat Inventory area.
-- `Glasses` ×1 — may be equipped in Eyes and currently provide `Vision +1`; taking them is intended to be part of the opening loadout decision rather than assumed.
+- `Glasses` ×1 — may be equipped in Eyes and provide `Vision +1`; taking them is intended to be part of the opening loadout decision rather than assumed.
 
 This is currently 12 offered card instances. The player may take only up to the opening-scene take limit, regardless of how much equipment-generated carrying capacity would otherwise be available.
 
@@ -38,6 +38,8 @@ The starting loadout is intentionally player-authored. Different choices should 
 ## SUPERSEDED
 
 The earlier idea that normal Inventory or equipment-generated carrying capacity alone should limit the opening loadout is superseded. The opening now uses its own explicit take limit.
+
+The earlier rule that a Flashlight is required to enter Deep Tunnels is also superseded. Deep Tunnels are soft-gated by the general Vision system instead.
 
 ## OPEN
 
