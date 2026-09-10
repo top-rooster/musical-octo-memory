@@ -6,6 +6,8 @@ This document records decided presentation rules for card creation/removal in Sa
 
 Card state changes that physically add or remove a card should normally be legible through animation rather than abrupt appearance/disappearance.
 
+Search decks are **not cards**. Deck presentation/removal rules are separate and do not inherit card discard behavior automatically.
+
 ### Draw animation
 
 When a card is drawn from a deck, it must visibly animate out from that deck before settling into its legal position in the Room.
@@ -22,6 +24,8 @@ The exact visual treatment and timing of the discard animation remain open. The 
 
 ### Search-deck exhaustion exception
 
-When a finite search deck has no cards remaining after its final draw, the deck itself is removed from the room immediately.
+For the current implementation, when a finite search deck has no cards remaining after its final draw, the deck object is removed from the room immediately.
 
-This exhausted-deck removal uses **no animation**. The search deck is not treated as an ordinary discarded card for the purpose of the discard-animation rule.
+This exhausted-deck removal uses **no animation**. It is not a card discard and therefore does not use the card discard animation.
+
+This behavior is intentionally provisional. Search-deck exhaustion/presentation may receive different behavior later.
