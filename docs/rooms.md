@@ -14,14 +14,25 @@ The Safe Room contains a navigation card titled:
 
 `To the tunnels`
 
-Dragging Nadir's **Body** card onto `To the tunnels` changes the current room to **Tunnels**.
+Dragging Nadir's **Body** card onto `To the tunnels` commits a **15-minute Action** that moves Nadir from **Safe Room** to **Tunnels**.
 
-Changing room replaces the visible Room-zone contents with the contents of the destination room. Inventory remains persistent and visible across room changes.
+Because traversal is an Action, those 15 minutes advance game time and all active Processes update from that elapsed time under the normal Action rules.
 
-The exact authored level-data syntax for rooms, exits, and destination references should follow the existing low-boilerplate text-data direction and be fixed when we implement the first navigable rooms.
+### Room-local cards
+
+Cards in the Room zone belong to the current room. They do not follow Nadir when he changes rooms.
+
+When Nadir leaves Safe Room:
+
+- the Safe Room's Room-zone cards remain associated with Safe Room;
+- those cards are no longer displayed as the active Room contents;
+- the cards belonging to Tunnels replace them in the Room zone;
+- Inventory remains persistent and visible across the room change.
+
+Changing rooms therefore swaps the active Room-zone card set rather than transferring the existing Room cards into the destination room.
+
+The exact authored level-data syntax for rooms, exits, destination references, and room-local card state should follow the existing low-boilerplate text-data direction and be fixed when the first navigable rooms are implemented.
 
 ## OPEN
 
-Whether moving between rooms advances game time has not yet been decided.
-
-Because only Actions advance game time in the current design, any room traversal that consumes time must be represented as an Action. If traversal is free, the Body-on-exit interaction can change rooms immediately without advancing time.
+Whether a room preserves the exact state and positions of all its cards while Nadir is away has not yet been explicitly decided.
