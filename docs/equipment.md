@@ -2,41 +2,82 @@
 
 ## DECIDED BY SIMON
 
-Equipment is represented by ordinary cards, but the earlier simplification that every equipment card is equipped merely because it is in Inventory is no longer sufficient.
+The earlier simplification that an equipment card is equipped merely because it is somewhere in Inventory is superseded.
 
-Safe Room needs to distinguish at least between cards that are **equipped** and cards that are merely **carried**.
+Safe Room uses explicit **equipment slots** as part of Nadir's Inventory interface.
 
-The first concrete reason is the `Simple Backpack` from the opening evacuation. The backpack itself can be equipped, and once Nadir reaches the Tunnels it allows him to carry five additional cards. Cards carried inside the backpack do **not** count as equipped.
+The equipment slots are not cards and do not consume card instances. They are fixed interface positions represented visually as indentations/placeholders in the Inventory area. An empty slot may show a faint slot image/icon; when equipment is placed there, the equipment card visually covers the slot.
 
-Equipment is expected to become a meaningful crafting/progression surface. Confirmed equipment families that should be supported by the design include:
+Current equipment slots are:
 
-- backpacks;
-- hats;
-- shirts;
-- pants;
-- shoes.
+- Left Hand
+- Right Hand
+- Head
+- Eyes
+- Neck
+- Chest
+- Back
+- Legs
+- Feet
 
-These are useful not only as found items but as potential crafting outcomes and upgrade targets.
+Equipment remains represented by ordinary cards. A card is equipped when placed into its compatible equipment slot.
 
-The equipment model should remain card-based and should not silently turn into a separate conventional RPG character-sheet subsystem unless a later decision explicitly requires that.
+The `Eyes` slot is for eyewear such as glasses or goggles. **Vision itself belongs on `Mind`, not on the Eyes slot or eyewear card.** Eyewear may later modify Vision or otherwise affect it, but the underlying Nadir state remains on Mind.
+
+The exact question of whether Nadir normally wears glasses is still open.
+
+### Carried Inventory
+
+There is no longer a fixed generic five-card carrying capacity independent of equipment.
+
+Equipped storage items such as backpacks, pants with pockets, jackets, and future carrying gear add usable carrying capacity to the Inventory interface.
+
+Cards are **not visually or mechanically nested inside the backpack, pants, pockets, or other equipment cards**. Carried cards remain ordinary cards in the flat Inventory area. Equipped storage gear instead increases how many carried cards the Inventory can legally hold and what sizes of card can be accommodated.
+
+This keeps the player-facing manipulation model flat while making carrying capacity originate from physical equipment rather than an abstract inventory number.
+
+### Item size and storage compatibility
+
+Carried items need a size property or equivalent authored constraint so different storage equipment can accept different kinds of items.
+
+Confirmed examples:
+
+- pants pockets may provide capacity for two small items such as a `Pocket Knife` and a `Lighter`;
+- those pockets must not be able to carry a long/bulky item such as a `Pipe`;
+- a backpack can provide capacity for larger items such as a `Pipe` and `Plastic Bottle` cards.
+
+The exact size vocabulary and packing/compatibility rules are not yet fixed. They should remain as simple as possible while supporting these concrete distinctions.
+
+### Simple Backpack
+
+The opening evacuation includes a `Simple Backpack`.
+
+The backpack is initially empty. If the player chooses it, it occupies the Back equipment slot and, once the main survival phase begins in the Tunnels, provides capacity for **five additional carried cards**.
+
+Cards enabled by the backpack's carrying capacity are carried, not equipped merely because they are in Inventory.
+
+### Equipment as progression
+
+Equipment is expected to become a meaningful crafting/progression surface rather than merely conventional RPG stat gear.
+
+Confirmed equipment families/slots already create useful crafting targets including backpacks, hats/headwear, eyewear, shirts/jackets, pants, shoes, and potentially neck-worn items. Their value can come from practical survival capabilities such as storage, protection, warmth, access, visibility, concealment, or comfort/mood effects.
 
 ## SUPERSEDES
 
-The previous rule that an equipment card is equipped exactly while that card instance is in Inventory is superseded by this document.
+The following earlier rules are superseded:
 
-Inventory remains the persistent player-facing zone, but being present in Inventory is no longer enough by itself to define equipped state.
+- `Inventory = equipped`;
+- a fixed five-card generic carrying capacity as Nadir's permanent inventory model;
+- the idea that equipment should avoid explicit body slots.
 
 ## OPEN
 
-The exact representation is not yet decided. In particular:
+The following remain undecided:
 
-- whether equipment uses explicit body slots such as Head, Torso, Legs, Feet, Back, etc.;
-- whether equipped cards attach to `Body`, occupy dedicated positions within Inventory, or use another card relationship;
-- how many items can be equipped in each equipment family;
-- whether clothing itself provides carrying capacity, protection, warmth, concealment, or other effects;
-- whether containers other than backpacks can provide carried-but-not-equipped card storage;
-- how nested carried cards are displayed and manipulated;
-- whether backpack contents can be accessed during all interactions or whether access can depend on context;
-- whether equipping/unequipping consumes time.
-
-These should be fixed only when concrete interactions require them, keeping the visible system as small as possible.
+- the exact item-size vocabulary;
+- how storage capacity and size compatibility are validated when several equipped storage items contribute capacity at once;
+- whether the UI visually indicates which equipped item is supplying capacity for a carried card, despite keeping the carried cards flat rather than nested;
+- exact effects of each clothing/equipment family;
+- whether equipping and unequipping consumes time;
+- whether Nadir normally uses glasses;
+- whether any equipment can occupy more than one slot, such as a future two-handed object or garment spanning multiple locations.
