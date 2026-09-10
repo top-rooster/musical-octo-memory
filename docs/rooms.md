@@ -31,8 +31,14 @@ When Nadir leaves Safe Room:
 
 Changing rooms therefore swaps the active Room-zone card set rather than transferring the existing Room cards into the destination room.
 
+### Persistent off-screen room state
+
+A room preserves the exact state of its cards while Nadir is elsewhere.
+
+This includes each card's identity, current Markers and Values, relationships, and exact position within that room. Leaving a room does not reset or respawn its contents, and returning to it restores the room visually with the cards where the player left them, subject to any state changes that occurred while away.
+
+Rooms are off-screen, not paused. Processes continue to progress according to elapsed game time even when Nadir is not present in the room. If Actions performed elsewhere advance game time, Processes in inactive rooms receive that elapsed time under the same Process rules as Processes in the current room.
+
+For example, spoilage or another unattended Process may continue while Nadir is in Tunnels and may have changed or completed before he returns to Safe Room.
+
 The exact authored level-data syntax for rooms, exits, destination references, and room-local card state should follow the existing low-boilerplate text-data direction and be fixed when the first navigable rooms are implemented.
-
-## OPEN
-
-Whether a room preserves the exact state and positions of all its cards while Nadir is away has not yet been explicitly decided.
