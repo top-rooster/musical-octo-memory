@@ -22,9 +22,22 @@ Current equipment slots are:
 
 Equipment remains represented by ordinary cards. A card is equipped when placed into its compatible equipment slot.
 
-The `Eyes` slot is for eyewear such as glasses or goggles. **Vision itself belongs on `Mind`, not on the Eyes slot or eyewear card.** Eyewear may later modify Vision or otherwise affect it, but the underlying Nadir state remains on Mind.
+### Eyes and Vision
 
-The exact question of whether Nadir normally wears glasses is still open.
+The `Eyes` slot is for eyewear such as glasses or goggles.
+
+**Vision belongs on `Mind`, not on the Eyes slot or eyewear card.** Equipment and environmental conditions may modify that Vision value while the underlying Nadir state remains on Mind.
+
+The current working Vision interaction is deliberately small and additive:
+
+- Nadir's glasses provide `Vision +1` while equipped in Eyes;
+- dim lighting applies `Vision -1`;
+- this means glasses can offset the dim-light penalty and let Nadir perform light-sensitive work in conditions where he otherwise could not;
+- without glasses, the most light-sensitive work may require a fully bright room.
+
+The exact absolute baseline for Vision, the exact thresholds for individual Actions, and the complete lighting scale are not yet fixed. The intended design is that equipment and lighting interact through one visible Vision state rather than separate hidden checks.
+
+Glasses are intended to be available as a possible choice during the opening evacuation rather than assumed to be permanently attached to Nadir.
 
 ### Carried Inventory
 
@@ -54,7 +67,7 @@ The opening evacuation includes a `Simple Backpack`.
 
 The backpack is initially empty. If the player chooses it, it occupies the Back equipment slot and, once the main survival phase begins in the Tunnels, provides capacity for **five additional carried cards**.
 
-Cards enabled by the backpack's carrying capacity are carried, not equipped merely because they are in Inventory.
+Cards enabled by the backpack's carrying capacity remain ordinary carried cards in the flat Inventory area. They are not nested inside the backpack and do not count as equipped merely because the backpack provides the capacity that lets Nadir carry them.
 
 ### Equipment as progression
 
@@ -79,5 +92,6 @@ The following remain undecided:
 - whether the UI visually indicates which equipped item is supplying capacity for a carried card, despite keeping the carried cards flat rather than nested;
 - exact effects of each clothing/equipment family;
 - whether equipping and unequipping consumes time;
-- whether Nadir normally uses glasses;
+- Nadir's base Vision value and exact Vision thresholds for light-sensitive Actions;
+- the complete room-lighting scale beyond the current dim-light `Vision -1` direction;
 - whether any equipment can occupy more than one slot, such as a future two-handed object or garment spanning multiple locations.
