@@ -28,12 +28,32 @@ The Explore deck is shuffled once when a new game starts. That shuffled result b
 
 The deck is not reshuffled between draws and an individual draw does not reroll its result. Different new games should therefore produce different Explore sequences, while a single run preserves the order established at game start.
 
+### Draw placement
+
+When a card is drawn, it animates outward from the Explore deck and is then placed in the nearest legal free space beside the deck.
+
+If there is no legal free position immediately beside the deck, the game finds the nearest other legal free position in the Tunnels room. A newly drawn card must not be placed overlapping another card merely because the preferred area is occupied.
+
+### Current 10-card composition
+
+For now, the Tunnels Explore deck contains exactly:
+
+- `Scrap Metal` ×2
+- `Pipe` ×1
+- `Squatter` ×1
+- `Dead Rat` ×1
+- `Plastic Bottle` ×1, starting empty (no `Contains-Water` Marker)
+- `Puddle of Water` ×1
+- `Go to deep tunnels` ×1
+- `Go to abandoned office` ×1
+- `Service Cabinet` ×1, starting locked
+
+This list defines the current deck contents only. The individual mechanics of `Pipe`, `Squatter`, `Puddle of Water`, `Go to deep tunnels`, `Go to abandoned office`, and `Service Cabinet` remain to be designed explicitly rather than inferred from their names.
+
 ## OPEN
 
 The following details are not yet decided:
 
-- the exact ten cards that can be drawn from Explore;
-- where the drawn card is initially placed in the room;
 - whether an explicit future rule can ever return a drawn card to the deck;
 - what happens when the deck is exhausted;
-- the exact animation timing and visual treatment.
+- the exact animation timing and visual treatment beyond the requirement that the card visibly draws out from the deck.
