@@ -6,49 +6,77 @@ This document records the current decided opening play experience for Safe Room.
 
 The game opens with a short evacuation interlude before the main survival/exploration phase.
 
-The authorities are coming and Nadir has to leave. The player chooses what to grab by moving cards from the opening room into Nadir's equipment slots and available carried Inventory before escaping.
+The authorities are coming and Nadir has to leave. The player chooses what to grab by moving offered cards into Nadir's equipment slots, Hands, or legal carried Inventory before escaping.
 
-Because the equipment-and-storage system no longer provides a useful natural limiter for this scene, the evacuation has an explicit **maximum number of offered items Nadir may take with him**. This is a special constraint of the opening scene rather than a permanent Inventory rule.
+Because the equipment-and-storage system no longer provides a useful natural limiter for this scene, the evacuation has an explicit maximum take limit:
 
-Equipped items count toward that opening take limit as well as carried items. The player therefore cannot bypass the evacuation choice by filling otherwise-empty equipment slots.
+**Nadir may take five offered card instances.**
 
-The exact numerical take limit is still open.
+Equipped offered items count toward the five-card limit as well as carried offered items. The player cannot bypass the choice by filling otherwise-empty equipment slots.
 
 After the escape, the main game begins in **Tunnels**. Nadir does not begin with an established base of operations and must later find somewhere suitable to use as one.
+
+### Nadir at the start
+
+Nadir is surprised and has not prepared to leave.
+
+He begins wearing:
+
+- `Pants` in Legs;
+- `T-Shirt` in Chest.
+
+He is **barefoot**. Feet are empty.
+
+Both Hands are empty. Head, Eyes, Neck, and Back are also empty.
+
+The Pants provide 2 Small carried-Inventory capacity. Other things taken during the opening can also be held/equipped in compatible slots. The five-card evacuation limit remains the overriding limit on how many offered cards leave with Nadir.
 
 ### Items available in the opening room
 
 The current opening offer is:
 
-- `Pocket Knife` ×1 — a very basic knife and poor weapon. It can be used to make wood shavings from wood; the shavings can be used as kindling.
-- `Plastic Bottle` ×2 — both start containing water.
-- `Canned Food` ×2.
-- `T-Shirt` ×1 — can be ripped into `Fabric`.
-- `Simple Lighter` ×1 — starts half empty.
-- `Flashlight` ×1 — starts with 20% battery. It provides `Vision +1` while in use and is particularly valuable in Deep Tunnels, but it is not an absolute requirement for entering them.
-- `Spare Batteries` ×1 — for the flashlight.
-- `Pain Killers` ×1.
-- `Simple Backpack` ×1 — starts empty. Once Nadir is in the Tunnels, it occupies Back and provides capacity for five additional carried cards in the flat Inventory area.
-- `Glasses` ×1 — may be equipped in Eyes and provide `Vision +1`; taking them is intended to be part of the opening loadout decision rather than assumed.
+- `Pocket Knife` x1 - a very basic knife and poor weapon. It can later be used to make wood shavings from wood for kindling;
+- `Plastic Bottle` x2 - both start with `Contains-Water`;
+- `Canned Food` x2;
+- `Simple Lighter` x1 - starts at `Fuel 50`;
+- `Flashlight` x1 - starts at `Battery 20`;
+- `Spare Batteries` x1;
+- `Pain Killers` x1;
+- `Simple Backpack` x1;
+- `Glasses` x1.
 
-This is currently 12 offered card instances. The player may take only up to the opening-scene take limit, regardless of how much equipment-generated carrying capacity would otherwise be available.
+The T-Shirt is **not** part of the offered set because Nadir is already wearing it.
+
+This is currently 11 offered card instances competing for the five-card opening limit.
 
 The starting loadout is intentionally player-authored. Different choices should emphasize different immediate capabilities rather than there being one fixed designer-issued starter kit.
 
+### Important opening consequences
+
+Taking Glasses allows them to be equipped in Eyes for `Vision +1`.
+
+Taking the Flashlight gives access to another `Vision +1` while it is actively held in a Hand and has battery remaining.
+
+Taking the Simple Backpack consumes one of the five opening choices but, once Nadir reaches Tunnels and equips it in Back, provides 5 Medium carried-Inventory capacity.
+
+Skipping both Glasses and Flashlight does not hard-lock later areas. Deep Tunnels remain reachable but are intentionally very difficult to use at low effective Vision.
+
 ## SUPERSEDED
 
-The earlier idea that normal Inventory or equipment-generated carrying capacity alone should limit the opening loadout is superseded. The opening now uses its own explicit take limit.
+The earlier idea that normal Inventory or equipment-generated carrying capacity alone should limit the opening loadout is superseded. The opening uses its own explicit five-card take limit.
 
-The earlier rule that a Flashlight is required to enter Deep Tunnels is also superseded. Deep Tunnels are soft-gated by the general Vision system instead.
+The earlier fixed five-card permanent Inventory model is superseded by `docs/equipment.md`.
+
+The earlier rule that a Flashlight is required to enter Deep Tunnels is superseded. Deep Tunnels are soft-gated by the general Vision system instead.
+
+The earlier offered T-Shirt is superseded by Nadir already wearing a T-Shirt when the opening begins.
 
 ## OPEN
 
 The following details are not yet fixed:
 
-- the exact numerical take limit;
-- the exact name and physical/narrative identity of the opening room;
-- whether the opening room can ever be revisited;
-- how urgency is presented mechanically or visually during the interlude;
-- what Nadir is already wearing/equipping when the interlude begins;
-- exact Values/Markers for lighter fuel, flashlight charge, batteries, pain killers, clothing, backpack capacity, and glasses durability if any;
-- whether any of the listed quantities or offered items change after playtesting.
+- the exact narrative/physical identity and final name of the opening room;
+- whether the opening room can ever be revisited after the interlude;
+- final narrative presentation of the authorities arriving;
+- exact long-term Values/Markers for Pain Killers and clothing beyond what Milestone 2 needs;
+- whether any offered quantities/items change after playtesting.
