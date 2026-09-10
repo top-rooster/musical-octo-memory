@@ -26,18 +26,21 @@ Equipment remains represented by ordinary cards. A card is equipped when placed 
 
 The `Eyes` slot is for eyewear such as glasses or goggles.
 
-**Vision belongs on `Mind`, not on the Eyes slot or eyewear card.** Equipment and environmental conditions may modify that Vision value while the underlying Nadir state remains on Mind.
+**Vision belongs on `Mind`, not on the Eyes slot or eyewear card.** Equipment and environmental conditions modify effective Vision while the underlying Nadir state remains on Mind.
 
-The current working Vision interaction is deliberately small and additive:
+Nadir's normal Vision is:
 
-- Nadir's glasses provide `Vision +1` while equipped in Eyes;
-- dim lighting applies `Vision -1`;
-- this means glasses can offset the dim-light penalty and let Nadir perform light-sensitive work in conditions where he otherwise could not;
-- without glasses, the most light-sensitive work may require a fully bright room.
+`Vision 4`
 
-The exact absolute baseline for Vision, the exact thresholds for individual Actions, and the complete lighting scale are not yet fixed. The intended design is that equipment and lighting interact through one visible Vision state rather than separate hidden checks.
+Nadir's glasses provide:
 
-Glasses are intended to be available as a possible choice during the opening evacuation rather than assumed to be permanently attached to Nadir.
+`Vision +1`
+
+while equipped in Eyes.
+
+Glasses are available as a possible choice during the opening evacuation rather than assumed to be permanently attached to Nadir. Because the lighting system uses capability thresholds, choosing the glasses can change which tasks Nadir can perform in a room rather than merely giving a minor passive bonus.
+
+The full decided lighting/Vision thresholds, room-light penalties, and portable-light modifiers are recorded in `docs/lighting-and-vision.md`.
 
 ### Carried Inventory
 
@@ -92,6 +95,4 @@ The following remain undecided:
 - whether the UI visually indicates which equipped item is supplying capacity for a carried card, despite keeping the carried cards flat rather than nested;
 - exact effects of each clothing/equipment family;
 - whether equipping and unequipping consumes time;
-- Nadir's base Vision value and exact Vision thresholds for light-sensitive Actions;
-- the complete room-lighting scale beyond the current dim-light `Vision -1` direction;
 - whether any equipment can occupy more than one slot, such as a future two-handed object or garment spanning multiple locations.
