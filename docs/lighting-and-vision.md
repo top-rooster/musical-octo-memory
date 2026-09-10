@@ -36,29 +36,50 @@ Room lighting applies an environmental Vision modifier.
 
 Current conditions are:
 
-- **Darkness** — `Vision -3`. Reserved for a future room not yet designed.
-- **Twilight** — `Vision -2`. **Deep Tunnels** currently use this condition.
+- **Darkness** — `Vision -4`. Reserved for a future room not yet designed.
+- **Twilight** — `Vision -3`. **Deep Tunnels** currently use this condition.
 - **Dim** — `Vision -1`. **Tunnels** currently use this condition.
 - **Bright** — no Vision penalty. **Abandoned Office** is Bright during daytime because it has a window.
 
-With Nadir's normal `Vision 4`, this currently means:
+With Nadir's normal `Vision 4`, this means:
 
 - Bright -> effective Vision 4;
 - Dim -> effective Vision 3;
-- Twilight -> effective Vision 2;
-- Darkness -> effective Vision 1.
+- Twilight -> effective Vision 1;
+- Darkness -> effective Vision 0.
 
 Glasses raise each of those by one while worn.
+
+This deliberately leaves a gap between Dim and Twilight. Deep Tunnels are substantially harder to function in without either eyewear, portable light, or both.
 
 ### Portable light sources
 
 Current portable light effects are:
 
-- **Lit Lighter** — `Vision +1`; consumes lighter fluid over time while lit.
-- **Flashlight** — `Vision +2`; consumes battery charge over time while in use.
-- **Torch** — a lit oil rag on a stick; `Vision +2`; the Torch card is discarded when it burns out.
+- **Flashlight** — `Vision +1`; consumes battery charge over time while in use.
+- **Torch** — a lit oil rag on a stick; `Vision +1`; the Torch card is discarded when it burns out.
 
-The exact burn/consumption rates and activation interactions remain to be authored separately.
+A lit lighter is **not** a Vision-producing light source. The lighter may still be used for ignition, but keeping it lit does not provide a `Vision` bonus.
+
+The exact flashlight battery consumption rate and Torch burn duration remain to be authored separately.
+
+### Combined examples
+
+The modifiers are additive.
+
+In **Deep Tunnels** (`Twilight`, `Vision -3`):
+
+- Nadir alone: effective Vision 1;
+- glasses only: effective Vision 2;
+- flashlight or Torch only: effective Vision 2;
+- glasses plus flashlight or Torch: effective Vision 3.
+
+In **Darkness** (`Vision -4`):
+
+- Nadir alone: effective Vision 0;
+- glasses only: effective Vision 1;
+- flashlight or Torch only: effective Vision 1;
+- glasses plus flashlight or Torch: effective Vision 2.
 
 ### Task light requirements
 
@@ -114,7 +135,6 @@ Portable light sources may also add a visual lighting effect. Their exact presen
 
 The following remain undecided:
 
-- exact lighter-fluid consumption rate;
 - exact flashlight battery consumption rate;
 - exact Torch burn duration;
 - whether Vision can exceed the currently useful threshold of 4 and, if so, whether values above 4 have any additional effect;
