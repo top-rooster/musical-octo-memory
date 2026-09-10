@@ -80,12 +80,23 @@ For example, spoilage or another unattended Process may continue while Nadir is 
 
 Search decks are room-local. They stay with their room and do not follow Nadir.
 
+All current room search decks use the same basic interaction:
+
+1. the player clicks the deck;
+2. clicking commits a **15-minute Action**;
+3. when that Action resolves, one card is drawn from the deck using the normal visible card-draw animation;
+4. the deck is depleted by exactly one card.
+
+Because searching is an Action, those 15 minutes advance game time and all active Processes everywhere receive the elapsed time under the normal rules.
+
+Each room may define its own search-deck size, contents, and label. Sharing the interaction model does not imply that different rooms use the same card pool.
+
 The **Tunnels** room contains the currently defined `Explore` deck. Detailed rules and current composition for that deck are recorded in `docs/explore-deck.md`.
 
 The **Abandoned Office** has its own search deck, separate from the Tunnels deck.
 
 The **Deep Tunnels** has its own search deck, separate from both the Tunnels and Abandoned Office decks.
 
-Their exact labels, card compositions, and any room-specific search rules have not yet been decided. Do not infer that they necessarily contain the same cards as Tunnels.
+The exact labels, sizes, and compositions of the Abandoned Office and Deep Tunnels search decks have not yet been decided.
 
 The exact authored level-data syntax for rooms, backgrounds, exits, destination references, room-local card state, and deck definitions should follow the existing low-boilerplate text-data direction and be fixed when the first navigable rooms are implemented.
