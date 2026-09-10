@@ -2,44 +2,48 @@
 
 ## Purpose
 
-This repository contains **Safe Room**, a narrative survival/stealth game centered on legible card interactions, a static room/blueprint view, and a persistent inventory.
+This repository contains **Safe Room**, a narrative survival/stealth game centered on legible card interactions, a static room/blueprint view, and persistent Nadir/equipment/inventory state.
 
 ## Sources of truth
 
 Before making material changes, read:
 
-- `docs/game-design.md` for current product and interaction context.
-- `docs/roadmap.md` for the active implementation slice and acceptance criteria.
-- `docs/backlog.md` for the design decision register, future candidates, open questions, priorities, and rationale.
-- `docs/data-language.md` for the authoring rules for card data and level design.
+- `docs/milestone-2.md` for the **active implementation slice and acceptance criteria**.
+- `docs/game-design.md` for broad product and interaction context.
+- the focused design notes referenced by `docs/milestone-2.md` for newer decisions about opening, equipment, rooms, search, lighting/Vision, drag feedback, card inspection, and animation.
+- `docs/data-language.md` for authoring rules for card and level data.
+- `docs/backlog.md` for the historical decision register, future candidates, open questions, priorities, and rationale.
 
-The status labels in `docs/backlog.md` are authoritative for design ownership.
+Design ownership still matters:
 
 - **DECIDED BY SIMON** means an explicit design decision and may be treated as a constraint.
 - **OPEN - SIMON TO DECIDE**, **DEFERRED**, and **SUGGESTED BY CHATGPT** are not design commitments.
 - Never promote a suggestion or open question into an accepted design rule merely because it appears in repository documentation.
-- Backlog items are not implementation commitments; implement them only when explicitly requested or promoted into `docs/roadmap.md`.
-- Older focused design notes may remain in `docs/` for history, but they do not override the four sources of truth listed above.
+
+Some older broad documents still contain Milestone 1 rules that have since been explicitly superseded. For Milestone 2, when a focused design note contains an explicit **SUPERSEDES** statement, that newer focused decision overrides the older conflicting rule. Do not resurrect the old fixed five-card Inventory model, `Inventory = equipped`, or `all interactables are cards` where newer docs define equipment slots and Search decks separately.
+
+`docs/roadmap.md` records Milestone 1. `docs/milestone-2.md` is the active code-iteration contract until Simon replaces it.
 
 Keep this file short. Put detailed design decisions in `docs/` rather than expanding `AGENTS.md` into an encyclopedia.
 
 ## Working practices
 
 - Inspect the repository before making changes and preserve unrelated user work.
-- Keep changes focused on the current request; do not add frameworks, dependencies, or broad scaffolding without a concrete need.
+- Keep changes focused on the active milestone; do not add frameworks, dependencies, or broad scaffolding without a concrete need.
 - Prefer small vertical slices that can be run and evaluated immediately.
 - Card master data belongs in the project's text data files, not duplicated as TypeScript/React constants. Code may parse, validate, and transform that data into runtime structures.
-- Authored level design is also a product-level text-data requirement, but follow `docs/roadmap.md` for milestone-specific scope. **Milestone 1 explicitly generates its temporary starting Room population from loaded card masters and must not invent or implement level-data syntax yet.**
+- Milestone 2 level/world state comes from `data/rooms.txt`; do not hard-code the current room graph, search-deck compositions, starting equipment, or opening offers into UI components.
 - Preserve the terse, low-boilerplate, phone-friendly authoring direction in `docs/data-language.md`; do not replace it with JSON, YAML, TOON, or another verbose object format for convenience.
+- Extend parsers only for syntax actually needed by the active milestone.
 - Prioritize player legibility: state changes should be visible before an action is committed when the design calls for a preview.
-- Follow the existing project structure and toolchain once one exists.
-- Run the narrowest relevant checks after changes. If no checks exist or cannot be run, state that clearly.
+- Keep game-rule/state-transition code separate from React rendering where practical.
+- Run the narrowest relevant checks after changes. At milestone completion run both tests and production build.
 - Update documentation when behavior, setup, or important decisions change.
 - Never commit credentials, tokens, private keys, or generated secrets. Use environment variables or workspace secret configuration instead.
 
 ## Toolchain
 
-The Milestone 1 prototype uses React, TypeScript, Vite, Vitest, and pnpm. This is a prototyping choice, not an irreversible engine decision. Keep dependencies minimal and isolate game rules from presentation so the design can evolve.
+The prototype uses React, TypeScript, Vite, Vitest, and pnpm. This remains a prototyping choice rather than an irreversible engine decision.
 
 - Install: `pnpm install`
 - Run: `pnpm dev`
