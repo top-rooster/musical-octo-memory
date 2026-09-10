@@ -88,6 +88,8 @@ For example, spoilage or another unattended Process may continue while Nadir is 
 
 Search decks are room-local. They stay with their room and do not follow Nadir.
 
+A search deck is **not a card**. It is a separate interactive room object that contains and produces cards. Card-instance rules, attributes, stacking, Anchored behavior, inspection, and discard behavior do not automatically apply to decks unless a future deck rule explicitly says so.
+
 All search decks use the same basic interaction:
 
 1. the player clicks the deck;
@@ -101,9 +103,13 @@ All search decks are finite and depletable. Each deck has an authored finite set
 
 **All search decks in the world are shuffled at game start, including decks in rooms Nadir has not yet discovered.** The resulting order becomes each deck's fixed hidden draw order for the entire run. Search decks are not reshuffled between draws, and drawing a card does not reroll the result. This means two new games may produce different discovery sequences while a single run remains deterministic after its initial shuffle.
 
-When the final card is drawn, the exhausted search deck is removed from its room entirely. There is no Empty deck card or placeholder for now, and the exhausted deck itself is removed with **no animation**.
+The player is **not shown how many cards remain** in a search deck for now.
 
-Each room may define its own search-deck size, contents, and label. Sharing the interaction, depletion, shuffle, and exhaustion rules does not imply that different rooms use the same card pool or the same number of cards.
+For the current implementation, when the final card is drawn, the exhausted search deck is removed from its room entirely. There is no Empty deck object or placeholder, and this deck removal uses **no animation**.
+
+That exhausted-deck behavior is intentionally provisional and should be revisited later rather than treated as the final deck model.
+
+Each room may define its own search-deck size, contents, and label. Sharing the interaction, depletion, shuffle, and current exhaustion rules does not imply that different rooms use the same card pool or the same number of cards.
 
 The **Tunnels** room contains the currently defined `Explore` deck. Detailed rules and current composition for that deck are recorded in `docs/explore-deck.md`.
 
