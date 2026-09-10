@@ -99,7 +99,7 @@ Because searching is an Action, those 15 minutes advance game time and all activ
 
 All search decks are finite and depletable. Each deck has an authored finite set of cards and does not automatically refill.
 
-Every search deck is shuffled once when a new game starts. The resulting order becomes that deck's fixed hidden draw order for the entire run. Search decks are not reshuffled between draws, and drawing a card does not reroll the result. This means two new games may produce different discovery sequences while a single run remains deterministic after its initial shuffle.
+**All search decks in the world are shuffled at game start, including decks in rooms Nadir has not yet discovered.** The resulting order becomes each deck's fixed hidden draw order for the entire run. Search decks are not reshuffled between draws, and drawing a card does not reroll the result. This means two new games may produce different discovery sequences while a single run remains deterministic after its initial shuffle.
 
 When the final card is drawn, the exhausted search deck is removed from its room entirely. There is no Empty deck card or placeholder for now, and the exhausted deck itself is removed with **no animation**.
 
