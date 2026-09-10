@@ -1,139 +1,183 @@
 # Rooms and navigation
 
-This document records the current decided room model for Safe Room.
+This document records the current decided room/world model for Safe Room.
 
 ## DECIDED BY SIMON
 
 ### Opening and starting state
 
-The game opens with a short **evacuation interlude** in an initial room rather than beginning with Nadir already established in a permanent Safe Room/base.
+The game opens with a short evacuation interlude rather than with Nadir already established in a permanent Safe Room/base.
 
-The immediate premise of the interlude is that **the authorities are coming and Nadir has to leave**. Before escaping, the player can choose a few available things to take by dragging those cards into Inventory. This acts as the player's starting-loadout choice rather than giving every new game the same fixed starting equipment.
+The authorities are coming and Nadir has to leave. The player may take **five** offered card instances. Details of the offered cards and Nadir's starting clothing are in `docs/opening.md`.
 
-After the interlude, Nadir escapes into **Tunnels**. The main survival/exploration game begins there.
+After the interlude, Nadir escapes into **Tunnels**. The main survival/exploration game begins there without an established base of operations.
 
-Nadir therefore starts the main game without an established base of operations. One of the early play experiences is finding somewhere suitable and gradually establishing a base rather than receiving a prebuilt Safe Room at the beginning.
+The opening room uses the working implementation name `Opening Room` in `data/rooms.txt`; that is not yet its final narrative name. Milestone 2 does not need a return route to it.
 
-The exact name and contents of the opening room, exactly how many items the player may take, how the urgency of the escape is presented, and whether that opening room can ever be revisited are still open.
+This supersedes the earlier assumption that `Safe Room` is Nadir's permanent starting base with a normal two-way connection to Tunnels.
 
-This supersedes the earlier assumption that `Safe Room` is Nadir's permanent starting base with a normal two-way 15-minute connection to Tunnels.
+### Persistent world rooms
 
-Rooms are navigable locations. Passage/exit points are represented as ordinary interactable cards in the Room zone, consistent with the universal card-on-card interaction language.
+The persistent rooms in the first playable world slice are:
 
-All travel/navigation cards are `Anchored` to their home room. They may be interacted with by dragging Nadir's **Body** onto them, but they cannot be carried away or permanently moved into another zone.
+- **Tunnels**
+- **Abandoned Office**
+- **Deep Tunnels**
 
-Because traversal is an Action, travel time advances game time and all active Processes update from that elapsed time under the normal Action rules.
+These rooms exist from new-game creation whether or not Nadir has discovered access to them.
 
-### Tunnels navigation
+Discovery controls access and visible travel options. It does not create or activate the destination room.
 
-**Tunnels** is the starting room for the main survival/exploration phase after the evacuation interlude.
+### Current connections
 
-The Tunnels search deck can reveal two additional travel cards. Once drawn, they remain as persistent room-local navigation cards in Tunnels:
+Passage/exit points are ordinary interactable cards in the Room zone.
 
-- `Go to abandoned office` — dragging Body onto it commits a **15-minute Action** and moves Nadir to **Abandoned Office**.
-- `Go to deep tunnels` — dragging Body onto it commits a **30-minute Action** and moves Nadir to **Deep Tunnels**.
+All travel cards are `Anchored` to their home room. Dragging Nadir's **Body** onto one commits its travel Action.
 
-Both cards are `Anchored` to Tunnels, consistent with the rule that all travel cards are anchored to their home room.
+Current links are:
 
-### Return travel from discovered rooms
+- Tunnels -> Abandoned Office: **15m**;
+- Abandoned Office -> Tunnels: **15m**;
+- Tunnels -> Deep Tunnels: **30m**;
+- Deep Tunnels -> Tunnels: **30m**.
 
-Travel is symmetric for these first discovered rooms.
+The two outbound Tunnels travel cards begin inside the Tunnels Explore deck:
 
-The **Abandoned Office** contains an Anchored travel card back to **Tunnels**. Dragging Body onto it commits a **15-minute Action** and returns Nadir to Tunnels.
+- `Go to abandoned office`;
+- `Go to deep tunnels`.
 
-The **Deep Tunnels** contains an Anchored travel card back to **Tunnels**. Dragging Body onto it commits a **30-minute Action** and returns Nadir to Tunnels.
+Once drawn, each remains as a persistent room-local travel card.
 
-For these links, the return trip therefore uses the same travel time as the outbound trip.
+Abandoned Office and Deep Tunnels each begin with an Anchored `Go to tunnels` card. The exact destination and travel duration are authored on the room-card instance in `data/rooms.txt`.
+
+Travel is an Action, so its elapsed time participates in the normal time system. Vision may multiply travel time according to `docs/lighting-and-vision.md`.
+
+### Room lighting
+
+Current Milestone 2 room-light conditions are:
+
+- Opening Room: **Bright**;
+- Tunnels: **Dim** (`Vision -1`);
+- Abandoned Office: **Bright** during the current prototype;
+- Deep Tunnels: **Twilight** (`Vision -3`).
+
+The authoritative light condition is room state/data. The renderer changes the visible brightness of the room background from that state.
+
+The background itself remains presentation rather than gameplay state.
 
 ### Deep Tunnels gameplay role
 
-Deep Tunnels are intentionally difficult to use without preparation because they currently have the `Twilight` room-light condition (`Vision -3`). They are not hard-gated by possession of a Flashlight.
+Deep Tunnels are intentionally difficult to use without preparation and are **soft-gated by Vision**, not by possession of a particular item.
 
-A player who skipped both `Glasses` and `Flashlight` during the opening evacuation can still enter Deep Tunnels, but Nadir's effective Vision is only 1 there under normal conditions. Travel and searching therefore become much slower and most work is unavailable.
+With normal `Vision 4` and Twilight `-3`, Nadir has effective Vision 1 there without Glasses or an active light source. Travel is slower, searching is much slower, and ordinary work is unavailable.
 
-This is a soft gate rather than a lock. The player has at least two recovery paths:
+Skipping both Glasses and Flashlight during the opening does not hard-lock the player. A Flashlight is part of the Deep Tunnels search content, and a Torch can be introduced later as another recovery path.
 
-- craft a `Torch` to gain `Vision +1`;
-- find a `Flashlight` by searching in Deep Tunnels itself.
-
-The latter is intentionally self-rescuing: the first searches may be costly, but finding the Flashlight can make later Deep Tunnels trips substantially more practical.
-
-### World existence and discovery
-
-Persistent world rooms exist from the beginning of a new game whether or not Nadir has discovered a route to them yet.
-
-Discovery controls access and what travel options become visible to the player. It does not create, instantiate, or activate the destination room.
-
-Tunnels, Abandoned Office, and Deep Tunnels therefore all exist from game start. Their room-local state can exist and evolve before Nadir first gains access to them, subject to the normal rules for off-screen room state and Processes.
-
-The opening evacuation room is a special introductory location. Whether it remains part of the persistent world after Nadir escapes is still open.
+Torch crafting/burn behavior is outside Milestone 2.
 
 ### Room backgrounds
 
-Each room has its own background image.
+Every room has its own background image:
 
-The background belongs to the room itself and changes when the active room changes. It provides place identity and atmosphere only; mechanically meaningful state remains represented by cards rather than being encoded into the background image.
+- `images/opening-room-background.jpg`
+- `images/tunnels-background.jpg`
+- `images/abandoned-office-background.jpg`
+- `images/deep-tunnels-background.jpg`
 
-Tunnels, Abandoned Office, Deep Tunnels, and the opening room therefore each have their own room background.
+Room backgrounds provide location identity and atmosphere. Mechanically meaningful state remains in authored game state/cards rather than being baked into the artwork.
 
-### Room-local cards
+### Room-local cards and persistence
 
-Cards in the Room zone belong to the current room. They do not follow Nadir when he changes rooms.
+Cards in the Room zone belong to the current room and do not follow Nadir when he changes rooms.
 
-When Nadir changes room:
+Changing rooms swaps the visible Room card set and room background. Nadir's persistent state, equipment slots, equipped cards, and carried Inventory remain present across room changes.
 
-- the current room's Room-zone cards remain associated with that room;
-- those cards are no longer displayed as the active Room contents;
-- the destination room's cards replace them in the Room zone;
-- Inventory remains persistent and visible across the room change.
+A persistent room preserves the exact state of its cards while Nadir is elsewhere, including:
 
-Changing rooms therefore swaps the active Room-zone card set rather than transferring the existing Room cards into the destination room.
+- card identity;
+- current Markers and Values;
+- relationships;
+- exact position.
 
-### Persistent off-screen room state
-
-A persistent room preserves the exact state of its cards while Nadir is elsewhere.
-
-This includes each card's identity, current Markers and Values, relationships, and exact position within that room. Leaving a persistent room does not reset or respawn its contents, and returning to it restores the room visually with the cards where the player left them, subject to any state changes that occurred while away.
-
-Persistent rooms are off-screen, not paused. Processes continue to progress according to elapsed game time even when Nadir is not present in the room. If Actions performed elsewhere advance game time, Processes in inactive persistent rooms receive that elapsed time under the same Process rules as Processes in the current room.
-
-For example, spoilage or another unattended Process may continue while Nadir is elsewhere and may have changed or completed before he returns.
+Persistent rooms are off-screen, not reset. The time model must allow later Processes in inactive rooms to receive elapsed game time, although Milestone 2 does not need to implement every existing unfinished Process.
 
 ### Search decks
 
-Search decks are room-local. They stay with their room and do not follow Nadir.
+Search decks are room-local interactive objects and are **not cards**.
 
-A search deck is **not a card**. It is a separate interactive room object that contains and produces cards. Card-instance rules, attributes, stacking, Anchored behavior, inspection, and discard behavior do not automatically apply to decks unless a future deck rule explicitly says so.
+Card-instance rules, card attributes, stacking, Anchored behavior, card inspection, and discard behavior do not automatically apply to decks.
 
-All search decks use the same basic interaction:
+All Search decks use the same dedicated face-down backside artwork:
 
-1. the player clicks the deck;
-2. clicking commits a **15-minute Action**;
-3. when that Action resolves, one card is drawn from the deck using the normal visible card-draw animation;
-4. the deck is depleted by exactly one card.
+`images/search-back.png`
 
-Because searching is an Action, those 15 minutes advance game time and all active Processes everywhere receive the elapsed time under the normal rules.
+The artwork covers the whole visible deck face and includes a stylized `Search` as part of the image. Different rooms do not get different Search backs.
 
-All search decks are finite and depletable. Each deck has an authored finite set of cards and does not automatically refill.
+All Search decks use the same basic interaction:
 
-**All search decks in the world are shuffled at game start, including decks in rooms Nadir has not yet discovered.** The resulting order becomes each deck's fixed hidden draw order for the entire run. Search decks are not reshuffled between draws, and drawing a card does not reroll the result. This means two new games may produce different discovery sequences while a single run remains deterministic after its initial shuffle.
+1. player clicks the deck;
+2. the click commits a base **15-minute Search Action**;
+3. Vision may multiply that duration;
+4. when the Action resolves, one card visibly draws out of the deck;
+5. the deck depletes by exactly one card.
 
-The player is **not shown how many cards remain** in a search deck for now.
+All Search decks are finite and are shuffled **once at new-game creation**, including decks in rooms Nadir has not yet discovered. Each resulting hidden order stays fixed for the run. There is no reshuffle or per-draw reroll.
 
-For the current implementation, when the final card is drawn, the exhausted search deck is removed from its room entirely. There is no Empty deck object or placeholder, and this deck removal uses **no animation**.
+The player is not shown the remaining card count.
 
-That exhausted-deck behavior is intentionally provisional and should be revisited later rather than treated as the final deck model.
+For the current implementation, an exhausted Search deck disappears immediately and without an animation. That behavior is provisional.
 
-Each room may define its own search-deck size, contents, and label. Sharing the interaction, depletion, shuffle, and current exhaustion rules does not imply that different rooms use the same card pool or the same number of cards.
+### Current search decks
 
-The **Tunnels** room contains the currently defined `Explore` deck. Detailed rules and current composition for that deck are recorded in `docs/explore-deck.md`.
+**Tunnels / Explore** contains exactly 10 cards:
 
-The **Abandoned Office** has its own search deck, separate from the Tunnels deck. For now, it contains **10 blank placeholder cards** so the room and search mechanics can be implemented before its actual contents are designed.
+- Scrap Metal x2
+- Pipe x1
+- Squatter x1
+- Dead Rat x1
+- Plastic Bottle x1, empty
+- Puddle of Water x1
+- Go to deep tunnels x1
+- Go to abandoned office x1
+- Service Cabinet x1, locked
 
-The **Deep Tunnels** has its own search deck, separate from both the Tunnels and Abandoned Office decks. For now, it contains **one `Flashlight` card plus 9 blank placeholder cards**. The Flashlight is a decided part of the eventual Deep Tunnels search content; the remaining nine cards are temporary scaffolding until the room's real composition is designed.
+Detailed behavior is also recorded in `docs/explore-deck.md`.
 
-The blank cards are temporary implementation scaffolding rather than final game content. Their real compositions remain open and should be designed later.
+**Abandoned Office** currently has 10 explicit Placeholder entries. They are implementation scaffolding, not designed content.
 
-The exact labels of the Abandoned Office and Deep Tunnels search decks have not yet been decided.
+**Deep Tunnels** currently has:
 
-The exact authored level-data syntax for rooms, backgrounds, exits, destination references, room-local card state, and deck definitions should follow the existing low-boilerplate text-data direction and be fixed when the first navigable rooms are implemented.
+- Flashlight x1;
+- Placeholder x9.
+
+The Flashlight is a decided useful find in Deep Tunnels. The other nine entries are temporary scaffolding.
+
+### Authored room data
+
+Milestone 2 introduces `data/rooms.txt` as the authored world/room source of truth.
+
+Its current small syntax covers:
+
+- initial room;
+- room background and light condition;
+- opening take limit/escape destination;
+- Nadir starting state cards;
+- equipped starting cards;
+- offered opening cards;
+- room-local cards;
+- Search decks and ordered authored contents before shuffle;
+- instance Markers/Values;
+- travel destinations and durations.
+
+Do not hard-code this room graph or these deck compositions in React/TypeScript. The format should grow only when a concrete level-design need requires it.
+
+## OPEN
+
+Still open beyond Milestone 2:
+
+- final narrative name/identity and revisit behavior of the opening room;
+- real Abandoned Office and Deep Tunnels search compositions beyond currently decided content;
+- future deck behavior after exhaustion;
+- day/night changes in Abandoned Office;
+- additional rooms and routes;
+- future mechanics for the currently inert Pipe, Squatter, Puddle of Water, Service Cabinet, and Placeholder content.
