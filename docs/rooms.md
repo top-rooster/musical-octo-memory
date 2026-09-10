@@ -45,6 +45,19 @@ The **Deep Tunnels** contains an Anchored travel card back to **Tunnels**. Dragg
 
 For these links, the return trip therefore uses the same travel time as the outbound trip.
 
+### Deep Tunnels gameplay role
+
+Deep Tunnels are intentionally difficult to use without preparation because they currently have the `Twilight` room-light condition (`Vision -3`). They are not hard-gated by possession of a Flashlight.
+
+A player who skipped both `Glasses` and `Flashlight` during the opening evacuation can still enter Deep Tunnels, but Nadir's effective Vision is only 1 there under normal conditions. Travel and searching therefore become much slower and most work is unavailable.
+
+This is a soft gate rather than a lock. The player has at least two recovery paths:
+
+- craft a `Torch` to gain `Vision +1`;
+- find a `Flashlight` by searching in Deep Tunnels itself.
+
+The latter is intentionally self-rescuing: the first searches may be costly, but finding the Flashlight can make later Deep Tunnels trips substantially more practical.
+
 ### World existence and discovery
 
 Persistent world rooms exist from the beginning of a new game whether or not Nadir has discovered a route to them yet.
@@ -117,9 +130,9 @@ The **Tunnels** room contains the currently defined `Explore` deck. Detailed rul
 
 The **Abandoned Office** has its own search deck, separate from the Tunnels deck. For now, it contains **10 blank placeholder cards** so the room and search mechanics can be implemented before its actual contents are designed.
 
-The **Deep Tunnels** has its own search deck, separate from both the Tunnels and Abandoned Office decks. For now, it also contains **10 blank placeholder cards**.
+The **Deep Tunnels** has its own search deck, separate from both the Tunnels and Abandoned Office decks. For now, it contains **one `Flashlight` card plus 9 blank placeholder cards**. The Flashlight is a decided part of the eventual Deep Tunnels search content; the remaining nine cards are temporary scaffolding until the room's real composition is designed.
 
-Those blank cards are temporary implementation scaffolding rather than final game content. Their real compositions remain open and should be designed later.
+The blank cards are temporary implementation scaffolding rather than final game content. Their real compositions remain open and should be designed later.
 
 The exact labels of the Abandoned Office and Deep Tunnels search decks have not yet been decided.
 
