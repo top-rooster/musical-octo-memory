@@ -14,6 +14,20 @@ While a card is being dragged, the interface should communicate both potential i
 
 The hover state therefore overrides the ordinary legal-target presentation for the card currently underneath the dragged card.
 
+### Known effect previews
+
+As soon as a card starts being dragged, every legal accepting target should show any known direct attribute changes that would result from that source/target interaction. The player should not need to hover the dragged card over the target before seeing the preview.
+
+The preview belongs on or immediately adjacent to the affected attribute on the accepting card. Examples include:
+
+- dragging Rat Meat while Body has `Satiation 67` shows `67 → 82` on Body immediately;
+- dragging Canned Food while Body has `Satiation 67` shows `67 → 92` on Body immediately;
+- dragging a water source for a known hydration interaction may show `Hydration 50 → 75` on the accepting card immediately.
+
+This applies only to consequences that Nadir/the player currently understands. Knowledge-dependent uncertainty and undiscovered consequences remain governed by the broader preview rules in `docs/game-design.md`.
+
+Hovering a legal target changes its target-state highlight to yellow, but does not control whether its known stat preview is visible.
+
 ### Zone state
 
 The Room or Inventory background receives a **subtle zone highlight** when releasing the currently dragged card at its current position would be accepted as ordinary placement in that zone.
@@ -34,6 +48,7 @@ If the dragged card is currently over another card, the card-under-pointer feedb
 ### Intended visual language
 
 - normal legal-target highlight: this card *can* accept the dragged card;
+- known stat preview on a legal target: this is the understood direct effect if that interaction is committed;
 - yellow hovered target: releasing *here now* will commit the interaction;
 - subtle zone highlight: releasing *here now* will place the card in this zone;
 - red hovered card: releasing *here now* is not accepted by the card below.
