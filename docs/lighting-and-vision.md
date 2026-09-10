@@ -81,6 +81,14 @@ In **Darkness** (`Vision -4`):
 - flashlight or Torch only: effective Vision 1;
 - glasses plus flashlight or Torch: effective Vision 2.
 
+### Deep Tunnels are soft-gated by Vision
+
+A Flashlight is **not an absolute requirement** for entering or travelling to Deep Tunnels.
+
+Deep Tunnels are instead soft-gated by the normal Vision rules. Nadir may go there without a Flashlight or Torch, but at his unmodified effective Vision of 1 he is severely constrained: travel takes 2x normal time, searching takes 3x normal time, and he cannot perform low-light, normal-light, or precision tasks.
+
+The intent is that entering Deep Tunnels without preparing for the lighting conditions remains technically possible but may be practically useless. Glasses, a Flashlight, a Torch, or combinations of these improve the situation through the same general Vision system rather than through a special item requirement.
+
 ### Task light requirements
 
 Every task has one light requirement:
