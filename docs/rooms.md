@@ -45,6 +45,14 @@ The **Deep Tunnels** contains an Anchored travel card back to **Tunnels**. Dragg
 
 For these links, the return trip therefore uses the same travel time as the outbound trip.
 
+### Room backgrounds
+
+Each room has its own background image.
+
+The background belongs to the room itself and changes when the active room changes. It provides place identity and atmosphere only; mechanically meaningful state remains represented by cards rather than being encoded into the background image.
+
+Safe Room, Tunnels, Abandoned Office, and Deep Tunnels therefore each have their own room background.
+
 ### Room-local cards
 
 Cards in the Room zone belong to the current room. They do not follow Nadir when he changes rooms.
@@ -68,16 +76,16 @@ Rooms are off-screen, not paused. Processes continue to progress according to el
 
 For example, spoilage or another unattended Process may continue while Nadir is in Tunnels and may have changed or completed before he returns to Safe Room.
 
-### Explore deck in Tunnels
+### Search decks
 
-The **Tunnels** room contains a deck of cards labeled:
+Search decks are room-local. They stay with their room and do not follow Nadir.
 
-`Explore`
+The **Tunnels** room contains the currently defined `Explore` deck. Detailed rules and current composition for that deck are recorded in `docs/explore-deck.md`.
 
-The Explore deck is a room-local interactive deck rather than an ordinary loose card. When the player clicks the Explore deck, one card is drawn from it.
+The **Abandoned Office** has its own search deck, separate from the Tunnels deck.
 
-Drawing from the deck must be presented with a visible **card draw animation** so the result feels like a physical card being drawn rather than a card simply appearing instantaneously.
+The **Deep Tunnels** has its own search deck, separate from both the Tunnels and Abandoned Office decks.
 
-Detailed Explore-deck rules and current composition are recorded in `docs/explore-deck.md`.
+Their exact labels, card compositions, and any room-specific search rules have not yet been decided. Do not infer that they necessarily contain the same cards as Tunnels.
 
-The exact authored level-data syntax for rooms, exits, destination references, room-local card state, and deck definitions should follow the existing low-boilerplate text-data direction and be fixed when the first navigable rooms are implemented.
+The exact authored level-data syntax for rooms, backgrounds, exits, destination references, room-local card state, and deck definitions should follow the existing low-boilerplate text-data direction and be fixed when the first navigable rooms are implemented.
