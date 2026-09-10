@@ -48,7 +48,16 @@ For now, the Tunnels Explore deck contains exactly:
 - `Go to abandoned office` ×1
 - `Service Cabinet` ×1, starting locked
 
-This list defines the current deck contents only. The individual mechanics of `Pipe`, `Squatter`, `Puddle of Water`, `Go to deep tunnels`, `Go to abandoned office`, and `Service Cabinet` remain to be designed explicitly rather than inferred from their names.
+### Travel cards revealed by Explore
+
+`Go to abandoned office` and `Go to deep tunnels` are persistent navigation cards once drawn. They remain in Tunnels rather than being consumed when used.
+
+All travel/navigation cards are `Anchored` to their home room.
+
+- `Go to abandoned office` accepts Nadir's **Body** and commits a **15-minute Action** that moves Nadir to **Abandoned Office**.
+- `Go to deep tunnels` accepts Nadir's **Body** and commits a **30-minute Action** that moves Nadir to **Deep Tunnels**.
+
+The remaining mechanics of `Pipe`, `Squatter`, `Puddle of Water`, and `Service Cabinet` are still to be designed explicitly rather than inferred from their names.
 
 ## OPEN
 
