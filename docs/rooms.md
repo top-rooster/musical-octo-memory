@@ -4,31 +4,31 @@ This document records the current decided room model for Safe Room.
 
 ## DECIDED BY SIMON
 
-Nadir starts in the room named **Safe Room**.
+### Opening and starting state
 
-The generic room currently shown by the prototype should be treated as that Safe Room rather than as an abstract unnamed room.
+The game opens with a short **evacuation interlude** in an initial room rather than beginning with Nadir already established in a permanent Safe Room/base.
+
+The immediate premise of the interlude is that **the authorities are coming and Nadir has to leave**. Before escaping, the player can choose a few available things to take by dragging those cards into Inventory. This acts as the player's starting-loadout choice rather than giving every new game the same fixed starting equipment.
+
+After the interlude, Nadir escapes into **Tunnels**. The main survival/exploration game begins there.
+
+Nadir therefore starts the main game without an established base of operations. One of the early play experiences is finding somewhere suitable and gradually establishing a base rather than receiving a prebuilt Safe Room at the beginning.
+
+The exact name and contents of the opening room, exactly how many items the player may take, how the urgency of the escape is presented, and whether that opening room can ever be revisited are still open.
+
+This supersedes the earlier assumption that `Safe Room` is Nadir's permanent starting base with a normal two-way 15-minute connection to Tunnels.
 
 Rooms are navigable locations. Passage/exit points are represented as ordinary interactable cards in the Room zone, consistent with the universal card-on-card interaction language.
 
 All travel/navigation cards are `Anchored` to their home room. They may be interacted with by dragging Nadir's **Body** onto them, but they cannot be carried away or permanently moved into another zone.
 
-The Safe Room contains a navigation card titled:
-
-`To the tunnels`
-
-Dragging Nadir's **Body** card onto `To the tunnels` commits a **15-minute Action** that moves Nadir from **Safe Room** to **Tunnels**.
-
-Because traversal is an Action, those minutes advance game time and all active Processes update from that elapsed time under the normal Action rules.
+Because traversal is an Action, travel time advances game time and all active Processes update from that elapsed time under the normal Action rules.
 
 ### Tunnels navigation
 
-The **Tunnels** room contains a navigation card titled:
+**Tunnels** is the starting room for the main survival/exploration phase after the evacuation interlude.
 
-`To the safe room`
-
-Dragging Nadir's **Body** card onto `To the safe room` commits a **15-minute Action** and returns Nadir to **Safe Room**.
-
-The Tunnels Explore deck can also reveal two additional travel cards. Once drawn, they remain as persistent room-local navigation cards in Tunnels:
+The Tunnels search deck can reveal two additional travel cards. Once drawn, they remain as persistent room-local navigation cards in Tunnels:
 
 - `Go to abandoned office` — dragging Body onto it commits a **15-minute Action** and moves Nadir to **Abandoned Office**.
 - `Go to deep tunnels` — dragging Body onto it commits a **30-minute Action** and moves Nadir to **Deep Tunnels**.
@@ -47,11 +47,13 @@ For these links, the return trip therefore uses the same travel time as the outb
 
 ### World existence and discovery
 
-Rooms exist from the beginning of a new game whether or not Nadir has discovered a route to them yet.
+Persistent world rooms exist from the beginning of a new game whether or not Nadir has discovered a route to them yet.
 
 Discovery controls access and what travel options become visible to the player. It does not create, instantiate, or activate the destination room.
 
-Safe Room, Tunnels, Abandoned Office, and Deep Tunnels therefore all exist from game start. Their room-local state can exist and evolve before Nadir first gains access to them, subject to the normal rules for off-screen room state and Processes.
+Tunnels, Abandoned Office, and Deep Tunnels therefore all exist from game start. Their room-local state can exist and evolve before Nadir first gains access to them, subject to the normal rules for off-screen room state and Processes.
+
+The opening evacuation room is a special introductory location. Whether it remains part of the persistent world after Nadir escapes is still open.
 
 ### Room backgrounds
 
@@ -59,30 +61,30 @@ Each room has its own background image.
 
 The background belongs to the room itself and changes when the active room changes. It provides place identity and atmosphere only; mechanically meaningful state remains represented by cards rather than being encoded into the background image.
 
-Safe Room, Tunnels, Abandoned Office, and Deep Tunnels therefore each have their own room background.
+Tunnels, Abandoned Office, Deep Tunnels, and the opening room therefore each have their own room background.
 
 ### Room-local cards
 
 Cards in the Room zone belong to the current room. They do not follow Nadir when he changes rooms.
 
-When Nadir leaves Safe Room:
+When Nadir changes room:
 
-- the Safe Room's Room-zone cards remain associated with Safe Room;
+- the current room's Room-zone cards remain associated with that room;
 - those cards are no longer displayed as the active Room contents;
-- the cards belonging to Tunnels replace them in the Room zone;
+- the destination room's cards replace them in the Room zone;
 - Inventory remains persistent and visible across the room change.
 
 Changing rooms therefore swaps the active Room-zone card set rather than transferring the existing Room cards into the destination room.
 
 ### Persistent off-screen room state
 
-A room preserves the exact state of its cards while Nadir is elsewhere.
+A persistent room preserves the exact state of its cards while Nadir is elsewhere.
 
-This includes each card's identity, current Markers and Values, relationships, and exact position within that room. Leaving a room does not reset or respawn its contents, and returning to it restores the room visually with the cards where the player left them, subject to any state changes that occurred while away.
+This includes each card's identity, current Markers and Values, relationships, and exact position within that room. Leaving a persistent room does not reset or respawn its contents, and returning to it restores the room visually with the cards where the player left them, subject to any state changes that occurred while away.
 
-Rooms are off-screen, not paused. Processes continue to progress according to elapsed game time even when Nadir is not present in the room. If Actions performed elsewhere advance game time, Processes in inactive rooms receive that elapsed time under the same Process rules as Processes in the current room.
+Persistent rooms are off-screen, not paused. Processes continue to progress according to elapsed game time even when Nadir is not present in the room. If Actions performed elsewhere advance game time, Processes in inactive persistent rooms receive that elapsed time under the same Process rules as Processes in the current room.
 
-For example, spoilage or another unattended Process may continue while Nadir is in Tunnels and may have changed or completed before he returns to Safe Room.
+For example, spoilage or another unattended Process may continue while Nadir is elsewhere and may have changed or completed before he returns.
 
 ### Search decks
 
