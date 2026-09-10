@@ -14,14 +14,23 @@ The draw must use a visible card-draw animation so the new card is presented as 
 
 The Explore deck belongs to the Tunnels room. It is not part of Inventory and does not follow Nadir to another room.
 
+### Depletion
+
+The Explore deck is finite and depletable.
+
+For now, the Tunnels Explore deck starts with **10 cards**.
+
+Each successful Explore draw removes exactly one card from the deck. A drawn card does not automatically return to the deck and the deck does not automatically refill or reshuffle.
+
+The exact composition and order of those ten cards remain separate design decisions.
+
 ## OPEN
 
 The following details are not yet decided:
 
-- the exact cards that can be drawn from Explore;
+- the exact ten cards that can be drawn from Explore;
 - whether draw order is random, weighted, or fixed;
 - where the drawn card is initially placed in the room;
-- whether drawn cards are removed permanently from the deck;
-- whether cards can ever return to the deck;
+- whether an explicit future rule can ever return a drawn card to the deck;
 - what happens when the deck is exhausted;
 - the exact animation timing and visual treatment.
