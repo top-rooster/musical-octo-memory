@@ -19,12 +19,18 @@ Dragging takes precedence over inspection. Starting a drag hides/suppresses the 
 
 The textbox should be positioned so it remains readable and does not run outside the visible viewport.
 
-## DATA DIRECTION — SUGGESTED BY CHATGPT, NOT YET DECIDED BY SIMON
+### Description authoring
 
-A useful authoring direction is:
+Card descriptions are authored in `data/cards.txt` as part of the card master definition.
 
-- card descriptions live with card master data;
-- an attribute explanation is authored once per attribute and reused wherever that attribute appears;
-- explanatory prose remains data-driven rather than hard-coded in React components.
+A card description is optional in authored data. If a card has no description, hovering the card must still show the inspection textbox, and its card-description section displays exactly:
 
-This avoids duplicating the same explanation for attributes such as `Anchored`, `Hydration`, `Satiation`, `Cutting Tool`, or `Contains-Water` across every card that uses them.
+`missing description`
+
+The absence of a description must therefore never suppress the inspection textbox.
+
+### Attribute descriptions
+
+Attribute explanatory text is defined centrally as a **master description for each attribute** and reused on every card carrying that attribute. The same `Hydration`, `Anchored`, `Satiation`, `Cutting Tool`, etc. explanation should not be copied into individual card definitions.
+
+The exact text-file layout/name for the attribute-description master data is not fixed by this decision. It should remain part of the authored text-data system rather than being hard-coded into React presentation components.
