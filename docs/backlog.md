@@ -26,10 +26,7 @@ Normally discuss only the single highest-priority open decision.
 
 # Current decision queue
 
-1. **PREVIEW-01 [P2]** - How much should be shown when several known attributes change?
-2. **TARGET-01 [P2]** - Should highlights differ by interaction type?
-3. **TARGET-02 [P2]** - Should dangerous legal interactions use the normal target highlight?
-4. **SURV-01 [P2]** - Are there other permanent survival pressures beyond Hydration and Satiation?
+1. **SURV-01 [P2]** - Are there other permanent survival pressures beyond Hydration and Satiation?
 
 ---
 
@@ -273,7 +270,7 @@ A `Process` is unattended work/change that continues while Nadir spends game tim
 
 A `Connection` is a persistent mechanically meaningful relationship. It begins immediately, lasts until the player separates the cards, and relationship-dependent effects disappear when it is broken.
 
-Example: a machine connected to a power outlet gains `Powered`; disconnecting removes it. One outlet can power only one card at a time.
+Example: a machine connected to a power outlet gives the machine the `Powered` Marker. Disconnecting removes `Powered`. One outlet can power only one card at a time.
 
 `Action` is a separate card-on-card interaction type, not a persistent stacking form; see ACTION-D01.
 
@@ -309,7 +306,7 @@ Starting or existing as a Process does not itself advance game time. A Process a
 
 A Process does not have to be a multi-card stack. `Dead Rat` spoilage, `Flesh Wound`, `Burn Wound`, `Fever`, and Body's Hydration loss are confirmed single-card Processes.
 
-Concrete multi-card examples include putting `Rat Meat` on a lit camp fire to start cooking, and combining an appropriate heat-source card, a water-filled container, and non-sterilized fabric to sterilize the fabric. These Processes continue unattended as Nadir performs Actions that advance game time.
+Concrete multi-card examples include putting `Rat Meat` on a lit camp fire to start cooking, and combining an appropriate heat-source card, a water-filled container, and non-sterilized `Fabric` to sterilize the fabric. These Processes continue unattended as Nadir performs Actions that advance game time.
 
 ## PROCESS-D03 - Process progress labels are UI names over the same mechanic
 **Status:** DECIDED BY SIMON
@@ -329,174 +326,29 @@ Sterilizing fabric by boiling is a **Process**, not an Action.
 
 The Process requires three participating cards:
 
-1. a `Campfire` or another card carrying the appropriate heat-source Marker;
-2. a card carrying `Contains-Water`;
-3. a card carrying `Fabric` that does not already have `Sterilized`.
+1. a `Campfire` or another card carrying the appropriate heat-source Marker,
+2. a card carrying `Contains-Water`,
+3. a card carrying `Fabric` without `Sterilized`.
 
-The exact player-facing name of the heat-source Marker is not yet fixed. `Campfire` is one confirmed qualifying card.
-
-The Process requires **one hour of elapsed game time**. Because only Actions advance game time, sterilization progresses as Nadir performs Actions elsewhere; starting or existing as the Process does not itself advance time.
-
-When the Process completes after one hour:
-
-- the water-containing card loses `Contains-Water`;
-- the fabric gains the `Sterilized` Marker;
-- both remain the same card identities.
-
-No partial liquid-volume system is implied by this rule.
-
-## ACTION-D01 - Nadir-involved work is an Action
-**Status:** DECIDED BY SIMON
-
-Work that requires Nadir's personal involvement is called an **Action**, not a Process.
-
-An Action is initiated through the same universal card-on-card interaction language, but it does not remain as an ongoing card stack.
-
-**Actions are the only mechanism that advances game time.** If something is intended to consume game time, it must be represented as an Action. Instant Actions still explicitly state `0m`.
-
-When an Action is committed:
-
-1. an Action window opens,
-2. the window shows the Action and its participating cards,
-3. the window animation represents the Action's duration,
-4. the corresponding amount of game time advances,
-5. all active Processes update from that elapsed game time,
-6. the Action completes when the window animation terminates,
-7. its Action-specific completion result is applied.
-
-Actions do **not** use a Process progress attribute. The Action window itself communicates the ongoing completion/time passage.
-
-The presence of a Nadir card is not required for something to be an Action. `Skinning` is an Action because Nadir personally performs the work even though the initiating cards are a cutting tool and a dead rat.
-
-## ACTION-D02 - Skinning example
-**Status:** DECIDED BY SIMON
-
-Concrete Action example - skinning a dead rat:
-
-1. `Dead Rat` accepts a source card carrying the `Cutting Tool` Marker as the starter for its `Skin` Action.
-2. Dragging a cutting tool such as a knife onto `Dead Rat` exposes `Skin` on the rat card.
-3. Dropping the cutting tool commits the Action.
-4. A window appears showing `Skinning` and the two participating cards: the cutting tool and the dead rat.
-5. The Action represents **15 minutes** of game time.
-6. When the Action window animation terminates, the cutting tool returns to where it came from.
-7. The `Dead Rat` is discarded.
-8. A `Rat Skin` card and a `Rat Meat` card are drawn/created as the Action outputs.
-
-A knife is one concrete `Cutting Tool` and has a `Durability` Value. The exact effect of Skinning on Durability has not yet been fixed.
-
-The 15-minute duration and outputs belong to this Action; other Actions can have different durations and results.
-
-## ACTION-D03 - Action completion is Action-specific
-**Status:** DECIDED BY SIMON
-
-There is no single universal Action completion transformation. An Action can return tools, discard inputs, draw output cards, change attributes, or combine those effects.
-
-`Skinning` is the confirmed example.
-
-## PROCESS-D02 - Process completion is Process-specific
-**Status:** DECIDED BY SIMON
-
-There is no single universal Process completion transformation. Each Process defines its own result when its progress reaches the completion state.
-
-A Process may discard cards, draw replacement/output cards, change attributes, separate its participants, or combine such results.
-
-Confirmed examples include:
-
-- at `Spoilage 100`, `Dead Rat` is discarded and `Rotten Meat` is drawn at the same location;
-- fabric sterilization removes `Contains-Water` from its water card and adds `Sterilized` to the fabric after one hour;
-- `Flesh Wound`, `Burn Wound`, and `Fever` are discarded when their recovery/healing progress reaches 100.
-
-## STACK-D03 - Dragging from a Stack peels off one card
-**Status:** DECIDED BY SIMON
-
-Dragging a Stack separates its top card as an individual card.
-
-- Stack 3 -> dragged card + Stack 2.
-- Stack 2 -> dragged card + ordinary card.
-- Count 1 is never presented as a Stack.
-
-The Stack count is presentation, not currently a normal card `Value` attribute.
-
-## STACK-D04 - Stack members must be identical now
-**Status:** DECIDED BY SIMON
-
-Cards can share a `Stack` only when they come from the same master definition and have identical current attributes: same Marker set, same Values, same Value numbers.
-
-## STACK-D05 - No Stacks in Inventory
-**Status:** DECIDED BY SIMON
-
-`Stack` presentation is not used in the Inventory zone.
-
-Identical cards carried in Inventory remain separate visible card instances. Each non-anchored instance therefore counts separately against the provisional five-card Inventory capacity.
-
-With the current two-zone model, Stack presentation is confined to Room.
-
-## STACK-05 - Anchored participant in an ongoing Process
-**Status:** DEFERRED
-**Priority:** P3
-
-If a future unattended Process needs an `Anchored` participant whose home is another zone, decide how that ongoing relationship is presented. There is no current concrete requirement; Nadir-performed work is now an Action and resolves in its window rather than remaining as an ongoing Process.
+The Process takes **1 hour** of elapsed game time created by Actions. On completion, the water card loses `Contains-Water` and the fabric gains `Sterilized`.
 
 ---
 
-# Card-on-card interaction
+# Universal interaction model
 
-## CORE-D04 - Eating
+## INTERACT-D01 - Every gameplay interaction is card-on-card
 **Status:** DECIDED BY SIMON
 
-Anything Nadir can eat or otherwise ingest must carry a visible Marker identifying it as ingestible. The exact final user-facing name of this Marker is not yet fixed.
+Every gameplay interaction is initiated by putting one card on top of another card.
 
-Eating uses **Body** as the receiving card. The ingestion Marker is what tells the interaction algorithm that the source can legally be dropped onto Body for ingestion. Authored interaction data should name `Body` as the receiver where needed; `Rotten Meat` currently uses `eat Body`.
+An interaction always has a dragged **source** card and a receiving **target** card.
 
-## FOOD-D01 - Dead Rat spoils into Rotten Meat
+Bare zone space can receive a card for ordinary movement/placement, but that is movement rather than a gameplay interaction.
+
+## INTERACT-D02 - At most one interaction per source/target pair
 **Status:** DECIDED BY SIMON
 
-`Dead Rat` is a single-card Process whose visible progress Value is named `Spoilage`.
-
-Spoilage increases as Actions advance game time. At `Spoilage 100`:
-
-1. discard the `Dead Rat` card;
-2. draw a `Rotten Meat` card;
-3. place the Rotten Meat at exactly the same location the Dead Rat occupied.
-
-The exact rate/formula for Spoilage growth is not yet fixed.
-
-## FOOD-D02 - Rotten Meat remains edible but has penalties
-**Status:** DECIDED BY SIMON
-
-`Rotten Meat` remains ingestible and therefore carries the ingestion Marker.
-
-If Nadir eats Rotten Meat by dropping it onto **Body**:
-
-- the Rotten Meat is consumed;
-- a mood debuff is applied to Nadir;
-- one `Fever` card is created.
-
-The exact representation, magnitude, and duration of the mood debuff are not yet decided.
-
-## FOOD-D03 - First prototype foods and Satiation effects
-**Status:** DECIDED BY SIMON
-
-The two ingestible food cards used to validate the first prototype's Satiation interaction are:
-
-- `Rat Meat` — eating it applies `Satiation +15` to Body;
-- `Canned Food` — eating it applies `Satiation +25` to Body.
-
-Both are consumed after eating. Their different effects are used to validate exact pre-drop Satiation previews.
-
-## INTERACT-D01 - All interactions are card-on-card
-**Status:** DECIDED BY SIMON
-
-Every gameplay interaction is initiated by putting one card on top of another card. An interaction always has a dragged source card and a target card.
-
-Moving a card within or between zones is movement rather than interaction. Bare zone space can receive a card for legal movement but is not an interaction target.
-
-An interaction may resolve immediately, start an **Action**, create/change a Stack, start/alter a Process, create/change a Connection, draw cards, discard cards, or change attributes.
-
-## INTERACT-D02 - At most one interaction per card pair
-**Status:** DECIDED BY SIMON
-
-A given source-card/target-card pair can support **at most one interaction**.
+A given source-card/target-card pair supports at most one interaction.
 
 If the pair is legal, there is a single interaction to perform. The game never needs to ask the player to choose between multiple Actions, Processes, Connections, or other outcomes for the same dragged source and receiving target.
 
@@ -599,34 +451,37 @@ Do not normally expose the underlying percentage or numerical odds. Coarse label
 
 The exact user-facing vocabulary is provisional and not locked. Revisit after UI testing if needed.
 
+## PREVIEW-D04 - Multiple known direct changes are shown simultaneously
+**Status:** DECIDED BY SIMON
+
+When dragging a source would cause several known direct attribute changes, show all of those known changes simultaneously on the affected cards/attributes. Do not collapse them to one representative change or require hovering a particular target to reveal additional known direct effects.
+
 ## TARGET-D01 - Legal interaction targets highlight
 **Status:** DECIDED BY SIMON
 
 While dragging, every card that can legally receive it as an interaction target highlights. Legal movement destinations may use a placement affordance but are not interaction targets.
 
-## PREVIEW-01 - Multiple affected attributes
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
+## TARGET-D02 - One common legality language, with Stack exception
+**Status:** DECIDED BY SIMON
 
-How much should be shown when several known attributes change?
+Use one common target-highlight language across Actions, Processes, Connections, consumption, repair, and other mechanically meaningful interactions. Do not use separate target colors merely to identify interaction type.
+
+A legal target is green while available and yellow when the dragged card is currently over it and release would commit the interaction.
+
+**Stack is the exception:** a legal Stack target remains green even while hovered/release-ready, because Stack has no gameplay consequence beyond visual compression.
+
+## TARGET-D03 - Dangerous legal interactions keep normal legality colors
+**Status:** DECIDED BY SIMON
+
+Danger does not alter the green/yellow legality language. A dangerous interaction that is legal still uses the normal legal-target highlight and yellow release-to-commit state.
+
+Known danger, uncertainty, or risk is communicated separately through previews, warnings, or risk presentation. Target color answers whether the interaction is valid, not whether it is safe.
 
 ## PREVIEW-04 - Long-term deterministic consequences
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P3
 
 Preview only immediate understood effects or also known longer-term effects?
-
-## TARGET-01 - Different highlights by interaction type
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-One validity language or different visuals for Action/Process/consume/repair/etc.?
-
-## TARGET-02 - Dangerous but legal interactions
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Should dangerous legal interactions use the normal legal-target highlight, with danger communicated separately?
 
 ## TARGET-03 - Inaccessible interactions
 **Status:** OPEN - SIMON TO DECIDE
@@ -648,6 +503,12 @@ Test visually.
 **Status:** DECIDED BY SIMON
 
 Nadir's representation is part of the persistent **Inventory** zone. There is no separate Nadir zone.
+
+For now, his persistent representation is divided across three cards:
+
+- **Body** - physical state,
+- **Mind** - cognitive / will state,
+- **Spirit** - emotional / spiritual state.
 
 ## NADIR-D02 - Character state uses card attributes
 **Status:** DECIDED BY SIMON
@@ -760,334 +621,27 @@ Once a wound gains `Dressed`, it keeps that Marker until the wound card itself i
 ## WOUND-D03 - Contains-Water cleans wounds; Fabric+Sterilized dresses them
 **Status:** DECIDED BY SIMON
 
-Treatment inputs are attribute/card driven:
+A source card carrying `Contains-Water` can clean a wound. A source carrying both `Fabric` and `Sterilized` can dress it.
 
-- A source card carrying `Contains-Water` can be used to clean a wound, reducing its `Infection` Value by **40**, to a minimum of 0, and losing `Contains-Water` on completion.
-- A source card must carry both `Fabric` and `Sterilized` to dress a wound. Dressing gives the wound its `Dressed` Marker and consumes the source fabric card.
-- Fabric is sterilized by a boiling Process requiring an appropriate heat source, a card with `Contains-Water`, and a `Fabric` card without `Sterilized`. After one hour of elapsed game time, the water card loses `Contains-Water` and the fabric gains `Sterilized`.
+Cleaning is a 15-minute Action, reduces Infection by 40 to a minimum of 0, and removes `Contains-Water` from the source card.
 
-## WOUND-D04 - Cleaning and dressing wounds are 15-minute Actions
+Dressing is a 15-minute Action, consumes the fabric source card, and adds `Dressed` to the wound.
+
+## SURV-D01 - Hydration and Satiation are permanent Body survival Values
 **Status:** DECIDED BY SIMON
 
-Both confirmed wound-treatment interactions require Nadir's time and use the normal **Action** model:
-
-- `action Contains-Water Clean 15m`
-- `action Fabric+Sterilized Dress 15m`
-
-Dropping the source onto the wound commits the Action. The Action window runs, 15 minutes of game time advances, and active Processes respond to that elapsed time.
-
-Partial liquid/container amounts are deferred and are not required by the current design.
-
-## WOUND-D05 - Wounds start at Infection 50; cleaning reduces by 40
-**Status:** DECIDED BY SIMON
-
-A newly created `Flesh Wound` or `Burn Wound` starts at `Infection 50`.
-
-Completing the 15-minute wound-cleaning Action reduces that wound's `Infection` Value by **40**, clamped at the default minimum 0. A fresh wound therefore becomes `Infection 10` after one cleaning.
-
-## WOUND-D06 - Dressed is permanent; sterilized fabric is required
-**Status:** DECIDED BY SIMON
-
-Once a wound has the `Dressed` Marker, it never loses that Marker during the lifetime of that wound card. The Marker disappears only because the wound card itself is discarded.
-
-A fabric card must have both `Fabric` and `Sterilized` to be usable as wound dressing.
-
-## WOUND-D07 - Boiling sterilizes fabric through a one-hour Process
-**Status:** DECIDED BY SIMON
-
-Boiling fabric is a **Process** requiring:
-
-- a `Campfire`, or another card carrying the appropriate heat-source Marker;
-- a card carrying `Contains-Water`;
-- a `Fabric` card that does not already carry `Sterilized`.
-
-The Process takes **one hour of elapsed game time**. It progresses only as Actions advance game time.
-
-When the hour completes:
-
-- the water card loses `Contains-Water`;
-- the fabric remains the same card and gains the `Sterilized` Marker.
-
-The exact name of the heat-source Marker is still open; no specific Marker name should be inferred yet.
-
-## WOUND-D08 - Flesh Wound healing rate depends on Infection
-**Status:** DECIDED BY SIMON
-
-`Flesh Wound` evaluates its healing Process every **15 minutes** of elapsed game time.
-
-Current authored bands:
-
-- `if Infection 0..24 progress +2`
-- `if Infection 25..49 progress +1`
-- `if Infection 50..74 progress +0`
-- `if Infection 75..100 progress -1`
-
-## BURN-D01 - Burn Wounds accelerate Hydration loss
-**Status:** DECIDED BY SIMON
-
-A `Burn Wound` carries a Value/effect whose purpose is to accelerate the rate at which Body loses `Hydration` as Actions advance game time.
-
-Hydration itself is now a confirmed Body Value. The exact burn Value name/scale and acceleration formula remain open.
-
-## FEVER-D01 - Three Fever cards kill Nadir
-**Status:** DECIDED BY SIMON
-
-`Fever` is a temporary condition card applying to Nadir. If Nadir accumulates **three Fever cards**, he dies.
-
-This establishes Fever accumulation as a lethal escalation path from unmanaged wound Infection or other effects such as eating Rotten Meat.
-
-## FEVER-D02 - Fever recovers over time or can be removed with water
-**Status:** DECIDED BY SIMON
-
-`Fever` is a single-card Process that recovers as Actions advance game time and is discarded when its process progress reaches 100.
-
-A source card carrying `Contains-Water` can be dragged onto a Fever card. That interaction:
-
-- discards the targeted Fever card;
-- removes `Contains-Water` from the source card;
-- does not itself advance game time unless it is later redesigned as an Action.
-
-The exact Fever recovery rate and the exact player-facing name of Fever's process progress are not yet decided.
-
-## NADIR-D08 - All injuries are Processes for now
-**Status:** DECIDED BY SIMON
-
-For now, every injury is represented as a **Process**.
-
-`Flesh Wound` and `Burn Wound` remain concrete single-card examples. Future injury types should use the Process model unless a later concrete design need causes Simon to revise this rule.
-
-This is a current design rule rather than a claim that no future exception can ever exist.
-
-## NADIR-D09 - Equipment is equipped by being in Inventory
-**Status:** DECIDED BY SIMON
-
-Equipment is represented by ordinary cards.
-
-An equipment card is considered **equipped exactly while that card instance is in Inventory**. Moving the card out of Inventory unequips it.
-
-There is no separate equipment zone, equipment-slot system, attachment relationship, or `Equipped` Marker in the current design. This does not mean every Inventory card is equipment; food, materials, containers, and other ordinary carried cards may also occupy Inventory.
-
-Any effect that depends on equipment being equipped should derive that state from the equipment card being present in Inventory.
-
-## SURV-D02 - Body survival Values and starting state
-**Status:** DECIDED BY SIMON
-
-Body carries two confirmed permanent survival Values:
+Body currently has two permanent survival Values:
 
 - `Hydration 50`
 - `Satiation 50`
 
-If either `Hydration` or `Satiation` reaches **0**, the game ends.
-
-There is no separate Body `Health` Value. Physical injury and health consequences are represented through injury/condition cards instead, avoiding a parallel health system.
-
-Body has a repeating Process evaluated every **15 minutes** of elapsed game time that applies `Hydration -2`.
-
-A `Plastic Bottle` is a `Container`. A filled bottle instance carries `Contains-Water`. Its instant `Drink` Action targets Body, requires `Contains-Water` on the bottle, adds `Hydration +25` to Body, and removes `Contains-Water` from the bottle.
-
-## SURV-D04 - Values default to 0-100
-**Status:** DECIDED BY SIMON
-
-Every Value is bounded and clamped from **0 to 100** unless Simon explicitly states a different range for that specific Value.
-
-## NADIR-04 - Mental/narrative state detail
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P3
-
-Beyond Mind and Spirit, how much mental/narrative state should be numerical, qualitative, or expressed through writing/behavior?
-
-## SURV-D01 - Keep survival complexity legible
-**Status:** DECIDED BY SIMON
-
-Aim for high decision complexity with as few exposed systems/attributes/cards as practical.
+Reaching 0 in either causes game over.
 
 ## SURV-01 - Other permanent survival pressures
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-`Hydration` and `Satiation` are now confirmed permanent Body Values. Decide later whether any additional permanent survival pressures are needed.
-
-Candidates previously raised include fatigue, temperature, illness, stress, injury, and morale. Listing them is not approval. Injury is currently represented through injury cards rather than a Body Value.
-
-## SURV-02 - Attribute versus condition card for other pressures
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-For future pressures beyond the confirmed Body Values, decide which deserve persistent Value/Marker attributes on Body, Mind, or Spirit and which should appear as temporary condition cards.
-
-## SURV-03 - Hidden survival state
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Current card attributes are never hidden. Decide whether simulation may nevertheless contain hidden state outside the card-attribute model.
-
-**Suggested by ChatGPT:** no hidden stomach/fullness system in the first food prototype.
-
-## SURV-05 - Change over time/actions
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Body loses **2 Hydration per 15 minutes** of elapsed game time. Decide the corresponding time behavior for Satiation, plus remaining modifiers such as Burn Wound acceleration.
-
----
-
-# Threat and noise
-
-## THREAT-D01 - No mandatory constant real-time pressure
-**Status:** DECIDED BY SIMON
-
-Risk should often come from player-chosen actions/exposure rather than an artificial timer.
-
-## THREAT-D02 - Noise can make productive actions dangerous
-**Status:** DECIDED BY SIMON
-
-The high-level possibility that noise can make productive actions dangerous remains part of the broader concept, but its mechanics are intentionally shelved for now.
-
-## THREAT-D03 - Search pressure requires a credible reason
-**Status:** DECIDED BY SIMON
-
-Attacks/searches do not happen merely to tax progress. Genuinely silent periods are possible.
-
-## THREAT-D04 - Nadir does not perform direct violence
-**Status:** DECIDED BY SIMON
-
-Violent defense, if present, is indirect/automated.
-
-## NOISE-01 - Mechanical representation
-**Status:** DEFERRED
-**Priority:** P3
-
-Noise mechanics are shelved until the design direction is clearer. Do not choose a representation yet.
-
-## NOISE-02 - Accumulation/decay/propagation
-**Status:** DEFERRED
-**Priority:** P3
-
-Shelved with the noise mechanic.
-
-## NOISE-03 - Risk information visible to player
-**Status:** DEFERRED
-**Priority:** P3
-
-Shelved with the noise mechanic.
-
-## NOISE-04 - Environmental masking
-**Status:** DEFERRED
-**Priority:** P3
-
-Shelved with the noise mechanic.
-
-## NOISE-05 - Persistent enemy learning
-**Status:** DEFERRED
-**Priority:** P3
-
-Shelved with the noise mechanic.
-
-## NOISE-06 - Avoid disguised danger meter
-**Status:** DEFERRED
-**Priority:** P3
-
-Shelved with the noise mechanic. Preserve the earlier concern against turning threat into an inevitable meter when noise is revisited.
-
----
-
-# Search teams and sweeps
-
-## SEARCH-D01 - Human search teams are a core threat
-**Status:** DECIDED BY SIMON
-
-## SEARCH-D02 - Direct violence is not Nadir's answer
-**Status:** DECIDED BY SIMON
-
-## SEARCH-01 - Persistent guards versus higher-level sweeps
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Individual schedules, higher-level sweep model, or hybrid?
-
-## SEARCH-02 - Learnability of schedules
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-How predictable/learnable are search routines?
-
-## SEARCH-03 - Enemy knowledge about Nadir
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-Nadir specifically, a code-named suspect, one unknown person, or potentially several?
-
-## SEARCH-04 - Persistent suspicion
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-How does suspicion/information persist between incidents?
-
-## SEARCH-05 - Partial discovery
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-What happens if searchers find evidence but not Nadir?
-
-## SEARCH-06 - Failure states
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P2
-
-What meaningful failures exist besides immediate capture/death?
-
----
-
-# Narrative
-
-## NARR-D01 - Nadir is fundamentally decent
-**Status:** DECIDED BY SIMON
-
-Military culture damaged him; it did not reveal that he was secretly ruthless.
-
-## NARR-D02 - Self-deception is a survival mechanism
-**Status:** DECIDED BY SIMON
-
-It grows from things Nadir has done, enabled, caused, or survived and should not make him appear stupid.
-
-## NARR-D03 - Nadir and Elina genuinely love each other
-**Status:** DECIDED BY SIMON
-
-The relationship is complicated by concealment, fear, and his past, not a reveal that he merely used her.
-
-## NOTES-D01 - Notes can reflect moral discomfort
-**Status:** DECIDED BY SIMON
-
-From Nadir's perspective, not as an authorial morality meter.
-
-## NOTES-01 - When notes are created
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P3
-
-Automatic after events, manually at rest, authored triggers, or combination?
-
-## NOTES-02 - Choices and what Nadir admits
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P3
-
-Can choices affect how directly he confronts fixed events from his past?
-
-## NOTES-03 - Frequency of reflection
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P3
-
-How often before it feels like commentary on every action?
-
-## NOTES-04 - Objective account versus Nadir's account
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P3
-
-Does the player ever get an objective account confirming distortions?
-
-## NOTES-05 - Fixed backstory versus interpretation
-**Status:** OPEN - SIMON TO DECIDE
-**Priority:** P3
-
-How much is objectively fixed versus left to interpretation/discovery order?
+Should Body, Mind, or Spirit have other permanent survival Values beyond Hydration and Satiation, or should other pressures mostly be represented by temporary cards/Processes?
 
 ---
 
