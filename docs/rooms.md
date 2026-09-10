@@ -93,7 +93,9 @@ All search decks are finite and depletable. Each deck has an authored finite set
 
 Every search deck is shuffled once when a new game starts. The resulting order becomes that deck's fixed hidden draw order for the entire run. Search decks are not reshuffled between draws, and drawing a card does not reroll the result. This means two new games may produce different discovery sequences while a single run remains deterministic after its initial shuffle.
 
-Each room may define its own search-deck size, contents, and label. Sharing the interaction, depletion, and shuffle rules does not imply that different rooms use the same card pool or the same number of cards.
+When the final card is drawn, the exhausted search deck is removed from its room entirely. There is no Empty deck card or placeholder for now, and the exhausted deck itself is removed with **no animation**.
+
+Each room may define its own search-deck size, contents, and label. Sharing the interaction, depletion, shuffle, and exhaustion rules does not imply that different rooms use the same card pool or the same number of cards.
 
 The **Tunnels** room contains the currently defined `Explore` deck. Detailed rules and current composition for that deck are recorded in `docs/explore-deck.md`.
 
