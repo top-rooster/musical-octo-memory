@@ -35,6 +35,16 @@ The Tunnels Explore deck can also reveal two additional travel cards. Once drawn
 
 Both cards are `Anchored` to Tunnels, consistent with the rule that all travel cards are anchored to their home room.
 
+### Return travel from discovered rooms
+
+Travel is symmetric for these first discovered rooms.
+
+The **Abandoned Office** contains an Anchored travel card back to **Tunnels**. Dragging Body onto it commits a **15-minute Action** and returns Nadir to Tunnels.
+
+The **Deep Tunnels** contains an Anchored travel card back to **Tunnels**. Dragging Body onto it commits a **30-minute Action** and returns Nadir to Tunnels.
+
+For these links, the return trip therefore uses the same travel time as the outbound trip.
+
 ### Room-local cards
 
 Cards in the Room zone belong to the current room. They do not follow Nadir when he changes rooms.
