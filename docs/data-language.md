@@ -45,6 +45,44 @@ These examples express the desired low-boilerplate style. Do not turn them into 
 
 Mutable object state should prefer Markers/Values on the same card identity where appropriate. Example: a `Plastic Bottle` remains the same card whether full or empty; it always has `Container`, and it has `Contains-Water` only while it contains water.
 
+## Card descriptions
+
+Card descriptions are authored in `data/cards.txt` as part of the card master definition.
+
+A description line begins with `>` and appears immediately after the picture path. Example:
+
+```text
+Body
+images/body.png
+> Nadir's physical condition and basic survival needs.
+Anchored
+Hydration 50
+Satiation 50
+```
+
+The description is optional. If no `>` description line is present, the card still exists normally and the hover-inspection UI displays `missing description` for the card description.
+
+The `>` marker is intentionally terse so adding a description does not require a repeated `description` key.
+
+## Attribute descriptions
+
+Shared attribute explanations are authored separately in `data/attributes.txt`.
+
+Each entry contains the attribute name on the first line and one explanatory paragraph on the following line. Blank lines separate entries. Example:
+
+```text
+Hydration
+How well hydrated Nadir is. Reaching zero is fatal.
+
+Satiation
+How well fed Nadir is. Reaching zero is fatal.
+
+Anchored
+This card belongs permanently to its home zone.
+```
+
+Each attribute has one master description reused wherever that attribute appears. Do not duplicate the same explanation inside individual card masters or hard-code attribute help text in React components.
+
 ## Interaction requirements
 
 When an Action or other interaction accepts a source based on more than one Marker, combine the required Markers with `+`.
@@ -112,6 +150,7 @@ The draft currently uses:
 - blank lines to separate card masters;
 - the card title as the first line;
 - the picture path as the second line;
+- an optional `>` description line immediately after the picture path;
 - Marker names as plain lines;
 - Values as `name integer`;
 - Values bounded to `0..100` by default unless explicitly overridden;
@@ -122,7 +161,9 @@ The draft currently uses:
 - `discard` for removing cards from play and `remove` for removing attributes from a surviving card;
 - short behavior verbs only where the data needs to express an Action, Process, input, output, condition, or state change.
 
-This file exists so the format can be judged against real Safe Room data. The syntax in `data/cards.txt` is **not yet a locked design decision**. Keep changing it if doing so removes boilerplate or ambiguity while preserving phone-friendly authoring.
+`data/attributes.txt` contains one master explanatory paragraph per attribute for hover inspection.
+
+This file exists so the format can be judged against real Safe Room data. Keep changing syntax if doing so removes boilerplate or ambiguity while preserving phone-friendly authoring, but syntax explicitly decided by Simon should not be changed silently during implementation.
 
 ## Level design
 
@@ -149,5 +190,7 @@ It currently interprets:
 - `eat Body` as a source-authored interaction target;
 - signed target Value effects such as `Satiation +15 target`;
 - `consume self` as the eating result.
+
+The current Milestone 1 parser has not yet been extended for the new `>` card-description syntax or `data/attributes.txt`; issue #5 covers that implementation work.
 
 An eating block is exposed as a Milestone 1 interaction only when its effect set is fully supported by that subset. Other authored Action, Process, condition, draw, and attribute-mutation statements remain in `data/cards.txt` but are not executed by the prototype. Malformed lines within the supported eating syntax produce a line-numbered parser error.
