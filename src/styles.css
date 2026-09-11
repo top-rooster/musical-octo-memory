@@ -226,6 +226,24 @@ button, input { font: inherit; }
   box-shadow: 0 0 0 5px rgba(224,67,63,.58), 0 8px 20px rgba(0,0,0,.42);
 }
 .card--dragging { z-index: 100; cursor: grabbing; opacity: .95; box-shadow: 0 14px 30px rgba(0,0,0,.5); }
+.card__stack-count {
+  position: absolute;
+  z-index: 2;
+  top: 4px;
+  right: 5px;
+  display: grid;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  place-items: center;
+  border-radius: 10px;
+  color: #f4f7f5;
+  background: #35413b;
+  box-shadow: 0 1px 3px rgba(0,0,0,.35);
+  font-size: 10px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
 .card__title {
   flex: 0 0 25px;
   overflow: hidden;

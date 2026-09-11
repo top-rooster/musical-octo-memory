@@ -7,10 +7,12 @@ import {
   calculateInteractionOutcome,
   canCrossZoneBoundaryDuringDrag,
   canInteract,
-  canPlaceInZone,
-  countInventoryCards,
+  canRestInZone,
+  canStackCards,
+  cardTargetKind,
   getValue,
-  resolveDrop,
+  hasMarker,
+  stackCards,
 } from "../src/game/rules";
 
 function seededRandom(seed = 123456): () => number {
@@ -94,57 +96,65 @@ describe("Milestone 1 rules", () => {
   it("restores an invalid card-on-card drop to the exact drag origin", () => {
     const ratSkin = card(state, "Rat Skin");
     const origin = { zone: ratSkin.zone, position: { ...ratSkin.position } };
-    const transient: GameState = {
-      ...state,
-      cards: state.cards.map((candidate) =>
-        candidate.id === ratSkin.id
-          ? { ...candidate, zone: "inventory", position: { x: 501.25, y: 91.75 } }
-          : candidate,
-      ),
-    };
-    const next = resolveDrop(transient, ratSkin.id, origin, {
-      kind: "card",
-      targetId: card(state, "Body").id,
-    });
+    const next = applyInteraction(state, ratSkin.id, card(state, "Body").id);
+    expect(next).toBe(state);
     expect(card(next, "Rat Skin")).toMatchObject(origin);
   });
 
   it("prevents Anchored cards from resting outside home but allows cross-zone dragging", () => {
     const body = card(state, "Body");
     expect(canCrossZoneBoundaryDuringDrag(body)).toBe(true);
-    expect(canPlaceInZone(body, "room", state.cards)).toEqual({
+    expect(canRestInZone(body, "room")).toEqual({
       legal: false,
       reason: "anchored",
     });
-    const next = resolveDrop(state, body.id, { zone: body.zone, position: body.position }, {
-      kind: "zone",
-      zone: "room",
-      position: { x: 100, y: 100 },
-      bounds: { x: 0, y: 0, width: 1400, height: 800 },
-    });
-    expect(card(next, "Body").zone).toBe("inventory");
+    expect(canRestInZone(body, "inventory")).toEqual({ legal: true });
   });
 
-  it("rejects a sixth non-Anchored Inventory card", () => {
-    const movable = state.cards.filter((candidate) => candidate.zone === "room").slice(0, 6);
+  it("classifies identical Room cards as Stack targets without a Stack Marker", () => {
+    const source = { ...card(state, "Canned Food"), roomId: "test-room" };
+    const target = {
+      ...source,
+      id: "canned-food-copy",
+      position: { x: source.position.x + 240, y: source.position.y },
+      attributes: source.attributes.map((attribute) => ({ ...attribute })),
+    };
     state = {
       ...state,
-      cards: state.cards.map((candidate) => {
-        const index = movable.slice(0, 5).findIndex((item) => item.id === candidate.id);
-        return index >= 0
-          ? { ...candidate, zone: "inventory", position: { x: index * 125, y: 160 } }
-          : candidate;
-      }),
+      cards: [
+        ...state.cards.filter((candidate) => candidate.id !== source.id),
+        source,
+        target,
+      ],
     };
-    expect(countInventoryCards(state.cards)).toBe(5);
-    expect(canPlaceInZone(card(state, movable[5].title), "inventory", state.cards)).toEqual({
-      legal: false,
-      reason: "capacity",
-    });
+
+    expect(hasMarker(source, "Stack")).toBe(false);
+    expect(canStackCards(source, target)).toBe(true);
+    expect(cardTargetKind(state, source, target)).toBe("stack");
+
+    const stacked = stackCards(state, source.id, target.id);
+    const stackedSource = stacked.cards.find((candidate) => candidate.id === source.id)!;
+    expect(stacked.cards).toHaveLength(state.cards.length);
+    expect(stacked.cards.some((candidate) => candidate.id === target.id)).toBe(true);
+    expect(stackedSource.stackRootId).toBe(target.id);
+    expect(stackedSource.roomId).toBe(target.roomId);
   });
 
-  it("does not count Anchored cards against Inventory capacity", () => {
-    expect(state.cards.filter((candidate) => candidate.zone === "inventory")).toHaveLength(3);
-    expect(countInventoryCards(state.cards)).toBe(0);
+  it("rejects Stack targets with different current visible state or outside Room", () => {
+    const source = { ...card(state, "Flashlight"), roomId: "test-room" };
+    const changed = {
+      ...source,
+      id: "changed-flashlight",
+      attributes: source.attributes.map((attribute) =>
+        attribute.kind === "value" && attribute.name === "Battery"
+          ? { ...attribute, value: attribute.value - 1 }
+          : { ...attribute },
+      ),
+    };
+    expect(canStackCards(source, changed)).toBe(false);
+    expect(canStackCards(
+      { ...source, zone: "inventory", roomId: undefined },
+      { ...source, id: "carried-copy", zone: "inventory", roomId: undefined },
+    )).toBe(false);
   });
 });

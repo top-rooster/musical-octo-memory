@@ -189,7 +189,7 @@ Card masters currently support:
 - title, image path, and an optional `>` description;
 - Marker lines and `Name integer` Values before behavior statements;
 - `size Small|Medium|Large`;
-- `equip <slot>` (with `Hand` meaning either Hand);
+- `equip <slot>` for authored non-Hand compatibility and active-effect context; either Hand accepts any ordinary movable item through the general equipment rule, so `equip Hand` is needed only when an authored effect is specifically active in a Hand;
 - `storage <size> <count> [main]`, where `main` delays capacity until the
   opening has ended;
 - `while-equipped <Value> <signed integer>`;

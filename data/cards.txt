@@ -142,7 +142,6 @@ Pocket Knife
 images/pocket-knife.png
 > A very basic folding knife. It is a poor weapon but a useful small cutting tool.
 size Small
-equip Hand
 Cutting Tool
 # Wood-shavings crafting is outside Milestone 2.
 

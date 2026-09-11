@@ -243,12 +243,12 @@ export function canTravelWith(source: CardInstance, target: CardInstance): boole
 export function equipCard(state: GameState, cardId: string, slot: EquipmentSlot): GameState {
   const card = state.cards.find((candidate) => candidate.id === cardId);
   const master = card && state.masters.find((candidate) => candidate.id === card.masterId);
-  if (!card || !master || !canEquip(master, slot) || !canTakeOpeningCard(state, card)) return state;
+  if (!card || !master || !canEquip(master, slot, card) || !canTakeOpeningCard(state, card)) return state;
   if (state.cards.some((candidate) => candidate.id !== cardId && candidate.equipmentSlot === slot)) return state;
   return {
     ...state,
     cards: state.cards.map((candidate) => candidate.id === cardId
-      ? { ...candidate, zone: "inventory", roomId: undefined, equipmentSlot: slot }
+      ? { ...candidate, zone: "inventory", roomId: undefined, equipmentSlot: slot, stackRootId: undefined }
       : candidate),
   };
 }

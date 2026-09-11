@@ -11,6 +11,7 @@ interface CardViewProps {
   incompatibleTarget?: boolean;
   dragging?: boolean;
   compact?: boolean;
+  stackCount?: number;
   preview?: ValueChangePreview[];
   onPointerDown?: (event: PointerEvent<HTMLDivElement>, card: CardInstance) => void;
   onPointerMove?: (event: PointerEvent<HTMLDivElement>) => void;
@@ -28,7 +29,7 @@ function assetUrl(path: string): string {
 
 export function CardView({
   card, style, legalTarget = false, releaseReady = false, incompatibleTarget = false,
-  dragging = false, compact = false, preview = [], onPointerDown, onPointerMove,
+  dragging = false, compact = false, stackCount, preview = [], onPointerDown, onPointerMove,
   onPointerUp, onPointerCancel, onInspect,
 }: CardViewProps) {
   const [imageFailed, setImageFailed] = useState(false);
@@ -61,6 +62,7 @@ export function CardView({
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerCancel}
     >
+      {stackCount && <span className="card__stack-count" aria-label={`Stack of ${stackCount}`}>{stackCount}</span>}
       <div className="card__title">{card.title}</div>
       <div className="card__image" aria-hidden="true">
         {imageFailed ? (

@@ -24,11 +24,11 @@ import { measureClientBox } from "./game/geometry";
 import {
   applyInteraction,
   calculateInteractionOutcome,
-  canInteract,
-  hasMarker,
-  isAnchored,
+  canRestInZone,
+  cardTargetKind,
   isWithinBounds,
   positionIsFree,
+  stackCards,
   type DragOrigin,
 } from "./game/rules";
 import {
@@ -177,7 +177,7 @@ function SearchDeck({
       onClick={onSearch}
     >
       {!failed && <img src={assetUrl(image)} alt="" onError={() => setFailed(true)} />}
-      <span>{failed ? "SEARCH" : name}</span>
+      {failed && <span>SEARCH</span>}
     </button>
   );
 }
@@ -237,11 +237,15 @@ export function App() {
     );
   }, [game]);
   const sourceCard = drag && game?.cards.find((card) => card.id === drag.sourceId);
-  const legalTargetIds = useMemo(() => {
-    if (!game || !sourceCard) return new Set<string>();
-    return new Set(visibleCards
-      .filter((target) => target.id !== sourceCard.id && canInteract(game, sourceCard, target))
-      .map((target) => target.id));
+  const targetKinds = useMemo(() => {
+    const kinds = new Map<string, ReturnType<typeof cardTargetKind>>();
+    if (!game || !sourceCard) return kinds;
+    for (const target of visibleCards) {
+      if (target.id === sourceCard.id) continue;
+      const kind = cardTargetKind(game, sourceCard, target);
+      if (kind) kinds.set(target.id, kind);
+    }
+    return kinds;
   }, [game, sourceCard, visibleCards]);
   const previews = useMemo(() => {
     const results = new Map<string, ReturnType<typeof calculateInteractionOutcome>>();
@@ -269,7 +273,7 @@ export function App() {
   const canDropInSlot = (state: GameState, card: CardInstance, slot: EquipmentSlot): boolean => {
     const master = state.masters.find((candidate) => candidate.id === card.masterId);
     return Boolean(
-      master && canEquip(master, slot) &&
+      master && canEquip(master, slot, card) &&
       !state.cards.some((candidate) => candidate.id !== card.id && candidate.equipmentSlot === slot) &&
       (card.zone === "inventory" || state.phase !== "opening" ||
         !card.offered || openingSelectionCount(state) < (state.openingTakeLimit ?? 0)),
@@ -289,7 +293,7 @@ export function App() {
     if (!zone) return {};
     const position = dropPosition(nextDrag, zone, layout, roomZoom);
     const bounds = localBounds(zone === "room" ? layout.room : layout.carried);
-    const anchored = isAnchored(card) && card.homeZone !== zone;
+    const anchored = !canRestInZone(card, zone).legal;
     const capacity = zone === "inventory" ? canCarryCard(state, card).legal : true;
     const free = positionIsFree(card.id, zone, position, state.cards, zone === "room" ? state.currentRoomId : undefined);
     return {
@@ -356,8 +360,12 @@ export function App() {
     };
     const target = targetAtPoint(event.clientX, event.clientY, drag.sourceId);
     if (target) {
-      if (!canInteract(game, sourceCard, target)) {
+      const targetKind = cardTargetKind(game, sourceCard, target);
+      if (!targetKind) {
         setMessage("Those cards do not interact; the card returned exactly to its origin.");
+      } else if (targetKind === "stack") {
+        setGame(stackCards(game, sourceCard.id, target.id));
+        setMessage(`${sourceCard.title} joined an identical Room Stack.`);
       } else if (canTravelWith(sourceCard, target) && target.travel) {
         const next = transitionRoom(game, target.travel.destinationRoomId, target.travel.baseMinutes);
         const minutes = (next.elapsedMinutes ?? 0) - (game.elapsedMinutes ?? 0);
@@ -399,6 +407,7 @@ export function App() {
         position: destinationPosition,
         roomId: destinationZone === "room" ? game.currentRoomId : undefined,
         equipmentSlot: undefined,
+        stackRootId: undefined,
       } : card),
     });
     setMessage(`Placed ${sourceCard.title} in ${destinationZone === "room" ? "Room" : "carried Inventory"}.`);
@@ -417,17 +426,27 @@ export function App() {
   const renderCard = (card: CardInstance) => {
     if (!layout) return null;
     const hovered = drag?.hoveredTargetId === card.id;
+    const targetKind = targetKinds.get(card.id) ?? null;
     const preview = previews.get(card.id);
+    const stackRootId = card.stackRootId ?? card.id;
+    const stackMembers = visibleCards.filter((candidate) =>
+      candidate.zone === "room" &&
+      (candidate.id === stackRootId || candidate.stackRootId === stackRootId),
+    );
+    const stackCount = stackMembers.length > 1 && stackMembers.at(-1)?.id === card.id
+      ? stackMembers.length
+      : undefined;
     return (
       <CardView
         key={card.id}
         card={card}
         style={{ ...localCardStyle(card, layout, roomZoom), opacity: drag?.sourceId === card.id ? 0 : 1 }}
-        legalTarget={legalTargetIds.has(card.id)}
-        releaseReady={hovered && legalTargetIds.has(card.id) && !hasMarker(card, "Stack")}
-        incompatibleTarget={hovered && !legalTargetIds.has(card.id)}
+        legalTarget={Boolean(targetKind)}
+        releaseReady={hovered && targetKind === "interaction"}
+        incompatibleTarget={hovered && !targetKind}
         dragging={drag?.sourceId === card.id}
         compact={Boolean(card.equipmentSlot)}
+        stackCount={stackCount}
         preview={preview?.valueChanges ?? []}
         onPointerDown={beginDrag}
         onPointerMove={moveDrag}

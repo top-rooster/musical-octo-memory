@@ -18,7 +18,18 @@ function masterFor(masters: CardMaster[], card: CardInstance): CardMaster | unde
   return masters.find((master) => master.id === card.masterId);
 }
 
-export function canEquip(master: CardMaster, slot: EquipmentSlot): boolean {
+export function isHandSlot(slot: EquipmentSlot): boolean {
+  return slot === "Left Hand" || slot === "Right Hand";
+}
+
+export function canEquip(
+  master: CardMaster,
+  slot: EquipmentSlot,
+  card?: CardInstance,
+): boolean {
+  if (isHandSlot(slot)) {
+    return Boolean(master.size) && !isAnchored(card ?? master);
+  }
   return master.equipSlots.includes(slot);
 }
 
@@ -27,9 +38,18 @@ export function isEquipped(card: CardInstance): boolean {
 }
 
 export function isEquipmentActive(card: CardInstance, master: CardMaster): boolean {
-  if (!isEquipped(card) || !card.equipmentSlot || !canEquip(master, card.equipmentSlot)) return false;
+  if (!isEquipped(card) || !card.equipmentSlot || !canEquip(master, card.equipmentSlot, card)) return false;
   if (master.whileEquipped.length && getValue(card, "Battery")?.value === 0) return false;
   return true;
+}
+
+export function isAuthoredEquipmentEffectActive(
+  card: CardInstance,
+  master: CardMaster,
+): boolean {
+  return isEquipmentActive(card, master) && Boolean(
+    card.equipmentSlot && master.equipSlots.includes(card.equipmentSlot),
+  );
 }
 
 export function storageCapacity(
@@ -40,7 +60,7 @@ export function storageCapacity(
   const capacity: CapacityCounts = { Small: 0, Medium: 0, Large: 0 };
   for (const card of cards) {
     const master = masterFor(masters, card);
-    if (!master?.storage || !isEquipmentActive(card, master)) continue;
+    if (!master?.storage || !isAuthoredEquipmentEffectActive(card, master)) continue;
     if (master.storage.phase && master.storage.phase !== phase) continue;
     capacity[master.storage.size] += master.storage.count;
   }

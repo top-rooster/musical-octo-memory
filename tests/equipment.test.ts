@@ -5,6 +5,7 @@ import {
   allocateCarriedCapacity,
   canEquip,
   canTakeOpeningCard,
+  isAuthoredEquipmentEffectActive,
   isEquipmentActive,
   openingSelectionCount,
   storageCapacity,
@@ -46,13 +47,19 @@ describe("equipment, opening, and carried capacity", () => {
     expect(openingSelectionCount(moveToInventory(state, find(state, "Body").id))).toBe(5);
   });
 
-  it("uses authored equipment-slot compatibility", () => {
+  it("lets either Hand hold ordinary items while other slots use authored compatibility", () => {
     const glasses = CARD_MASTERS.find((master) => master.title === "Glasses")!;
-    const flashlight = CARD_MASTERS.find((master) => master.title === "Flashlight")!;
+    const cannedFood = CARD_MASTERS.find((master) => master.title === "Canned Food")!;
+    const plasticBottle = CARD_MASTERS.find((master) => master.title === "Plastic Bottle")!;
+    const body = find(state, "Body");
+    const bodyMaster = CARD_MASTERS.find((master) => master.id === body.masterId)!;
     expect(canEquip(glasses, "Eyes")).toBe(true);
-    expect(canEquip(glasses, "Left Hand")).toBe(false);
-    expect(canEquip(flashlight, "Left Hand")).toBe(true);
-    expect(canEquip(flashlight, "Right Hand")).toBe(true);
+    expect(canEquip(cannedFood, "Left Hand")).toBe(true);
+    expect(canEquip(cannedFood, "Right Hand")).toBe(true);
+    expect(canEquip(plasticBottle, "Left Hand")).toBe(true);
+    expect(canEquip(plasticBottle, "Right Hand")).toBe(true);
+    expect(canEquip(cannedFood, "Eyes")).toBe(false);
+    expect(canEquip(bodyMaster, "Left Hand", body)).toBe(false);
   });
 
   it("distinguishes equipped cards from merely carried cards", () => {
@@ -73,8 +80,26 @@ describe("equipment, opening, and carried capacity", () => {
     expect(storageCapacity(state.cards, state.masters, "main").Medium).toBe(5);
   });
 
-  it("allows only legal carried sizes during the opening as well as enforcing the take limit", () => {
+  it("holds Medium opening items in Hands without using carried capacity", () => {
+    const cannedFood = find(state, "Canned Food");
+    const plasticBottle = find(state, "Plastic Bottle");
+    state = equipCard(state, cannedFood.id, "Left Hand");
+    state = equipCard(state, plasticBottle.id, "Right Hand");
+
+    expect(find(state, "Canned Food").equipmentSlot).toBe("Left Hand");
+    expect(find(state, "Plastic Bottle").equipmentSlot).toBe("Right Hand");
+    expect(openingSelectionCount(state)).toBe(2);
+    expect(allocateCarriedCapacity(state.cards, state.masters, "opening").used).toEqual({
+      Small: 0, Medium: 0, Large: 0,
+    });
+    const cannedMaster = CARD_MASTERS.find((master) => master.id === cannedFood.masterId)!;
+    expect(isEquipmentActive(find(state, "Canned Food"), cannedMaster)).toBe(true);
+    expect(isAuthoredEquipmentEffectActive(find(state, "Canned Food"), cannedMaster)).toBe(false);
+  });
+
+  it("still applies storage legality when a held card moves to flat Inventory", () => {
     expect(canCarryCard(state, find(state, "Pocket Knife")).legal).toBe(true);
+    state = equipCard(state, find(state, "Canned Food").id, "Left Hand");
     expect(canCarryCard(state, find(state, "Canned Food"))).toEqual({
       legal: false,
       reason: "capacity",

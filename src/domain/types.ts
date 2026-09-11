@@ -62,6 +62,7 @@ export interface CardInstance {
   homeZone?: Zone;
   roomId?: string;
   equipmentSlot?: EquipmentSlot;
+  stackRootId?: string;
   offered?: boolean;
   travel?: TravelDefinition;
   animation?: "draw";

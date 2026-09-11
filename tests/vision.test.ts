@@ -32,6 +32,11 @@ describe("Vision and lighting", () => {
       ? { ...card, zone: "inventory" as const, roomId: undefined }
       : card) };
     expect(effectiveVision(state)).toBe(4);
+    state = equipCard(state, glasses.id, "Left Hand");
+    expect(effectiveVision(state)).toBe(4);
+    state = { ...state, cards: state.cards.map((card) => card.id === glasses.id
+      ? { ...card, equipmentSlot: undefined }
+      : card) };
     state = equipCard(state, glasses.id, "Eyes");
     expect(effectiveVision(state)).toBe(5);
   });

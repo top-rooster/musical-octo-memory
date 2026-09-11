@@ -57,11 +57,6 @@ Public prototype URL:
 If an authored image is absent, the prototype uses a readable fallback without
 hiding card titles or mechanics.
 
-## Explicit prototype boundary
-
-The opening applies both the authored five-card take limit and currently active
-storage legality. Because the Backpack's storage is authored to activate only
-after reaching Tunnels, Medium offerings cannot rest in carried Inventory during
-the opening. The current design does not define a temporary evacuation holding
-surface or general Hand compatibility, so this implementation does not invent
-one; that opening/storage edge remains a focused playtest question.
+During the opening, either Hand can hold any ordinary movable item without using
+carried capacity. Held offered cards still count toward the five-card evacuation
+limit; flat carried Inventory remains governed by equipped storage capacity.
