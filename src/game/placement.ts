@@ -64,10 +64,17 @@ export function generateRoomPlacements(
       placements.map((placement) => placement.position),
     );
     if (!position) {
-      throw new Error(
-        `Room placement exhausted after ${maxAttemptsPerCard} attempts for "${master.title}"; ` +
-          "increase the Room size or reduce the generated card set.",
-      );
+      try {
+        return generateGridPositions(masters.length, bounds).map((gridPosition, index) => ({
+          master: masters[index],
+          position: gridPosition,
+        }));
+      } catch {
+        throw new Error(
+          `Room placement exhausted after ${maxAttemptsPerCard} attempts for "${master.title}"; ` +
+            "increase the Room size or reduce the generated card set.",
+        );
+      }
     }
     placements.push({ master, position });
   }

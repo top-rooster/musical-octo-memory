@@ -27,6 +27,8 @@ export interface InteractionOutcome {
 export interface DragOrigin {
   zone: Zone;
   position: Position;
+  roomId?: string;
+  equipmentSlot?: CardInstance["equipmentSlot"];
 }
 
 export type DropIntent =
@@ -118,11 +120,14 @@ export function positionIsFree(
   zone: Zone,
   position: Position,
   cards: CardInstance[],
+  roomId?: string,
 ): boolean {
   return cards.every(
     (other) =>
       other.id === cardId ||
       other.zone !== zone ||
+      Boolean(other.equipmentSlot) ||
+      (zone === "room" && other.roomId !== roomId) ||
       !rectanglesOverlap(position, other.position),
   );
 }
@@ -166,7 +171,10 @@ export function canInteract(
   source: CardInstance,
   target: CardInstance,
 ): boolean {
-  return calculateInteractionOutcome(state, source, target) !== null;
+  return (
+    calculateInteractionOutcome(state, source, target) !== null ||
+    (source.masterId === "body" && Boolean(target.travel))
+  );
 }
 
 function applyValueChanges(
@@ -208,7 +216,9 @@ function restoreOrigin(state: GameState, cardId: string, origin: DragOrigin): Ga
     !card ||
     (card.zone === origin.zone &&
       card.position.x === origin.position.x &&
-      card.position.y === origin.position.y)
+      card.position.y === origin.position.y &&
+      card.roomId === origin.roomId &&
+      card.equipmentSlot === origin.equipmentSlot)
   ) {
     return state;
   }
@@ -216,7 +226,13 @@ function restoreOrigin(state: GameState, cardId: string, origin: DragOrigin): Ga
     ...state,
     cards: state.cards.map((candidate) =>
       candidate.id === cardId
-        ? { ...candidate, zone: origin.zone, position: { ...origin.position } }
+        ? {
+            ...candidate,
+            zone: origin.zone,
+            position: { ...origin.position },
+            roomId: origin.roomId,
+            equipmentSlot: origin.equipmentSlot,
+          }
         : candidate,
     ),
   };

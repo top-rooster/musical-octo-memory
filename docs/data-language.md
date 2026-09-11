@@ -179,18 +179,29 @@ Do not pre-design a large general-purpose configuration language. Add syntax onl
 
 When the parser gains new syntax, document that syntax here with a small real game-data example.
 
-## Milestone 1 parser subset
+## Milestone 2 parser subset
 
-The interaction prototype intentionally parses only the useful subset needed to render the known card masters and validate eating. This is an implementation boundary for the prototype, not a permanent decision about the language.
+The prototype deliberately parses only the authored forms used by
+`data/cards.txt`, `data/attributes.txt`, and `data/rooms.txt`.
 
-It currently interprets:
+Card masters currently support:
 
-- the first two non-comment lines of each blank-line-separated block as title and picture path;
-- Marker lines and `Name integer` Value lines that appear before behavior statements;
-- `eat Body` as a source-authored interaction target;
-- signed target Value effects such as `Satiation +15 target`;
-- `consume self` as the eating result.
+- title, image path, and an optional `>` description;
+- Marker lines and `Name integer` Values before behavior statements;
+- `size Small|Medium|Large`;
+- `equip <slot>` (with `Hand` meaning either Hand);
+- `storage <size> <count> [main]`, where `main` delays capacity until the
+  opening has ended;
+- `while-equipped <Value> <signed integer>`;
+- the Milestone 1 eating subset: `eat Body`, signed target Value changes, and
+  `consume self`.
 
-The current Milestone 1 parser has not yet been extended for the new `>` card-description syntax or `data/attributes.txt`; issue #5 covers that implementation work.
+Room data currently supports the forms documented in `data/rooms.txt`.
+`deck <name> <duration>` authors the Search deck's base duration. Instance
+overrides support `+Marker`, `Value <integer>`, and
+`-> <destination room> <duration>`.
 
-An eating block is exposed as a Milestone 1 interaction only when its effect set is fully supported by that subset. Other authored Action, Process, condition, draw, and attribute-mutation statements remain in `data/cards.txt` but are not executed by the prototype. Malformed lines within the supported eating syntax produce a line-numbered parser error.
+These are implementation boundaries for the current slice, not a generic
+configuration language or a promise to execute unfinished historical
+Action/Process sketches. Malformed lines in supported syntax produce
+line-numbered parser errors.
