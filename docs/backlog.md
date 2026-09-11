@@ -517,6 +517,12 @@ The two Trinket slots are decided. Which future items use them and what effects 
 
 Torch may later provide portable light, but recipe, burn duration, and other behavior are not part of the current prototype.
 
+## CAMPFIRE-OPEN-01 - Heat-source attribute
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+The old card-data draft noted that Campfire should eventually identify as a heat source, but the player-facing Marker name remains undecided. Do not add a heat-source Marker to runtime data until it is named.
+
 ---
 
 # Maintenance rule

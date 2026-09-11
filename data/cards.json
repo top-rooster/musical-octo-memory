@@ -1,0 +1,364 @@
+{
+  "body": {
+    "name": "Body",
+    "image": "images/body.png",
+    "description": "Nadir's physical condition and basic survival needs.",
+    "markers": ["anchored"],
+    "values": { "hydration": 50, "satiation": 50 },
+    "processes": [
+      {
+        "interval": "15m",
+        "effects": [{ "change": "hydration", "amount": -2 }]
+      }
+    ],
+    "when": [
+      { "value": "hydration", "equals": 0, "effects": [{ "gameOver": true }] },
+      { "value": "satiation", "equals": 0, "effects": [{ "gameOver": true }] }
+    ]
+  },
+  "mind": {
+    "name": "Mind",
+    "image": "images/mind.png",
+    "description": "Nadir's perception and mental state.",
+    "markers": ["anchored"],
+    "values": { "vision": 4 }
+  },
+  "spirit": {
+    "name": "Spirit",
+    "image": "images/spirit.png",
+    "description": "Nadir's emotional and spiritual state.",
+    "markers": ["anchored"]
+  },
+  "exhausted": {
+    "name": "Exhausted",
+    "image": "images/exhausted.png",
+    "description": "Nadir is too exhausted to function normally.",
+    "markers": ["anchored"],
+    "accept": [
+      {
+        "card": "body",
+        "action": { "time": "8h", "effects": [{ "discard": "source" }] }
+      }
+    ]
+  },
+  "flesh-wound": {
+    "name": "Flesh Wound",
+    "image": "images/flesh-wound.png",
+    "description": "An open injury that can heal or become infected.",
+    "markers": ["anchored"],
+    "values": { "infection": 50 },
+    "processes": [
+      {
+        "interval": "15m",
+        "change": "progress",
+        "amountByValue": {
+          "value": "infection",
+          "ranges": [
+            { "from": 0, "to": 24, "amount": 2 },
+            { "from": 25, "to": 49, "amount": 1 },
+            { "from": 50, "to": 74, "amount": 0 },
+            { "from": 75, "to": 100, "amount": -1 }
+          ]
+        },
+        "when": [{ "value": "progress", "equals": 100, "effects": [{ "discard": "self" }] }]
+      }
+    ],
+    "accept": [
+      {
+        "markers": ["contains-water"],
+        "action": {
+          "time": "15m",
+          "effects": [
+            { "change": "infection", "target": "receiver", "amount": -40 },
+            { "remove": "contains-water", "target": "source" }
+          ]
+        }
+      },
+      {
+        "markers": ["fabric", "sterilized"],
+        "action": {
+          "time": "15m",
+          "effects": [
+            { "discard": "source" },
+            { "add": "dressed", "target": "receiver" }
+          ]
+        }
+      }
+    ]
+  },
+  "burn-wound": {
+    "name": "Burn Wound",
+    "image": "images/burn-wound.png",
+    "description": "A burn injury requiring treatment and time to heal.",
+    "markers": ["anchored"],
+    "values": { "infection": 50 },
+    "accept": [
+      {
+        "markers": ["contains-water"],
+        "action": {
+          "time": "15m",
+          "effects": [
+            { "change": "infection", "target": "receiver", "amount": -40 },
+            { "remove": "contains-water", "target": "source" }
+          ]
+        }
+      },
+      {
+        "markers": ["fabric", "sterilized"],
+        "action": {
+          "time": "15m",
+          "effects": [
+            { "discard": "source" },
+            { "add": "dressed", "target": "receiver" }
+          ]
+        }
+      }
+    ]
+  },
+  "fever": {
+    "name": "Fever",
+    "image": "images/fever.png",
+    "description": "A dangerous fever affecting Nadir.",
+    "markers": ["anchored"]
+  },
+  "dead-rat": {
+    "name": "Dead Rat",
+    "image": "images/dead-rat.png",
+    "description": "A dead rat. It can provide food and material if Nadir has a cutting tool.",
+    "size": "Medium",
+    "accept": [
+      {
+        "markers": ["cutting-tool"],
+        "action": {
+          "name": "Skin",
+          "time": "15m",
+          "effects": [
+            { "discard": "receiver" },
+            { "draw": "rat-skin" },
+            { "draw": "rat-meat" }
+          ]
+        }
+      }
+    ]
+  },
+  "rotten-meat": {
+    "name": "Rotten Meat",
+    "image": "images/rotten-meat.png",
+    "description": "Spoiled meat that is dangerous to eat.",
+    "size": "Medium",
+    "accept": [
+      {
+        "card": "body",
+        "action": {
+          "time": "0m",
+          "effects": [{ "discard": "source" }, { "draw": "fever" }]
+        }
+      }
+    ]
+  },
+  "rat-skin": {
+    "name": "Rat Skin",
+    "image": "images/rat-skin.png",
+    "description": "Skin removed from a rat.",
+    "size": "Small"
+  },
+  "rat-meat": {
+    "name": "Rat Meat",
+    "image": "images/rat-meat.png",
+    "description": "Raw meat cut from a rat.",
+    "size": "Small",
+    "accept": [
+      {
+        "card": "body",
+        "action": {
+          "time": "0m",
+          "effects": [
+            { "change": "satiation", "target": "body", "amount": 15 },
+            { "discard": "source" }
+          ]
+        }
+      }
+    ]
+  },
+  "canned-food": {
+    "name": "Canned Food",
+    "image": "images/canned-food.png",
+    "description": "Shelf-stable food in a sealed can.",
+    "size": "Medium",
+    "accept": [
+      {
+        "card": "body",
+        "action": {
+          "time": "0m",
+          "effects": [
+            { "change": "satiation", "target": "body", "amount": 25 },
+            { "discard": "source" }
+          ]
+        }
+      }
+    ]
+  },
+  "knife": {
+    "name": "Knife",
+    "image": "images/knife.png",
+    "description": "A general cutting tool.",
+    "size": "Small",
+    "markers": ["cutting-tool"]
+  },
+  "pocket-knife": {
+    "name": "Pocket Knife",
+    "image": "images/pocket-knife.png",
+    "description": "A very basic folding knife. It is a poor weapon but a useful small cutting tool.",
+    "size": "Small",
+    "markers": ["cutting-tool"]
+  },
+  "campfire": {
+    "name": "Campfire",
+    "image": "images/campfire.png",
+    "description": "A small fire suitable for heat and cooking."
+  },
+  "plastic-bottle": {
+    "name": "Plastic Bottle",
+    "image": "images/plastic-bottle.png",
+    "description": "A reusable plastic bottle that may contain drinking water.",
+    "size": "Medium",
+    "markers": ["container"],
+    "accept": [
+      {
+        "card": "body",
+        "requires": { "markers": ["contains-water"] },
+        "action": {
+          "time": "0m",
+          "effects": [
+            { "change": "hydration", "target": "body", "amount": 25 },
+            { "remove": "contains-water", "target": "source" }
+          ]
+        }
+      }
+    ]
+  },
+  "pants": {
+    "name": "Pants",
+    "image": "images/pants.png",
+    "description": "Ordinary pants with two usable small pockets.",
+    "size": "Medium",
+    "equip": ["legs"],
+    "storage": { "size": "Small", "count": 2 }
+  },
+  "t-shirt": {
+    "name": "T-Shirt",
+    "image": "images/t-shirt.png",
+    "description": "A plain T-shirt Nadir is wearing when he is forced to flee.",
+    "size": "Medium",
+    "equip": ["chest"]
+  },
+  "simple-lighter": {
+    "name": "Simple Lighter",
+    "image": "images/simple-lighter.png",
+    "description": "A cheap disposable lighter useful for starting fires.",
+    "size": "Small",
+    "values": { "fuel": 100 }
+  },
+  "flashlight": {
+    "name": "Flashlight",
+    "image": "images/flashlight.png",
+    "description": "A small battery-powered flashlight.",
+    "size": "Small",
+    "equip": ["left-hand", "right-hand"],
+    "values": { "battery": 100 },
+    "whileEquipped": [{ "attribute": "vision", "amount": 1 }]
+  },
+  "spare-batteries": {
+    "name": "Spare Batteries",
+    "image": "images/spare-batteries.png",
+    "description": "Spare batteries for a flashlight.",
+    "size": "Small"
+  },
+  "pain-killers": {
+    "name": "Pain Killers",
+    "image": "images/pain-killers.png",
+    "description": "Basic pain medication.",
+    "size": "Small"
+  },
+  "simple-backpack": {
+    "name": "Simple Backpack",
+    "image": "images/simple-backpack.png",
+    "description": "A simple backpack that greatly increases what Nadir can carry.",
+    "size": "Medium",
+    "equip": ["back"],
+    "storage": { "size": "Medium", "count": 5, "phase": "main" }
+  },
+  "glasses": {
+    "name": "Glasses",
+    "image": "images/glasses.png",
+    "description": "Nadir's prescription glasses.",
+    "size": "Small",
+    "equip": ["eyes"],
+    "whileEquipped": [{ "attribute": "vision", "amount": 1 }]
+  },
+  "scrap-metal": {
+    "name": "Scrap Metal",
+    "image": "images/scrap-metal.png",
+    "description": "A useful piece of salvaged metal.",
+    "size": "Medium"
+  },
+  "pipe": {
+    "name": "Pipe",
+    "image": "images/pipe.png",
+    "description": "A length of pipe found in the tunnels.",
+    "size": "Medium"
+  },
+  "squatter": {
+    "name": "Squatter",
+    "image": "images/squatter.png",
+    "description": "Another person sheltering in the tunnels.",
+    "markers": ["anchored"]
+  },
+  "puddle-of-water": {
+    "name": "Puddle of Water",
+    "image": "images/puddle-of-water.png",
+    "description": "Water pooled on the tunnel floor.",
+    "markers": ["anchored"],
+    "values": { "water": 3 }
+  },
+  "service-cabinet": {
+    "name": "Service Cabinet",
+    "image": "images/service-cabinet.png",
+    "description": "A fixed service cabinet built into the tunnel infrastructure.",
+    "markers": ["anchored"]
+  },
+  "go-abandoned-office": {
+    "name": "Go to abandoned office",
+    "image": "images/go-to-abandoned-office.png",
+    "description": "A discovered route from the tunnels to an abandoned office.",
+    "markers": ["anchored"],
+    "accept": [{ "card": "body", "action": { "time": "15m", "effects": [{ "go": "abandoned-office" }] } }]
+  },
+  "go-deep-tunnels": {
+    "name": "Go to deep tunnels",
+    "image": "images/go-to-deep-tunnels.png",
+    "description": "A route leading farther into the dark tunnel system.",
+    "markers": ["anchored"],
+    "accept": [{ "card": "body", "action": { "time": "30m", "effects": [{ "go": "deep-tunnels" }] } }]
+  },
+  "go-tunnels-from-office": {
+    "name": "Go to tunnels",
+    "image": "images/go-to-tunnels.png",
+    "description": "A route returning to the tunnels.",
+    "markers": ["anchored"],
+    "accept": [{ "card": "body", "action": { "time": "15m", "effects": [{ "go": "tunnels" }] } }]
+  },
+  "go-tunnels-from-deep-tunnels": {
+    "name": "Go to tunnels",
+    "image": "images/go-to-tunnels.png",
+    "description": "A route returning to the tunnels.",
+    "markers": ["anchored"],
+    "accept": [{ "card": "body", "action": { "time": "30m", "effects": [{ "go": "tunnels" }] } }]
+  },
+  "placeholder": {
+    "name": "Placeholder",
+    "image": "images/placeholder.png",
+    "description": "Temporary Milestone 2 search-deck scaffolding with no gameplay behavior.",
+    "markers": ["anchored"]
+  }
+}
