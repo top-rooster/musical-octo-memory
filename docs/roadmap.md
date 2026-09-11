@@ -1,104 +1,283 @@
-# Safe Room — implementation roadmap
+# Safe Room - implementation roadmap
 
-## Milestone 1: interaction prototype
+This roadmap tracks implementation order, not design history.
 
-Build a small browser prototype whose only purpose is to validate the core card interaction language.
+Detailed design decisions live in focused docs and `docs/backlog.md`. Git history preserves older milestone contracts.
 
-### Required behavior
+## Current status
 
-- Use React + TypeScript + Vite.
-- Show two zones on one screen: **Room** and **Inventory**.
-- **Room** occupies the upper two thirds of the screen and represents the currently viewed physical space.
-- **Inventory** occupies the lower third of the screen. It is persistent and remains on screen when Nadir moves to another room.
-- Separate Room and Inventory with a clear, suitable horizontal divider. The divider should make the zones immediately legible without becoming a dominant visual element.
-- Each Room/area has its own subtle non-illustrated background used for ambience only. The Inventory uses one constant background across rooms.
-- Backgrounds are not gameplay state. Any mechanically meaningful room condition or interactable/environmental state is represented by cards, not by changing or overlaying the background.
-- Room zoom changes the size and positions of cards only. The Room background stays fixed to the viewport and does not pan or scale, so the player can never move or zoom past an edge of the background.
-- Room zoom is centered on the center of the Room zone. There is no panning in Milestone 1.
-- Inventory remains its own fixed interface area and does not participate in Room zoom.
-- Inventory contains three persistent Nadir cards:
-  - **Body**,
-  - **Mind**,
-  - **Spirit**.
-- All three persistent Nadir cards have `Anchored` with Inventory as their home zone. They may be dragged across the Room/Inventory boundary, but cannot come to rest in Room as ordinary placement. If released onto bare Room space, they return to Inventory.
-- `Anchored` does not prevent dragging a card onto another card for a legal interaction.
-- Put visible `Hydration 50` and `Satiation 50` Values on **Body**.
-- Values are clamped to 0–100 unless a specific Value explicitly defines another range.
-- Reaching `Hydration 0` or `Satiation 0` is a game-over condition, although Milestone 1 does not need to implement the ongoing Processes that reduce those Values over time.
-- Physical injury/health state is represented through injury and condition cards rather than a separate Body `Health` Value.
-- Temporary Nadir condition cards such as `Exhausted` and `Flesh Wound` are part of the design and also live in Inventory, but their lifecycle mechanics and initial spawning are not required in Milestone 1.
-- Load the known card master definitions from the project's authored card text data.
-- Milestone 1 does **not** require authored level-data syntax or authored starting positions. Instead, create one instance of each known **non-`Anchored`** card master in Room at startup. Body, Mind, and Spirit are the explicit starting `Anchored` Inventory cards.
-- Randomize each generated Room card's starting position within the Room zone. If its candidate placement overlaps an already placed card or leaves the usable Room bounds, reroll the position until a valid non-overlapping placement is found.
-- Seed the prototype with **Rat Meat** and **Canned Food** as the two food cards.
-  - Eating Rat Meat applies `Satiation +15` to Body.
-  - Eating Canned Food applies `Satiation +25` to Body.
-- For Milestone 1, do **not** require or invent an ingestion Marker. The existing authored interaction/effect data (`eat Body`, the Satiation effect, and consumption result) is sufficient to determine whether a card can be eaten. The product-level ingestion Marker decision can be revisited after the prototype.
-- Non-anchored cards can be dragged between Room and Inventory when the destination is legal.
-- The only current rules that can prevent a Room/Inventory transfer are `Anchored` and the Inventory capacity limit.
-- Gameplay interactions are card-on-card: dragging one card onto another card initiates the interaction.
-- For Milestone 1, interaction legality should be derived from the authored interaction data rather than from a hard-coded list of Rat Meat/Canned Food IDs or from an ingestion Marker.
-- While dragging a card, all legal card interaction targets highlight.
-- Dragging Rat Meat or Canned Food over **Body** previews the exact resulting Satiation value before the drop.
-- Dropping Rat Meat or Canned Food on **Body** applies its Satiation effect and consumes the food card.
-- A card with no legal authored interaction with Body must not be accepted by Body merely because it is movable.
-- Cards may not overlap in ordinary placement.
-- When a card is dropped on another card with which it has a legal combination/interaction, commit that interaction according to the prototype rules.
-- When a card is dropped on another card with which it **cannot** legally combine/interact, return the dragged card to the exact position it occupied when that drag began.
-- An invalid drop on another card therefore never displaces either card and does not search for a nearby fallback position.
-- An anchored card released outside its home zone without a legal accepting interaction returns home.
-- The UI should be plain and readable. Do not spend time on final art, animation polish, sound, narrative content, persistence beyond the visible Inventory behavior, combat, crafting, or world simulation yet.
+### Milestone 1 - core card interaction prototype
+**Status: COMPLETE**
 
-### Architecture constraints
+Validated the basic interaction language:
 
-- Follow `docs/data-language.md` for authored **card master** data.
-- **All card master data is authored in text files.** Runtime code may parse, validate, and transform it, but card masters must not be duplicated as hard-coded TypeScript/React objects.
-- The product direction remains that level design will eventually be authored in text files, but **Milestone 1 is explicitly exempt from implementing level-data syntax**. Its starting Room population is generated from the loaded card masters as described above.
-- Preserve the terse data-language direction: low boilerplate, phone-friendly, no required braces/tabs/list lengths, and no unnecessary repeated field labels. Do not substitute JSON, YAML, TOON, or a verbose generic object format as the primary authoring source.
-- Keep card definitions and effects as data rather than hard-coding each individual card in UI components.
-- For the prototype eating interaction, use the existing authored interaction/effect lines to determine legality and effects. Do not add a provisional ingestion Marker solely to satisfy Milestone 1.
-- Do not introduce generic `Consumable` or `Reusable` classifications for the prototype. Whether a card is consumed or remains is part of the interaction result.
-- Implement `Anchored` as an attribute-driven home-zone rule, not as a special Nadir card type. It prevents the card from coming to rest outside its home zone while preserving cross-zone dragging and legal card-on-card interaction.
-- Do not add extra contextual Room/Inventory transfer blockers beyond `Anchored` and Inventory capacity.
-- Keep Room background rendering separate from the zoomable card layer. Do not implement browser-page zoom for gameplay zoom.
-- Scale Room cards around the Room-zone center and do not implement Room panning in Milestone 1.
-- Treat backgrounds as ambience/presentation only; do not encode flooding, exposed wiring, broken windows, lit campfires, condensation, machinery state, hazards, or other gameplay facts into them. Those belong to cards.
-- Keep state transition/game-rule functions separate from React rendering where practical.
-- Keep the text-data parser/loader separate from rendering and validate malformed authored data with useful errors rather than silently accepting ambiguity.
-- Avoid a heavy state-management library for this prototype unless there is a demonstrated need.
-- Implement initial randomized Room placement as a simple retry loop: choose a candidate position, reject it if the card would overlap an already placed card or exceed Room bounds, and reroll until valid. The known Milestone 1 card set is small enough that no more sophisticated packing algorithm is required.
-- Record the dragged card's origin position when a drag begins so an illegal card-on-card drop can restore that exact position.
-- Add lightweight automated tests for the pure game-rule logic, especially authored eating-interaction recognition, rejection of a card with no Body eating interaction, Rat Meat `+15` Satiation, Canned Food `+25` Satiation, food consumption, Value clamping, invalid card-on-card drop restoration, Inventory-capacity rejection, and anchored-card return-to-home behavior after a foreign-zone release.
-- Add lightweight tests that prove card masters are loaded from text data rather than duplicated as TypeScript constants.
+- React + TypeScript + Vite browser prototype;
+- Room and Inventory zones;
+- authored card masters;
+- drag/drop and legal-target feedback;
+- Anchored behavior;
+- card-on-card interactions;
+- Value preview/clamping;
+- food consumption;
+- collision rejection and exact-origin restoration.
 
-### Done means
+Milestone 1 rules that were later superseded must not be treated as current design. In particular, the old generic five-card Inventory capacity and the old custom text-data direction are obsolete.
 
-A developer can clone the repo, install dependencies, start the app, and immediately test the full interaction loop above in a browser. `README.md` and `AGENTS.md` contain the exact commands needed. Card masters originate from authored text data; Milestone 1 generates its temporary starting Room population from those loaded masters rather than requiring authored level data.
+### Milestone 2 - playable world slice
+**Status: BASELINE COMPLETE AND MERGED TO `main`**
 
-## Not yet
+The merged baseline established:
 
-Do not implement these during Milestone 1:
+- opening evacuation/loadout scene;
+- persistent rooms;
+- Search decks;
+- room discovery and travel;
+- Vision and room lighting;
+- equipment and carried storage;
+- opening item selection;
+- Flashlight/Glasses Vision effects;
+- room-local Search content;
+- GitHub Pages deployment workflow;
+- automated test/build coverage for the implemented slice.
 
-- authored level-data syntax or production room layouts,
-- a permanent ingestion Marker or final ingestion interaction grammar beyond what the current prototype needs,
-- **Action** windows that advance game time to completion,
-- the `Skinning` Action, tool Durability behavior, or other Action-specific completion transformations,
-- unattended **Process** progression while Nadir performs Actions or other time-consuming activities,
-- Process completion transformations,
-- `Spoilage`, `Dead Rat` → `Rotten Meat`, rotten-food penalties, or other timed food decay,
-- ongoing Hydration/Satiation loss Processes or Burn Wound effects on Hydration,
-- ongoing cross-zone Process presentation for anchored participants,
-- temporary condition creation/removal/healing rules,
-- complete survival simulation,
-- hidden stomach/fullness mechanics,
-- NPC schedules,
-- stealth/search-team simulation,
-- traps/turrets,
-- noise propagation,
-- Room panning,
-- save games,
-- story/dialogue,
-- final visual identity,
-- a permanent engine decision.
+The baseline exposed several architecture and UI issues that are now intentionally being corrected before adding more game breadth.
 
-Those follow only after the card interaction prototype gives us something concrete to evaluate.
+---
+
+# Current implementation pass - Milestone 2 correction and foundation cleanup
+
+**Priority: NOW**
+
+Do this before adding more survival, crafting, NPC, stealth, or narrative systems.
+
+## 1. Replace custom runtime text formats with JSON
+
+Migrate:
+
+- `data/cards.txt` -> `data/cards.json`
+- `data/rooms.txt` -> `data/rooms.json`
+- `data/attributes.txt` -> `data/attributes.json`
+
+Requirements:
+
+- valid JSON only;
+- no JSONC/comments in runtime files;
+- stable lowercase kebab-case IDs;
+- IDs separate from display names;
+- cards, rooms, Markers, and Values use stable IDs;
+- remove obsolete custom parsers when migration is complete;
+- move unresolved data comments/TODOs into `docs/backlog.md`.
+
+## 2. Clarify data ownership
+
+`cards.json` owns card behavior and card-master state.
+
+`rooms.json` owns room/world composition and card-instance placement/state overrides.
+
+`attributes.json` owns player-facing attribute metadata.
+
+Room data must not encode card behavior merely because a card instance exists in a room.
+
+## 3. Make travel fully card-driven
+
+Remove travel destination/time behavior from room data.
+
+Route-card masters define:
+
+- which card they accept;
+- Action duration;
+- destination effect.
+
+Remove hardcoded runtime assumptions that travel always means dragging Body onto an object with a travel field.
+
+Use separate card IDs for routes with different behavior even when they share the same visible name and art.
+
+Current examples:
+
+- `go-tunnels-from-office` - visible name `Go to tunnels`, 15m
+- `go-tunnels-from-deep-tunnels` - visible name `Go to tunnels`, 30m
+
+## 4. Implement real Process execution
+
+Centralize world-time advancement.
+
+Only Actions advance world time.
+
+All active Processes update only when world time crosses a global quarter-hour boundary:
+
+- `:00`
+- `:15`
+- `:30`
+- `:45`
+
+Tick count for an Action is equivalent to:
+
+`floor(newElapsedMinutes / 15) - floor(oldElapsedMinutes / 15)`
+
+Search, travel, and future time-consuming Actions must all use the same time-advance path so no Action can bypass Processes.
+
+### First concrete recurring Process
+
+Body:
+
+- starts Hydration 50;
+- every global Process tick applies Hydration -2;
+- Hydration 0 is game over;
+- do not invent Satiation decay yet.
+
+The Process model must leave room for both recurring and finite Processes without implementing unfinished mechanics prematurely.
+
+## 5. Correct the opening scene
+
+Treat the opening as a loadout-selection interlude rather than normal survival simulation.
+
+During Opening Room:
+
+- Body, Mind, and Spirit are not visible/usable;
+- Vision/survival-state UI is hidden;
+- offered items may be carried/equipped;
+- equipment management remains free;
+- five-item take limit remains;
+- held/equipped offered items count toward five;
+- Escape remains available.
+
+Body, Mind, Spirit, and normal survival simulation begin on entering Tunnels.
+
+## 6. Equipment correction
+
+Replace `Neck` with:
+
+- Trinket 1
+- Trinket 2
+
+Keep universal Hand behavior:
+
+- ordinary movable items may go in either Hand;
+- Anchored world cards and Nadir-state cards may not;
+- Hand placement does not require authored `equip Hand`;
+- special effects still require their authored activation condition;
+- held cards do not consume carried capacity.
+
+## 7. Correct Stack semantics
+
+There is never a Stack Marker.
+
+Cards may Stack only when:
+
+- same master ID;
+- same Marker-ID set;
+- neither card contains any Value attributes.
+
+Cards with Values never Stack, even when current numbers match.
+
+Stack remains Room-only visual organization with separate underlying instances.
+
+## 8. Implement Puddle filling
+
+Puddle of Water:
+
+- Anchored;
+- visible `water = 3` Value.
+
+An empty container is a card with `container` and without `contains-water`.
+
+A successful fill:
+
+- adds `contains-water` to the container;
+- decreases Puddle water by 1;
+- discards the Puddle when water reaches 0.
+
+Do not invent the Action duration for filling; it remains open in the backlog.
+
+## 9. Correct Deep Tunnels Flashlight state
+
+- Opening Flashlight remains Battery 20.
+- Deep Tunnels Search Flashlight starts Battery 0.
+- Battery drain rate remains undecided and must not be invented.
+
+## 10. UI legibility correction
+
+### Equipment area
+
+- make equipment targets visibly larger;
+- keep slot labels readable while dragging;
+- keep legal/interaction highlight visible under drag preview;
+- prefer reduced equipment-preview card scale when hovering equipment targets;
+- ensure the player can tell exactly which slot will receive the card.
+
+### Inventory divider
+
+- reserve actual layout space for the `Inventory & equipment` header/divider;
+- content/placement bounds begin below it;
+- no card may render partly underneath it.
+
+### Cards
+
+- reduce bright-white visual dominance;
+- enlarge Marker icons;
+- enlarge Value presentation and numbers;
+- make basic mechanical state readable without mouseover.
+
+### Room backgrounds
+
+- reduce visual dominance;
+- avoid obvious enlargement/cropping where practical;
+- preserve aspect ratio;
+- lower brightness/saturation/contrast and/or use a subtle dark overlay;
+- do not regenerate or edit source art in this pass.
+
+Desired hierarchy:
+
+1. cards and interaction feedback;
+2. room UI;
+3. background artwork.
+
+---
+
+# Completion gate for the current correction pass
+
+Do not consider the pass complete until:
+
+- JSON migration is complete;
+- obsolete text parsers/data are removed where no longer needed;
+- travel behavior is card-authored rather than room-authored/hardcoded;
+- all time-consuming Actions use centralized time advancement;
+- Hydration visibly updates on crossed global quarter-hours;
+- Opening Room no longer exposes Body/Mind/Spirit;
+- Stack, equipment, Puddle, and Flashlight corrections work;
+- UI issues above are manually browser-verified;
+- focused technical documentation matches the implementation;
+- unresolved design values are recorded in `docs/backlog.md` rather than invented;
+- `pnpm test` passes;
+- `pnpm build` passes.
+
+The correction work should be developed on a dedicated branch and reviewed before merging to `main`.
+
+---
+
+# After the correction pass
+
+Do not expand the game merely because infrastructure now supports it.
+
+The next milestone should be chosen from concrete gameplay needs after the corrected Milestone 2 slice is played again.
+
+Likely future areas already present in the design include:
+
+- richer survival Processes;
+- wounds, healing, Fever, and spoilage;
+- crafting and sterilization;
+- noise and machinery;
+- more Search/world content;
+- NPC schedules and stealth/search-team systems;
+- narrative progression and Nadir's notes.
+
+These are not automatically the next implementation milestone. Their exact order remains a design/roadmap decision after the current correction pass.
+
+---
+
+# Roadmap ownership
+
+- Simon decides product/design direction and milestone priority.
+- ChatGPT maintains roadmap/backlog when design decisions change.
+- Codex implements the agreed scope and updates technical/focused documentation to match code.
+- Codex must not silently promote suggestions or unresolved backlog items into decided gameplay.
