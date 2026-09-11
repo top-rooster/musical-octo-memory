@@ -8,7 +8,7 @@ import type {
   ValueAttribute,
   Zone,
 } from "../domain/types";
-import { CARD_HEIGHT, CARD_WIDTH, INVENTORY_CAPACITY } from "./constants";
+import { CARD_HEIGHT, CARD_WIDTH } from "./constants";
 
 export interface ValueChangePreview {
   cardId: string;
@@ -27,12 +27,9 @@ export interface InteractionOutcome {
 export interface DragOrigin {
   zone: Zone;
   position: Position;
+  roomId?: string;
+  equipmentSlot?: CardInstance["equipmentSlot"];
 }
-
-export type DropIntent =
-  | { kind: "card"; targetId: string }
-  | { kind: "zone"; zone: Zone; position: Position; bounds: Bounds }
-  | { kind: "outside" };
 
 export function displayAttributeName(name: string): string {
   return name.replaceAll("-", " ");
@@ -52,6 +49,15 @@ export function canCrossZoneBoundaryDuringDrag(_card: CardInstance): boolean {
   return true;
 }
 
+export function canRestInZone(
+  card: CardInstance,
+  zone: Zone,
+): { legal: boolean; reason?: "anchored" } {
+  return isAnchored(card) && card.homeZone !== zone
+    ? { legal: false, reason: "anchored" }
+    : { legal: true };
+}
+
 export function clampValue(value: number, min = 0, max = 100): number {
   return Math.min(max, Math.max(min, value));
 }
@@ -64,31 +70,6 @@ export function getValue(
     (attribute): attribute is ValueAttribute =>
       attribute.kind === "value" && attribute.name === name,
   );
-}
-
-export function countInventoryCards(cards: CardInstance[], excludingId?: string): number {
-  return cards.filter(
-    (card) =>
-      card.id !== excludingId && card.zone === "inventory" && !isAnchored(card),
-  ).length;
-}
-
-export function canPlaceInZone(
-  card: CardInstance,
-  zone: Zone,
-  cards: CardInstance[],
-): { legal: boolean; reason?: "anchored" | "capacity" } {
-  if (isAnchored(card) && card.homeZone !== zone) {
-    return { legal: false, reason: "anchored" };
-  }
-  if (
-    zone === "inventory" &&
-    !isAnchored(card) &&
-    countInventoryCards(cards, card.id) >= INVENTORY_CAPACITY
-  ) {
-    return { legal: false, reason: "capacity" };
-  }
-  return { legal: true };
 }
 
 export function isWithinBounds(position: Position, bounds: Bounds): boolean {
@@ -118,11 +99,14 @@ export function positionIsFree(
   zone: Zone,
   position: Position,
   cards: CardInstance[],
+  roomId?: string,
 ): boolean {
   return cards.every(
     (other) =>
       other.id === cardId ||
       other.zone !== zone ||
+      Boolean(other.equipmentSlot) ||
+      (zone === "room" && other.roomId !== roomId) ||
       !rectanglesOverlap(position, other.position),
   );
 }
@@ -166,7 +150,40 @@ export function canInteract(
   source: CardInstance,
   target: CardInstance,
 ): boolean {
-  return calculateInteractionOutcome(state, source, target) !== null;
+  return (
+    calculateInteractionOutcome(state, source, target) !== null ||
+    (source.masterId === "body" && Boolean(target.travel))
+  );
+}
+
+function visibleAttributeIdentity(card: CardInstance): string[] {
+  return card.attributes.map((attribute) =>
+    attribute.kind === "marker"
+      ? `marker:${attribute.name}`
+      : `value:${attribute.name}:${attribute.value}`,
+  ).sort();
+}
+
+export function canStackCards(source: CardInstance, target: CardInstance): boolean {
+  if (source.id === target.id || source.masterId !== target.masterId) return false;
+  if (target.zone !== "room" || !target.roomId) return false;
+  if (source.zone === "room" && source.roomId !== target.roomId) return false;
+  if (source.zone === "inventory" && isAnchored(source)) return false;
+  const sourceAttributes = visibleAttributeIdentity(source);
+  const targetAttributes = visibleAttributeIdentity(target);
+  return sourceAttributes.length === targetAttributes.length &&
+    sourceAttributes.every((attribute, index) => attribute === targetAttributes[index]);
+}
+
+export type CardTargetKind = "interaction" | "stack" | null;
+
+export function cardTargetKind(
+  state: GameState,
+  source: CardInstance,
+  target: CardInstance,
+): CardTargetKind {
+  if (canInteract(state, source, target)) return "interaction";
+  return canStackCards(source, target) ? "stack" : null;
 }
 
 function applyValueChanges(
@@ -202,55 +219,31 @@ export function applyInteraction(
   return { ...state, cards };
 }
 
-function restoreOrigin(state: GameState, cardId: string, origin: DragOrigin): GameState {
-  const card = state.cards.find((candidate) => candidate.id === cardId);
-  if (
-    !card ||
-    (card.zone === origin.zone &&
-      card.position.x === origin.position.x &&
-      card.position.y === origin.position.y)
-  ) {
-    return state;
-  }
+export function stackCards(state: GameState, sourceId: string, targetId: string): GameState {
+  const source = state.cards.find((card) => card.id === sourceId);
+  const target = state.cards.find((card) => card.id === targetId);
+  if (!source || !target || cardTargetKind(state, source, target) !== "stack") return state;
+
+  const rootId = target.stackRootId ?? target.id;
+  const root = state.cards.find((card) => card.id === rootId) ?? target;
+  const memberCount = state.cards.filter(
+    (card) => card.id === rootId || card.stackRootId === rootId,
+  ).length;
+  const offset = Math.min(memberCount * 6, 18);
+  const stackedSource: CardInstance = {
+    ...source,
+    zone: "room",
+    roomId: target.roomId,
+    equipmentSlot: undefined,
+    stackRootId: rootId,
+    position: { x: root.position.x + offset, y: root.position.y + offset },
+  };
+
   return {
     ...state,
-    cards: state.cards.map((candidate) =>
-      candidate.id === cardId
-        ? { ...candidate, zone: origin.zone, position: { ...origin.position } }
-        : candidate,
-    ),
-  };
-}
-
-export function resolveDrop(
-  state: GameState,
-  sourceId: string,
-  origin: DragOrigin,
-  intent: DropIntent,
-): GameState {
-  const restored = restoreOrigin(state, sourceId, origin);
-  const source = restored.cards.find((card) => card.id === sourceId);
-  if (!source) return restored;
-
-  if (intent.kind === "card") {
-    return applyInteraction(restored, sourceId, intent.targetId);
-  }
-  if (intent.kind === "outside") return restored;
-
-  if (
-    !canPlaceInZone(source, intent.zone, restored.cards).legal ||
-    !isWithinBounds(intent.position, intent.bounds) ||
-    !positionIsFree(sourceId, intent.zone, intent.position, restored.cards)
-  ) {
-    return restored;
-  }
-
-  return {
-    ...restored,
-    cards: restored.cards.map((card) =>
-      card.id === sourceId
-        ? { ...card, zone: intent.zone, position: { ...intent.position } }
-        : card,
-    ),
+    cards: [
+      ...state.cards.filter((card) => card.id !== sourceId),
+      stackedSource,
+    ],
   };
 }

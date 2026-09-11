@@ -9,7 +9,7 @@
 # Milestone 2 adds a small amount of non-attribute behavior metadata:
 #   size Small|Medium|Large
 #   equip <slot>
-#   storage Small|Medium|Large <count>
+#   storage Small|Medium|Large <count> [main]
 #   while-equipped <effect>
 # These lines describe card behavior and are not additional hidden card attributes.
 #
@@ -142,7 +142,6 @@ Pocket Knife
 images/pocket-knife.png
 > A very basic folding knife. It is a poor weapon but a useful small cutting tool.
 size Small
-equip Hand
 Cutting Tool
 # Wood-shavings crafting is outside Milestone 2.
 
@@ -209,7 +208,7 @@ images/simple-backpack.png
 > A simple backpack that greatly increases what Nadir can carry.
 size Medium
 equip Back
-storage Medium 5
+storage Medium 5 main
 
 Glasses
 images/glasses.png

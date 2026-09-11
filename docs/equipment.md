@@ -30,6 +30,10 @@ Left Hand and Right Hand are ordinary equipment slots under the same rule as the
 
 A card in a Hand is equipped/active. A card in the flat carried Inventory is only carried.
 
+Either Hand may hold any ordinary movable item card. Hand compatibility is a general rule rather than authored `equip Hand` metadata on every item. Anchored world cards and Nadir-state cards are not ordinary movable items and cannot be placed in Hands.
+
+Held cards do not consume carried-storage capacity. During the opening evacuation, an offered card held in a Hand still counts toward the five-card selection limit. This allows a Medium offered item such as Canned Food or a Plastic Bottle to be chosen in a free Hand even though the initially equipped Pants provide only Small carried storage.
+
 This creates a place for active hand-held items such as the Flashlight. It does not yet impose a universal rule that every directly used tool must first be in a Hand; add that only when a concrete interaction requires it.
 
 ### Eyes and Vision

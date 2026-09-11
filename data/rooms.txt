@@ -5,6 +5,7 @@
 #
 # Top-level forms used by Milestone 2:
 #   start <room>
+#   search-back <image path>
 #   room <name>
 #   background <image path>
 #   light Bright|Dim|Twilight|Darkness
@@ -14,7 +15,7 @@
 #   equipped                     starts <slot> <card master> list
 #   offered                      starts opening offered-card list
 #   cards                        starts room-local starting-card list
-#   deck <name>                  starts a room-local Search deck
+#   deck <name> <duration>       starts a room-local Search deck
 #
 # A new section keyword or `room` ends the preceding list.
 # No indentation is required.
@@ -31,6 +32,7 @@
 # `Opening Room` is a working implementation name, not a decided narrative name.
 
 start Opening Room
+search-back images/search-back.jpg
 
 room Opening Room
 background images/opening-room-background.jpg
@@ -64,7 +66,7 @@ room Tunnels
 background images/tunnels-background.jpg
 light Dim
 
-deck Explore
+deck Explore 15m
 Scrap Metal
 Scrap Metal
 Pipe
@@ -83,7 +85,7 @@ light Bright
 cards
 Go to tunnels -> Tunnels 15m
 
-deck Search
+deck Search 15m
 Placeholder
 Placeholder
 Placeholder
@@ -102,7 +104,7 @@ light Twilight
 cards
 Go to tunnels -> Tunnels 30m
 
-deck Search
+deck Search 15m
 Flashlight
 Placeholder
 Placeholder

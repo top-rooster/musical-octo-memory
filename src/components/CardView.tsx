@@ -7,47 +7,42 @@ interface CardViewProps {
   card: CardInstance;
   style: CSSProperties;
   legalTarget?: boolean;
-  hoveredTarget?: boolean;
+  releaseReady?: boolean;
+  incompatibleTarget?: boolean;
   dragging?: boolean;
+  compact?: boolean;
+  stackCount?: number;
   preview?: ValueChangePreview[];
   onPointerDown?: (event: PointerEvent<HTMLDivElement>, card: CardInstance) => void;
   onPointerMove?: (event: PointerEvent<HTMLDivElement>) => void;
   onPointerUp?: (event: PointerEvent<HTMLDivElement>) => void;
   onPointerCancel?: (event: PointerEvent<HTMLDivElement>) => void;
+  onInspect?: (card: CardInstance | null, position?: { x: number; y: number }) => void;
 }
 
-function markerGlyph(name: string): string {
-  return name
-    .split(/[\s-]+/)
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+function glyph(name: string): string {
+  return name.split(/[\s-]+/).map((word) => word[0]).join("").slice(0, 2).toUpperCase();
+}
+function assetUrl(path: string): string {
+  return `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
 }
 
 export function CardView({
-  card,
-  style,
-  legalTarget = false,
-  hoveredTarget = false,
-  dragging = false,
-  preview = [],
-  onPointerDown,
-  onPointerMove,
-  onPointerUp,
-  onPointerCancel,
+  card, style, legalTarget = false, releaseReady = false, incompatibleTarget = false,
+  dragging = false, compact = false, stackCount, preview = [], onPointerDown, onPointerMove,
+  onPointerUp, onPointerCancel, onInspect,
 }: CardViewProps) {
   const [imageFailed, setImageFailed] = useState(false);
   useEffect(() => setImageFailed(false), [card.image]);
-
   const className = [
     "card",
     legalTarget && "card--legal-target",
-    hoveredTarget && "card--hovered-target",
+    releaseReady && "card--release-ready",
+    incompatibleTarget && "card--incompatible-target",
     dragging && "card--dragging",
-  ]
-    .filter(Boolean)
-    .join(" ");
+    compact && "card--compact",
+    card.animation === "draw" && "card--drawn",
+  ].filter(Boolean).join(" ");
 
   return (
     <div
@@ -57,22 +52,23 @@ export function CardView({
       tabIndex={0}
       aria-label={`${card.title} card`}
       data-card-id={card.id}
+      onPointerEnter={(event) => !dragging && onInspect?.(card, { x: event.clientX, y: event.clientY })}
+      onPointerLeave={() => onInspect?.(null)}
       onPointerDown={(event) => onPointerDown?.(event, card)}
-      onPointerMove={onPointerMove}
+      onPointerMove={(event) => {
+        onPointerMove?.(event);
+        if (!dragging) onInspect?.(card, { x: event.clientX, y: event.clientY });
+      }}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerCancel}
     >
+      {stackCount && <span className="card__stack-count" aria-label={`Stack of ${stackCount}`}>{stackCount}</span>}
       <div className="card__title">{card.title}</div>
       <div className="card__image" aria-hidden="true">
         {imageFailed ? (
-          <span className="card__placeholder">{markerGlyph(card.title)}</span>
+          <span className="card__placeholder">{glyph(card.title)}</span>
         ) : (
-          <img
-            src={`/${card.image}`}
-            alt=""
-            draggable={false}
-            onError={() => setImageFailed(true)}
-          />
+          <img src={assetUrl(card.image)} alt="" draggable={false} onError={() => setImageFailed(true)} />
         )}
       </div>
       <div className="card__attributes">
@@ -80,13 +76,8 @@ export function CardView({
           const label = displayAttributeName(attribute.name);
           if (attribute.kind === "marker") {
             return (
-              <span
-                className="attribute attribute--marker"
-                title={label}
-                aria-label={label}
-                key={attribute.name}
-              >
-                {markerGlyph(label)}
+              <span className="attribute attribute--marker" aria-label={label} key={attribute.name}>
+                {glyph(label)}
               </span>
             );
           }
@@ -95,11 +86,10 @@ export function CardView({
           return (
             <span
               className={`attribute attribute--value ${change ? "attribute--preview" : ""}`}
-              title={`${label} ${valueText}`}
               aria-label={`${label} ${valueText}`}
               key={attribute.name}
             >
-              <span className="attribute__icon">{markerGlyph(label)}</span>
+              <span className="attribute__icon">{glyph(label)}</span>
               <span className="attribute__value">{valueText}</span>
             </span>
           );
