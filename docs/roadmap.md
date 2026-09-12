@@ -9,379 +9,365 @@ Detailed design decisions live in focused docs and `docs/backlog.md`. The curren
 ### Milestone 1 - core card interaction prototype
 **Status: COMPLETE**
 
-Validated the basic interaction language:
-
-- React + TypeScript + Vite browser prototype;
-- Room and Inventory zones;
-- authored card masters;
-- drag/drop and legal-target feedback;
-- Anchored behavior;
-- card-on-card interactions;
-- Value preview/clamping;
-- food consumption;
-- collision rejection and exact-origin restoration.
-
-Milestone 1 rules that were later superseded must not be treated as current design. In particular, the old generic five-card Inventory capacity and the old custom text-data direction are obsolete.
+Validated the basic Room/Inventory card workspace, drag/drop, Anchored behavior, card-on-card interactions, Value previews, food consumption, collision rejection, and exact-origin restoration.
 
 ### Milestone 2 - playable world slice
 **Status: BASELINE COMPLETE AND MERGED TO `main`**
 
-The merged baseline established:
-
-- opening evacuation/loadout scene;
-- persistent rooms;
-- Search decks;
-- room discovery and travel;
-- Vision and room lighting;
-- equipment and carried storage;
-- opening item selection;
-- Flashlight/Glasses Vision effects;
-- room-local Search content;
-- GitHub Pages deployment workflow;
-- automated test/build coverage for the implemented slice.
-
-The baseline exposed architecture and UI issues that are now intentionally being corrected before adding more gameplay breadth.
+Established the opening evacuation scene, persistent rooms, Search decks, travel, Vision/light, equipment, carried storage, item selection, and deployment/test coverage.
 
 ### JSON authored-data migration
 **Status: COMPLETE AND MERGED**
 
-PR #7 moved runtime authored data to strict JSON, removed the old TXT runtime parsers/data, centralized JSON loading/validation, preserved the temporary travel compatibility adapter, and added a capability gate so unsupported Actions cannot partially execute.
-
-That compatibility model is intentionally temporary. The next pass replaces it with the current attribute-driven Action model.
+Runtime authored data now uses strict JSON. The current runtime still contains temporary schema/behavior inherited from the baseline that the next correction pass must replace.
 
 ---
 
-# Current implementation pass - Action, attribute, and time foundation
+# Next Codex iteration - Action, attribute, time, and card-model correction
 
 **Priority: NOW**
 
-Do this before adding more survival, crafting, NPC, stealth, or narrative systems.
+The next Codex iteration should correct the existing slice before adding new gameplay breadth.
 
-## 1. Implement the current trigger-based Action model
+## Non-negotiable implementation constraints
 
-Replace the temporary receiver-owned `accept` representation with the design in `docs/action-process-model.md`.
+### Do not invent JSON structure
+
+Codex must not introduce new authored JSON fields, object shapes, arrays, wrappers, or special-purpose datatypes unless Simon explicitly asks for a new JSON structure.
+
+Use the structures already decided and already present in the project, including:
+
+- Markers;
+- Values;
+- References;
+- Actions;
+- Processes;
+- the explicitly decided structured attributes `path`, `food`, and `hydration`.
+
+If the existing schema cannot represent a required mechanic, stop at that point and document the missing design decision. Do not solve it by inventing syntax.
+
+In particular, do not invent a new Reference representation. Reuse the project's existing Reference schema.
+
+## 1. Replace the temporary card-on-card interaction model
+
+Replace receiver-owned `accept` behavior with the trigger-based Action model from `docs/action-process-model.md`.
 
 For card-on-card drag/drop:
 
 - dragged card = `accepted`;
 - card underneath = `received`;
-- `on` matches the received card from an Action on accepted;
-- `receive` matches the accepted card from an Action on received;
-- trigger selectors may match card IDs, Markers, and attribute presence, including conjunctive combinations;
-- effect targets use `accepted` and `received` roles;
-- 0 matches means no Action;
-- exactly 1 match starts the Action;
-- 2+ matches are invalid authored data.
+- `on` Actions belong to accepted and match received;
+- `receive` Actions belong to received and match accepted;
+- selectors may use card IDs, Markers, structured-attribute presence, and decided conjunctive combinations;
+- effect targets use `accepted` and `received`;
+- 0 matches = no Action;
+- exactly 1 = execute;
+- 2+ = invalid authored data.
 
-Authored-data validation must detect overlapping Action match domains and report the conflicting card IDs and Action definitions. Runtime resolution must guard against ambiguity as a safety net.
+Validation must reject overlapping Action match domains. Runtime resolution must also guard against ambiguity.
 
-## 2. Add structured card attributes
-
-Support card attributes that carry authored payload beyond Marker presence or a single numeric Value.
-
-Implement the three concrete attributes currently decided:
+## 2. Implement the three decided structured attributes
 
 ### Path
 
-A route/passage card has a `path` attribute containing:
+Route cards carry `path` with destination Room and travel time.
 
-- target Room ID;
-- travel time.
+Body owns one generic Travel Action. Body is dragged onto a card carrying `path`.
 
-Body owns one generic Travel Action triggered when Body is dropped on a card carrying `path`.
-
-Travel reads destination and duration from Path. Do not duplicate destination/time in room data, a route-specific Action, or a separate `go` effect.
+Travel reads destination and duration from Path. Remove duplicated travel destination/time behavior from legacy route handling.
 
 ### Food
 
-An edible card has a `food` attribute containing the concrete completion effects of eating it.
+Edible cards carry `food` with the concrete effects of eating them.
 
-Body owns one generic Eat Action triggered when Body receives a card carrying `food`.
+Body owns one generic Eat Action. Food is dropped on Body.
 
-Do not put a growing list of edible card IDs or item-specific food effects on Body.
+Do not keep item-specific Eat Actions on Body.
 
 ### Hydration and Contains Water
 
-A card that can provide hydration has a `hydration` attribute containing the concrete completion effects of drinking from it.
+A card capable of providing hydration carries `hydration` with the concrete Drink effects.
 
-Current water presence is represented by the mutable Marker `contains-water`.
+Current water presence is the mutable Marker `contains-water`.
 
-Body owns one generic Drink Action. Its trigger requires the incoming card to satisfy the water-state requirement, including `contains-water`, and the current model also requires the `hydration` attribute that supplies the effect payload.
+Body owns one generic Drink Action. A legal Drink source must satisfy the decided trigger including `contains-water` and the hydration behavior required by the current model.
 
-`hydration` does not replace `contains-water`. An empty container may retain its hydration behavior payload while becoming non-drinkable because `contains-water` has been removed. Refilling restores `contains-water` and makes the interaction legal again.
+`hydration` does not replace `contains-water`. Drinking removes the current water state as authored; refilling restores `contains-water`.
 
-Do not duplicate drink effects on Body.
+## 3. Build the generic atomic Action executor
 
-The general principle is:
+The Action executor must:
 
-> Action = what Nadir does. Triggering card state/attributes = the concrete eligibility and data/effects contributed by the object.
+- support the concrete effect set required by current authored behavior;
+- validate that the entire Action is executable before applying any effects;
+- never partially execute an unsupported/invalid Action;
+- execute only one Action at a time;
+- apply normal effects at Action completion;
+- require an explicit/resolved duration; there is no default duration.
 
-Do not generalize this into a broad scripting system beyond the concrete needs above.
-
-## 3. Build one generic Action executor
-
-Action execution must be atomic: either every required effect is supported and the Action executes, or the Action is not executable.
-
-The existing capability gate from PR #7 should remain effective until the generic executor supports the authored effect set.
-
-Only one Action may execute at a time.
-
-Normal Action effects execute at completion, not once per world tick.
-
-An Action must resolve an explicit duration when it starts. There is no default duration. The duration may be authored on the Action or supplied by its triggering attribute; Travel specifically uses `path.time`.
+Do not broaden this into an unrestricted scripting engine.
 
 ## 4. Centralize world-time advancement
 
 Only Actions advance world time.
 
-All time-consuming Action paths must use one centralized time-advance mechanism. This includes:
+All time-consuming paths must use the same time-advance mechanism, including:
 
 - card Actions;
 - Travel;
-- Search;
-- future Action types.
+- Search.
 
-While one Action executes, world time crosses zero or more global quarter-hour boundaries. Each crossed boundary causes one world tick.
+The world tick grid is global at `:00`, `:15`, `:30`, and `:45`.
 
-If Action completion falls exactly on a world-tick boundary, resolve the world tick first and Action completion second.
+Every crossed boundary produces one world tick.
+
+If an Action completes exactly on a tick boundary:
+
+1. resolve the world tick;
+2. resolve Process consequences;
+3. complete the Action;
+4. apply completion effects.
 
 ## 5. Implement the global Process model
 
-Processes have no private interval, countdown, or duration.
+Processes have no private interval/countdown/timer.
 
-Remove Process timing fields such as `interval`, `intervalMinutes`, or any equivalent per-Process clock.
+Every active Process updates once on each global world tick.
 
-Every active Process updates exactly once on every global world tick:
+Body starts with:
 
-- `:00`
-- `:15`
-- `:30`
-- `:45`
+- Hydration 50;
+- Satiation 50.
 
-Many Processes may be active while the one Action executes.
+Each global 15-minute world tick applies:
 
-All active Processes participate in one world update. JSON ordering must not become gameplay ordering.
+- Hydration -2;
+- Satiation -1.
 
-### First concrete recurring survival Process
+Hydration 0 is game over.
 
-Body:
+Remove legacy per-Process timing fields that conflict with this model.
 
-- starts Hydration 50 and Satiation 50;
-- each global world tick applies Hydration -2;
-- each global world tick applies Satiation -1;
-- Hydration 0 is game over.
+## 6. Preserve Body / Mind / Spirit
 
-Finite/staged Processes use card state, effects, and conditions/thresholds rather than independent timers.
+Nadir remains represented by three persistent anchored Inventory cards:
 
-## 6. Support Hidden Values
+- Body;
+- Mind;
+- Spirit.
 
-Cards may have player-facing Values and non-player-facing Hidden Values.
+Do not create a generic Nadir card.
 
-Hidden Values:
+Body holds Hydration/Satiation and the current generic physical Actions. Mind holds Vision. Spirit remains persistent even where later mechanics are not yet decided.
 
-- are numeric card-instance state;
-- use stable IDs;
-- clone independently from master state and support instance overrides;
-- may be used by Actions, Processes, and conditions;
-- do not automatically appear in player UI;
-- do not require player-facing metadata unless later made visible.
+Body, Mind, and Spirit remain hidden during the opening and appear when the normal simulation begins in Tunnels.
 
-Do not invent generic Hidden Value bounds/clamping or Stack behavior until those details are decided.
+## 7. Migrate item size to Markers
 
-## 7. Remove travel compatibility code
+Remove the standalone item `size` field/type.
 
-Once Path + Travel work through the generic Action system:
+Use exactly one of these ordinary Markers for size-based carried items:
 
-- remove `CardInstance.travel`;
-- remove derived travel compatibility adapters;
-- remove hardcoded accepted-Body travel checks;
-- keep route-card identity separate where distinct world passages require separate masters.
+- `small`;
+- `medium`;
+- `large`.
 
-## 8. Correct the opening scene
+Add the appropriate player-facing attribute metadata using the existing attribute metadata model.
 
-Treat the opening as a loadout-selection interlude rather than normal survival simulation.
+Storage/packing logic must inspect the size Marker.
 
-During Opening Room:
+Do not retain the legacy size field as a second source of truth.
 
-- Body, Mind, and Spirit are not visible/usable;
-- Vision/survival-state UI is hidden;
+## 8. Migrate storage capacity to Values
+
+Remove the standalone `storage` object/type.
+
+Use ordinary Values:
+
+- `storage-small`;
+- `storage-medium`;
+- `storage-large`.
+
+Current decided examples:
+
+- Pants: `storage-small = 2`;
+- Simple Backpack: `storage-medium = 5`.
+
+Only equipped gear contributes these Values to active carried capacity.
+
+Packing convention:
+
+- `storage-small` accepts `small`;
+- `storage-medium` accepts `small` or `medium`;
+- `storage-large` accepts all three;
+- allocate to the smallest fitting capacity first.
+
+The opening's five-offered-card limit remains a scene rule and must not be encoded by inventing storage-phase schema.
+
+## 9. Migrate equipment compatibility to References
+
+Remove the standalone authored `equip` field from the target card model.
+
+Non-Hand equipment compatibility uses the project's existing Reference mechanism.
+
+Semantics include:
+
+- T-Shirt -> Chest;
+- Pants -> Legs;
+- Glasses -> Eyes;
+- Simple Backpack -> Back.
+
+Use the existing Reference schema exactly. Do not invent a replacement Reference JSON structure.
+
+Hands are not authored per card:
+
+- every ordinary movable card may be placed in Left Hand or Right Hand;
+- ordinary cards do not need Hand References;
+- Anchored world cards and Nadir-state cards cannot be held;
+- held cards do not consume carried storage capacity.
+
+## 10. Remove temporary compatibility code
+
+Once the new models are active, remove legacy compatibility/adapters instead of keeping duplicate sources of truth.
+
+This includes, where present:
+
+- receiver-owned `accept` handling;
+- legacy travel adapters / route-specific travel behavior;
+- hardcoded accepted-Body travel checks;
+- dedicated item-size handling;
+- dedicated storage-object handling;
+- dedicated `equip` handling for non-Hand slots;
+- per-card authored Hand compatibility.
+
+Do not retain old and new representations side by side.
+
+## 11. Preserve and correct the opening scene
+
+During the opening:
+
+- Body, Mind, and Spirit are hidden/unusable;
+- ordinary survival-state UI is hidden;
 - offered items may be carried/equipped;
-- equipment management remains free;
-- five-item take limit remains;
-- held/equipped offered items count toward five;
+- equipment management is free;
+- the player may take at most five offered card instances;
+- held/equipped offered cards count toward five;
 - Escape remains available.
 
-Body, Mind, Spirit, and normal survival simulation begin on entering Tunnels.
+Normal survival simulation begins in Tunnels.
 
-## 9. Equipment, size, and storage correction
+## 12. Preserve current Stack semantics
 
-Replace `Neck` with:
+There is no Stack Marker.
 
-- Trinket 1
-- Trinket 2
-
-Keep universal Hand behavior:
-
-- ordinary movable items may go in either Hand;
-- Anchored world cards and Nadir-state cards may not;
-- Hand placement does not require authored `equip Hand`;
-- special effects still require their authored activation condition;
-- held cards do not consume carried capacity.
-
-Migrate item size into the existing Marker system:
-
-- use `small`, `medium`, and `large` Markers;
-- remove the standalone card `size` field/type;
-- size-based carried items have exactly one size Marker;
-- add player-facing attribute metadata for the three size Markers;
-- storage/packing rules inspect the size Marker rather than a dedicated size property.
-
-Migrate storage capacity into the existing Value system:
-
-- use `storage-small`, `storage-medium`, and `storage-large` Values;
-- remove the standalone card `storage` object/type;
-- Pants use `values: { "storage-small": 2 }`;
-- Simple Backpack uses `values: { "storage-medium": 5 }`;
-- add player-facing attribute metadata for the three storage Values;
-- only equipped cards contribute their storage Values to carried capacity;
-- the opening's separate five-offered-card rule remains a scene rule rather than a `phase` property embedded in storage data;
-- keep the existing smallest-fitting-capacity allocation convention.
-
-Do not keep Marker/Value data and old `size`/`storage` fields as parallel sources of truth.
-
-## 10. Correct Stack semantics
-
-There is never a Stack Marker.
-
-Current decided visible-state rule:
+Current eligibility remains:
 
 - same master ID;
-- same Marker-ID set;
-- cards containing visible Value attributes do not Stack;
-- Stack is Room-only presentation and underlying instances remain separate.
+- same current Marker set;
+- cards with visible Values do not Stack;
+- Stack is Room-only presentation;
+- underlying card instances remain separate.
 
-Whether Hidden Values additionally prevent Stack remains undecided.
+Whether Hidden Values affect Stack remains unresolved and must not be invented.
 
-## 11. Implement Puddle filling after its Action duration is decided
+## 13. Keep Puddle and Flashlight within decided scope
 
 Puddle of Water:
 
 - Anchored;
-- visible `water = 3` Value.
+- `Water 3`;
+- filling an eligible empty container adds `contains-water`;
+- filling reduces Puddle Water by 1;
+- discard Puddle at 0.
 
-An empty container is a card with `container` and without `contains-water`.
+The fill Action duration remains undecided. Do not invent it.
 
-A successful fill:
+Flashlight:
 
-- adds `contains-water` to the container;
-- decreases Puddle water by 1;
-- discards the Puddle when water reaches 0.
+- opening instance Battery 20;
+- Deep Tunnels Search instance Battery 0;
+- Vision +1 only while active in a Hand and Battery > 0.
 
-`contains-water` is part of the Drink trigger; filling restores the mutable water-present state that makes the container a legal Drink source.
+Battery drain rate remains undecided. Do not invent it.
 
-Do not invent the fill Action duration; it remains open.
+## 14. Correct drag feedback and UI legibility
 
-## 12. Preserve decided Flashlight instance state
+Preserve/implement the decided drag language:
 
-- Opening Flashlight remains Battery 20.
-- Deep Tunnels Search Flashlight starts Battery 0.
-- Battery drain rate remains undecided and must not be invented.
+- all legal card targets highlight when dragging begins;
+- ordinary legal targets become yellow when hovered for commitment;
+- rejecting hovered cards are red;
+- Stack targets remain green;
+- known direct Value changes preview immediately on affected cards.
 
-## 13. UI legibility correction
+Correct the existing UI issues:
 
-### Equipment area
-
-- make equipment targets visibly larger;
-- keep slot labels readable while dragging;
-- keep legal/interaction highlight visible under drag preview;
-- prefer reduced equipment-preview card scale when hovering equipment targets;
-- ensure the player can tell exactly which slot will receive the card.
-
-### Inventory divider
-
-- reserve actual layout space for the `Inventory & equipment` header/divider;
-- content/placement bounds begin below it;
-- no card may render partly underneath it.
-
-### Cards
-
-- reduce bright-white visual dominance;
-- enlarge player-facing attributes and Value numbers;
-- make basic mechanical state readable without mouseover.
-
-### Room backgrounds
-
-- reduce visual dominance;
-- avoid obvious enlargement/cropping where practical;
-- preserve aspect ratio;
-- lower brightness/saturation/contrast and/or use a subtle dark overlay;
-- do not regenerate or edit source art in this pass.
-
-Desired hierarchy:
-
-1. cards and interaction feedback;
-2. room UI;
-3. background artwork.
+- equipment targets large enough to read/use;
+- slot labels remain visible while dragging;
+- Inventory divider reserves actual layout space;
+- no cards render under the divider;
+- attribute icons and Value numbers are clearly readable;
+- cards should visually dominate backgrounds, not vice versa;
+- background source art is not regenerated or modified in this pass.
 
 ---
 
-# Completion gate for the current correction pass
+# Completion gate for the next Codex iteration
 
-Do not consider the pass complete until:
+Do not consider the iteration complete until all of the following are true:
 
-- Body, Mind, and Spirit remain the persistent Nadir-state card model; no generic Nadir card is introduced;
-- card-on-card interactions use the trigger-based Action model with ambiguity validation;
-- Path, Food, and Hydration attributes follow the current ownership model;
-- Drink legality includes `contains-water` as current water state;
-- Body has generic Travel, Eat, and Drink Actions rather than item-specific lists;
+- Body/Mind/Spirit remain the Nadir-state model;
+- trigger-based Actions replace the legacy `accept` interaction model;
+- Path, Food, and Hydration follow the decided ownership model;
+- Drink requires `contains-water` as decided;
+- Body owns generic Travel, Eat, and Drink Actions;
 - Action execution is atomic;
-- only one Action may execute at a time;
-- all time-consuming Actions use centralized world-time advancement;
-- Processes have no individual timers and all active Processes update on global 15-minute ticks;
-- each global world tick applies Hydration -2 and Satiation -1 to Body;
-- world tick resolves before Action completion when both occur at the same timestamp;
-- Hydration and Satiation visibly update on crossed world ticks;
-- Hidden Values can exist as non-player-facing card-instance state;
-- the temporary travel adapter is removed;
-- Opening Room no longer exposes Body/Mind/Spirit;
-- item size is represented only by `small`/`medium`/`large` Markers and the old standalone `size` field is removed;
-- storage capacity is represented only by `storage-small`/`storage-medium`/`storage-large` Values and the old standalone `storage` field is removed;
-- equipped gear is the only source of active storage-capacity Values;
-- storage packing uses the size Markers and storage Values without changing the decided allocation semantics;
-- Stack, equipment, Puddle, and Flashlight corrections obey current design decisions;
-- UI issues above are manually browser-verified;
-- focused technical documentation matches implementation;
-- unresolved design values are recorded rather than invented;
+- only Actions advance time;
+- all time-consuming Actions use centralized time advancement;
+- all active Processes update on global 15-minute ticks;
+- each tick applies Hydration -2 and Satiation -1 to Body;
+- tick-before-completion ordering is correct;
+- standalone item `size` data is removed and size is represented by Markers;
+- standalone `storage` data is removed and storage capacity is represented by Values;
+- standalone `equip` data is removed for equipment compatibility;
+- non-Hand equipment compatibility uses the existing Reference system;
+- ordinary Hand compatibility is a general rule and is not authored per card;
+- no new JSON schema has been invented;
+- old compatibility paths are removed once superseded;
+- opening behavior remains correct;
+- Stack semantics remain correct;
+- drag feedback/stat previews match the design;
+- relevant docs are updated to match the final implementation;
+- unresolved design values remain unresolved rather than guessed;
 - `pnpm test` passes;
-- `pnpm build` passes.
+- `pnpm build` passes;
+- the corrected slice is manually browser-verified.
 
-The correction work should be developed on a dedicated branch and reviewed before merging to `main`.
+Develop the implementation on a dedicated branch and review before merging to `main`.
 
 ---
 
-# After the correction pass
+# Explicitly out of scope for this iteration
 
-Do not expand the game merely because infrastructure supports it.
+Do not expand into these areas merely because the infrastructure could support them:
 
-The next milestone should be chosen from concrete gameplay needs after the corrected Milestone 2 slice is played again.
-
-Likely future areas already present in the design include:
-
-- richer survival Processes;
-- wounds, healing, Fever, and spoilage;
-- crafting and sterilization;
-- noise and machinery;
-- more Search/world content;
-- NPC schedules and stealth/search-team systems;
-- narrative progression and Nadir's notes.
-
-These are not automatically the next implementation milestone.
+- new crafting systems;
+- new wound/healing rules;
+- Fever recovery design;
+- spoilage timing beyond already-decided behavior;
+- new NPC/stealth systems;
+- new narrative systems;
+- new permanent survival Values;
+- durability rules;
+- exact Flashlight drain;
+- Puddle fill duration;
+- new JSON schema.
 
 ---
 
 # Roadmap ownership
 
-- Simon decides product/design direction and milestone priority.
-- ChatGPT maintains roadmap/backlog when design decisions change.
+- Simon decides product/design direction and JSON/schema direction.
+- ChatGPT maintains roadmap/backlog and must not invent product/schema decisions.
 - Codex implements the agreed scope and updates technical/focused documentation to match code.
-- Codex must not silently promote suggestions or unresolved backlog items into decided gameplay.
+- Codex must not silently promote suggestions, unresolved questions, or implementation convenience into authored schema.
