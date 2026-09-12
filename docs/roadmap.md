@@ -2,7 +2,7 @@
 
 This roadmap tracks implementation order, not design history.
 
-Detailed design decisions live in focused docs and `docs/backlog.md`. Git history preserves older milestone contracts.
+Detailed design decisions live in focused docs and `docs/backlog.md`. The current Action/Process contract is in `docs/action-process-model.md`. Git history preserves older milestone contracts.
 
 ## Current status
 
@@ -64,11 +64,11 @@ Requirements:
 - no JSONC/comments in runtime files;
 - stable lowercase kebab-case IDs;
 - IDs separate from display names;
-- cards, rooms, Markers, and Values use stable IDs;
+- cards, rooms, Markers, Values, and Hidden Values use stable IDs;
 - remove obsolete custom parsers when migration is complete;
-- move unresolved data comments/TODOs into `docs/backlog.md`.
+- move unresolved data comments/TODOs into design docs/backlog.
 
-## 2. Clarify data ownership
+## 2. Keep data ownership explicit
 
 `cards.json` owns card behavior and card-master state.
 
@@ -78,56 +78,108 @@ Requirements:
 
 Room data must not encode card behavior merely because a card instance exists in a room.
 
-## 3. Make travel fully card-driven
+## 3. Implement the trigger-based Action model
 
-Remove travel destination/time behavior from room data.
+Replace the temporary receiver-owned `accept` representation with the decided Action model in `docs/action-process-model.md`.
 
-Route-card masters define:
+For card-on-card drag/drop:
 
-- which card they accept;
-- Action duration;
-- destination effect.
+- the dragged card is `accepted`;
+- the card underneath is `received`;
+- an Action authored on accepted may use trigger `on` to match received;
+- an Action authored on received may use trigger `receive` to match accepted;
+- `requires` describes state required on the Action-owning card;
+- effect targets use `accepted` and `received` roles.
 
-Remove hardcoded runtime assumptions that travel always means dragging Body onto an object with a travel field.
+There is no separate `accept` gameplay concept.
 
-Use separate card IDs for routes with different behavior even when they share the same visible name and art.
+At drag-end:
 
-Current examples:
+- 0 matching Actions means no interaction;
+- exactly 1 matching Action starts;
+- 2+ matching Actions are invalid authored data.
 
-- `go-tunnels-from-office` - visible name `Go to tunnels`, 15m
-- `go-tunnels-from-deep-tunnels` - visible name `Go to tunnels`, 30m
+Authored-data validation must detect overlapping Action matches and report the conflicting card IDs and Action definitions. Runtime resolution must also guard against ambiguity.
 
-## 4. Implement real Process execution
+Consumable behavior belongs primarily on the consumable card. Do not turn Body into a registry containing every item that may be consumed.
 
-Centralize world-time advancement.
+## 4. Add Action execution and centralized world-time advancement
 
-Only Actions advance world time.
+Only one Action may execute at a time.
 
-All active Processes update only when world time crosses a global quarter-hour boundary:
+Every Action has an explicit duration; instant Actions use `0m`.
+
+Normal Action effects execute at Action completion, not once per world tick.
+
+All time-consuming Action paths must use one centralized time-advance mechanism. This includes card Actions, travel, Search, and future Action types.
+
+While an Action executes, world time crosses zero or more global quarter-hour boundaries. Each crossed boundary causes one world tick.
+
+If Action completion falls exactly on a world-tick boundary, the world tick resolves first and Action completion occurs afterward.
+
+## 5. Implement the global Process model
+
+Processes have no private interval, countdown, or duration.
+
+Remove Process timing fields such as:
+
+- `interval`;
+- `intervalMinutes`;
+- any equivalent per-Process clock.
+
+Every active Process updates exactly once on every global world tick:
 
 - `:00`
 - `:15`
 - `:30`
 - `:45`
 
-Tick count for an Action is equivalent to:
+Many Processes may be active while the one Action executes.
 
-`floor(newElapsedMinutes / 15) - floor(oldElapsedMinutes / 15)`
+All active Processes participate in one world update. JSON ordering must not become gameplay ordering.
 
-Search, travel, and future time-consuming Actions must all use the same time-advance path so no Action can bypass Processes.
-
-### First concrete recurring Process
+### First concrete Process
 
 Body:
 
 - starts Hydration 50;
-- every global Process tick applies Hydration -2;
+- each global world tick applies Hydration -2;
 - Hydration 0 is game over;
-- do not invent Satiation decay yet.
+- do not invent Satiation decay.
 
-The Process model must leave room for both recurring and finite Processes without implementing unfinished mechanics prematurely.
+Finite/staged Processes should use card state, effects, and conditions/thresholds instead of acquiring independent timers.
 
-## 5. Correct the opening scene
+## 6. Support Hidden Values as card-local internal state
+
+Cards may have player-facing Values and non-player-facing Hidden Values.
+
+Hidden Values:
+
+- are numeric state owned by the card instance;
+- use stable IDs;
+- clone independently from master state and support instance overrides;
+- may be used by Actions, Processes, and conditions;
+- do not automatically appear in player UI;
+- do not require `attributes.json` metadata unless later made visible.
+
+Do not invent generic Hidden Value bounds/clamping or Stack behavior until those details are decided.
+
+## 7. Make travel use the Action model directly
+
+Route-card masters own their trigger, Action duration, and destination effect.
+
+A route that receives Body may express that through `trigger.receive` rather than room-authored travel metadata or hardcoded Body checks.
+
+Remove the temporary `CardInstance.travel` compatibility adapter once generic Action execution can perform travel faithfully.
+
+Use separate card IDs for routes with different behavior even when they share the same visible name and art.
+
+Current examples:
+
+- `go-tunnels-from-office` - visible name `Go to tunnels`, 15m;
+- `go-tunnels-from-deep-tunnels` - visible name `Go to tunnels`, 30m.
+
+## 8. Correct the opening scene
 
 Treat the opening as a loadout-selection interlude rather than normal survival simulation.
 
@@ -143,7 +195,7 @@ During Opening Room:
 
 Body, Mind, Spirit, and normal survival simulation begin on entering Tunnels.
 
-## 6. Equipment correction
+## 9. Equipment correction
 
 Replace `Neck` with:
 
@@ -158,21 +210,20 @@ Keep universal Hand behavior:
 - special effects still require their authored activation condition;
 - held cards do not consume carried capacity.
 
-## 7. Correct Stack semantics
+## 10. Correct Stack semantics
 
 There is never a Stack Marker.
 
-Cards may Stack only when:
+Current decided visible-state rule:
 
 - same master ID;
 - same Marker-ID set;
-- neither card contains any Value attributes.
+- cards containing visible Value attributes do not Stack;
+- Stack is Room-only presentation and underlying instances remain separate.
 
-Cards with Values never Stack, even when current numbers match.
+Whether Hidden Values additionally prevent Stack is still a design question and must not be invented during implementation.
 
-Stack remains Room-only visual organization with separate underlying instances.
-
-## 8. Implement Puddle filling
+## 11. Implement Puddle filling after its Action duration is decided
 
 Puddle of Water:
 
@@ -187,15 +238,15 @@ A successful fill:
 - decreases Puddle water by 1;
 - discards the Puddle when water reaches 0.
 
-Do not invent the Action duration for filling; it remains open in the backlog.
+Do not invent the Action duration for filling; it remains open.
 
-## 9. Correct Deep Tunnels Flashlight state
+## 12. Preserve decided Flashlight instance state
 
 - Opening Flashlight remains Battery 20.
 - Deep Tunnels Search Flashlight starts Battery 0.
 - Battery drain rate remains undecided and must not be invented.
 
-## 10. UI legibility correction
+## 13. UI legibility correction
 
 ### Equipment area
 
@@ -238,16 +289,21 @@ Desired hierarchy:
 
 Do not consider the pass complete until:
 
-- JSON migration is complete;
-- obsolete text parsers/data are removed where no longer needed;
-- travel behavior is card-authored rather than room-authored/hardcoded;
-- all time-consuming Actions use centralized time advancement;
-- Hydration visibly updates on crossed global quarter-hours;
+- JSON migration is complete and obsolete text parsers/data are removed;
+- stable IDs remain runtime identity rather than display-name lookups;
+- card-on-card interactions use the trigger-based Action model with ambiguity validation;
+- only one Action may execute at a time;
+- all time-consuming Actions use centralized world-time advancement;
+- Processes have no individual timers and all active Processes update on global 15-minute ticks;
+- world tick resolves before Action completion when both occur at the same timestamp;
+- Hydration visibly updates on crossed world ticks;
+- Hidden Values can exist as non-player-facing card-instance state;
+- travel uses generic Action behavior rather than room-authored/hardcoded travel behavior;
 - Opening Room no longer exposes Body/Mind/Spirit;
-- Stack, equipment, Puddle, and Flashlight corrections work;
+- Stack, equipment, Puddle, and Flashlight corrections obey current design decisions;
 - UI issues above are manually browser-verified;
-- focused technical documentation matches the implementation;
-- unresolved design values are recorded in `docs/backlog.md` rather than invented;
+- focused technical documentation matches implementation;
+- unresolved design values are recorded rather than invented;
 - `pnpm test` passes;
 - `pnpm build` passes.
 
