@@ -39,7 +39,7 @@ Different masters may share the same visible name.
 ## DATA-D03 - Ownership is separated by responsibility
 **Status:** DECIDED BY SIMON
 
-- `cards.json` owns card identity, state, structured attributes, Actions, Processes, and other card-owned behavior;
+- `cards.json` owns card identity, state, structured attributes, Actions, Processes, References, and other card-owned behavior;
 - `rooms.json` owns world composition, Nadir-state/equipment/opening state, card instances, Search decks, and instance overrides;
 - `attributes.json` owns player-facing attribute metadata.
 
@@ -51,6 +51,17 @@ Room data must not define card behavior merely because an instance exists there.
 Every executable Action resolves an explicit duration. There is no default duration.
 
 Duration may be authored directly on an Action or supplied by a structured triggering attribute such as `path.time`.
+
+## DATA-D05 - Do not invent JSON schema
+**Status:** DECIDED BY SIMON
+
+ChatGPT and Codex must not invent new JSON fields, object shapes, array shapes, wrappers, or special-purpose authored datatypes unless Simon explicitly asks for a new JSON structure.
+
+Reuse existing decided mechanisms such as Markers, Values, References, Actions, Processes, and explicitly decided structured attributes.
+
+If an existing structure cannot express a required mechanic, record the missing design decision instead of silently creating new JSON.
+
+Do not publish speculative JSON examples as though they were decided schema.
 
 ---
 
@@ -109,31 +120,21 @@ Whether Hidden Values affect Stack eligibility remains open.
 
 Item size is not a separate card field or attribute type.
 
-The current size Markers are:
+The current size Markers are `small`, `medium`, and `large`.
 
-- `small`;
-- `medium`;
-- `large`.
-
-A size-based carried item has exactly one of these Markers. Storage and packing rules inspect that Marker. There must not also be a separate `size` field duplicating the same information.
+A size-based carried item has exactly one of these Markers. There must not also be a separate `size` field duplicating the same information.
 
 ## CARD-D05 - Storage capacity is represented by Values
 **Status:** DECIDED BY SIMON
 
 Storage capacity is not a separate `storage` object or attribute type.
 
-The current storage-capacity Values are:
-
-- `storage-small`;
-- `storage-medium`;
-- `storage-large`.
-
-Examples:
+The current storage-capacity Values are `storage-small`, `storage-medium`, and `storage-large`.
 
 - Pants: `storage-small = 2`;
 - Simple Backpack: `storage-medium = 5`.
 
-Only equipped gear contributes these Values to carried capacity. A storage item carried flat in Inventory does not contribute capacity.
+Only equipped gear contributes these Values to carried capacity.
 
 There must not also be a separate `storage` field duplicating the same information.
 
@@ -173,13 +174,9 @@ Object-specific effects belong on the triggering object attribute rather than as
 ## ACTION-D03 - Structured attributes and mutable trigger state
 **Status:** DECIDED BY SIMON
 
-Current concrete structured attributes are:
+Current concrete structured attributes are `path`, `food`, and `hydration`.
 
-- `path` - target Room ID and travel time;
-- `food` - concrete eating completion effects;
-- `hydration` - concrete drinking completion effects.
-
-`contains-water` remains the mutable Marker meaning that a container currently contains water. It is part of the Drink trigger and is not replaced by the `hydration` structured attribute.
+`contains-water` remains the mutable Marker meaning that a container currently contains water. It is part of the Drink trigger and is not replaced by `hydration`.
 
 An empty container may retain its hydration behavior payload while being non-drinkable because `contains-water` is absent. Refilling restores `contains-water`.
 
@@ -242,10 +239,7 @@ Danger is communicated separately from legality color.
 
 Known direct Value changes appear as previews on the affected card as soon as dragging begins.
 
-Examples on Body:
-
-- `Satiation 67 -> 82`;
-- `Hydration 50 -> 75`.
+Examples on Body include `Satiation 67 -> 82` and `Hydration 50 -> 75`.
 
 If several known Values change, show them all simultaneously.
 
@@ -297,17 +291,7 @@ The player may take at most five offered card instances; held/equipped offered i
 
 Nadir begins wearing Pants and T-Shirt, with Feet and Hands empty.
 
-Current offers:
-
-- Pocket Knife x1;
-- Plastic Bottle x2 with `contains-water`;
-- Canned Food x2;
-- Simple Lighter x1, Fuel 50;
-- Flashlight x1, Battery 20;
-- Spare Batteries x1;
-- Pain Killers x1;
-- Simple Backpack x1;
-- Glasses x1.
+Current offers remain Pocket Knife, two Plastic Bottles with `contains-water`, two Canned Food, Simple Lighter, Flashlight, Spare Batteries, Pain Killers, Simple Backpack, and Glasses.
 
 ---
 
@@ -316,18 +300,20 @@ Current offers:
 ## EQUIP-D01 - Current equipment slots
 **Status:** DECIDED BY SIMON
 
-- Left Hand;
-- Right Hand;
-- Head;
-- Eyes;
-- Trinket 1;
-- Trinket 2;
-- Chest;
-- Back;
-- Legs;
-- Feet.
+Current slots are Left Hand, Right Hand, Head, Eyes, Trinket 1, Trinket 2, Chest, Back, Legs, and Feet.
 
-Any ordinary movable card may be held in either Hand. Anchored world/Nadir-state cards may not.
+## EQUIP-D02 - Non-Hand equipment compatibility uses References
+**Status:** DECIDED BY SIMON
+
+Compatibility with non-Hand equipment slots is represented through the existing Reference mechanism, not a separate `equip` field.
+
+Examples: T-Shirt references Chest; Pants reference Legs; Glasses reference Eyes; Simple Backpack references Back.
+
+The exact JSON form must reuse the existing Reference schema. Do not invent a new Reference structure.
+
+All ordinary movable cards may be placed in either Hand through the general Hand rule. They do not need authored Left Hand/Right Hand References merely to be holdable.
+
+Anchored world cards and Nadir-state cards may not be held.
 
 ## INV-D01 - Carried storage uses size Markers and storage Values
 **Status:** DECIDED BY SIMON
@@ -336,19 +322,13 @@ There is no permanent generic five-card Inventory limit.
 
 Item size is represented by exactly one of `small`, `medium`, or `large` Markers.
 
-Capacity is represented by equipped-card Values:
-
-- `storage-small`;
-- `storage-medium`;
-- `storage-large`.
-
-Pants have `storage-small = 2`. Simple Backpack has `storage-medium = 5` for the main game.
+Capacity is represented by equipped-card Values: `storage-small`, `storage-medium`, and `storage-large`.
 
 `storage-small` accepts `small`; `storage-medium` accepts `small` or `medium`; `storage-large` accepts all three size Markers. Allocate to the smallest fitting capacity first.
 
 Equipment slots including Hands do not consume carried storage capacity.
 
-No standalone `size` field or `storage` object remains in the target model.
+No standalone `size`, `storage`, or `equip` field remains in the target model.
 
 ---
 
@@ -398,4 +378,5 @@ When Simon makes a new explicit design decision:
 2. remove obsolete prototype rules from the active decision register;
 3. move unresolved implementation-blocking values into the decision queue;
 4. do not turn ChatGPT suggestions into decisions;
-5. keep runtime-data TODOs out of JSON.
+5. keep runtime-data TODOs out of JSON;
+6. never invent new JSON structure unless Simon explicitly asks for it; if existing schema is insufficient, record an open design question instead.
