@@ -73,32 +73,38 @@ Equipped storage gear contributes carrying capacity to that flat area.
 
 Cards occupying equipment slots, including Hands, are equipped rather than carried and do not consume the storage capacity described below.
 
-### Item sizes
+### Item size Markers
 
-Carried items use exactly three size classes for now:
+Item size is **not a separate card field or separate attribute type**. It uses the ordinary Marker system.
 
-- `Small`
-- `Medium`
-- `Large`
+The current size Markers are:
 
-The Inventory UI should show a **current / maximum** readout for all three sizes so the player can see available carrying capacity directly.
+- `small` -> Small
+- `medium` -> Medium
+- `large` -> Large
+
+A carried item that consumes size-based storage has exactly one of these size Markers. Storage and packing rules inspect that Marker; there must not also be a separate `size` property carrying the same information.
+
+This keeps size available to the same trigger, validation, rendering, inspection, and card-state mechanisms as other Markers rather than creating a parallel concept.
+
+The Inventory UI should show a **current / maximum** readout for all three size capacities so the player can see available carrying capacity directly.
 
 Confirmed storage contributions:
 
 - equipped `Pants` add **2 Small** storage;
 - equipped `Simple Backpack` adds **5 Medium** storage once the main survival phase begins in Tunnels.
 
-The Pants pockets can therefore carry two Small items such as Pocket Knife and Simple Lighter, but cannot carry a Pipe.
+The Pants pockets can therefore carry two cards carrying the `small` Marker, such as Pocket Knife and Simple Lighter, but cannot carry a Pipe carrying `medium`.
 
-The Simple Backpack provides space suitable for Medium objects such as a Pipe or Plastic Bottle while still keeping all carried cards visually flat in Inventory.
+The Simple Backpack provides space suitable for cards carrying `medium`, such as a Pipe or Plastic Bottle, while still keeping all carried cards visually flat in Inventory.
 
 ### Milestone 2 packing convention
 
 The exact long-term packing model has not been separately designed. For Milestone 2, use this deliberately small implementation convention:
 
-- Small capacity accepts Small items only;
-- Medium capacity accepts Small or Medium items;
-- Large capacity accepts Small, Medium, or Large items;
+- Small capacity accepts cards with the `small` Marker only;
+- Medium capacity accepts cards with `small` or `medium`;
+- Large capacity accepts cards with `small`, `medium`, or `large`;
 - when more than one compatible capacity exists, allocate carried items to the smallest fitting capacity first.
 
 This is a **prototype implementation convention**, not a claim that the final game needs invisible per-container packing simulation. Keep the rule isolated so it can be changed after playtesting.
@@ -136,7 +142,8 @@ The following earlier rules are superseded:
 - `Inventory = equipped`;
 - a fixed five-card generic carrying capacity as Nadir's permanent inventory model;
 - the idea that equipment should avoid explicit body slots;
-- the earlier `Neck` equipment slot.
+- the earlier `Neck` equipment slot;
+- representing item size through a separate `size` field/type rather than Markers.
 
 ## OPEN
 
