@@ -215,15 +215,17 @@ Finite/staged Processes use card state, effects, and conditions/thresholds rathe
 
 ### First recurring survival Process
 
-Body starts with `Hydration 50`.
+Body starts with:
 
-Each world tick applies:
+- `Hydration 50`;
+- `Satiation 50`.
 
-`Hydration -2`
+Each global 15-minute world tick applies:
+
+- `Hydration -2`;
+- `Satiation -1`.
 
 Hydration 0 causes game over.
-
-Do not invent recurring Satiation loss until explicitly decided.
 
 ## Survival design principle
 
