@@ -8,11 +8,13 @@ The game opens with a short evacuation interlude before the main survival/explor
 
 The authorities are coming and Nadir has to leave. The player chooses what to grab by moving offered cards into Nadir's equipment slots, Hands, or legal carried Inventory before escaping.
 
-Because the equipment-and-storage system no longer provides a useful natural limiter for this scene, the evacuation has an explicit maximum take limit:
+The evacuation has an explicit maximum take limit:
 
 **Nadir may take five offered card instances.**
 
-Equipped offered items count toward the five-card limit as well as carried offered items. The player cannot bypass the choice by filling otherwise-empty equipment slots.
+Equipped offered items count toward the five-card limit as well as carried offered items. The player cannot bypass the choice by filling otherwise-empty equipment slots or by gaining additional carried-storage capacity.
+
+Normal equipment storage rules still apply during the opening. If Simple Backpack is chosen and equipped in Back, its `storage-medium = 5` contributes immediately, just as equipped storage gear does elsewhere. This does not increase the number of offered cards Nadir may take; the explicit five-card limit remains authoritative for the evacuation.
 
 After the escape, the main game begins in **Tunnels**. Nadir does not begin with an established base of operations and must later find somewhere suitable to use as one.
 
@@ -29,7 +31,7 @@ He is **barefoot**. Feet are empty.
 
 Both Hands are empty. Head, Eyes, Trinket 1, Trinket 2, and Back are also empty.
 
-The Pants provide 2 Small carried-Inventory capacity. Other things taken during the opening can also be held/equipped in compatible slots. The five-card evacuation limit remains the overriding limit on how many offered cards leave with Nadir.
+The Pants provide 2 Small carried-Inventory capacity. Other things taken during the opening can also be held/equipped in compatible slots and can provide their normal equipped effects, including storage capacity. The five-card evacuation limit remains the overriding limit on how many offered cards leave with Nadir.
 
 ### Items available in the opening room
 
@@ -57,13 +59,15 @@ Taking Glasses allows them to be equipped in Eyes for `Vision +1`.
 
 Taking the Flashlight gives access to another `Vision +1` while it is actively held in a Hand and has battery remaining.
 
-Taking the Simple Backpack consumes one of the five opening choices but, once Nadir reaches Tunnels and equips it in Back, provides 5 Medium carried-Inventory capacity.
+Taking the Simple Backpack consumes one of the five opening choices. If equipped in Back, it immediately provides `storage-medium = 5`, including during the opening itself.
 
 Skipping both Glasses and Flashlight does not hard-lock later areas. Deep Tunnels remain reachable but are intentionally very difficult to use at low effective Vision.
 
 ## SUPERSEDED
 
 The earlier idea that normal Inventory or equipment-generated carrying capacity alone should limit the opening loadout is superseded. The opening uses its own explicit five-card take limit.
+
+The earlier restriction that Simple Backpack should only contribute storage after reaching Tunnels is superseded. Equipped storage gear contributes normally during the opening; the five-card take limit remains the evacuation limiter.
 
 The earlier fixed five-card permanent Inventory model is superseded by `docs/equipment.md`.
 
