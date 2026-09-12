@@ -4,7 +4,7 @@
 
 Safe Room is a narrative survival/stealth game about isolation, preparation, and risk.
 
-The interface should feel like a physical workspace. Interactable world entities are represented as cards, and complexity should emerge from interactions between a relatively small number of visible systems rather than from many overlapping hidden bars and sub-systems.
+The interface should feel like a physical workspace. Interactable world entities are represented as cards, and complexity should emerge from interactions between a relatively small number of visible systems rather than from many overlapping hidden bars and special-purpose subsystems.
 
 The player should usually be able to understand the state needed for a decision by looking at the cards in front of them.
 
@@ -33,46 +33,53 @@ Nadir Veylan is represented by three persistent anchored cards in Inventory:
 - **Mind** - perception/cognitive state;
 - **Spirit** - emotional/spiritual state.
 
-This split is intentional. There is no separate generic Nadir card.
+There is no generic Nadir card.
 
 Current confirmed permanent player-facing Values include:
 
 - Body: `Hydration 50`, `Satiation 50`;
 - Mind: `Vision 4`.
 
-Spirit exists as a persistent part of the representation even where its concrete Values are not yet decided.
+Spirit remains a persistent part of the representation even where its concrete Values are not yet decided.
 
 Conditions that deserve their own identity/lifecycle may appear as separate anchored cards, for example wounds, Fever, or Exhausted.
 
-The intent is to keep each persistent card readable and compact while allowing exceptional state to become separate cards when that adds useful gameplay.
-
-## Cards
+## Cards and visible state
 
 Every card instance has a stable master identity plus independent instance state.
 
-A reusable card master supplies display data, starting attributes, structured attributes, Actions, Processes, and other authored behavior.
+A reusable card master supplies display data, starting attributes, References, explicitly decided structured attributes, Actions, Processes, and other already-decided authored behavior.
 
 Instances clone master starting state and then evolve independently.
 
 When something becomes a materially different object, discard the old card and draw the replacement rather than silently changing its master ID.
 
-### Visible state
-
 Player-facing card state is primarily expressed through:
 
 - **Markers** - presence/absence represented by an icon;
 - **Values** - integer state represented by an icon and number;
-- structured attributes when they require player-facing representation.
+- existing References where cards relate to other game concepts;
+- explicitly decided structured attributes where payload beyond Marker/Value state is required.
 
 Values normally use `0..100` unless explicitly designed otherwise.
 
 Hidden Values are allowed for concrete internal mechanics, but they must not be used simply to make routine survival decisions opaque.
 
-Item size deliberately does not introduce another attribute category. `small`, `medium`, and `large` are ordinary Markers. A size-based carried item has exactly one of those Markers, and there is no separate `size` field containing the same information.
+### Size and storage use existing systems
 
-Storage capacity also deliberately uses the existing attribute system. `storage-small`, `storage-medium`, and `storage-large` are ordinary Values on equipment cards. There is no separate `storage` object carrying the same information.
+Item size is not a separate field/type.
 
-## Authored data
+- `small`, `medium`, and `large` are ordinary Markers;
+- a size-based carried item has exactly one of them.
+
+Storage capacity is not a separate object/type.
+
+- `storage-small`, `storage-medium`, and `storage-large` are ordinary Values on equipment cards;
+- only equipped gear contributes those Values as active carrying capacity.
+
+There is no standalone `size` field and no standalone `storage` object in the target model.
+
+## Authored data and schema discipline
 
 Runtime authored content uses strict JSON:
 
@@ -84,7 +91,15 @@ Runtime identity uses stable lowercase kebab-case IDs separate from display name
 
 Design notes and unresolved values belong in docs/backlog, not runtime JSON.
 
-Room data describes world composition. Card behavior remains card-owned.
+### Do not invent JSON structure
+
+ChatGPT and Codex must not invent new JSON fields, object shapes, arrays, wrappers, or special-purpose authored datatypes unless Simon explicitly asks for a new JSON structure.
+
+Reuse the existing decided concepts, including Markers, Values, References, Actions, Processes, and explicitly decided structured attributes.
+
+If the existing model cannot express a required mechanic, that is a design question. Record it as unresolved instead of creating syntax to solve it.
+
+Documentation must not present speculative JSON examples as decided schema.
 
 ## Universal interaction language
 
@@ -95,7 +110,7 @@ For card-on-card drag/drop:
 - the dragged card is **accepted**;
 - the card underneath is **received**.
 
-A given accepted/received pair may resolve at most one Action. The player is not asked to choose between several possible verbs after dropping.
+A given accepted/received pair may resolve at most one Action. The player is not asked to choose between several verbs after dropping.
 
 A legal drop is the commitment to perform the interaction. There is no separate confirmation dialog.
 
@@ -106,7 +121,7 @@ Actions may be authored on either participating card:
 - `on` - Action belongs to accepted and matches received;
 - `receive` - Action belongs to received and matches accepted.
 
-Selectors may match stable card IDs, Marker requirements, or structured-attribute presence. These selector requirements may be combined when the interaction needs all of them.
+Selectors may match stable card IDs, Marker requirements, or structured-attribute presence. These requirements may be conjunctive.
 
 Resolution must yield:
 
@@ -118,7 +133,7 @@ Authored validation must detect overlapping match domains.
 
 ## Actions describe what Nadir does
 
-Generic verbs belong on the relevant Nadir state card; object-specific data/effects belong with the object used.
+Generic physical verbs belong on Body; object-specific eligibility/data/effects belong with the object used.
 
 Current examples:
 
@@ -128,7 +143,7 @@ Eat    -> food is dropped on Body
 Drink  -> a water-containing card is dropped on Body
 ```
 
-Body therefore owns generic Travel, Eat, and Drink Actions rather than item-specific lists.
+Body owns generic Travel, Eat, and Drink Actions rather than item-specific lists.
 
 ### Structured attributes
 
@@ -138,7 +153,7 @@ Current concrete structured attributes are:
 - `food` - concrete completion effects contributed when eaten;
 - `hydration` - concrete completion effects contributed when drunk.
 
-For Drink, current water presence remains explicit card state: the incoming card must carry `contains-water` as part of the trigger. The `hydration` structured attribute supplies the concrete effect payload; it does not replace `Contains Water` as the mutable state saying that the card currently contains water.
+For Drink, current water presence remains explicit state: the incoming card must carry `contains-water` as part of the trigger. `hydration` supplies the concrete effect payload and does not replace `Contains Water`.
 
 The principle is:
 
@@ -161,17 +176,13 @@ When a card starts being dragged:
 
 Known direct effects should be previewed on the affected visible attributes as soon as dragging begins, not only after hovering.
 
-For Body this means examples such as:
+Examples on Body include:
 
-- Rat Meat with `Satiation 67` -> show `67 -> 82` on Body;
-- Canned Food with `Satiation 67` -> show `67 -> 92` on Body;
-- a known water source with `Hydration 50` -> show the resulting Hydration value on Body.
+- Rat Meat with `Satiation 67` -> `67 -> 82`;
+- Canned Food with `Satiation 67` -> `67 -> 92`;
+- a known water source with `Hydration 50` -> the resulting Hydration value.
 
 If an interaction has several understood direct effects, show all relevant previews at once.
-
-The player should not need to memorize food restoration values or inspect an invisible stomach/fullness system to decide whether to eat.
-
-Unknown consequences remain knowledge-dependent. Serious danger should still be telegraphed without necessarily revealing exact probabilities or outcomes.
 
 ## Actions and world time
 
@@ -217,7 +228,7 @@ JSON ordering must not become gameplay ordering.
 
 Finite/staged Processes use card state, effects, and conditions/thresholds rather than independent clocks.
 
-### First recurring survival Process
+### Current survival drain
 
 Body starts with:
 
@@ -237,7 +248,7 @@ Current permanent survival Values are Hydration and Satiation on Body.
 
 Avoid adding hidden stomach contents, fullness, eating-frequency adaptation, or similar invisible simulation merely to create complexity.
 
-If future hidden state is introduced, it should solve a concrete gameplay problem rather than reproduce the uncertainty that makes routine survival choices hard to read in other card-survival games.
+If future hidden state is introduced, it should solve a concrete gameplay problem rather than make routine survival choices unreadable.
 
 ## Stack
 
@@ -273,21 +284,44 @@ Current slots:
 - Legs;
 - Feet.
 
-Any ordinary movable card may be held in either Hand. A card in a compatible equipment slot is active/equipped; a merely carried card is not.
+### Equipment compatibility
 
-Carried storage uses the normal Marker/Value system rather than dedicated size/storage datatypes:
+Compatibility with non-Hand equipment slots uses the existing **Reference** mechanism.
+
+Examples of the semantics are:
+
+- T-Shirt references Chest;
+- Pants reference Legs;
+- Glasses reference Eyes;
+- Simple Backpack references Back.
+
+There is no separate `equip` field in the target model. The exact authored JSON must reuse the Reference structure that already exists in the project; do not invent a new Reference representation.
+
+Hands are a general rule rather than authored compatibility. Any ordinary movable card may be placed in either Hand without a Left Hand/Right Hand Reference. Anchored world cards and Nadir-state cards may not be held.
+
+A card in a compatible equipment slot is active/equipped. A merely carried card is not.
+
+### Carrying capacity
+
+Carried storage uses the ordinary Marker/Value systems:
 
 - item size is one Marker: `small`, `medium`, or `large`;
-- storage capacity is expressed by Values such as `storage-small`, `storage-medium`, or `storage-large` on equipped gear;
-- only equipped gear contributes its storage-capacity Values;
-- there is no standalone `size` field and no standalone `storage` object.
+- storage capacity is expressed by Values `storage-small`, `storage-medium`, and `storage-large` on equipped gear;
+- only equipped gear contributes storage Values.
 
-Current contributions include:
+Current contributions:
 
-- Pants: `Storage Small 2`;
-- Simple Backpack: `Storage Medium 5` during the main game.
+- Pants: `storage-small = 2`;
+- Simple Backpack: `storage-medium = 5` in the main game.
 
-`storage-small` accepts `small`; `storage-medium` accepts `small` or `medium`; `storage-large` accepts all three size Markers. When multiple capacity classes can fit an item, use the smallest fitting capacity first.
+Packing convention:
+
+- `storage-small` accepts `small`;
+- `storage-medium` accepts `small` or `medium`;
+- `storage-large` accepts all three size Markers;
+- use the smallest fitting available capacity first.
+
+Equipment slots, including Hands, do not consume carried capacity.
 
 The opening evacuation separately limits the player to taking five offered card instances.
 
@@ -362,7 +396,7 @@ An empty container is a card with `container` and without `contains-water`.
 
 A successful fill consumes one Puddle Water unit and adds `contains-water` to the container. Puddle is discarded at 0.
 
-`contains-water` is part of the Drink trigger. It is the mutable state that tells the interaction system whether that container currently contains water.
+`contains-water` is part of the Drink trigger.
 
 The fill Action duration remains undecided and must not be invented.
 
@@ -388,6 +422,6 @@ His notes may reflect moral tension between player choices, past trauma, and the
 
 A suggestion is not a decision.
 
-Do not invent missing durations, rates, Values, Markers, probabilities, Process rules, or extra systems to make implementation appear complete.
+Do not invent missing durations, rates, Values, Markers, probabilities, Process rules, JSON structures, or extra systems to make implementation appear complete.
 
-Prefer concrete gameplay needs over abstract infrastructure. Keep the number of systems small, but allow attributes and interactions to create depth.
+Prefer concrete gameplay needs over abstract infrastructure. Keep the number of systems small, and reuse existing mechanisms before introducing new concepts.
