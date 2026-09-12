@@ -14,7 +14,8 @@ Current equipment slots are:
 - Right Hand
 - Head
 - Eyes
-- Neck
+- Trinket 1
+- Trinket 2
 - Chest
 - Back
 - Legs
@@ -55,6 +56,12 @@ while equipped in Eyes.
 Glasses are available as a possible choice during the opening evacuation rather than assumed to be permanently attached to Nadir.
 
 The full lighting/Vision rules are recorded in `docs/lighting-and-vision.md`.
+
+### Trinkets
+
+`Trinket 1` and `Trinket 2` replace the earlier `Neck` slot.
+
+No particular trinket items or effects are implied merely because these slots exist. Their concrete content remains deferred until a gameplay need requires it.
 
 ### Carried Inventory
 
@@ -112,7 +119,7 @@ At the beginning of the evacuation interlude Nadir is surprised and only partly 
 - T-Shirt is already equipped in Chest;
 - Feet are empty: Nadir is barefoot;
 - both Hands are empty;
-- Head, Eyes, Neck, and Back are empty.
+- Head, Eyes, both Trinket slots, and Back are empty.
 
 The worn Pants therefore provide his only initial flat carried-storage capacity: 2 Small.
 
@@ -120,7 +127,7 @@ The worn Pants therefore provide his only initial flat carried-storage capacity:
 
 Equipment is expected to become a meaningful crafting/progression surface rather than merely conventional RPG stat gear.
 
-Confirmed equipment families/slots already create useful crafting targets including backpacks, hats/headwear, eyewear, shirts/jackets, pants, shoes, and potentially neck-worn items. Their value can come from practical survival capabilities such as storage, protection, warmth, access, visibility, concealment, or comfort/mood effects.
+Confirmed equipment families/slots already create useful crafting targets including backpacks, hats/headwear, eyewear, shirts/jackets, pants, shoes, and future trinkets. Their value can come from practical survival capabilities such as storage, protection, warmth, access, visibility, concealment, comfort, or mood effects.
 
 ## SUPERSEDES
 
@@ -128,7 +135,8 @@ The following earlier rules are superseded:
 
 - `Inventory = equipped`;
 - a fixed five-card generic carrying capacity as Nadir's permanent inventory model;
-- the idea that equipment should avoid explicit body slots.
+- the idea that equipment should avoid explicit body slots;
+- the earlier `Neck` equipment slot.
 
 ## OPEN
 
@@ -137,5 +145,6 @@ The following remain undecided beyond the Milestone 2 implementation convention 
 - the final long-term packing/allocation model if the prototype convention proves insufficient;
 - whether the UI should identify which equipped storage item is supplying capacity for each carried card;
 - exact effects of most clothing/equipment families;
+- which future items use the Trinket slots and what they do;
 - whether equipping/unequipping should later consume time;
 - whether any future equipment occupies more than one slot.
