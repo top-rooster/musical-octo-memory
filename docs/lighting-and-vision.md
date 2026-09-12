@@ -6,7 +6,7 @@ This document records the current decided lighting, Vision, and task-light requi
 
 ### Vision
 
-`Vision` is a visible Value on Nadir's **Mind** card.
+`Vision` is a visible Value on Nadir's anchored **Nadir** card.
 
 Nadir's normal Vision is:
 
@@ -17,6 +17,8 @@ Glasses equipped in the `Eyes` slot provide:
 `Vision +1`
 
 Vision is modified by room lighting and active portable light sources. The resulting effective Vision determines what Nadir can do and how long some activities take.
+
+There is no separate Mind card in the current Nadir model.
 
 ### Effective Vision levels
 
@@ -57,7 +59,7 @@ Current portable light effects are:
 - **Flashlight** - `Vision +1` while actively held in either Hand and `Battery > 0`;
 - **Torch** - a lit oil rag on a stick; `Vision +1`; the Torch card is discarded when it burns out.
 
-A lit lighter is **not** a Vision-producing light source. The lighter may still be used for ignition, but keeping it lit does not provide a `Vision` bonus.
+A lit lighter is **not** a Vision-producing light source.
 
 ### Flashlight active state and battery
 
@@ -68,20 +70,16 @@ While active:
 - it provides `Vision +1`;
 - its battery drains over elapsed game time.
 
-While the Flashlight is merely carried in Inventory or left in a Room:
+While merely carried in Inventory or left in a Room:
 
 - it provides no Vision bonus;
 - it does not drain battery.
 
-The opening Flashlight starts at:
+The opening Flashlight starts at `Battery 20`.
 
-`Battery 20`
-
-The exact numerical battery drain rate is not yet a product decision. Milestone 2 should therefore implement the active/inactive rule and keep battery depletion isolated behind one configurable/pure game rule, without silently inventing a permanent rate.
+The exact battery drain rate remains undecided and must not be invented.
 
 ### Combined examples
-
-The modifiers are additive.
 
 In **Deep Tunnels** (`Twilight`, `Vision -3`):
 
@@ -99,20 +97,9 @@ In **Darkness** (`Vision -4`):
 
 ### Deep Tunnels are soft-gated by Vision
 
-A Flashlight is **not an absolute requirement** for entering or travelling to Deep Tunnels.
+A Flashlight is not an absolute requirement for entering Deep Tunnels.
 
-Deep Tunnels are instead soft-gated by the normal Vision rules. Nadir may go there without a Flashlight or Torch, but at his unmodified effective Vision of 1 he is severely constrained: travel takes 2x normal time, searching takes 3x normal time, and he cannot perform low-light, normal-light, or precision tasks.
-
-The intent is that entering Deep Tunnels without preparing for the lighting conditions remains technically possible but may be practically useless.
-
-If the player did not take either Glasses or Flashlight during the opening evacuation, the game still has recovery paths rather than becoming hard-locked:
-
-- a Torch can later be crafted and used for `Vision +1`;
-- a Flashlight can be found by searching in **Deep Tunnels**.
-
-Finding that Flashlight is deliberately somewhat self-rescuing: reaching and searching Deep Tunnels without good Vision is inefficient, but success can improve future trips to the same area.
-
-Torch crafting and burn behavior are explicitly outside Milestone 2.
+Deep Tunnels are soft-gated by the normal Vision rules. Nadir may go there without a Flashlight or Torch, but at effective Vision 1 he is severely constrained: travel takes 2x normal time, searching takes 3x normal time, and he cannot perform low-light, normal-light, or precision tasks.
 
 ### Task light requirements
 
@@ -145,12 +132,7 @@ A task can only be started/performed when effective Vision reaches the correspon
 
 ### Stationary and moving tasks
 
-Every task is also classified independently as either:
-
-- **stationary**; or
-- **moving**.
-
-Light requirement and movement are separate properties. A task can therefore be low-light/stationary, normal-light/moving, precision/stationary, and so on.
+Every task is also classified independently as either stationary or moving. Light requirement and movement are separate properties.
 
 The exact mechanical consequences of stationary versus moving beyond the already-decided travel/search behavior remain open.
 
@@ -158,11 +140,7 @@ The exact mechanical consequences of stationary versus moving beyond the already
 
 The room background should visually respond to the room's current light condition.
 
-The background image itself remains atmospheric presentation rather than the authoritative source of mechanical state. The room's authored/current light condition determines the Vision modifier, and the renderer derives background brightness from that condition.
-
-The same room background can therefore be shown darker or brighter as its light state changes without requiring separate artwork for every lighting level.
-
-Portable light sources may also add a visual lighting effect later. Their exact local-light presentation is not required for Milestone 2; the room-light-derived background brightness and effective-Vision rules are the important part.
+The background image remains atmospheric presentation rather than authoritative mechanical state. The room's authored/current light condition determines the Vision modifier, and the renderer derives background brightness from that condition.
 
 ## OPEN
 
