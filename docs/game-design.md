@@ -68,6 +68,8 @@ Values normally use `0..100` unless explicitly designed otherwise.
 
 Hidden Values are allowed for concrete internal mechanics, but they must not be used simply to make routine survival decisions opaque.
 
+Item size deliberately does not introduce another attribute category. `small`, `medium`, and `large` are ordinary Markers. A size-based carried item has exactly one of those Markers, and there is no separate `size` field containing the same information.
+
 ## Authored data
 
 Runtime authored content uses strict JSON:
@@ -271,12 +273,14 @@ Current slots:
 
 Any ordinary movable card may be held in either Hand. A card in a compatible equipment slot is active/equipped; a merely carried card is not.
 
-Carried storage uses size capacities rather than a permanent five-card generic limit.
+Carried storage uses Small/Medium/Large capacities rather than a permanent five-card generic limit. Item size itself is expressed by ordinary Markers: `small`, `medium`, or `large`.
 
 Current contributions include:
 
 - Pants: 2 Small;
 - Simple Backpack: 5 Medium during the main game.
+
+Small capacity accepts `small`; Medium accepts `small` or `medium`; Large accepts all three size Markers. There is no standalone item-size datatype outside the Marker system.
 
 The opening evacuation separately limits the player to taking five offered card instances.
 
