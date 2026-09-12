@@ -24,7 +24,7 @@ Card-master Markers are ID arrays and Values are ID-to-integer maps:
 
 ```json
 {
-  "markers": ["anchored", "container", "contains-water"],
+  "markers": ["anchored", "container", "contains-water", "medium"],
   "values": { "hydration": 50, "satiation": 50 }
 }
 ```
@@ -35,9 +35,13 @@ Cards may also carry typed structured attributes with authored payload. Current 
 
 `contains-water` remains a Marker representing current water presence. It is not replaced by the `hydration` structured attribute.
 
+Item size also uses the ordinary Marker system. The current size Markers are `small`, `medium`, and `large`. A size-based carried item has exactly one of these Markers. There is no separate card `size` field or separate size attribute type.
+
+Storage/packing code matches these Markers against available Small/Medium/Large capacity. Do not duplicate the same size information in another field.
+
 ## Card masters and Actions
 
-`cards.json` uses card IDs as top-level keys. Concrete fields may include display metadata, Markers, Values, Hidden Values, structured attributes, Actions, Processes, size, equipment compatibility, storage, and equipped modifiers.
+`cards.json` uses card IDs as top-level keys. Concrete fields may include display metadata, Markers, Values, Hidden Values, structured attributes, Actions, Processes, equipment compatibility, storage, and equipped modifiers.
 
 There is no receiver-owned `accept` gameplay model in the current design.
 
@@ -145,6 +149,7 @@ Validation must cover at least:
 - supported effect targets;
 - supported equipment-slot IDs;
 - Action trigger validity;
-- overlapping Action match domains that could yield more than one Action for the same card pair.
+- overlapping Action match domains that could yield more than one Action for the same card pair;
+- size Marker validity: size-based carried cards must use exactly one of `small`, `medium`, or `large`, and no standalone `size` field is permitted.
 
 Invalid authored data fails startup rather than falling back to a legacy format.
