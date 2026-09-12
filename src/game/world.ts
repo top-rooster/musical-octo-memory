@@ -7,11 +7,12 @@ import type {
   GameState,
   Position,
   SearchDeckState,
+  TravelDefinition,
 } from "../domain/types";
 import type {
   CardInstanceDefinition,
   WorldDefinition,
-} from "../data/roomParser";
+} from "../data/worldDefinition";
 import { CARD_GAP, CARD_HEIGHT, CARD_WIDTH, SEARCH_DECK_HEIGHT, SEARCH_DECK_WIDTH } from "./constants";
 import { drawFromDeck, shuffleOnce } from "./decks";
 import { allocateCarriedCapacity, canEquip, canTakeOpeningCard } from "./equipment";
@@ -26,6 +27,18 @@ function masterById(masters: CardMaster[], id: string): CardMaster {
   const master = masters.find((candidate) => candidate.id === id);
   if (!master) throw new Error(`Missing card master "${id}"`);
   return master;
+}
+function travelFor(master: CardMaster): TravelDefinition | undefined {
+  for (const acceptance of master.accept) {
+    const destination = acceptance.action.effects.find((effect) => "go" in effect);
+    if (destination && "go" in destination && acceptance.card) {
+      return {
+        acceptedCardId: acceptance.card,
+        destinationRoomId: destination.go,
+        baseMinutes: acceptance.action.baseMinutes,
+      };
+    }
+  }
 }
 
 export function createWorldGameState(
@@ -56,7 +69,7 @@ export function createWorldGameState(
       zone,
       homeZone: isAnchored(master) ? zone : undefined,
       position: { ...position },
-      travel: authored.travel,
+      travel: travelFor(master),
       ...options,
     };
   };
@@ -98,6 +111,7 @@ export function createWorldGameState(
   const rooms = Object.fromEntries(definition.rooms.map((room) => {
     const decks: SearchDeckState[] = room.decks.map((deck, index) => ({
       id: nextId(`deck-${room.id}`),
+      definitionId: deck.id,
       name: deck.name,
       baseMinutes: deck.baseMinutes,
       position: { x: 18 + index * (SEARCH_DECK_WIDTH + CARD_GAP), y: 66 },
@@ -105,7 +119,6 @@ export function createWorldGameState(
         id: nextId(`deck-card-${card.masterId}`),
         masterId: card.masterId,
         attributes: cloneAttributes(card.attributes),
-        travel: card.travel,
       })), random),
     }));
     return [room.id, {
@@ -202,7 +215,7 @@ export function searchRoom(state: GameState, deckId: string, bounds: Bounds): Se
     homeZone: isAnchored(master) ? "room" : undefined,
     roomId,
     position,
-    travel: result.drawn.travel,
+    travel: travelFor(master),
     animation: "draw",
     drawOrigin: { ...deck.position },
   };
@@ -237,7 +250,7 @@ export function transitionRoom(state: GameState, destinationRoomId: string, base
 }
 
 export function canTravelWith(source: CardInstance, target: CardInstance): boolean {
-  return source.masterId === "body" && Boolean(target.travel);
+  return source.masterId === target.travel?.acceptedCardId;
 }
 
 export function equipCard(state: GameState, cardId: string, slot: EquipmentSlot): GameState {

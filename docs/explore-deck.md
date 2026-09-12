@@ -67,7 +67,7 @@ The Tunnels Explore deck contains exactly:
 - `Go to abandoned office` x1
 - `Service Cabinet` x1, starting `Locked`
 
-The authored composition is also present in `data/rooms.txt` and should not be duplicated as a TypeScript constant.
+The authored composition is also present in `data/rooms.json` and should not be duplicated as a TypeScript constant.
 
 ### Travel cards revealed by Explore
 

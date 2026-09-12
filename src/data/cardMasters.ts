@@ -1,5 +1,4 @@
-import authoredCards from "../../data/cards.txt?raw";
-import { parseCardMasters } from "./cardParser";
+import { AUTHORED_DATA } from "./authoredData";
 
-export const CARD_MASTER_SOURCE = "data/cards.txt";
-export const CARD_MASTERS = parseCardMasters(authoredCards);
+export const CARD_MASTER_SOURCE = "data/cards.json";
+export const CARD_MASTERS = AUTHORED_DATA.masters;

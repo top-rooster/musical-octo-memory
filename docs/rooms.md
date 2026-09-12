@@ -12,7 +12,7 @@ The authorities are coming and Nadir has to leave. The player may take **five** 
 
 After the interlude, Nadir escapes into **Tunnels**. The main survival/exploration game begins there without an established base of operations.
 
-The opening room uses the working implementation name `Opening Room` in `data/rooms.txt`; that is not yet its final narrative name. Milestone 2 does not need a return route to it.
+The opening room uses the working implementation name `Opening Room` in `data/rooms.json`; that is not yet its final narrative name. Milestone 2 does not need a return route to it.
 
 This supersedes the earlier assumption that `Safe Room` is Nadir's permanent starting base with a normal two-way connection to Tunnels.
 
@@ -48,7 +48,7 @@ The two outbound Tunnels travel cards begin inside the Tunnels Explore deck:
 
 Once drawn, each remains as a persistent room-local travel card.
 
-Abandoned Office and Deep Tunnels each begin with an Anchored `Go to tunnels` card. The exact destination and travel duration are authored on the room-card instance in `data/rooms.txt`.
+Abandoned Office and Deep Tunnels each begin with an Anchored `Go to tunnels` card. The exact destination and travel duration are authored on their distinct route-card masters in `data/cards.json`.
 
 Travel is an Action, so its elapsed time participates in the normal time system. Vision may multiply travel time according to `docs/lighting-and-vision.md`.
 
@@ -154,7 +154,7 @@ The Flashlight is a decided useful find in Deep Tunnels. The other nine entries 
 
 ### Authored room data
 
-Milestone 2 introduces `data/rooms.txt` as the authored world/room source of truth.
+Milestone 2 uses `data/rooms.json` as the authored world/room source of truth.
 
 Its current small syntax covers:
 

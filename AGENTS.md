@@ -31,10 +31,9 @@ Keep this file short. Put detailed design decisions in `docs/` rather than expan
 - Inspect the repository before making changes and preserve unrelated user work.
 - Keep changes focused on the active milestone; do not add frameworks, dependencies, or broad scaffolding without a concrete need.
 - Prefer small vertical slices that can be run and evaluated immediately.
-- Card master data belongs in the project's text data files, not duplicated as TypeScript/React constants. Code may parse, validate, and transform that data into runtime structures.
-- Milestone 2 level/world state comes from `data/rooms.txt`; do not hard-code the current room graph, search-deck compositions, starting equipment, or opening offers into UI components.
-- Preserve the terse, low-boilerplate, phone-friendly authoring direction in `docs/data-language.md`; do not replace it with JSON, YAML, TOON, or another verbose object format for convenience.
-- Extend parsers only for syntax actually needed by the active milestone.
+- Card master data belongs in `data/cards.json`, not duplicated as TypeScript/React constants. Code may validate and transform it into runtime structures.
+- Milestone 2 level/world state comes from `data/rooms.json`; do not hard-code the current room graph, Search-deck compositions, Nadir cards, starting equipment, or opening offers into UI components.
+- Runtime authored data is strict JSON. Keep stable lowercase kebab-case IDs separate from player-facing names and keep the schema concrete rather than inventing a generic scripting language.
 - Prioritize player legibility: state changes should be visible before an action is committed when the design calls for a preview.
 - Keep game-rule/state-transition code separate from React rendering where practical.
 - Run the narrowest relevant checks after changes. At milestone completion run both tests and production build.

@@ -5,9 +5,9 @@ import type { CardInstance, GameState } from "../src/domain/types";
 import { effectiveVision, LIGHT_MODIFIERS, searchDuration, travelDuration } from "../src/game/vision";
 import { createWorldGameState, equipCard } from "../src/game/world";
 
-function find(state: GameState, title: string): CardInstance {
-  const card = state.cards.find((item) => item.title === title);
-  if (!card) throw new Error(`Missing ${title}`);
+function find(state: GameState, masterId: string): CardInstance {
+  const card = state.cards.find((item) => item.masterId === masterId);
+  if (!card) throw new Error(`Missing ${masterId}`);
   return card;
 }
 
@@ -27,31 +27,31 @@ describe("Vision and lighting", () => {
   });
 
   it("adds Vision only while Glasses are equipped in Eyes", () => {
-    const glasses = find(state, "Glasses");
+    const glasses = find(state, "glasses");
     state = { ...state, cards: state.cards.map((card) => card.id === glasses.id
       ? { ...card, zone: "inventory" as const, roomId: undefined }
       : card) };
     expect(effectiveVision(state)).toBe(4);
-    state = equipCard(state, glasses.id, "Left Hand");
+    state = equipCard(state, glasses.id, "left-hand");
     expect(effectiveVision(state)).toBe(4);
     state = { ...state, cards: state.cards.map((card) => card.id === glasses.id
       ? { ...card, equipmentSlot: undefined }
       : card) };
-    state = equipCard(state, glasses.id, "Eyes");
+    state = equipCard(state, glasses.id, "eyes");
     expect(effectiveVision(state)).toBe(5);
   });
 
   it("activates a powered hand-held Flashlight but not a carried one", () => {
-    const flashlight = find(state, "Flashlight");
+    const flashlight = find(state, "flashlight");
     state = { ...state, cards: state.cards.map((card) => card.id === flashlight.id
       ? { ...card, zone: "inventory" as const, roomId: undefined }
       : card) };
     expect(effectiveVision(state)).toBe(4);
-    state = equipCard(state, flashlight.id, "Left Hand");
+    state = equipCard(state, flashlight.id, "left-hand");
     expect(effectiveVision(state)).toBe(5);
     state = { ...state, cards: state.cards.map((card) => card.id === flashlight.id
       ? { ...card, attributes: card.attributes.map((attribute) =>
-          attribute.kind === "value" && attribute.name === "Battery"
+          attribute.kind === "value" && attribute.id === "battery"
             ? { ...attribute, value: 0 } : attribute) }
       : card) };
     expect(effectiveVision(state)).toBe(4);

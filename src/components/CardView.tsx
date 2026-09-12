@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties, type PointerEvent } from "react";
 import type { CardInstance } from "../domain/types";
 import type { ValueChangePreview } from "../game/rules";
-import { displayAttributeName } from "../game/rules";
+import { ATTRIBUTE_METADATA } from "../data/attributeDescriptions";
 
 interface CardViewProps {
   card: CardInstance;
@@ -73,21 +73,21 @@ export function CardView({
       </div>
       <div className="card__attributes">
         {card.attributes.map((attribute) => {
-          const label = displayAttributeName(attribute.name);
+          const label = ATTRIBUTE_METADATA[attribute.id]?.name ?? attribute.id;
           if (attribute.kind === "marker") {
             return (
-              <span className="attribute attribute--marker" aria-label={label} key={attribute.name}>
+              <span className="attribute attribute--marker" aria-label={label} key={attribute.id}>
                 {glyph(label)}
               </span>
             );
           }
-          const change = preview.find((item) => item.attribute === attribute.name);
+          const change = preview.find((item) => item.attribute === attribute.id);
           const valueText = change ? `${change.before} → ${change.after}` : attribute.value;
           return (
             <span
               className={`attribute attribute--value ${change ? "attribute--preview" : ""}`}
               aria-label={`${label} ${valueText}`}
-              key={attribute.name}
+              key={attribute.id}
             >
               <span className="attribute__icon">{glyph(label)}</span>
               <span className="attribute__value">{valueText}</span>

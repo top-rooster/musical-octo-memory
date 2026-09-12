@@ -3,35 +3,37 @@ export type GamePhase = "opening" | "main";
 export type ItemSize = "Small" | "Medium" | "Large";
 export type LightLevel = "Bright" | "Dim" | "Twilight" | "Darkness";
 export type EquipmentSlot =
-  | "Left Hand"
-  | "Right Hand"
-  | "Head"
-  | "Eyes"
-  | "Neck"
-  | "Chest"
-  | "Back"
-  | "Legs"
-  | "Feet";
+  | "left-hand"
+  | "right-hand"
+  | "head"
+  | "eyes"
+  | "trinket-1"
+  | "trinket-2"
+  | "chest"
+  | "back"
+  | "legs"
+  | "feet";
 
 export interface Position { x: number; y: number; }
 export interface Bounds { x: number; y: number; width: number; height: number; }
-export interface MarkerAttribute { kind: "marker"; name: string; }
-export interface ValueAttribute { kind: "value"; name: string; value: number; min: number; max: number; }
+export interface MarkerAttribute { kind: "marker"; id: string; }
+export interface ValueAttribute { kind: "value"; id: string; value: number; min: number; max: number; }
 export type CardAttribute = MarkerAttribute | ValueAttribute;
 
-export interface ChangeValueEffect {
-  kind: "change-value";
-  attribute: string;
-  amount: number;
-  recipient: "target";
-}
-export interface ConsumeSourceEffect { kind: "consume-source"; }
-export type InteractionEffect = ChangeValueEffect | ConsumeSourceEffect;
-export interface InteractionDefinition {
-  kind: "eat";
-  targetTitle: string;
-  effects: InteractionEffect[];
-}
+export type EffectTarget = "source" | "receiver";
+export interface ChangeValueEffect { change: string; amount: number; target?: EffectTarget; }
+export interface AddMarkerEffect { add: string; target: EffectTarget; }
+export interface RemoveMarkerEffect { remove: string; target: EffectTarget; }
+export interface DiscardEffect { discard: EffectTarget; }
+export interface DrawEffect { draw: string; }
+export interface GoEffect { go: string; }
+export interface GameOverEffect { gameOver: true; }
+export type ActionEffect = ChangeValueEffect | AddMarkerEffect | RemoveMarkerEffect |
+  DiscardEffect | DrawEffect | GoEffect | GameOverEffect;
+export interface ActionDefinition { name?: string; time: string; baseMinutes: number; effects: ActionEffect[]; }
+export interface AcceptanceDefinition { card?: string; markers?: string[]; action: ActionDefinition; }
+export interface ProcessDefinition { interval: string; intervalMinutes: number; effects: ActionEffect[]; }
+export interface ThresholdDefinition { value: string; equals: number; effects: ActionEffect[]; }
 
 export interface StorageEffect { size: ItemSize; count: number; phase?: GamePhase; }
 export interface EquippedModifier { attribute: string; amount: number; }
@@ -42,14 +44,16 @@ export interface CardMaster {
   image: string;
   description?: string;
   attributes: CardAttribute[];
-  interactions: InteractionDefinition[];
   size?: ItemSize;
   equipSlots: EquipmentSlot[];
   storage?: StorageEffect;
   whileEquipped: EquippedModifier[];
+  accept: AcceptanceDefinition[];
+  processes: ProcessDefinition[];
+  when: ThresholdDefinition[];
 }
 
-export interface TravelDefinition { destinationRoomId: string; baseMinutes: number; }
+export interface TravelDefinition { acceptedCardId: string; destinationRoomId: string; baseMinutes: number; }
 
 export interface CardInstance {
   id: string;
@@ -74,10 +78,10 @@ export interface DeckCardState {
   id: string;
   masterId: string;
   attributes: CardAttribute[];
-  travel?: TravelDefinition;
 }
 export interface SearchDeckState {
   id: string;
+  definitionId: string;
   name: string;
   baseMinutes: number;
   position: Position;

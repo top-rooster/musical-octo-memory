@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CARD_MASTERS } from "../src/data/cardMasters";
+import { WORLD_DEFINITION } from "../src/data/worldDefinition";
 import { CARD_HEIGHT, CARD_WIDTH } from "../src/game/constants";
 import { createInitialGameState } from "../src/game/initialState";
 import { generateRoomPlacements } from "../src/game/placement";
@@ -18,6 +19,7 @@ describe("initial Room generation", () => {
   it("creates exactly one Room instance of every non-Anchored master", () => {
     const state = createInitialGameState(
       CARD_MASTERS,
+      WORLD_DEFINITION.rooms.find((room) => room.id === WORLD_DEFINITION.startRoomId)!.nadir.map((card) => card.masterId),
       roomBounds,
       { x: 0, y: 0, width: 900, height: 320 },
       seededRandom(),
