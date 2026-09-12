@@ -87,12 +87,42 @@ A carried item that consumes size-based storage has exactly one of these size Ma
 
 This keeps size available to the same trigger, validation, rendering, inspection, and card-state mechanisms as other Markers rather than creating a parallel concept.
 
-The Inventory UI should show a **current / maximum** readout for all three size capacities so the player can see available carrying capacity directly.
+### Storage capacity Values
+
+Storage capacity is **not a separate `storage` object or separate storage type**. It uses ordinary Values on the equipment card.
+
+The current storage-capacity Values are:
+
+- `storage-small`
+- `storage-medium`
+- `storage-large`
+
+Examples:
+
+```json
+"pants": {
+  "markers": ["medium"],
+  "values": { "storage-small": 2 }
+}
+```
+
+```json
+"simple-backpack": {
+  "markers": ["medium"],
+  "values": { "storage-medium": 5 }
+}
+```
+
+These Values contribute capacity only while the card is equipped. A Backpack carried flat in Inventory does not provide its storage Value as usable capacity.
+
+The opening evacuation remains governed by its explicit five-offered-card selection rule. The normal main-game carried-capacity calculation does not require a separate `phase` property on storage data.
+
+The Inventory UI should show a **current / maximum** readout for all three capacities so the player can see available carrying capacity directly.
 
 Confirmed storage contributions:
 
-- equipped `Pants` add **2 Small** storage;
-- equipped `Simple Backpack` adds **5 Medium** storage once the main survival phase begins in Tunnels.
+- equipped `Pants` provide `Storage Small 2`;
+- equipped `Simple Backpack` provides `Storage Medium 5` in the main survival game.
 
 The Pants pockets can therefore carry two cards carrying the `small` Marker, such as Pocket Knife and Simple Lighter, but cannot carry a Pipe carrying `medium`.
 
@@ -102,9 +132,9 @@ The Simple Backpack provides space suitable for cards carrying `medium`, such as
 
 The exact long-term packing model has not been separately designed. For Milestone 2, use this deliberately small implementation convention:
 
-- Small capacity accepts cards with the `small` Marker only;
-- Medium capacity accepts cards with `small` or `medium`;
-- Large capacity accepts cards with `small`, `medium`, or `large`;
+- `storage-small` capacity accepts cards with the `small` Marker only;
+- `storage-medium` capacity accepts cards with `small` or `medium`;
+- `storage-large` capacity accepts cards with `small`, `medium`, or `large`;
 - when more than one compatible capacity exists, allocate carried items to the smallest fitting capacity first.
 
 This is a **prototype implementation convention**, not a claim that the final game needs invisible per-container packing simulation. Keep the rule isolated so it can be changed after playtesting.
@@ -113,7 +143,7 @@ This is a **prototype implementation convention**, not a claim that the final ga
 
 The opening evacuation includes a `Simple Backpack`.
 
-The Backpack is initially empty. If chosen and equipped in Back, it adds **5 Medium** carried-Inventory capacity once Nadir reaches Tunnels.
+The Backpack is initially empty. If chosen and equipped in Back, its `storage-medium` Value provides 5 Medium carried-Inventory capacity in the main survival game.
 
 Cards using that capacity remain ordinary carried cards. They do not become children of the Backpack and do not count as equipped merely because the Backpack supplies their capacity.
 
@@ -127,7 +157,7 @@ At the beginning of the evacuation interlude Nadir is surprised and only partly 
 - both Hands are empty;
 - Head, Eyes, both Trinket slots, and Back are empty.
 
-The worn Pants therefore provide his only initial flat carried-storage capacity: 2 Small.
+The worn Pants therefore provide his only initial main-game flat carried-storage capacity: `Storage Small 2`.
 
 ### Equipment as progression
 
@@ -143,7 +173,8 @@ The following earlier rules are superseded:
 - a fixed five-card generic carrying capacity as Nadir's permanent inventory model;
 - the idea that equipment should avoid explicit body slots;
 - the earlier `Neck` equipment slot;
-- representing item size through a separate `size` field/type rather than Markers.
+- representing item size through a separate `size` field/type rather than Markers;
+- representing carrying capacity through a separate `storage` object/type rather than Values.
 
 ## OPEN
 
