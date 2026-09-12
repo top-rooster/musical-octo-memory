@@ -12,12 +12,11 @@ Historical versions remain available in Git. A suggestion is not a decision.
 
 ## Current decision queue
 
-1. **SURV-02 [P0]** - Resolve the Satiation timing conflict before implementing the global Process pass: `docs/survival-conditions.md` currently says `Satiation -1` per 30m, while the current roadmap/Process contract says not to invent recurring Satiation decay.
-2. **WATER-01 [P0]** - Duration of filling a container from a Puddle remains undecided.
-3. **FLASHLIGHT-01 [P1]** - Exact Flashlight Battery drain rate remains undecided.
-4. **PROCESS-02 [P1]** - Exact concrete rules for unfinished cooking, wound healing, Fever recovery, spoilage, and other Processes remain undecided unless a focused doc explicitly decides them.
-5. **DURABILITY-01 [P2]** - Starting Durability, wear rates, and zero-Durability behavior remain undecided.
-6. **SURV-01 [P2]** - Whether permanent survival pressures beyond Hydration and Satiation are needed remains open.
+1. **WATER-01 [P0]** - Duration of filling a container from a Puddle remains undecided.
+2. **FLASHLIGHT-01 [P1]** - Exact Flashlight Battery drain rate remains undecided.
+3. **PROCESS-02 [P1]** - Exact concrete rules for unfinished cooking, wound healing, Fever recovery, spoilage, and other Processes remain undecided unless a focused doc explicitly decides them.
+4. **DURABILITY-01 [P2]** - Starting Durability, wear rates, and zero-Durability behavior remain undecided.
+5. **SURV-01 [P2]** - Whether permanent survival pressures beyond Hydration and Satiation are needed remains open.
 
 ---
 
@@ -182,16 +181,15 @@ Every active Process updates once whenever world time crosses `:00`, `:15`, `:30
 
 If Action completion occurs exactly on a tick boundary, the world tick resolves before Action completion.
 
-## PROCESS-D02 - Hydration
+## PROCESS-D02 - Body survival drain
 **Status:** DECIDED BY SIMON
 
-At every global world tick Body receives:
+At every global 15-minute world tick Body receives:
 
-`Hydration -2`
+- `Hydration -2`;
+- `Satiation -1`.
 
 Hydration 0 is game over.
-
-The recurring Satiation rule is currently blocked by **SURV-02** above because the focused survival doc and the current Process roadmap disagree.
 
 ---
 
