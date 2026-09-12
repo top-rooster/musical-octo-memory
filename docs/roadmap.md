@@ -67,7 +67,7 @@ For card-on-card drag/drop:
 - card underneath = `received`;
 - `on` matches the received card from an Action on accepted;
 - `receive` matches the accepted card from an Action on received;
-- trigger selectors may match card IDs, Markers, and attribute presence;
+- trigger selectors may match card IDs, Markers, and attribute presence, including conjunctive combinations;
 - effect targets use `accepted` and `received` roles;
 - 0 matches means no Action;
 - exactly 1 match starts the Action;
@@ -83,7 +83,7 @@ Implement the three concrete attributes currently decided:
 
 ### Path
 
-A route/passsage card has a `path` attribute containing:
+A route/passage card has a `path` attribute containing:
 
 - target Room ID;
 - travel time.
@@ -100,17 +100,21 @@ Body owns one generic Eat Action triggered when Body receives a card carrying `f
 
 Do not put a growing list of edible card IDs or item-specific food effects on Body.
 
-### Hydration
+### Hydration and Contains Water
 
-A drinkable card has a `hydration` attribute containing the concrete completion effects of drinking from it.
+A card that can provide hydration has a `hydration` attribute containing the concrete completion effects of drinking from it.
 
-Body owns one generic Drink Action triggered when Body receives a card carrying `hydration`.
+Current water presence is represented by the mutable Marker `contains-water`.
+
+Body owns one generic Drink Action. Its trigger requires the incoming card to satisfy the water-state requirement, including `contains-water`, and the current model also requires the `hydration` attribute that supplies the effect payload.
+
+`hydration` does not replace `contains-water`. An empty container may retain its hydration behavior payload while becoming non-drinkable because `contains-water` has been removed. Refilling restores `contains-water` and makes the interaction legal again.
 
 Do not duplicate drink effects on Body.
 
 The general principle is:
 
-> Action = what Nadir does. Triggering attribute = the concrete data/effects contributed by the object.
+> Action = what Nadir does. Triggering card state/attributes = the concrete eligibility and data/effects contributed by the object.
 
 Do not generalize this into a broad scripting system beyond the concrete needs above.
 
@@ -248,13 +252,13 @@ An empty container is a card with `container` and without `contains-water`.
 
 A successful fill:
 
-- adds the water/drinkable state required by the current Hydration model to the container;
+- adds `contains-water` to the container;
 - decreases Puddle water by 1;
 - discards the Puddle when water reaches 0.
 
-Do not invent the fill Action duration; it remains open.
+`contains-water` is part of the Drink trigger; filling restores the mutable water-present state that makes the container a legal Drink source.
 
-Do not preserve obsolete `contains-water` mechanics merely for compatibility if the new Hydration attribute replaces them. Migrate authored data deliberately when this step is implemented.
+Do not invent the fill Action duration; it remains open.
 
 ## 12. Preserve decided Flashlight instance state
 
@@ -304,8 +308,10 @@ Desired hierarchy:
 
 Do not consider the pass complete until:
 
+- Body, Mind, and Spirit remain the persistent Nadir-state card model; no generic Nadir card is introduced;
 - card-on-card interactions use the trigger-based Action model with ambiguity validation;
 - Path, Food, and Hydration attributes follow the current ownership model;
+- Drink legality includes `contains-water` as current water state;
 - Body has generic Travel, Eat, and Drink Actions rather than item-specific lists;
 - Action execution is atomic;
 - only one Action may execute at a time;
