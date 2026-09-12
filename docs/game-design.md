@@ -48,7 +48,7 @@ Conditions that deserve their own identity/lifecycle may appear as separate anch
 
 Every card instance has a stable master identity plus independent instance state.
 
-A reusable card master supplies display data, starting attributes, References, explicitly decided structured attributes, Actions, Processes, and other already-decided authored behavior.
+A reusable card master supplies display data, starting attributes, explicitly decided structured attributes, Actions, Processes, and other already-decided authored behavior.
 
 Instances clone master starting state and then evolve independently.
 
@@ -58,8 +58,9 @@ Player-facing card state is primarily expressed through:
 
 - **Markers** - presence/absence represented by an icon;
 - **Values** - integer state represented by an icon and number;
-- existing References where cards relate to other game concepts;
 - explicitly decided structured attributes where payload beyond Marker/Value state is required.
+
+References are also a decided semantic concept for relationships such as non-Hand equipment compatibility, but the authored JSON representation of References is not yet decided.
 
 Values normally use `0..100` unless explicitly designed otherwise.
 
@@ -95,11 +96,13 @@ Design notes and unresolved values belong in docs/backlog, not runtime JSON.
 
 ChatGPT and Codex must not invent new JSON fields, object shapes, arrays, wrappers, or special-purpose authored datatypes unless Simon explicitly asks for a new JSON structure.
 
-Reuse the existing decided concepts, including Markers, Values, References, Actions, Processes, and explicitly decided structured attributes.
-
-If the existing model cannot express a required mechanic, that is a design question. Record it as unresolved instead of creating syntax to solve it.
+If the current decided schema cannot express a required mechanic, that is a design question. Record it as unresolved instead of creating syntax to solve it.
 
 Documentation must not present speculative JSON examples as decided schema.
+
+The current repository does not contain a generic authored Reference JSON schema. The `reference(...)` helper in `src/data/jsonValidation.ts` only validates ordinary ID strings and is not a Reference representation.
+
+Therefore Reference encoding remains an explicit open schema decision.
 
 ## Universal interaction language
 
@@ -286,24 +289,26 @@ Current slots:
 
 ### Equipment compatibility
 
-Compatibility with non-Hand equipment slots uses the existing **Reference** mechanism.
+Simon has decided that compatibility with non-Hand equipment slots is a **Reference** relationship.
 
-Examples of the semantics are:
+Required semantics:
 
 - T-Shirt references Chest;
 - Pants reference Legs;
 - Glasses reference Eyes;
 - Simple Backpack references Back.
 
-There is no separate `equip` field in the target model. The exact authored JSON must reuse the Reference structure that already exists in the project; do not invent a new Reference representation.
+There should not be a dedicated `equip` array in the final model.
 
-Hands are a general rule rather than authored compatibility. Any ordinary movable card may be placed in either Hand without a Left Hand/Right Hand Reference. Anchored world cards and Nadir-state cards may not be held.
+However, the JSON representation for References is still open. The current runtime has no generic authored Reference schema, so the migration away from legacy non-Hand `equip` data must wait until Simon explicitly decides that encoding.
+
+Hands are a general rule rather than authored compatibility. Any ordinary movable card may be placed in either Hand without authored Hand compatibility. Anchored world cards and Nadir-state cards may not be held.
 
 A card in a compatible equipment slot is active/equipped. A merely carried card is not.
 
 ### Carrying capacity
 
-Carried storage uses the ordinary Marker/Value systems:
+Carried storage uses ordinary Marker/Value systems:
 
 - item size is one Marker: `small`, `medium`, or `large`;
 - storage capacity is expressed by Values `storage-small`, `storage-medium`, and `storage-large` on equipped gear;
@@ -422,6 +427,6 @@ His notes may reflect moral tension between player choices, past trauma, and the
 
 A suggestion is not a decision.
 
-Do not invent missing durations, rates, Values, Markers, probabilities, Process rules, JSON structures, or extra systems to make implementation appear complete.
+Do not invent missing durations, rates, Values, Markers, probabilities, Process rules, Reference encoding, JSON structures, or extra systems to make implementation appear complete.
 
 Prefer concrete gameplay needs over abstract infrastructure. Keep the number of systems small, and reuse existing mechanisms before introducing new concepts.
