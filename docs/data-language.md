@@ -22,7 +22,7 @@ Documentation must not present speculative JSON as decided authored data.
 
 ## Stable identity
 
-Card, room, deck, Marker, Value, structured-attribute, and equipment-slot IDs use stable lowercase kebab-case IDs. Display names are presentation metadata and may change without changing runtime identity.
+Card, room, deck, Marker, Value, Reference name/target, structured-attribute, and equipment-slot IDs use stable lowercase kebab-case IDs. Display names are presentation metadata and may change without changing runtime identity.
 
 ## Attributes
 
@@ -63,41 +63,52 @@ Only equipped cards contribute their storage-capacity Values to active carried c
 
 There is no separate `storage` object in the target model.
 
-## Equipment compatibility and References
+## References
 
-Simon has decided that compatibility with non-Hand equipment slots is a **Reference**, not an `equip` array or another special-purpose equipment field.
+References are authored on a card through a `references` object mapping a reference name to a reference target ID:
 
-Required semantics include:
+```json
+"references": { "<reference name>": "<reference target id>" }
+```
 
-- T-Shirt references Chest;
-- Pants reference Legs;
-- Glasses reference Eyes;
-- Simple Backpack references Back.
+The reference name identifies the relationship. The value is the stable ID of the referenced target.
+
+Do not expand this decided representation into arrays, nested objects, wrappers, or alternate forms unless Simon explicitly decides a different Reference structure.
+
+Reference target IDs must be validated against the target set appropriate to that reference name.
+
+### Equipment compatibility
+
+Compatibility with non-Hand equipment slots is a Reference named `equip`.
+
+Examples:
+
+```json
+"references": { "equip": "chest" }
+```
+
+```json
+"references": { "equip": "legs" }
+```
+
+Current equipment semantics are:
+
+- T-Shirt: `equip -> chest`;
+- Pants: `equip -> legs`;
+- Glasses: `equip -> eyes`;
+- Simple Backpack: `equip -> back`.
 
 Hands are different: every ordinary movable card may be placed in Left Hand or Right Hand by the general Hand rule. Ordinary cards do not need authored Hand References merely to be holdable. Anchored world cards and Nadir-state cards cannot be held.
 
-### Reference JSON representation is not yet decided
-
-The current repository does **not** contain a generic authored Reference representation to reuse. The function named `reference(...)` in `src/data/jsonValidation.ts` only validates that a string points to a known ID; it is not a JSON Reference schema.
-
-Therefore the JSON representation for card References is currently an open schema decision.
-
-Do not invent it.
-
-Until Simon explicitly decides the Reference encoding:
-
-- do not migrate non-Hand equipment compatibility out of legacy `equip` data;
-- do not add a `references`, `reference`, `ref`, or similar field;
-- do not infer a shape from implementation convenience;
-- treat Reference encoding as an implementation blocker for that specific migration.
-
-The semantic decision that equipment compatibility is a Reference remains decided; only its authored JSON representation is open.
+The legacy standalone `equip` array is superseded by the `equip` Reference and must be removed once the migration is complete.
 
 ## Card masters and Actions
 
 `cards.json` uses card IDs as top-level keys.
 
 The target model removes separate `size` and `storage` data because those concepts are represented by Markers and Values.
+
+The target model removes the standalone `equip` array because non-Hand equipment compatibility is represented through `references`.
 
 The target model also removes the receiver-owned `accept` gameplay model in favor of trigger-based Actions as defined in `docs/action-process-model.md`.
 
@@ -150,7 +161,9 @@ For the current migrations:
 
 - size-based carried cards use exactly one of `small`, `medium`, or `large`, and no standalone `size` field remains;
 - storage capacity uses `storage-small`, `storage-medium`, and `storage-large` Values, and no standalone `storage` field remains;
-- ordinary Hand compatibility is not authored per card;
-- non-Hand equipment compatibility eventually uses References, but Reference JSON validation must not be implemented until Simon decides the authored Reference representation.
+- References are represented only by the decided `references` object mapping names to target IDs;
+- `references.equip`, when present, targets a valid non-Hand equipment-slot ID;
+- the legacy standalone `equip` array is not permitted in the target model;
+- ordinary Hand compatibility is not authored per card.
 
 Invalid authored data fails startup rather than falling back to a legacy format.
