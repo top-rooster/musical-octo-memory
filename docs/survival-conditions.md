@@ -22,10 +22,13 @@ If a survival state matters mechanically, represent it through visible cards, Ma
 
 This is a current constraint, not a permanent prohibition. Reopen the decision only if a concrete future mechanic cannot be expressed cleanly without hidden state.
 
-### Satiation over time
+### Recurring Body survival Processes
 
-Body has a repeating survival Process that applies `Satiation -1` for every `30m` of elapsed game time.
+Body participates in the global world-tick Process model.
 
-As with all Processes, this does not create elapsed time itself. The Satiation decrease is evaluated from game time advanced by Actions.
+At every global 15-minute world tick:
 
-This intentionally gives Satiation a slower rhythm than Hydration, which currently decreases by 2 every 15 minutes.
+- `Hydration -2`;
+- `Satiation -1`.
+
+These Processes do not create elapsed time themselves. They update only when Actions advance world time across a global quarter-hour boundary.
