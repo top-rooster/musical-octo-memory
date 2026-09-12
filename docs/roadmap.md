@@ -23,34 +23,13 @@ Runtime authored data uses strict JSON. The current runtime still contains tempo
 
 ---
 
-# Current blocker before the next full Codex iteration
-
-## REF-01 - Reference JSON representation
-
-Simon has decided that non-Hand equipment compatibility is a **Reference** relationship rather than an authored `equip` array.
-
-Required semantics include:
-
-- T-Shirt -> Chest;
-- Pants -> Legs;
-- Glasses -> Eyes;
-- Simple Backpack -> Back.
-
-However, the repository currently has **no generic authored Reference JSON representation**.
-
-The helper called `reference(...)` in `src/data/jsonValidation.ts` validates that an ordinary string is a known ID. It is not an authored Reference schema.
-
-Therefore Codex must not invent Reference syntax. The equipment migration away from legacy `equip` data is blocked until Simon explicitly decides how References are represented in JSON.
-
-This blocker applies specifically to authored Reference encoding. It does not invalidate the already-decided semantic rule that non-Hand equipment compatibility is a Reference.
-
----
-
 # Next Codex iteration - Action, attribute, time, and card-model correction
 
-**Priority: NEXT after REF-01 is decided and the workspace is based on current remote `main`.**
+**Priority: NOW**
 
 The implementation should correct the existing slice before adding new gameplay breadth.
+
+The iteration must start from current remote `main`, not from a stale Codex `work` snapshot.
 
 ## Non-negotiable implementation constraints
 
@@ -58,7 +37,19 @@ Codex must not introduce new authored JSON fields, object shapes, arrays, wrappe
 
 If the decided schema cannot represent a required mechanic, report the missing design decision instead of inventing syntax.
 
-The iteration must start from the current remote `main`, not from a stale Codex `work` snapshot.
+The decided Reference representation is:
+
+```json
+"references": { "<reference name>": "<reference target id>" }
+```
+
+For non-Hand equipment compatibility the reference name is `equip`, for example:
+
+```json
+"references": { "equip": "chest" }
+```
+
+Do not expand References into arrays, nested objects, wrappers, or alternate forms without an explicit design decision.
 
 ## 1. Replace the temporary card-on-card interaction model
 
@@ -160,24 +151,26 @@ Only equipped gear contributes active capacity.
 
 Packing uses the smallest fitting capacity first.
 
-## 9. Equipment compatibility after REF-01 is decided
+## 9. Migrate equipment compatibility to References
 
-Once Simon has explicitly decided Reference JSON representation:
+Remove the standalone authored `equip` array from the target model.
 
-- migrate non-Hand equipment compatibility from legacy `equip` data to References;
-- T-Shirt references Chest;
-- Pants references Legs;
-- Glasses references Eyes;
-- Simple Backpack references Back;
-- remove the legacy `equip` representation once fully superseded.
+Non-Hand equipment compatibility uses the decided `references` object with reference name `equip`.
+
+Required migrations:
+
+- T-Shirt -> `"references": { "equip": "chest" }`;
+- Pants -> `"references": { "equip": "legs" }`;
+- Glasses -> `"references": { "equip": "eyes" }`;
+- Simple Backpack -> `"references": { "equip": "back" }`.
+
+Validation must ensure that `references.equip` targets a valid non-Hand equipment-slot ID.
 
 Hands are not authored per card. Every ordinary movable card may be placed in either Hand. Anchored world cards and Nadir-state cards may not be held.
 
-Until REF-01 is decided, Codex must leave the legacy non-Hand equipment encoding intact rather than inventing replacement JSON.
+## 10. Remove superseded compatibility code
 
-## 10. Remove other superseded compatibility code
-
-Once replacement systems work, remove old paths rather than keeping duplicate sources of truth, including legacy `accept`, legacy travel adapters, standalone size handling, and standalone storage-object handling.
+Once replacement systems work, remove old paths rather than keeping duplicate sources of truth, including legacy `accept`, legacy travel adapters, standalone size handling, standalone storage-object handling, and the standalone `equip` array.
 
 ## 11. Preserve opening behavior
 
@@ -222,9 +215,9 @@ The full iteration is complete only when:
 - each tick applies Hydration -2 and Satiation -1;
 - size is represented by Markers, not standalone `size` data;
 - storage capacity is represented by Values, not standalone `storage` data;
-- after REF-01 is decided, non-Hand equipment compatibility is represented by References and legacy `equip` is removed;
+- non-Hand equipment compatibility is represented by the decided `references` object and legacy `equip` is removed;
 - ordinary Hand compatibility is a general rule;
-- no JSON schema was invented;
+- no JSON schema was invented beyond explicit decisions;
 - old compatibility paths are removed once superseded;
 - opening, Stack, drag feedback, and UI rules remain correct;
 - unresolved design questions remain unresolved;
