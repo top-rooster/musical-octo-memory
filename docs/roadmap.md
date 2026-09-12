@@ -149,6 +149,10 @@ Current examples:
 
 Only equipped gear contributes active capacity.
 
+Equipped storage Values are active in every scene, including Opening. In particular, Simple Backpack contributes `storage-medium = 5` immediately when equipped in Back during Opening. Do not add scene- or phase-specific suppression of storage capacity.
+
+The Opening scene is independently limited to five offered card instances; additional storage capacity does not increase that limit.
+
 Packing uses the smallest fitting capacity first.
 
 ## 9. Migrate equipment compatibility to References
@@ -179,9 +183,13 @@ During Opening:
 - Body/Mind/Spirit are hidden/unusable;
 - normal survival state UI is hidden;
 - equipment movement is free;
-- max five offered instances may be taken;
+- normal equipped effects, including storage Values, are active;
+- Simple Backpack provides `storage-medium = 5` immediately if equipped in Back;
+- max five offered instances may be taken regardless of storage capacity;
 - held/equipped offered cards count toward five;
 - Escape remains available.
+
+Do not implement a separate Opening-only rule that disables Backpack storage. The five-card selection rule already provides the intended limit.
 
 ## 12. Preserve Stack semantics
 
@@ -215,6 +223,9 @@ The full iteration is complete only when:
 - each tick applies Hydration -2 and Satiation -1;
 - size is represented by Markers, not standalone `size` data;
 - storage capacity is represented by Values, not standalone `storage` data;
+- equipped storage Values work during Opening as well as elsewhere;
+- Simple Backpack provides `storage-medium = 5` immediately when equipped in Opening;
+- the five-offered-card Opening limit remains independent of storage capacity;
 - non-Hand equipment compatibility is represented by the decided `references` object and legacy `equip` is removed;
 - ordinary Hand compatibility is a general rule;
 - no JSON schema was invented beyond explicit decisions;
