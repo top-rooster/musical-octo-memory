@@ -155,6 +155,10 @@ The current storage-capacity Values are `storage-small`, `storage-medium`, and `
 
 Only equipped gear contributes these Values to carried capacity.
 
+Storage Values are active whenever the gear is equipped, including during the Opening scene. There is no special rule suppressing Simple Backpack until Tunnels.
+
+The Opening scene remains limited to five offered card instances regardless of how much storage capacity equipped gear provides.
+
 ---
 
 # Interaction and Action model
