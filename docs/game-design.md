@@ -81,7 +81,8 @@ Item size is not a separate field/type.
 Storage capacity is not a separate object/type.
 
 - `storage-small`, `storage-medium`, and `storage-large` are ordinary Values on equipment cards;
-- only equipped gear contributes those Values as active carrying capacity.
+- only equipped gear contributes those Values as active carrying capacity;
+- equipped storage Values apply whenever the item is equipped, including during Opening.
 
 There is no standalone `size` field and no standalone `storage` object in the target model.
 
@@ -318,7 +319,9 @@ Carried storage uses ordinary Marker/Value systems:
 Current contributions:
 
 - Pants: `storage-small = 2`;
-- Simple Backpack: `storage-medium = 5` in the main game.
+- Simple Backpack: `storage-medium = 5`.
+
+Simple Backpack contributes `storage-medium = 5` immediately whenever equipped in Back, including during Opening. There is no scene-specific delay until Tunnels.
 
 Packing convention:
 
@@ -329,7 +332,7 @@ Packing convention:
 
 Equipment slots, including Hands, do not consume carried capacity.
 
-The opening evacuation separately limits the player to taking five offered card instances.
+The opening evacuation separately limits the player to taking five offered card instances. Additional storage capacity does not raise that five-card limit.
 
 ## Vision and lighting
 
@@ -387,6 +390,8 @@ Each room deck is shuffled once at new-game creation and keeps that hidden order
 The game begins with an evacuation/loadout interlude before normal survival simulation.
 
 Nadir may take at most five offered card instances. Equipped/held offered items count toward the five.
+
+Equipped storage gear still provides its normal storage Values during Opening. In particular, Simple Backpack provides `storage-medium = 5` as soon as it is equipped in Back. The five-card take limit remains independent and authoritative.
 
 During the opening, Body, Mind, Spirit, and normal survival interaction/state are hidden until Escape transitions into Tunnels and the main simulation starts.
 
