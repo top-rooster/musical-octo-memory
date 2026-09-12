@@ -12,12 +12,11 @@ Historical versions remain available in Git. A suggestion is not a decision.
 
 ## Current decision queue
 
-1. **REF-01 [P0]** - Decide the authored JSON representation for References. Simon has decided that non-Hand equipment compatibility is a Reference, but the repository currently has no generic authored Reference schema. Do not invent one.
-2. **WATER-01 [P0]** - Duration of filling a container from a Puddle remains undecided.
-3. **FLASHLIGHT-01 [P1]** - Exact Flashlight Battery drain rate remains undecided.
-4. **PROCESS-02 [P1]** - Exact concrete rules for unfinished cooking, wound healing, Fever recovery, spoilage, and other Processes remain undecided unless a focused doc explicitly decides them.
-5. **DURABILITY-01 [P2]** - Starting Durability, wear rates, and zero-Durability behavior remain undecided.
-6. **SURV-01 [P2]** - Whether permanent survival pressures beyond Hydration and Satiation are needed remains open.
+1. **WATER-01 [P0]** - Duration of filling a container from a Puddle remains undecided.
+2. **FLASHLIGHT-01 [P1]** - Exact Flashlight Battery drain rate remains undecided.
+3. **PROCESS-02 [P1]** - Exact concrete rules for unfinished cooking, wound healing, Fever recovery, spoilage, and other Processes remain undecided unless a focused doc explicitly decides them.
+4. **DURABILITY-01 [P2]** - Starting Durability, wear rates, and zero-Durability behavior remain undecided.
+5. **SURV-01 [P2]** - Whether permanent survival pressures beyond Hydration and Satiation are needed remains open.
 
 ---
 
@@ -40,7 +39,7 @@ Different masters may share the same visible name.
 ## DATA-D03 - Ownership is separated by responsibility
 **Status:** DECIDED BY SIMON
 
-- `cards.json` owns card identity, state, explicitly decided structured attributes, Actions, Processes, and other card-owned behavior;
+- `cards.json` owns card identity, state, explicitly decided structured attributes, Actions, Processes, References, and other card-owned behavior;
 - `rooms.json` owns world composition, Nadir-state/equipment/opening state, card instances, Search decks, and instance overrides;
 - `attributes.json` owns player-facing attribute metadata.
 
@@ -62,14 +61,28 @@ If the decided schema cannot express a required mechanic, record the missing des
 
 Do not publish speculative JSON examples as though they were decided schema.
 
-## DATA-D06 - Reference is a semantic concept; encoding remains open
-**Status:** DECIDED BY SIMON / ENCODING OPEN
+## DATA-D06 - Reference JSON representation
+**Status:** DECIDED BY SIMON
 
-Simon has decided that non-Hand equipment compatibility is a Reference relationship rather than an `equip` array.
+Card References are authored as a `references` object mapping a reference name to a reference target ID:
 
-The repository does not currently contain a generic authored Reference representation. The helper named `reference(...)` in `src/data/jsonValidation.ts` only validates ID strings and is not a Reference schema.
+```json
+"references": { "<reference name>": "<reference target id>" }
+```
 
-Therefore Reference JSON encoding is blocked by **REF-01** and must not be invented.
+For non-Hand equipment compatibility, the reference name is the existing relation `equip`.
+
+Examples:
+
+```json
+"references": { "equip": "chest" }
+```
+
+```json
+"references": { "equip": "legs" }
+```
+
+Reference target IDs use the existing stable ID rules and must be validated against the appropriate known target set.
 
 ---
 
@@ -230,17 +243,17 @@ Hydration 0 is game over.
 
 Current slots are Left Hand, Right Hand, Head, Eyes, Trinket 1, Trinket 2, Chest, Back, Legs, and Feet.
 
-## EQUIP-D02 - Non-Hand equipment compatibility is a Reference
+## EQUIP-D02 - Non-Hand equipment compatibility is an `equip` Reference
 **Status:** DECIDED BY SIMON
 
-Required semantics:
+Non-Hand equipment compatibility uses the decided Reference representation with reference name `equip`.
 
-- T-Shirt references Chest;
-- Pants reference Legs;
-- Glasses reference Eyes;
-- Simple Backpack references Back.
+Examples:
 
-The JSON representation is not yet decided; see **REF-01**.
+- T-Shirt: `"references": { "equip": "chest" }`;
+- Pants: `"references": { "equip": "legs" }`;
+- Glasses: `"references": { "equip": "eyes" }`;
+- Simple Backpack: `"references": { "equip": "back" }`.
 
 All ordinary movable cards may be placed in either Hand through the general Hand rule. They do not need authored Left Hand/Right Hand compatibility. Anchored world cards and Nadir-state cards may not be held.
 
