@@ -25,24 +25,26 @@ For the current prototype, equipping or unequipping itself is free and does not 
 
 ## Equipment compatibility uses References
 
-Compatibility with non-Hand equipment slots is represented through the existing **Reference** mechanism.
+Simon has decided that compatibility with non-Hand equipment slots is a **Reference** relationship rather than a dedicated `equip` array.
 
-Examples of the intended semantics:
+Required semantics:
 
-- a T-Shirt references Chest;
+- T-Shirt references Chest;
 - Pants reference Legs;
 - Glasses reference Eyes;
 - Simple Backpack references Back.
 
-Do not represent this with a separate `equip` field.
+The authored JSON representation of a Reference has **not yet been decided**.
 
-The exact authored JSON form must use the project's existing Reference structure. Do not invent a new Reference JSON shape in design documentation or implementation work.
+The current runtime does not contain a generic Reference JSON schema that can simply be reused. The `reference(...)` helper in `src/data/jsonValidation.ts` is only an ID-validation helper, not authored Reference data.
+
+Therefore do not invent Reference syntax. Until Simon decides the encoding, the migration away from legacy non-Hand `equip` data is blocked specifically on that schema decision.
 
 ### Hands
 
 Hands are intentionally not authored as per-card equipment compatibility.
 
-Either Hand may hold any ordinary movable card. Therefore ordinary item cards do not need References to Left Hand or Right Hand merely to be holdable.
+Either Hand may hold any ordinary movable card. Ordinary item cards do not need References to Left Hand or Right Hand merely to be holdable.
 
 Anchored world cards and Nadir-state cards are not ordinary movable items and cannot be placed in Hands.
 
@@ -50,7 +52,7 @@ A card in a Hand is equipped/active. A card in flat carried Inventory is only ca
 
 Held cards do not consume carried-storage capacity. During the opening evacuation, an offered card held in a Hand still counts toward the five-card selection limit.
 
-This does not imply that every directly used tool must first be held. Add such requirements only when a concrete mechanic is explicitly decided.
+This does not imply that every directly used tool must first be held. Add such requirements only when explicitly decided.
 
 ## Eyes and Vision
 
@@ -80,9 +82,7 @@ Cards occupying equipment slots, including Hands, are equipped rather than carri
 
 ## Item size Markers
 
-Item size is not a separate card field or separate attribute type. It uses the ordinary Marker system.
-
-Current size Markers are:
+Item size is not a separate card field or datatype. It uses ordinary Markers:
 
 - `small`
 - `medium`
@@ -94,9 +94,7 @@ There must not also be a separate `size` property containing the same informatio
 
 ## Storage capacity Values
 
-Storage capacity is not a separate `storage` object or separate storage type. It uses ordinary Values on equipment cards.
-
-Current storage-capacity Values are:
+Storage capacity is not a separate `storage` object or datatype. It uses ordinary Values:
 
 - `storage-small`
 - `storage-medium`
@@ -142,26 +140,28 @@ Equipment is expected to become a meaningful crafting/progression surface. Its v
 
 ## SUPERSEDES
 
-The following earlier rules are superseded:
+The following earlier rules are superseded as design direction:
 
 - `Inventory = equipped`;
 - a fixed five-card generic carrying capacity as Nadir's permanent Inventory model;
 - the earlier Neck slot;
 - representing item size through a separate `size` field/type rather than Markers;
 - representing carrying capacity through a separate `storage` object/type rather than Values;
-- representing equipment-slot compatibility through a separate `equip` field;
-- authored Left Hand/Right Hand compatibility on ordinary movable cards.
+- treating Hand compatibility as authored per-card equipment compatibility.
+
+The legacy `equip` field for non-Hand slots is also intended to be superseded by References, but its runtime migration must wait until Reference JSON encoding is explicitly decided.
 
 ## Schema discipline
 
-Do not invent new JSON structure for equipment or storage unless Simon explicitly asks for it.
+Do not invent new JSON structure for equipment, storage, or References unless Simon explicitly asks for it.
 
-If the existing Markers, Values, References, or other already-decided structures cannot express a future mechanic, record that as an unresolved design question instead of adding a new authored field or object shape.
+If the currently decided schema cannot express a mechanic, record that as an unresolved design question instead of adding a new authored field or object shape.
 
 ## OPEN
 
-The following remain undecided beyond the current prototype convention:
+The following remain undecided:
 
+- the authored JSON representation for References;
 - the final long-term packing/allocation model if the prototype convention proves insufficient;
 - whether the UI should identify which equipped storage item supplies capacity for each carried card;
 - exact effects of most clothing/equipment families;
