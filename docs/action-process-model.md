@@ -252,7 +252,7 @@ Every active Process updates exactly once on every global world tick.
 
 Process authored data must not contain `interval`, `intervalMinutes`, or another per-Process clock.
 
-Body Hydration is the first concrete recurring Process:
+Body's first concrete recurring survival Process applies both permanent survival drains on every world tick:
 
 ```json
 {
@@ -262,6 +262,10 @@ Body Hydration is the first concrete recurring Process:
         {
           "change": "hydration",
           "amount": -2
+        },
+        {
+          "change": "satiation",
+          "amount": -1
         }
       ]
     }
