@@ -5,6 +5,50 @@
     "description": "Nadir's physical condition and basic survival needs.",
     "markers": ["anchored"],
     "values": { "hydration": 50, "satiation": 50 },
+    "accept": [
+      {
+        "card": "rat-meat",
+        "action": {
+          "name": "Eat",
+          "time": "0m",
+          "effects": [
+            { "change": "satiation", "target": "receiver", "amount": 15 },
+            { "discard": "source" }
+          ]
+        }
+      },
+      {
+        "card": "canned-food",
+        "action": {
+          "name": "Eat",
+          "time": "0m",
+          "effects": [
+            { "change": "satiation", "target": "receiver", "amount": 25 },
+            { "discard": "source" }
+          ]
+        }
+      },
+      {
+        "card": "rotten-meat",
+        "action": {
+          "name": "Eat",
+          "time": "0m",
+          "effects": [{ "discard": "source" }, { "draw": "fever" }]
+        }
+      },
+      {
+        "card": "plastic-bottle",
+        "markers": ["contains-water"],
+        "action": {
+          "name": "Drink",
+          "time": "0m",
+          "effects": [
+            { "change": "hydration", "target": "receiver", "amount": 25 },
+            { "remove": "contains-water", "target": "source" }
+          ]
+        }
+      }
+    ],
     "processes": [
       {
         "interval": "15m",
@@ -37,7 +81,7 @@
     "accept": [
       {
         "card": "body",
-        "action": { "time": "8h", "effects": [{ "discard": "source" }] }
+        "action": { "name": "Sleep", "time": "8h", "effects": [{ "discard": "receiver" }] }
       }
     ]
   },
@@ -47,26 +91,11 @@
     "description": "An open injury that can heal or become infected.",
     "markers": ["anchored"],
     "values": { "infection": 50 },
-    "processes": [
-      {
-        "interval": "15m",
-        "change": "progress",
-        "amountByValue": {
-          "value": "infection",
-          "ranges": [
-            { "from": 0, "to": 24, "amount": 2 },
-            { "from": 25, "to": 49, "amount": 1 },
-            { "from": 50, "to": 74, "amount": 0 },
-            { "from": 75, "to": 100, "amount": -1 }
-          ]
-        },
-        "when": [{ "value": "progress", "equals": 100, "effects": [{ "discard": "self" }] }]
-      }
-    ],
     "accept": [
       {
         "markers": ["contains-water"],
         "action": {
+          "name": "Clean",
           "time": "15m",
           "effects": [
             { "change": "infection", "target": "receiver", "amount": -40 },
@@ -77,6 +106,7 @@
       {
         "markers": ["fabric", "sterilized"],
         "action": {
+          "name": "Dress",
           "time": "15m",
           "effects": [
             { "discard": "source" },
@@ -96,6 +126,7 @@
       {
         "markers": ["contains-water"],
         "action": {
+          "name": "Clean",
           "time": "15m",
           "effects": [
             { "change": "infection", "target": "receiver", "amount": -40 },
@@ -106,6 +137,7 @@
       {
         "markers": ["fabric", "sterilized"],
         "action": {
+          "name": "Dress",
           "time": "15m",
           "effects": [
             { "discard": "source" },
@@ -145,16 +177,7 @@
     "name": "Rotten Meat",
     "image": "images/rotten-meat.png",
     "description": "Spoiled meat that is dangerous to eat.",
-    "size": "Medium",
-    "accept": [
-      {
-        "card": "body",
-        "action": {
-          "time": "0m",
-          "effects": [{ "discard": "source" }, { "draw": "fever" }]
-        }
-      }
-    ]
+    "size": "Medium"
   },
   "rat-skin": {
     "name": "Rat Skin",
@@ -166,37 +189,13 @@
     "name": "Rat Meat",
     "image": "images/rat-meat.png",
     "description": "Raw meat cut from a rat.",
-    "size": "Small",
-    "accept": [
-      {
-        "card": "body",
-        "action": {
-          "time": "0m",
-          "effects": [
-            { "change": "satiation", "target": "body", "amount": 15 },
-            { "discard": "source" }
-          ]
-        }
-      }
-    ]
+    "size": "Small"
   },
   "canned-food": {
     "name": "Canned Food",
     "image": "images/canned-food.png",
     "description": "Shelf-stable food in a sealed can.",
-    "size": "Medium",
-    "accept": [
-      {
-        "card": "body",
-        "action": {
-          "time": "0m",
-          "effects": [
-            { "change": "satiation", "target": "body", "amount": 25 },
-            { "discard": "source" }
-          ]
-        }
-      }
-    ]
+    "size": "Medium"
   },
   "knife": {
     "name": "Knife",
@@ -222,20 +221,7 @@
     "image": "images/plastic-bottle.png",
     "description": "A reusable plastic bottle that may contain drinking water.",
     "size": "Medium",
-    "markers": ["container"],
-    "accept": [
-      {
-        "card": "body",
-        "requires": { "markers": ["contains-water"] },
-        "action": {
-          "time": "0m",
-          "effects": [
-            { "change": "hydration", "target": "body", "amount": 25 },
-            { "remove": "contains-water", "target": "source" }
-          ]
-        }
-      }
-    ]
+    "markers": ["container"]
   },
   "pants": {
     "name": "Pants",

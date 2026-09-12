@@ -1,6 +1,7 @@
 {
   "start": "opening-room",
   "searchBack": "images/search-back.jpg",
+  "nadir": ["body", "mind", "spirit"],
   "rooms": {
     "opening-room": {
       "name": "Opening Room",

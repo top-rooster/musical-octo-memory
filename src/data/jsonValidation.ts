@@ -49,14 +49,23 @@ function validateEffects(
   rooms: Set<string>,
   attributes: Set<string>,
   location: string,
+  localValues?: Set<string>,
 ): void {
   for (const [index, rawEffect] of array(value, location).entries()) {
     const effect = object(rawEffect, `${location}[${index}]`);
-    if (effect.change !== undefined) reference(effect.change, attributes, `${location}[${index}].change`);
+    if (effect.change !== undefined) {
+      reference(effect.change, attributes, `${location}[${index}].change`);
+      if (localValues && !localValues.has(effect.change)) {
+        throw new Error(`${location}[${index}].change references Value "${effect.change}" not present on this card`);
+      }
+    }
     if (effect.add !== undefined) reference(effect.add, attributes, `${location}[${index}].add`);
     if (effect.remove !== undefined) reference(effect.remove, attributes, `${location}[${index}].remove`);
     if (effect.draw !== undefined) reference(effect.draw, cards, `${location}[${index}].draw`);
     if (effect.go !== undefined) reference(effect.go, rooms, `${location}[${index}].go`);
+    if (effect.discard !== undefined && effect.discard !== "source" && effect.discard !== "receiver") {
+      throw new Error(`${location}[${index}].discard must be "source" or "receiver"`);
+    }
     if (effect.target !== undefined && effect.target !== "source" && effect.target !== "receiver") {
       reference(effect.target, cards, `${location}[${index}].target`);
     }
@@ -116,6 +125,7 @@ export function validateAuthoredData(
   for (const cardId of cardIds) {
     id(cardId, `cards.${cardId}`);
     const card = object(cards[cardId], `cards.${cardId}`);
+    const localValues = new Set(Object.keys(object(card.values ?? {}, `cards.${cardId}.values`)));
     string(card.name, `cards.${cardId}.name`);
     string(card.image, `cards.${cardId}.image`);
     if (card.markers !== undefined) {
@@ -144,12 +154,6 @@ export function validateAuthoredData(
             reference(marker, attributeIds, `cards.${cardId}.accept[${index}].markers[${markerIndex}]`);
           }
         }
-        if (acceptance.requires !== undefined) {
-          const requires = object(acceptance.requires, `cards.${cardId}.accept[${index}].requires`);
-          for (const [markerIndex, marker] of array(requires.markers, `cards.${cardId}.accept[${index}].requires.markers`).entries()) {
-            reference(marker, attributeIds, `cards.${cardId}.accept[${index}].requires.markers[${markerIndex}]`);
-          }
-        }
         const action = object(acceptance.action, `cards.${cardId}.accept[${index}].action`);
         duration(action.time, `cards.${cardId}.accept[${index}].action.time`);
         validateEffects(action.effects, cardIds, roomIds, attributeIds, `cards.${cardId}.accept[${index}].action.effects`);
@@ -159,8 +163,13 @@ export function validateAuthoredData(
       for (const [index, rawProcess] of array(card.processes, `cards.${cardId}.processes`).entries()) {
         const process = object(rawProcess, `cards.${cardId}.processes[${index}]`);
         duration(process.interval, `cards.${cardId}.processes[${index}].interval`);
-        if (process.effects !== undefined) validateEffects(process.effects, cardIds, roomIds, attributeIds, `cards.${cardId}.processes[${index}].effects`);
-        if (process.change !== undefined) reference(process.change, attributeIds, `cards.${cardId}.processes[${index}].change`);
+        if (process.effects !== undefined) validateEffects(process.effects, cardIds, roomIds, attributeIds, `cards.${cardId}.processes[${index}].effects`, localValues);
+        if (process.change !== undefined) {
+          reference(process.change, attributeIds, `cards.${cardId}.processes[${index}].change`);
+          if (!localValues.has(process.change)) {
+            throw new Error(`cards.${cardId}.processes[${index}].change references Value "${process.change}" not present on this card`);
+          }
+        }
         if (process.amountByValue !== undefined) {
           const conditional = object(process.amountByValue, `cards.${cardId}.processes[${index}].amountByValue`);
           reference(conditional.value, attributeIds, `cards.${cardId}.processes[${index}].amountByValue.value`);
@@ -171,6 +180,9 @@ export function validateAuthoredData(
       for (const [index, rawWhen] of array(card.when, `cards.${cardId}.when`).entries()) {
         const when = object(rawWhen, `cards.${cardId}.when[${index}]`);
         reference(when.value, attributeIds, `cards.${cardId}.when[${index}].value`);
+        if (!localValues.has(when.value)) {
+          throw new Error(`cards.${cardId}.when[${index}].value references Value "${when.value}" not present on this card`);
+        }
         validateEffects(when.effects, cardIds, roomIds, attributeIds, `cards.${cardId}.when[${index}].effects`);
       }
     }
@@ -178,6 +190,9 @@ export function validateAuthoredData(
 
   reference(world.start, roomIds, "rooms document.start");
   string(world.searchBack, "rooms document.searchBack");
+  for (const [index, nadirCard] of array(world.nadir, "rooms document.nadir").entries()) {
+    reference(nadirCard, cardIds, `rooms document.nadir[${index}]`);
+  }
   for (const roomId of roomIds) {
     id(roomId, `rooms.${roomId}`);
     const room = object(rooms[roomId], `rooms.${roomId}`);
