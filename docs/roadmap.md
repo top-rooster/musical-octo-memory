@@ -40,92 +40,112 @@ The merged baseline established:
 - GitHub Pages deployment workflow;
 - automated test/build coverage for the implemented slice.
 
-The baseline exposed several architecture and UI issues that are now intentionally being corrected before adding more game breadth.
+The baseline exposed architecture and UI issues that are now intentionally being corrected before adding more gameplay breadth.
+
+### JSON authored-data migration
+**Status: COMPLETE AND MERGED**
+
+PR #7 moved runtime authored data to strict JSON, removed the old TXT runtime parsers/data, centralized JSON loading/validation, preserved the temporary travel compatibility adapter, and added a capability gate so unsupported Actions cannot partially execute.
+
+That compatibility model is intentionally temporary. The next pass replaces it with the current attribute-driven Action model.
 
 ---
 
-# Current implementation pass - Milestone 2 correction and foundation cleanup
+# Current implementation pass - Action, attribute, and time foundation
 
 **Priority: NOW**
 
 Do this before adding more survival, crafting, NPC, stealth, or narrative systems.
 
-## 1. Replace custom runtime text formats with JSON
+## 1. Implement the current trigger-based Action model
 
-Migrate:
-
-- `data/cards.txt` -> `data/cards.json`
-- `data/rooms.txt` -> `data/rooms.json`
-- `data/attributes.txt` -> `data/attributes.json`
-
-Requirements:
-
-- valid JSON only;
-- no JSONC/comments in runtime files;
-- stable lowercase kebab-case IDs;
-- IDs separate from display names;
-- cards, rooms, Markers, Values, and Hidden Values use stable IDs;
-- remove obsolete custom parsers when migration is complete;
-- move unresolved data comments/TODOs into design docs/backlog.
-
-## 2. Keep data ownership explicit
-
-`cards.json` owns card behavior and card-master state.
-
-`rooms.json` owns room/world composition and card-instance placement/state overrides.
-
-`attributes.json` owns player-facing attribute metadata.
-
-Room data must not encode card behavior merely because a card instance exists in a room.
-
-## 3. Implement the trigger-based Action model
-
-Replace the temporary receiver-owned `accept` representation with the decided Action model in `docs/action-process-model.md`.
+Replace the temporary receiver-owned `accept` representation with the design in `docs/action-process-model.md`.
 
 For card-on-card drag/drop:
 
-- the dragged card is `accepted`;
-- the card underneath is `received`;
-- an Action authored on accepted may use trigger `on` to match received;
-- an Action authored on received may use trigger `receive` to match accepted;
-- `requires` describes state required on the Action-owning card;
-- effect targets use `accepted` and `received` roles.
+- dragged card = `accepted`;
+- card underneath = `received`;
+- `on` matches the received card from an Action on accepted;
+- `receive` matches the accepted card from an Action on received;
+- trigger selectors may match card IDs, Markers, and attribute presence;
+- effect targets use `accepted` and `received` roles;
+- 0 matches means no Action;
+- exactly 1 match starts the Action;
+- 2+ matches are invalid authored data.
 
-There is no separate `accept` gameplay concept.
+Authored-data validation must detect overlapping Action match domains and report the conflicting card IDs and Action definitions. Runtime resolution must guard against ambiguity as a safety net.
 
-At drag-end:
+## 2. Add structured card attributes
 
-- 0 matching Actions means no interaction;
-- exactly 1 matching Action starts;
-- 2+ matching Actions are invalid authored data.
+Support card attributes that carry authored payload beyond Marker presence or a single numeric Value.
 
-Authored-data validation must detect overlapping Action matches and report the conflicting card IDs and Action definitions. Runtime resolution must also guard against ambiguity.
+Implement the three concrete attributes currently decided:
 
-Consumable behavior belongs primarily on the consumable card. Do not turn Body into a registry containing every item that may be consumed.
+### Path
 
-## 4. Add Action execution and centralized world-time advancement
+A route/passsage card has a `path` attribute containing:
+
+- target Room ID;
+- travel time.
+
+Body owns one generic Travel Action triggered when Body is dropped on a card carrying `path`.
+
+Travel reads destination and duration from Path. Do not duplicate destination/time in room data, a route-specific Action, or a separate `go` effect.
+
+### Food
+
+An edible card has a `food` attribute containing the concrete completion effects of eating it.
+
+Body owns one generic Eat Action triggered when Body receives a card carrying `food`.
+
+Do not put a growing list of edible card IDs or item-specific food effects on Body.
+
+### Hydration
+
+A drinkable card has a `hydration` attribute containing the concrete completion effects of drinking from it.
+
+Body owns one generic Drink Action triggered when Body receives a card carrying `hydration`.
+
+Do not duplicate drink effects on Body.
+
+The general principle is:
+
+> Action = what Nadir does. Triggering attribute = the concrete data/effects contributed by the object.
+
+Do not generalize this into a broad scripting system beyond the concrete needs above.
+
+## 3. Build one generic Action executor
+
+Action execution must be atomic: either every required effect is supported and the Action executes, or the Action is not executable.
+
+The existing capability gate from PR #7 should remain effective until the generic executor supports the authored effect set.
 
 Only one Action may execute at a time.
 
-Every Action has an explicit duration; instant Actions use `0m`.
+Normal Action effects execute at completion, not once per world tick.
 
-Normal Action effects execute at Action completion, not once per world tick.
+An Action must resolve an explicit duration when it starts. There is no default duration. The duration may be authored on the Action or supplied by its triggering attribute; Travel specifically uses `path.time`.
 
-All time-consuming Action paths must use one centralized time-advance mechanism. This includes card Actions, travel, Search, and future Action types.
+## 4. Centralize world-time advancement
 
-While an Action executes, world time crosses zero or more global quarter-hour boundaries. Each crossed boundary causes one world tick.
+Only Actions advance world time.
 
-If Action completion falls exactly on a world-tick boundary, the world tick resolves first and Action completion occurs afterward.
+All time-consuming Action paths must use one centralized time-advance mechanism. This includes:
+
+- card Actions;
+- Travel;
+- Search;
+- future Action types.
+
+While one Action executes, world time crosses zero or more global quarter-hour boundaries. Each crossed boundary causes one world tick.
+
+If Action completion falls exactly on a world-tick boundary, resolve the world tick first and Action completion second.
 
 ## 5. Implement the global Process model
 
 Processes have no private interval, countdown, or duration.
 
-Remove Process timing fields such as:
-
-- `interval`;
-- `intervalMinutes`;
-- any equivalent per-Process clock.
+Remove Process timing fields such as `interval`, `intervalMinutes`, or any equivalent per-Process clock.
 
 Every active Process updates exactly once on every global world tick:
 
@@ -147,37 +167,31 @@ Body:
 - Hydration 0 is game over;
 - do not invent Satiation decay.
 
-Finite/staged Processes should use card state, effects, and conditions/thresholds instead of acquiring independent timers.
+Finite/staged Processes use card state, effects, and conditions/thresholds rather than independent timers.
 
-## 6. Support Hidden Values as card-local internal state
+## 6. Support Hidden Values
 
 Cards may have player-facing Values and non-player-facing Hidden Values.
 
 Hidden Values:
 
-- are numeric state owned by the card instance;
+- are numeric card-instance state;
 - use stable IDs;
 - clone independently from master state and support instance overrides;
 - may be used by Actions, Processes, and conditions;
 - do not automatically appear in player UI;
-- do not require `attributes.json` metadata unless later made visible.
+- do not require player-facing metadata unless later made visible.
 
 Do not invent generic Hidden Value bounds/clamping or Stack behavior until those details are decided.
 
-## 7. Make travel use the Action model directly
+## 7. Remove travel compatibility code
 
-Route-card masters own their trigger, Action duration, and destination effect.
+Once Path + Travel work through the generic Action system:
 
-A route that receives Body may express that through `trigger.receive` rather than room-authored travel metadata or hardcoded Body checks.
-
-Remove the temporary `CardInstance.travel` compatibility adapter once generic Action execution can perform travel faithfully.
-
-Use separate card IDs for routes with different behavior even when they share the same visible name and art.
-
-Current examples:
-
-- `go-tunnels-from-office` - visible name `Go to tunnels`, 15m;
-- `go-tunnels-from-deep-tunnels` - visible name `Go to tunnels`, 30m.
+- remove `CardInstance.travel`;
+- remove derived travel compatibility adapters;
+- remove hardcoded accepted-Body travel checks;
+- keep route-card identity separate where distinct world passages require separate masters.
 
 ## 8. Correct the opening scene
 
@@ -221,7 +235,7 @@ Current decided visible-state rule:
 - cards containing visible Value attributes do not Stack;
 - Stack is Room-only presentation and underlying instances remain separate.
 
-Whether Hidden Values additionally prevent Stack is still a design question and must not be invented during implementation.
+Whether Hidden Values additionally prevent Stack remains undecided.
 
 ## 11. Implement Puddle filling after its Action duration is decided
 
@@ -234,11 +248,13 @@ An empty container is a card with `container` and without `contains-water`.
 
 A successful fill:
 
-- adds `contains-water` to the container;
+- adds the water/drinkable state required by the current Hydration model to the container;
 - decreases Puddle water by 1;
 - discards the Puddle when water reaches 0.
 
-Do not invent the Action duration for filling; it remains open.
+Do not invent the fill Action duration; it remains open.
+
+Do not preserve obsolete `contains-water` mechanics merely for compatibility if the new Hydration attribute replaces them. Migrate authored data deliberately when this step is implemented.
 
 ## 12. Preserve decided Flashlight instance state
 
@@ -265,8 +281,7 @@ Do not invent the Action duration for filling; it remains open.
 ### Cards
 
 - reduce bright-white visual dominance;
-- enlarge Marker icons;
-- enlarge Value presentation and numbers;
+- enlarge player-facing attributes and Value numbers;
 - make basic mechanical state readable without mouseover.
 
 ### Room backgrounds
@@ -289,16 +304,17 @@ Desired hierarchy:
 
 Do not consider the pass complete until:
 
-- JSON migration is complete and obsolete text parsers/data are removed;
-- stable IDs remain runtime identity rather than display-name lookups;
 - card-on-card interactions use the trigger-based Action model with ambiguity validation;
+- Path, Food, and Hydration attributes follow the current ownership model;
+- Body has generic Travel, Eat, and Drink Actions rather than item-specific lists;
+- Action execution is atomic;
 - only one Action may execute at a time;
 - all time-consuming Actions use centralized world-time advancement;
 - Processes have no individual timers and all active Processes update on global 15-minute ticks;
 - world tick resolves before Action completion when both occur at the same timestamp;
 - Hydration visibly updates on crossed world ticks;
 - Hidden Values can exist as non-player-facing card-instance state;
-- travel uses generic Action behavior rather than room-authored/hardcoded travel behavior;
+- the temporary travel adapter is removed;
 - Opening Room no longer exposes Body/Mind/Spirit;
 - Stack, equipment, Puddle, and Flashlight corrections obey current design decisions;
 - UI issues above are manually browser-verified;
@@ -313,7 +329,7 @@ The correction work should be developed on a dedicated branch and reviewed befor
 
 # After the correction pass
 
-Do not expand the game merely because infrastructure now supports it.
+Do not expand the game merely because infrastructure supports it.
 
 The next milestone should be chosen from concrete gameplay needs after the corrected Milestone 2 slice is played again.
 
@@ -327,7 +343,7 @@ Likely future areas already present in the design include:
 - NPC schedules and stealth/search-team systems;
 - narrative progression and Nadir's notes.
 
-These are not automatically the next implementation milestone. Their exact order remains a design/roadmap decision after the current correction pass.
+These are not automatically the next implementation milestone.
 
 ---
 
