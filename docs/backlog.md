@@ -12,11 +12,12 @@ Historical versions remain available in Git. A suggestion is not a decision.
 
 ## Current decision queue
 
-1. **WATER-01 [P0]** - Duration of filling a container from a Puddle remains undecided.
-2. **FLASHLIGHT-01 [P1]** - Exact Flashlight Battery drain rate remains undecided.
-3. **PROCESS-02 [P1]** - Exact concrete rules for unfinished cooking, wound healing, Fever recovery, spoilage, and other Processes remain undecided unless a focused doc explicitly decides them.
-4. **DURABILITY-01 [P2]** - Starting Durability, wear rates, and zero-Durability behavior remain undecided.
-5. **SURV-01 [P2]** - Whether permanent survival pressures beyond Hydration and Satiation are needed remains open.
+1. **REF-01 [P0]** - Decide the authored JSON representation for References. Simon has decided that non-Hand equipment compatibility is a Reference, but the repository currently has no generic authored Reference schema. Do not invent one.
+2. **WATER-01 [P0]** - Duration of filling a container from a Puddle remains undecided.
+3. **FLASHLIGHT-01 [P1]** - Exact Flashlight Battery drain rate remains undecided.
+4. **PROCESS-02 [P1]** - Exact concrete rules for unfinished cooking, wound healing, Fever recovery, spoilage, and other Processes remain undecided unless a focused doc explicitly decides them.
+5. **DURABILITY-01 [P2]** - Starting Durability, wear rates, and zero-Durability behavior remain undecided.
+6. **SURV-01 [P2]** - Whether permanent survival pressures beyond Hydration and Satiation are needed remains open.
 
 ---
 
@@ -39,7 +40,7 @@ Different masters may share the same visible name.
 ## DATA-D03 - Ownership is separated by responsibility
 **Status:** DECIDED BY SIMON
 
-- `cards.json` owns card identity, state, structured attributes, Actions, Processes, References, and other card-owned behavior;
+- `cards.json` owns card identity, state, explicitly decided structured attributes, Actions, Processes, and other card-owned behavior;
 - `rooms.json` owns world composition, Nadir-state/equipment/opening state, card instances, Search decks, and instance overrides;
 - `attributes.json` owns player-facing attribute metadata.
 
@@ -57,11 +58,18 @@ Duration may be authored directly on an Action or supplied by a structured trigg
 
 ChatGPT and Codex must not invent new JSON fields, object shapes, array shapes, wrappers, or special-purpose authored datatypes unless Simon explicitly asks for a new JSON structure.
 
-Reuse existing decided mechanisms such as Markers, Values, References, Actions, Processes, and explicitly decided structured attributes.
-
-If an existing structure cannot express a required mechanic, record the missing design decision instead of silently creating new JSON.
+If the decided schema cannot express a required mechanic, record the missing design decision instead of silently creating JSON.
 
 Do not publish speculative JSON examples as though they were decided schema.
+
+## DATA-D06 - Reference is a semantic concept; encoding remains open
+**Status:** DECIDED BY SIMON / ENCODING OPEN
+
+Simon has decided that non-Hand equipment compatibility is a Reference relationship rather than an `equip` array.
+
+The repository does not currently contain a generic authored Reference representation. The helper named `reference(...)` in `src/data/jsonValidation.ts` only validates ID strings and is not a Reference schema.
+
+Therefore Reference JSON encoding is blocked by **REF-01** and must not be invented.
 
 ---
 
@@ -98,8 +106,6 @@ Material identity changes use discard + draw replacement rather than changing ma
 
 Visible Markers/Values carry routine gameplay state. Hidden Values may exist for concrete internal mechanics, but they must not be used merely to hide information required for ordinary survival decisions.
 
-Do not recreate invisible hunger/fullness/stomach systems merely for complexity.
-
 ## CARD-D03 - Stack is presentation only
 **Status:** DECIDED BY SIMON
 
@@ -122,7 +128,7 @@ Item size is not a separate card field or attribute type.
 
 The current size Markers are `small`, `medium`, and `large`.
 
-A size-based carried item has exactly one of these Markers. There must not also be a separate `size` field duplicating the same information.
+A size-based carried item has exactly one of these Markers.
 
 ## CARD-D05 - Storage capacity is represented by Values
 **Status:** DECIDED BY SIMON
@@ -135,8 +141,6 @@ The current storage-capacity Values are `storage-small`, `storage-medium`, and `
 - Simple Backpack: `storage-medium = 5`.
 
 Only equipped gear contributes these Values to carried capacity.
-
-There must not also be a separate `storage` field duplicating the same information.
 
 ---
 
@@ -177,10 +181,6 @@ Object-specific effects belong on the triggering object attribute rather than as
 Current concrete structured attributes are `path`, `food`, and `hydration`.
 
 `contains-water` remains the mutable Marker meaning that a container currently contains water. It is part of the Drink trigger and is not replaced by `hydration`.
-
-An empty container may retain its hydration behavior payload while being non-drinkable because `contains-water` is absent. Refilling restores `contains-water`.
-
-Do not generalize into an unrestricted scripting language.
 
 ## ACTION-D04 - Atomic Action execution
 **Status:** DECIDED BY SIMON
@@ -223,78 +223,6 @@ Hydration 0 is game over.
 
 ---
 
-# Drag feedback
-
-## UI-D01 - Legal targets highlight during drag
-**Status:** DECIDED BY SIMON
-
-Every legal receiving card highlights as soon as a drag begins.
-
-Ordinary legal targets become yellow when hovered for commitment. Rejecting hovered cards become red. Stack targets remain green.
-
-Danger is communicated separately from legality color.
-
-## UI-D02 - Known direct effects preview on affected cards
-**Status:** DECIDED BY SIMON
-
-Known direct Value changes appear as previews on the affected card as soon as dragging begins.
-
-Examples on Body include `Satiation 67 -> 82` and `Hydration 50 -> 75`.
-
-If several known Values change, show them all simultaneously.
-
----
-
-# Rooms and travel
-
-## ROOM-D01 - Room composition is separate from route behavior
-**Status:** DECIDED BY SIMON
-
-Travel destination/time belongs to route-card `path`, not room placement data.
-
-## TRAVEL-D01 - Body owns generic Travel
-**Status:** DECIDED BY SIMON
-
-Dragging Body onto a route card carrying `path` executes Travel.
-
-Current base links:
-
-- Tunnels -> Abandoned Office: 15m;
-- Abandoned Office -> Tunnels: 15m;
-- Tunnels -> Deep Tunnels: 30m;
-- Deep Tunnels -> Tunnels: 30m.
-
-## SEARCH-D01 - Search deck timing and persistence
-**Status:** DECIDED BY SIMON
-
-Search is an Action with authored base duration.
-
-Room Search decks are shuffled once at new-game creation, retain the hidden order for the run, do not reroll, and do not show remaining-card count.
-
-Search decks are not cards.
-
----
-
-# Opening
-
-## OPEN-D01 - Opening is a loadout-selection interlude
-**Status:** DECIDED BY SIMON
-
-The Opening Room is not normal survival simulation.
-
-During opening, Body, Mind, Spirit, Vision, and ordinary survival interaction/state are hidden until Escape begins the main game in Tunnels.
-
-The player may take at most five offered card instances; held/equipped offered items count toward five.
-
-## OPEN-D02 - Starting clothes/offers
-**Status:** DECIDED BY SIMON
-
-Nadir begins wearing Pants and T-Shirt, with Feet and Hands empty.
-
-Current offers remain Pocket Knife, two Plastic Bottles with `contains-water`, two Canned Food, Simple Lighter, Flashlight, Spare Batteries, Pain Killers, Simple Backpack, and Glasses.
-
----
-
 # Equipment and storage
 
 ## EQUIP-D01 - Current equipment slots
@@ -302,18 +230,19 @@ Current offers remain Pocket Knife, two Plastic Bottles with `contains-water`, t
 
 Current slots are Left Hand, Right Hand, Head, Eyes, Trinket 1, Trinket 2, Chest, Back, Legs, and Feet.
 
-## EQUIP-D02 - Non-Hand equipment compatibility uses References
+## EQUIP-D02 - Non-Hand equipment compatibility is a Reference
 **Status:** DECIDED BY SIMON
 
-Compatibility with non-Hand equipment slots is represented through the existing Reference mechanism, not a separate `equip` field.
+Required semantics:
 
-Examples: T-Shirt references Chest; Pants reference Legs; Glasses reference Eyes; Simple Backpack references Back.
+- T-Shirt references Chest;
+- Pants reference Legs;
+- Glasses reference Eyes;
+- Simple Backpack references Back.
 
-The exact JSON form must reuse the existing Reference schema. Do not invent a new Reference structure.
+The JSON representation is not yet decided; see **REF-01**.
 
-All ordinary movable cards may be placed in either Hand through the general Hand rule. They do not need authored Left Hand/Right Hand References merely to be holdable.
-
-Anchored world cards and Nadir-state cards may not be held.
+All ordinary movable cards may be placed in either Hand through the general Hand rule. They do not need authored Left Hand/Right Hand compatibility. Anchored world cards and Nadir-state cards may not be held.
 
 ## INV-D01 - Carried storage uses size Markers and storage Values
 **Status:** DECIDED BY SIMON
@@ -327,8 +256,6 @@ Capacity is represented by equipped-card Values: `storage-small`, `storage-mediu
 `storage-small` accepts `small`; `storage-medium` accepts `small` or `medium`; `storage-large` accepts all three size Markers. Allocate to the smallest fitting capacity first.
 
 Equipment slots including Hands do not consume carried storage capacity.
-
-No standalone `size`, `storage`, or `equip` field remains in the target model.
 
 ---
 
@@ -358,18 +285,6 @@ Exact Battery drain remains OPEN.
 
 ---
 
-# Open/deferred systems
-
-- Exact wound healing/Burn Wound/Fever recovery behavior remains open unless superseded by a focused doc.
-- Rat Meat cooking timing/effects remain open.
-- Exact Dead Rat spoilage rate remains open.
-- Durability wear/zero behavior remains open.
-- Trinket content is deferred.
-- Torch recipe/burn behavior is deferred.
-- Final heat-source attribute name remains open.
-
----
-
 # Maintenance rule
 
 When Simon makes a new explicit design decision:
@@ -379,4 +294,4 @@ When Simon makes a new explicit design decision:
 3. move unresolved implementation-blocking values into the decision queue;
 4. do not turn ChatGPT suggestions into decisions;
 5. keep runtime-data TODOs out of JSON;
-6. never invent new JSON structure unless Simon explicitly asks for it; if existing schema is insufficient, record an open design question instead.
+6. never invent new JSON structure unless Simon explicitly asks for it.
