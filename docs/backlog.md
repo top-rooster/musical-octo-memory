@@ -117,6 +117,26 @@ The current size Markers are:
 
 A size-based carried item has exactly one of these Markers. Storage and packing rules inspect that Marker. There must not also be a separate `size` field duplicating the same information.
 
+## CARD-D05 - Storage capacity is represented by Values
+**Status:** DECIDED BY SIMON
+
+Storage capacity is not a separate `storage` object or attribute type.
+
+The current storage-capacity Values are:
+
+- `storage-small`;
+- `storage-medium`;
+- `storage-large`.
+
+Examples:
+
+- Pants: `storage-small = 2`;
+- Simple Backpack: `storage-medium = 5`.
+
+Only equipped gear contributes these Values to carried capacity. A storage item carried flat in Inventory does not contribute capacity.
+
+There must not also be a separate `storage` field duplicating the same information.
+
 ---
 
 # Interaction and Action model
@@ -309,16 +329,26 @@ Current offers:
 
 Any ordinary movable card may be held in either Hand. Anchored world/Nadir-state cards may not.
 
-## INV-D01 - Carried storage uses size-marker capacities
+## INV-D01 - Carried storage uses size Markers and storage Values
 **Status:** DECIDED BY SIMON
 
 There is no permanent generic five-card Inventory limit.
 
-Pants add 2 Small capacity. Simple Backpack adds 5 Medium capacity in the main game.
+Item size is represented by exactly one of `small`, `medium`, or `large` Markers.
 
-Storage consumes capacity according to an item's `small`, `medium`, or `large` Marker rather than a standalone size property.
+Capacity is represented by equipped-card Values:
+
+- `storage-small`;
+- `storage-medium`;
+- `storage-large`.
+
+Pants have `storage-small = 2`. Simple Backpack has `storage-medium = 5` for the main game.
+
+`storage-small` accepts `small`; `storage-medium` accepts `small` or `medium`; `storage-large` accepts all three size Markers. Allocate to the smallest fitting capacity first.
 
 Equipment slots including Hands do not consume carried storage capacity.
+
+No standalone `size` field or `storage` object remains in the target model.
 
 ---
 
