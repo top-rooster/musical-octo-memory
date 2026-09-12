@@ -2,6 +2,18 @@
 
 This document defines the current design contract for card Actions, card-owned attributes, world time, Processes, and hidden card state.
 
+## Nadir state cards
+
+Nadir is represented by three persistent anchored Inventory cards:
+
+- **Body** - physical state and bodily survival needs;
+- **Mind** - perception/cognitive state;
+- **Spirit** - emotional/spiritual state.
+
+There is no separate generic Nadir card. Actions belong on the state card that naturally represents what Nadir is doing or what part of his state is affected.
+
+Current examples in this document use Body for Travel, Eat, and Drink.
+
 ## Interaction terminology
 
 For a card-on-card drag/drop interaction:
@@ -22,7 +34,7 @@ For card-on-card interactions:
 - `on` - the Action is authored on the accepted card and matches the received card;
 - `receive` - the Action is authored on the received card and matches the accepted card.
 
-A trigger may match by stable card ID, Marker requirements, or attribute presence. Requirements on the Action-owning card remain separate from the trigger.
+A trigger may match by stable card ID, Marker requirements, or attribute presence. These requirements may be combined, and when combined all must match. Requirements on the Action-owning card remain separate from the trigger.
 
 At drag-end:
 
@@ -41,16 +53,16 @@ Authored-data validation must reject overlapping Action match domains. Runtime r
 
 ## Actions describe what Nadir does
 
-The Action owns the verb. The triggering card attribute owns the concrete data and effects contributed by the object being used.
+The Action owns the verb. The triggering card state/attribute owns the concrete eligibility, data, and effects contributed by the object being used.
 
-This keeps generic behavior on Nadir instead of producing long lists of item-specific Actions on Body.
+This keeps generic behavior on Body instead of producing long lists of item-specific Actions there.
 
 The current Body model is:
 
 ```text
 Travel  -> Body is dropped on a card with Path
 Eat     -> Body receives a card with Food
-Drink   -> Body receives a card with Hydration
+Drink   -> Body receives a card with Contains Water and Hydration
 ```
 
 Conceptually:
@@ -78,6 +90,7 @@ Conceptually:
       "name": "Drink",
       "trigger": {
         "receive": {
+          "markers": ["contains-water"],
           "attribute": "hydration"
         }
       }
@@ -87,6 +100,8 @@ Conceptually:
 ```
 
 This is conceptual schema. Exact JSON field layout may evolve, but the ownership and runtime semantics are decided.
+
+`contains-water` is deliberately part of the Drink trigger. It represents current water presence. The `hydration` attribute provides the concrete effect payload and does not by itself mean that a container currently contains water.
 
 ## Structured card attributes
 
@@ -151,18 +166,19 @@ A different food can provide different effects without changing Body or the Eat 
 
 Do not duplicate the same sustenance number both as a Food property and as an effect amount unless a future mechanic genuinely needs both representations.
 
-### Hydration
+### Hydration and Contains Water
 
-Cards that can be drunk from carry a `hydration` attribute.
+A card that can provide hydration carries a `hydration` structured attribute describing the concrete completion effects of drinking from it.
 
-Body owns one generic Drink Action. Drink triggers when Body receives a card with `hydration`.
+A container currently holding water carries the mutable Marker `contains-water`.
 
-The Hydration attribute owns the concrete completion effects of drinking from that card.
+Body owns one generic Drink Action. Drink triggers only when Body receives a card that satisfies the Drink trigger, including `contains-water`. In the current model the same card also provides the `hydration` attribute from which Drink obtains its completion effects.
 
 Conceptually:
 
 ```json
 {
+  "markers": ["container", "contains-water"],
   "hydration": {
     "effects": [
       {
@@ -171,7 +187,7 @@ Conceptually:
         "amount": 25
       },
       {
-        "remove": "hydration",
+        "remove": "contains-water",
         "target": "accepted"
       }
     ]
@@ -179,7 +195,9 @@ Conceptually:
 }
 ```
 
-The example only illustrates ownership. Exact container/water-state representation must follow the concrete authored model and must not be duplicated merely to fit the example.
+After drinking, removing `contains-water` makes the same container no longer a legal Drink source. The `hydration` behavior payload may remain on the card so refilling the container can make the same Drink interaction legal again.
+
+Do not duplicate current water presence in another state system merely because `hydration` exists.
 
 ## Action effects and duration
 
