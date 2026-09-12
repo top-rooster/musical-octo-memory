@@ -213,7 +213,7 @@ During Opening Room:
 
 Body, Mind, Spirit, and normal survival simulation begin on entering Tunnels.
 
-## 9. Equipment correction
+## 9. Equipment and size correction
 
 Replace `Neck` with:
 
@@ -227,6 +227,17 @@ Keep universal Hand behavior:
 - Hand placement does not require authored `equip Hand`;
 - special effects still require their authored activation condition;
 - held cards do not consume carried capacity.
+
+Migrate item size into the existing Marker system:
+
+- use `small`, `medium`, and `large` Markers;
+- remove the standalone card `size` field/type;
+- size-based carried items have exactly one size Marker;
+- add player-facing attribute metadata for the three size Markers;
+- storage/packing rules inspect the size Marker rather than a dedicated size property;
+- keep existing Small/Medium/Large capacity behavior and smallest-fitting-capacity allocation convention.
+
+Do not keep both a Marker and a separate `size` field as parallel sources of truth.
 
 ## 10. Correct Stack semantics
 
@@ -323,6 +334,8 @@ Do not consider the pass complete until:
 - Hidden Values can exist as non-player-facing card-instance state;
 - the temporary travel adapter is removed;
 - Opening Room no longer exposes Body/Mind/Spirit;
+- item size is represented only by `small`/`medium`/`large` Markers and the old standalone `size` field is removed;
+- storage packing uses the size Markers without changing the decided capacity semantics;
 - Stack, equipment, Puddle, and Flashlight corrections obey current design decisions;
 - UI issues above are manually browser-verified;
 - focused technical documentation matches implementation;
