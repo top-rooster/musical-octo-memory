@@ -25,20 +25,34 @@ For the current prototype, equipping or unequipping itself is free and does not 
 
 ## Equipment compatibility uses References
 
-Simon has decided that compatibility with non-Hand equipment slots is a **Reference** relationship rather than a dedicated `equip` array.
+Compatibility with non-Hand equipment slots is represented through a **Reference** relationship rather than a dedicated `equip` array.
 
-Required semantics:
+The authored Reference representation is:
 
-- T-Shirt references Chest;
-- Pants reference Legs;
-- Glasses reference Eyes;
-- Simple Backpack references Back.
+```json
+"references": { "<reference name>": "<reference target id>" }
+```
 
-The authored JSON representation of a Reference has **not yet been decided**.
+For equipment compatibility, the reference name is `equip`.
 
-The current runtime does not contain a generic Reference JSON schema that can simply be reused. The `reference(...)` helper in `src/data/jsonValidation.ts` is only an ID-validation helper, not authored Reference data.
+Examples:
 
-Therefore do not invent Reference syntax. Until Simon decides the encoding, the migration away from legacy non-Hand `equip` data is blocked specifically on that schema decision.
+```json
+"references": { "equip": "chest" }
+```
+
+```json
+"references": { "equip": "legs" }
+```
+
+Current required semantics:
+
+- T-Shirt: `"references": { "equip": "chest" }`;
+- Pants: `"references": { "equip": "legs" }`;
+- Glasses: `"references": { "equip": "eyes" }`;
+- Simple Backpack: `"references": { "equip": "back" }`.
+
+Reference target IDs use stable IDs and must be validated against the appropriate known target set.
 
 ### Hands
 
@@ -140,20 +154,21 @@ Equipment is expected to become a meaningful crafting/progression surface. Its v
 
 ## SUPERSEDES
 
-The following earlier rules are superseded as design direction:
+The following earlier rules are superseded:
 
 - `Inventory = equipped`;
 - a fixed five-card generic carrying capacity as Nadir's permanent Inventory model;
 - the earlier Neck slot;
 - representing item size through a separate `size` field/type rather than Markers;
 - representing carrying capacity through a separate `storage` object/type rather than Values;
-- treating Hand compatibility as authored per-card equipment compatibility.
-
-The legacy `equip` field for non-Hand slots is also intended to be superseded by References, but its runtime migration must wait until Reference JSON encoding is explicitly decided.
+- treating Hand compatibility as authored per-card equipment compatibility;
+- representing non-Hand equipment compatibility through the legacy `equip` array instead of References.
 
 ## Schema discipline
 
 Do not invent new JSON structure for equipment, storage, or References unless Simon explicitly asks for it.
+
+The current Reference structure is specifically the `references` object mapping a reference name to one reference target ID. Do not expand it into arrays, nested objects, wrappers, or alternate forms without an explicit design decision.
 
 If the currently decided schema cannot express a mechanic, record that as an unresolved design question instead of adding a new authored field or object shape.
 
@@ -161,7 +176,6 @@ If the currently decided schema cannot express a mechanic, record that as an unr
 
 The following remain undecided:
 
-- the authored JSON representation for References;
 - the final long-term packing/allocation model if the prototype convention proves insufficient;
 - whether the UI should identify which equipped storage item supplies capacity for each carried card;
 - exact effects of most clothing/equipment families;
