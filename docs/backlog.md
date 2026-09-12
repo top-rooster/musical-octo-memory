@@ -104,6 +104,19 @@ Current eligibility:
 
 Whether Hidden Values affect Stack eligibility remains open.
 
+## CARD-D04 - Item size is represented by Markers
+**Status:** DECIDED BY SIMON
+
+Item size is not a separate card field or attribute type.
+
+The current size Markers are:
+
+- `small`;
+- `medium`;
+- `large`.
+
+A size-based carried item has exactly one of these Markers. Storage and packing rules inspect that Marker. There must not also be a separate `size` field duplicating the same information.
+
 ---
 
 # Interaction and Action model
@@ -296,12 +309,14 @@ Current offers:
 
 Any ordinary movable card may be held in either Hand. Anchored world/Nadir-state cards may not.
 
-## INV-D01 - Carried storage uses size capacities
+## INV-D01 - Carried storage uses size-marker capacities
 **Status:** DECIDED BY SIMON
 
 There is no permanent generic five-card Inventory limit.
 
 Pants add 2 Small capacity. Simple Backpack adds 5 Medium capacity in the main game.
+
+Storage consumes capacity according to an item's `small`, `medium`, or `large` Marker rather than a standalone size property.
 
 Equipment slots including Hands do not consume carried storage capacity.
 
