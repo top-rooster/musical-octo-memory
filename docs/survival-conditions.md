@@ -4,52 +4,28 @@ This document records the current decided representation of Nadir's ongoing surv
 
 ## DECIDED BY SIMON
 
-Nadir is represented by one persistent **Nadir** card anchored to Inventory.
+For now, `Hydration` and `Satiation` are the only permanent survival Values on Body.
 
-`Hydration` and `Satiation` are currently the permanent survival Values on that card. They are ordinary visible card attributes, not separate character-sheet bars or hidden survival systems.
+Other survival pressures should be represented as conditions rather than additional permanent Body Values.
 
-Other survival pressures should normally be represented as condition cards rather than additional permanent Values on Nadir when they have their own identity and lifecycle.
+Examples include fatigue, temperature-related problems, illness, injury, stress, and similar temporary or situational pressures. Their exact cards, attributes, Processes, and effects are still defined individually as needed; this decision only fixes the representation direction.
 
-Examples include fatigue, illness, injury, stress, and temperature-related problems. Their exact cards, attributes, Processes, and effects are defined individually as needed.
+The purpose is to keep Nadir's permanent state compact and legible while allowing complexity to appear through condition cards when it is actually relevant.
 
-The purpose is to keep Nadir's permanent state compact and legible while allowing complexity to appear only when it matters.
-
-### Visibility and readability
-
-Routine survival decisions must be readable from the Nadir card itself.
-
-When the player drags food, drink, medicine, or another source whose direct effect is understood, any affected visible Nadir Values should preview the result in place, for example:
-
-- `Satiation 67 -> 82`
-- `Hydration 50 -> 75`
-
-The player should not need to remember hidden restoration values or consult a second survival panel to decide whether to eat or drink.
+This remains consistent with the current injury model, where wounds and Fever are represented as condition cards/Processes rather than through a general Health Value.
 
 ### Hidden survival state
 
-Do not recreate Card Survival-style opacity by adding invisible hunger/fullness/stomach systems merely to increase simulation complexity.
+For now, the survival simulation should not contain hidden character-state variables outside the visible card/attribute model.
 
-Hidden Values exist in the general card model, but Nadir's routine survival state should remain visible unless a concrete future mechanic specifically benefits from being hidden.
+If a survival state matters mechanically, represent it through visible cards, Markers, Values, Processes, or other already-established visible game state rather than through an invisible accumulator such as hidden fullness, fatigue, immunity, or similar state.
 
-### Hydration over time
-
-Nadir starts with:
-
-- `Hydration 50`
-- `Satiation 50`
-
-Hydration is currently the first recurring survival Process.
-
-At each global quarter-hour world tick:
-
-`Hydration -2`
-
-Hydration 0 causes game over.
-
-Do not invent additional Hydration sub-systems such as stomach contents, drinking frequency adaptation, or delayed absorption unless explicitly designed later.
+This is a current constraint, not a permanent prohibition. Reopen the decision only if a concrete future mechanic cannot be expressed cleanly without hidden state.
 
 ### Satiation over time
 
-No recurring Satiation decay is part of the current implementation contract.
+Body has a repeating survival Process that applies `Satiation -1` for every `30m` of elapsed game time.
 
-Earlier drafts described `Satiation -1` every 30 minutes, but the current Action/Process foundation explicitly leaves Satiation decay undecided. Do not implement it until Simon chooses a concrete rule.
+As with all Processes, this does not create elapsed time itself. The Satiation decrease is evaluated from game time advanced by Actions.
+
+This intentionally gives Satiation a slower rhythm than Hydration, which currently decreases by 2 every 15 minutes.

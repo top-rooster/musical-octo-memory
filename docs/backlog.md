@@ -1,157 +1,155 @@
 # Safe Room - design decision backlog
 
-This file is the current design decision register. It is not an implementation log or history archive.
+This file is the current design decision register. It is not an implementation log and not a history archive.
 
-Historical versions remain available in Git. A suggestion is not a decision.
+Historical versions remain available in Git. Focused design documents may contain more detail, but this file records the decisions and unresolved questions that should guide the next implementation pass.
+
+Most importantly: **a suggestion is not a decision.**
 
 ## Status
 
 - **DECIDED BY SIMON** - Simon explicitly chose this.
 - **OPEN - SIMON TO DECIDE** - a real design question still needs an answer.
-- **DEFERRED** - intentionally postponed.
+- **DEFERRED** - intentionally not worth deciding yet.
 
-## Current decision queue
+## Priority
 
-1. **WATER-01 [P0]** - Duration of filling a container from a Puddle remains undecided.
-2. **FLASHLIGHT-01 [P1]** - Exact Flashlight Battery drain rate remains undecided.
-3. **PROCESS-02 [P1]** - Exact concrete rules for unfinished cooking, wound healing, Fever recovery, spoilage, and other Processes remain undecided unless a focused doc explicitly decides them.
+- **P0 - Now** - blocks or directly affects the current prototype.
+- **P1 - Soon** - important to the next core systems.
+- **P2 - Later** - decide before implementing the affected system.
+- **P3 - Parked** - preserve without spending attention now.
+
+---
+
+# Current decision queue
+
+1. **WATER-01 [P0]** - Duration of filling a container from a Puddle is still undecided. Do not invent an Action duration.
+2. **FLASHLIGHT-01 [P1]** - Exact Flashlight Battery drain rate is undecided.
+3. **PROCESS-02 [P1]** - Exact rules/durations for unfinished cooking, wound healing, Fever recovery, spoilage, and other Processes remain undecided unless separately documented as decided.
 4. **DURABILITY-01 [P2]** - Starting Durability, wear rates, and zero-Durability behavior remain undecided.
 5. **SURV-01 [P2]** - Whether permanent survival pressures beyond Hydration and Satiation are needed remains open.
 
 ---
 
-# Foundational decisions
+# Current foundational decisions
 
-## DATA-D01 - Runtime authored data uses strict JSON
+## DATA-D01 - Runtime authored data uses JSON
 **Status:** DECIDED BY SIMON
 
-Runtime authored data uses `data/cards.json`, `data/rooms.json`, and `data/attributes.json`.
+The custom text data language is retired because the syntax became too complicated as Actions, Processes, equipment, instance overrides, and card behavior grew.
 
-No JSONC/comments in runtime JSON. Design notes and TODOs belong in docs.
+Runtime authored data will use valid JSON:
 
-## DATA-D02 - Stable IDs are separate from display names
+- `data/cards.json`
+- `data/rooms.json`
+- `data/attributes.json`
+
+No JSONC and no comments in runtime JSON.
+
+The old `.txt` runtime files and their custom parsers should be removed once the JSON migration is complete and nothing still depends on them.
+
+## DATA-D02 - Comments and TODOs do not live in runtime data
 **Status:** DECIDED BY SIMON
 
-Gameplay references use stable lowercase kebab-case IDs, never player-facing names.
+Design notes, TODOs, undecided numerical values, and explanatory comments are moved out of runtime data and into this backlog or the appropriate focused design document.
 
-Different masters may share the same visible name.
+Runtime JSON contains executable game data only.
 
-## DATA-D03 - Ownership is separated by responsibility
+## DATA-D03 - Stable IDs are separate from display names
 **Status:** DECIDED BY SIMON
 
-- `cards.json` owns card identity, state, structured attributes, Actions, Processes, and other card-owned behavior;
-- `rooms.json` owns world composition, Nadir/equipment/opening state, card instances, Search decks, and instance overrides;
-- `attributes.json` owns player-facing attribute metadata.
+Cards, rooms, Markers, and Values all have stable lowercase kebab-case IDs separate from player-facing names.
 
-Room data must not define card behavior merely because an instance exists there.
+Examples:
 
-## DATA-D04 - Explicit Action duration
+- `body` -> `Body`
+- `hydration` -> `Hydration`
+- `contains-water` -> `Contains Water`
+- `deep-tunnels` -> `Deep Tunnels`
+- `go-deep-tunnels` -> `Go to deep tunnels`
+
+Gameplay references use IDs, never display names. Display names may change without breaking behavior or references.
+
+Different masters may share the same display name when they represent different identities or behavior.
+
+## DATA-D04 - Data ownership is separated by responsibility
 **Status:** DECIDED BY SIMON
 
-Every executable Action resolves an explicit duration. There is no default duration.
+`cards.json` owns card master identity and card behavior, including Markers, Values, Actions, accepted-card interactions, Processes, equipment metadata, storage effects, and other card-owned behavior.
 
-Duration may be authored directly on an Action or supplied by a structured triggering attribute such as `path.time`.
+`rooms.json` owns world composition: rooms, backgrounds, light, starting/offered/equipped cards, Search decks, card placement/population, and instance state overrides.
+
+`attributes.json` owns player-facing attribute metadata such as name and description.
+
+Room data must not define what a card does merely because an instance is placed in that room.
+
+## DATA-D05 - Explicit time remains mandatory
+**Status:** DECIDED BY SIMON
+
+Every Action has an explicit duration in authored data. Instant Actions use `0m`.
+
+There is no implicit/default Action duration.
+
+Finite Processes also explicitly define their relevant timing when implemented. Do not invent missing durations.
 
 ---
 
-# Nadir and card model
+# Card model
 
-## NADIR-D01 - Nadir is one anchored Inventory card
+## CARD-D01 - Master definitions and instances are separate
 **Status:** DECIDED BY SIMON
 
-Nadir is represented by one persistent anchored `nadir` card in Inventory.
+A card master defines stable identity, display data, starting attributes, and authored behavior.
 
-The earlier Body/Mind/Spirit split is superseded.
+Each spawned card is an independent instance with its own current Values and Markers.
 
-Current visible permanent Values on Nadir include:
+A material identity change is represented by discarding the old instance and drawing the replacement at the same location, rather than silently changing its master ID.
 
-- Hydration 50;
-- Satiation 50;
-- Vision 4.
-
-Conditions that have their own identity/lifecycle may remain separate anchored cards.
-
-## CARD-D01 - Masters and instances are separate
+## CARD-D02 - Visible attributes are Markers or Values
 **Status:** DECIDED BY SIMON
 
-A card master defines stable identity, starting state, and authored behavior. Each spawned card is an independent instance.
+All gameplay attributes exposed by the current model are visible.
 
-Material identity changes use discard + draw replacement rather than changing master ID in place.
+- **Marker** - presence/absence state represented by an icon.
+- **Value** - integer state represented by an icon plus number.
 
-## CARD-D02 - Player-facing state is readable on cards
+Values use `0..100` unless that Value explicitly defines another range.
+
+Do not add hidden gameplay attributes merely for implementation convenience.
+
+## CARD-D03 - Search decks are not cards
 **Status:** DECIDED BY SIMON
 
-Visible Markers/Values carry routine gameplay state. Hidden Values may exist for concrete internal mechanics, but they must not be used merely to hide information required for ordinary survival decisions.
+Search decks are room-local interactive objects with a shared identical backside. They are not card instances and do not use card behavior merely because they look card-like.
 
-Do not recreate invisible hunger/fullness/stomach systems merely for complexity.
+Search deck names are not printed visibly on the deck backside.
 
-## CARD-D03 - Stack is presentation only
+## CARD-D04 - Stack is presentation only
 **Status:** DECIDED BY SIMON
 
-There is no Stack Marker.
+There is no `Stack` Marker and there must never be one.
 
-Stack is Room-only visual compression. Underlying cards remain separate instances and stacking has no gameplay effect.
+Stack exists only to reduce Room clutter. Individual card instances remain separate and stacking has no gameplay effect.
 
-Current eligibility:
+Cards may stack only when all of the following are true:
 
 1. same master ID;
-2. same current Marker set;
-3. cards containing visible Values do not Stack.
+2. same current Marker-ID set;
+3. neither card has any Value attributes.
 
-Whether Hidden Values affect Stack eligibility remains open.
+Any card containing one or more Values cannot stack, even when two instances currently have identical numerical values.
 
----
+Stack is Room-only.
 
-# Interaction and Action model
-
-## ACTION-D01 - Card-on-card roles and triggers
+## CARD-D05 - Action, Process, Connection, Stack remain distinct concepts
 **Status:** DECIDED BY SIMON
 
-For drag/drop:
+- **Action** - Nadir personally performs work; Actions are the only thing that advances world time.
+- **Process** - unattended ongoing change that progresses as Actions advance world time.
+- **Connection** - persistent mechanically meaningful relationship.
+- **Stack** - visual organization only.
 
-- dragged card = `accepted`;
-- card underneath = `received`.
-
-`on` Actions belong to accepted and match received.
-
-`receive` Actions belong to received and match accepted.
-
-Selectors may match card IDs, Markers, or structured-attribute presence.
-
-0 matches means no Action, exactly 1 executes, and 2+ is invalid authored data.
-
-Validation must detect overlapping match domains.
-
-## ACTION-D02 - Generic behavior belongs on Nadir
-**Status:** DECIDED BY SIMON
-
-Current generic Nadir Actions are:
-
-- Travel - Nadir dropped on a card with `path`;
-- Eat - Nadir receives a card with `food`;
-- Drink - Nadir receives a card with `hydration`.
-
-Object-specific effects belong on the triggering object attribute rather than as item lists on Nadir.
-
-## ACTION-D03 - Structured attributes
-**Status:** DECIDED BY SIMON
-
-Current concrete structured attributes are:
-
-- `path` - target Room ID and travel time;
-- `food` - concrete eating completion effects;
-- `hydration` - concrete drinking completion effects.
-
-Do not generalize into an unrestricted scripting language.
-
-## ACTION-D04 - Atomic Action execution
-**Status:** DECIDED BY SIMON
-
-Only one Action executes at a time.
-
-Normal effects execute at completion.
-
-Unsupported/invalid Actions must not partially execute.
+Do not collapse these concepts into one generic relationship mechanism.
 
 ---
 
@@ -160,84 +158,99 @@ Unsupported/invalid Actions must not partially execute.
 ## TIME-D01 - Only Actions advance world time
 **Status:** DECIDED BY SIMON
 
-Moving cards, equipment changes, Inventory organization, Stacking, and similar free operations do not advance time unless an authored Action does.
+Moving cards, equipping items, organizing inventory, creating a Stack, and other free UI operations do not advance time unless an authored Action explicitly says they do.
 
-All time-consuming Action paths use one centralized time-advance mechanism.
+All code paths that execute time-consuming Actions must use one centralized time-advance mechanism so Processes cannot be bypassed by Search, travel, or future Actions.
 
-## PROCESS-D01 - Global quarter-hour ticks
+## PROCESS-D01 - Process updates are synchronized to the world clock
 **Status:** DECIDED BY SIMON
 
-Processes have no private timers or intervals.
+All Process updates occur only when world time crosses a global quarter-hour boundary:
 
-Every active Process updates once whenever world time crosses `:00`, `:15`, `:30`, or `:45`.
+- `:00`
+- `:15`
+- `:30`
+- `:45`
 
-If Action completion occurs exactly on a tick boundary, the world tick resolves before Action completion.
+Processes do not maintain independent 15-minute timers.
 
-## PROCESS-D02 - Hydration
+For an Action moving world time from `oldElapsedMinutes` to `newElapsedMinutes`, the number of Process updates is equivalent to:
+
+`floor(newElapsedMinutes / 15) - floor(oldElapsedMinutes / 15)`
+
+Examples:
+
+- 10 -> 14: 0 updates
+- 10 -> 16: 1 update
+- 14 -> 31: 2 updates
+- 44 -> 61: 2 updates
+- 0-minute Action: 0 updates
+
+Each crossed global quarter-hour boundary causes one update of every active Process.
+
+## PROCESS-D02 - Body Hydration is a recurring Process
 **Status:** DECIDED BY SIMON
 
-At every global world tick Nadir receives:
+Body starts with:
+
+- Hydration 50
+- Satiation 50
+
+At every global Process update, Body applies:
 
 `Hydration -2`
 
-Hydration 0 is game over.
+Hydration is clamped to its Value bounds. Hydration 0 is a game-over condition.
 
-Do not invent recurring Satiation decay yet.
+No recurring Satiation loss should be invented until explicitly decided/authored.
 
----
-
-# Drag feedback
-
-## UI-D01 - Legal targets highlight during drag
+## PROCESS-D03 - Process schema must support recurring and finite Processes
 **Status:** DECIDED BY SIMON
 
-Every legal receiving card highlights as soon as a drag begins.
+The data/runtime model must not assume every Process is an endless 15-minute decay.
 
-Ordinary legal targets become yellow when hovered for commitment. Rejecting hovered cards become red. Stack targets remain green.
+It must leave room for both:
 
-Danger is communicated separately from legality color.
+- recurring Processes such as Hydration;
+- finite Processes such as sterilization, healing, cooking, and spoilage.
 
-## UI-D02 - Known direct effects preview on affected cards
-**Status:** DECIDED BY SIMON
-
-Known direct Value changes appear as previews on the affected card as soon as dragging begins.
-
-Examples on Nadir:
-
-- `Satiation 67 -> 82`;
-- `Hydration 50 -> 75`.
-
-If several known Values change, show them all simultaneously.
+Only concrete decided behavior should be implemented now.
 
 ---
 
 # Rooms and travel
 
-## ROOM-D01 - Room composition is separate from route behavior
+## ROOM-D01 - Rooms describe world composition, not card behavior
 **Status:** DECIDED BY SIMON
 
-Travel destination/time belongs to route-card `path`, not room placement data.
+`rooms.json` identifies the rooms and what exists in them. It may contain room-owned properties such as background, light, Search decks, offered cards, and instance overrides.
 
-## TRAVEL-D01 - Nadir owns generic Travel
+Travel destination and travel duration are not room-instance behavior and must not be encoded on a card entry in `rooms.json`.
+
+## TRAVEL-D01 - Travel behavior belongs to the route card
 **Status:** DECIDED BY SIMON
 
-Dragging Nadir onto a route card carrying `path` executes Travel.
+A route card owns the accepted card, Action duration, and destination effect.
 
-Current base links:
+Conceptually:
 
-- Tunnels -> Abandoned Office: 15m;
-- Abandoned Office -> Tunnels: 15m;
-- Tunnels -> Deep Tunnels: 30m;
-- Deep Tunnels -> Tunnels: 30m.
+`accept body -> Action -> go deep-tunnels`
 
-## SEARCH-D01 - Search deck timing and persistence
+The runtime must not hardcode that every travel card accepts `body` merely because it has a travel destination.
+
+Travel is executed through the same small data-driven Action/effect mechanism used for other concrete card interactions.
+
+## TRAVEL-D02 - Routes with different behavior have different IDs
 **Status:** DECIDED BY SIMON
 
-Search is an Action with authored base duration.
+Two route cards may have the same player-facing name and art but must have separate master IDs when their behavior differs.
 
-Room Search decks are shuffled once at new-game creation, retain the hidden order for the run, do not reroll, and do not show remaining-card count.
+For example:
 
-Search decks are not cards.
+- `go-tunnels-from-office` - display name `Go to tunnels`, 15-minute Action
+- `go-tunnels-from-deep-tunnels` - display name `Go to tunnels`, 30-minute Action
+
+This is one reason stable ID and display name are separate concepts.
 
 ---
 
@@ -246,93 +259,269 @@ Search decks are not cards.
 ## OPEN-D01 - Opening is a loadout-selection interlude
 **Status:** DECIDED BY SIMON
 
-The Opening Room is not normal survival simulation.
+The Opening Room is not yet the normal survival simulation.
 
-During opening, ordinary Nadir survival interaction/state is hidden until Escape begins the main game in Tunnels.
+During the opening:
 
-The player may take at most five offered card instances; held/equipped offered items count toward five.
+- Body, Mind, and Spirit are not visible or usable interaction targets;
+- Vision is not shown;
+- survival-state UI that belongs to the main game is hidden;
+- offered items may be carried/equipped;
+- equipment management remains free;
+- the offered-item take limit is five;
+- held/equipped offered items count toward the five;
+- Escape remains available.
 
-## OPEN-D02 - Starting clothes/offers
+Body, Mind, Spirit, and the normal survival simulation appear when Nadir reaches the Tunnels.
+
+This naturally prevents consuming opening food/water through Body before completing the loadout choice.
+
+## OPEN-D02 - Starting clothes and offers
 **Status:** DECIDED BY SIMON
 
-Nadir begins wearing Pants and T-Shirt, with Feet and Hands empty.
+Nadir begins wearing Pants in Legs and T-Shirt in Chest. Feet and both Hands start empty.
 
-Current offers:
+Starting clothes are not opening offers and do not count against the five-item take limit.
 
-- Pocket Knife x1;
-- Plastic Bottle x2 with water/drinkable state;
-- Canned Food x2;
-- Simple Lighter x1, Fuel 50;
-- Flashlight x1, Battery 20;
-- Spare Batteries x1;
-- Pain Killers x1;
-- Simple Backpack x1;
-- Glasses x1.
+Opening offers remain:
+
+- Pocket Knife x1
+- Plastic Bottle x2, each containing water
+- Canned Food x2
+- Simple Lighter x1, Fuel 50 instance override
+- Flashlight x1, Battery 20 instance override
+- Spare Batteries x1
+- Pain Killers x1
+- Simple Backpack x1
+- Glasses x1
 
 ---
 
-# Equipment and storage
+# Equipment and carried inventory
 
 ## EQUIP-D01 - Current equipment slots
 **Status:** DECIDED BY SIMON
 
-- Left Hand;
-- Right Hand;
-- Head;
-- Eyes;
-- Trinket 1;
-- Trinket 2;
-- Chest;
-- Back;
-- Legs;
-- Feet.
+Equipment slots are:
 
-Any ordinary movable card may be held in either Hand. Anchored world/Nadir-state cards may not.
+- Left Hand
+- Right Hand
+- Head
+- Eyes
+- Trinket 1
+- Trinket 2
+- Chest
+- Back
+- Legs
+- Feet
+
+`Neck` is removed and replaced by the two Trinket slots.
+
+No Trinket effects/items should be invented merely because the slots exist.
+
+## EQUIP-D02 - Hands are universal holding slots
+**Status:** DECIDED BY SIMON
+
+Every ordinary movable card may be placed in either Hand without requiring an authored `equip Hand` declaration.
+
+Anchored world cards and Nadir-state cards cannot be placed in Hands.
+
+A card in Hand is active/equipped under the general equipment model, but it only gains a special effect when an authored effect applies there.
+
+Held cards do not consume carried storage capacity.
 
 ## INV-D01 - Carried storage uses size capacities
 **Status:** DECIDED BY SIMON
 
-There is no permanent generic five-card Inventory limit.
+There is no permanent generic five-card carried Inventory limit.
 
-Pants add 2 Small capacity. Simple Backpack adds 5 Medium capacity in the main game.
+Items use size classes:
 
-Equipment slots including Hands do not consume carried storage capacity.
+- Small
+- Medium
+- Large
+
+Pants add 2 Small capacity.
+
+Simple Backpack adds 5 Medium capacity in the main game.
+
+For current packing:
+
+- Small capacity accepts Small only;
+- Medium accepts Small or Medium;
+- Large accepts Small, Medium, or Large;
+- allocate carried items to the smallest compatible available capacity first.
+
+Equipment slots, including Hands, do not consume carried storage capacity.
 
 ---
 
-# Water and Flashlight
+# Water and survival items
 
 ## WATER-D01 - Puddle of Water
 **Status:** DECIDED BY SIMON
 
-Puddle is Anchored with `Water 3`.
+Puddle of Water is Anchored and has visible Value:
 
-A successful fill gives an eligible container the current drinkable/water state, reduces Puddle Water by 1, and discards Puddle at 0.
+`Water 3`
 
-Fill duration remains OPEN and must not be invented.
+A card may be filled from the Puddle when it has Marker `container` and does not have Marker `contains-water`.
 
-Do not preserve obsolete `contains-water` representation merely for compatibility if Hydration replaces it.
+A successful fill:
 
-## FLASHLIGHT-D01
+- adds `contains-water` to the container;
+- reduces Puddle `water` by 1.
+
+At `water = 0`, discard the Puddle.
+
+For the current prototype one fill consumes exactly one Water unit.
+
+Do not invent litres, partial fills, container capacities, fluid types, contamination, or direct drinking from the Puddle.
+
+The Action duration for filling is still OPEN and must not be invented.
+
+## FLASHLIGHT-D01 - Flashlight instance state
 **Status:** DECIDED BY SIMON
 
-Opening Flashlight starts Battery 20. Deep Tunnels Search Flashlight starts Battery 0.
+The opening Flashlight starts at Battery 20.
 
-Flashlight gives Vision +1 only while active in a Hand and Battery > 0.
+The Flashlight found in the Deep Tunnels Search deck starts at Battery 0.
 
-Exact Battery drain remains OPEN.
+Flashlight provides Vision +1 only while active in a Hand and Battery > 0.
+
+Exact Battery drain rate is still OPEN.
 
 ---
 
-# Open/deferred systems
+# Vision, Search, and rooms
 
-- Exact wound healing/Burn Wound/Fever recovery behavior remains open unless superseded by a focused doc.
-- Rat Meat cooking timing/effects remain open.
-- Exact Dead Rat spoilage rate remains open.
-- Durability wear/zero behavior remains open.
-- Trinket content is deferred.
-- Torch recipe/burn behavior is deferred.
-- Final heat-source attribute name remains open.
+## VISION-D01 - Effective Vision
+**Status:** DECIDED BY SIMON
+
+Mind has base Vision 4.
+
+Current additive modifiers include:
+
+- Glasses in Eyes: +1
+- active Flashlight in Hand with Battery > 0: +1
+- Bright: 0
+- Dim: -1
+- Twilight: -3
+- Darkness: -4
+
+Current effective-Vision consequences:
+
+- <=0: cannot Search; travel x3
+- 1: Search x3; travel x2
+- 2: Search x2
+- >=3: Search normal
+
+## SEARCH-D01 - Search deck timing and persistence
+**Status:** DECIDED BY SIMON
+
+Search is an Action with an authored base duration on the Search deck.
+
+Each room's Search deck is shuffled once when a new game is created, including undiscovered rooms. The order then remains fixed for that run.
+
+No reshuffle/reroll and no visible remaining-card count.
+
+Search decks disappear when exhausted.
+
+---
+
+# UI correction decisions
+
+## UI-D01 - Equipment targets must remain legible during dragging
+**Status:** DECIDED BY SIMON
+
+Equipment slots are currently too small and are obscured by full-size dragged cards.
+
+The correction must provide larger, clearly distinguishable targets. Slot labels and legality/highlight feedback must remain visible before release.
+
+A reduced equipment-preview representation of the dragged card is preferred when dragging over the equipment area, provided underlying drag/drop semantics remain unchanged.
+
+## UI-D02 - Inventory/equipment divider owns layout space
+**Status:** DECIDED BY SIMON
+
+The `Inventory & equipment` header/divider must reserve actual layout space. Cards and equipment content begin below it and placement bounds must use the usable content area.
+
+No card may render partly beneath the divider.
+
+## UI-D03 - Cards need stronger attribute legibility and less white dominance
+**Status:** DECIDED BY SIMON
+
+Cards should not read as large bright white rectangles dominating the scene.
+
+Marker icons, Value presentation, and Value numbers must be materially larger and readable without mouseover.
+
+Hover remains for explanation/description, not basic identification.
+
+## UI-D04 - Background art is subordinate to gameplay
+**Status:** DECIDED BY SIMON
+
+Room backgrounds currently appear too zoomed, grainy, and visually dominant.
+
+Renderer treatment should preserve aspect ratio, avoid obvious over-enlargement/aggressive cropping, and lower background prominence through brightness/saturation/contrast treatment and/or a subtle dark overlay.
+
+Do not regenerate, replace, convert, or edit source art during this correction pass.
+
+Desired visual hierarchy:
+
+1. cards and interaction feedback;
+2. room UI;
+3. background artwork.
+
+---
+
+# Deferred/open systems
+
+## PROCESS-OPEN-01 - Flesh Wound healing details
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+The old TXT draft sketched a 15-minute Flesh Wound healing Process with Infection-dependent progress bands and removal at full progress. Its starting progress Value and final player-facing progress design were never decided, so the incomplete Process remains out of runtime JSON until those details are resolved. Any unfinished Infection-over-time behavior also remains undecided unless a focused design document supersedes this entry.
+
+## PROCESS-OPEN-02 - Burn Wound healing
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+Exact healing Process rules/rate/duration remain undecided.
+
+## PROCESS-OPEN-03 - Fever recovery
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+Exact recovery Process duration/behavior remains undecided.
+
+## PROCESS-OPEN-04 - Rat Meat cooking
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+Cooking is intended to be a Process, but concrete timing/effects remain undecided.
+
+## PROCESS-OPEN-05 - Dead Rat spoilage
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+Spoilage as a Process and Dead Rat -> Rotten Meat identity replacement are part of the design direction, but the exact concrete timing/rate must not be invented if not already explicitly decided in a focused document.
+
+## EQUIP-OPEN-01 - Trinket content
+**Status:** DEFERRED
+**Priority:** P3
+
+The two Trinket slots are decided. Which future items use them and what effects they provide are not.
+
+## TORCH-OPEN-01 - Torch implementation
+**Status:** DEFERRED
+**Priority:** P3
+
+Torch may later provide portable light, but recipe, burn duration, and other behavior are not part of the current prototype.
+
+## CAMPFIRE-OPEN-01 - Heat-source attribute
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+The old card-data draft noted that Campfire should eventually identify as a heat source, but the player-facing Marker name remains undecided. Do not add a heat-source Marker to runtime data until it is named.
 
 ---
 
@@ -340,8 +529,8 @@ Exact Battery drain remains OPEN.
 
 When Simon makes a new explicit design decision:
 
-1. update the current entry rather than creating contradictory duplicates;
-2. remove obsolete prototype rules from the active decision register;
-3. move unresolved implementation-blocking values into the decision queue;
+1. update the relevant existing entry rather than creating a contradictory duplicate;
+2. remove obsolete prototype rules from the current decision register;
+3. move genuinely unresolved implementation-blocking values into the decision queue;
 4. do not turn ChatGPT suggestions into decisions;
-5. keep runtime-data TODOs out of JSON.
+5. keep runtime-data TODOs out of JSON and record them here instead.

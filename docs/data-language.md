@@ -4,120 +4,80 @@
 
 Safe Room's runtime-authored content has one source of truth:
 
-- `data/cards.json` owns card masters, starting card state, structured attributes, Actions, Processes, and other card-owned behavior;
-- `data/rooms.json` owns world composition, persistent Nadir state, room instances, opening configuration, Search decks, equipment placement, and instance overrides;
+- `data/cards.json` owns card masters and card-owned behavior;
+- `data/rooms.json` owns world composition, Nadir state cards, room instances, opening configuration, and Search decks;
 - `data/attributes.json` owns player-facing attribute names and descriptions.
 
 All three files are strict JSON: no comments, JSONC, or trailing commas. Design notes and unresolved values belong in focused documents or `docs/backlog.md`, not runtime data.
 
 ## Stable identity
 
-Card, room, deck, Marker, Value, Hidden Value, structured-attribute, and equipment-slot references use stable lowercase kebab-case IDs.
+Card, room, deck, Marker, Value, and equipment-slot references use stable lowercase kebab-case IDs. Object keys define master identities. Display names are presentation metadata and may change or be duplicated without changing runtime identity.
 
-Display names are presentation metadata and may change or be duplicated without changing runtime identity.
+For example, `go-tunnels-from-office` and `go-tunnels-from-deep-tunnels` are distinct masters even though both display as **Go to tunnels**. Runtime code must not derive IDs by slugifying display names.
 
-For example, two distinct route masters may both display as **Go to tunnels** while carrying different Path destinations or travel times.
+## Attributes
 
-Runtime code must never derive identity by slugifying display names.
+`attributes.json` maps each stable attribute ID to `name` and `description`. It does not classify an attribute as a Marker or Value; usage on a card or instance supplies that distinction.
 
-## Card state and attributes
+Card-master Markers are ID arrays and Values are ID-to-integer maps:
 
-Card masters may contain:
+```json
+{
+  "markers": ["anchored", "container"],
+  "values": { "hydration": 50, "satiation": 50 }
+}
+```
 
-- Markers;
-- visible Values;
-- Hidden Values;
-- structured attributes such as `path`, `food`, and `hydration`;
-- Actions;
-- Processes;
-- equipment/storage metadata where relevant.
+Values use bounds `0..100` unless a concrete Value explicitly defines otherwise. Instance Marker overrides add to the master's initial Marker set. Instance Value overrides may only replace Values already present on that master.
 
-Marker presence and visible Values are player-facing state. Hidden Values are internal card-instance state and are not rendered automatically.
+## Card masters and interactions
 
-Structured attributes carry typed authored payload. They are not merely display labels.
+`cards.json` uses card IDs as top-level keys. Concrete fields include display metadata, attributes, size, equipment compatibility, storage, equipped modifiers, accepted interactions, Processes, and thresholds.
 
-Current concrete structured attributes are:
+Interactions are receiver-owned: the master containing `accept` is the receiver, while `card` and `markers` are conjunctive requirements on the incoming source. Every Action has explicit `time`, including `0m`.
 
-- `path` - destination Room ID and travel time;
-- `food` - completion effects contributed by food when eaten;
-- `hydration` - completion effects contributed by a drinkable card.
+```json
+"accept": [
+  {
+    "card": "plastic-bottle",
+    "markers": ["contains-water"],
+    "action": {
+      "name": "Drink",
+      "time": "0m",
+      "effects": [
+        { "change": "hydration", "target": "receiver", "amount": 25 },
+        { "remove": "contains-water", "target": "source" }
+      ]
+    }
+  }
+]
+```
 
-Do not generalize these into an unrestricted scripting language.
+Use only the concrete effect forms required by authored behavior. Do not introduce a generic scripting language. Travel is an accepted Body interaction on a route card; destination and duration never belong to room composition.
 
-## Nadir
-
-Nadir is one persistent anchored card in Inventory.
-
-His ordinary permanent state, including current `Hydration`, `Satiation`, and `Vision`, belongs on that card.
-
-Generic Nadir behavior such as Travel, Eat, and Drink is authored as Actions on Nadir. Object-specific payload belongs on the triggering object's structured attribute.
-
-## Action triggers
-
-For card-on-card drag/drop:
-
-- dragged card = `accepted`;
-- card underneath = `received`.
-
-An Action may use:
-
-- `on` when the Action belongs to the accepted card and matches the received card;
-- `receive` when the Action belongs to the received card and matches the accepted card.
-
-Trigger selectors may match stable card IDs, Marker requirements, or structured-attribute presence.
-
-Requirements on the Action-owning card are separate from the counterpart trigger selector.
-
-Effect targets use the stable interaction roles `accepted` and `received`.
-
-The runtime must resolve:
-
-- 0 matching Actions -> no Action;
-- 1 matching Action -> execute it;
-- 2+ matching Actions -> invalid authored data.
-
-Validation must detect overlapping match domains before runtime wherever possible.
-
-## Action duration and effects
-
-Every executable Action resolves an explicit duration. There is no default duration.
-
-The duration may be authored directly on the Action or supplied by a triggering structured attribute when that attribute owns the duration. Travel is the concrete example: `path.time` supplies Travel duration.
-
-Normal Action effects execute at completion.
-
-Action execution is atomic: if required effects are unsupported, the Action must not partially execute.
+Processes and thresholds remain typed authored data even when their execution belongs to a later milestone. Never invent a missing duration, Value, condition, or effect to make an unfinished design appear complete.
 
 ## World composition and instances
 
-`rooms.json` defines the starting room, room data, opening configuration, persistent Nadir state/equipment, room-local cards, and Search decks.
+`rooms.json` defines `start`, the shared `searchBack`, persistent `nadir` card IDs, and a stable-ID `rooms` object. Rooms own display/background/light metadata, opening configuration, placed card instances, and stable-ID Search decks.
 
-Room data owns composition, not card behavior.
+A simple instance is its card ID:
 
-Travel destination/time belongs to route-card `path`, not to room placement data.
+```json
+"scrap-metal"
+```
 
-Runtime creation clones master state before applying instance overrides. Instances never mutate their master or one another.
+Use an object only when an instance has state overrides:
 
-## Search decks
+```json
+{ "card": "flashlight", "values": { "battery": 0 } }
+```
 
-Search decks remain room-local interactive objects rather than cards.
+Runtime creation clones the master's initial Markers and Values before applying overrides. Instances never mutate their master or one another.
 
-Search duration is deck-authored data and Search advances time through the same centralized Action/time system as card Actions and Travel.
+Search duration is deck data. Deck contents use the same string-or-override-object representation as other room instances. Search decks are room-local interactive objects, not cards.
 
 ## Validation
 
-The centralized JSON loading path validates all authored documents before transforming them into runtime structures.
-
-Validation should cover at least:
-
-- stable ID form;
-- cross-file references;
-- supported equipment-slot IDs;
-- valid instance overrides;
-- valid structured-attribute payloads;
-- explicit/resolvable Action durations;
-- supported effect targets/effect forms;
-- overlapping Action match domains;
-- card/room references inside Path and other typed payloads.
-
-Invalid authored data fails startup rather than falling back to legacy behavior.
+The centralized JSON loading path validates all three documents before transforming them into typed runtime structures. Validation checks stable ID form, explicit durations, supported equipment-slot IDs, cross-file references, local Value references, instance overrides, and supported effect targets. Invalid authored data fails startup rather than falling back to a legacy format.

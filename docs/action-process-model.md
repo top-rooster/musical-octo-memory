@@ -11,16 +11,6 @@ For a card-on-card drag/drop interaction:
 
 These role names do not depend on which card owns the Action.
 
-## Nadir is one anchored card
-
-Nadir is represented by one persistent **Nadir** card anchored to Inventory.
-
-His permanent player-facing state lives as attributes on that card. Current examples include `Hydration`, `Satiation`, and `Vision`.
-
-Do not split his ordinary state across separate Body, Mind, or Spirit cards. Conditions that deserve their own identity may still exist as separate anchored condition cards.
-
-This keeps the interaction language uniform: food can be dragged onto Nadir, Nadir can be dragged onto a route card, and understood stat changes can be previewed directly on the Nadir card.
-
 ## Actions and triggers
 
 There is no separate `accept` gameplay concept.
@@ -53,12 +43,14 @@ Authored-data validation must reject overlapping Action match domains. Runtime r
 
 The Action owns the verb. The triggering card attribute owns the concrete data and effects contributed by the object being used.
 
-The current Nadir model is:
+This keeps generic behavior on Nadir instead of producing long lists of item-specific Actions on Body.
+
+The current Body model is:
 
 ```text
-Travel  -> Nadir is dropped on a card with Path
-Eat     -> Nadir receives a card with Food
-Drink   -> Nadir receives a card with Hydration
+Travel  -> Body is dropped on a card with Path
+Eat     -> Body receives a card with Food
+Drink   -> Body receives a card with Hydration
 ```
 
 Conceptually:
@@ -96,8 +88,6 @@ Conceptually:
 
 This is conceptual schema. Exact JSON field layout may evolve, but the ownership and runtime semantics are decided.
 
-Do not turn Nadir into a registry of every edible, drinkable, or traversable card ID. Generic Actions belong on Nadir; object-specific payload belongs on the object attribute.
-
 ## Structured card attributes
 
 Cards may carry typed attributes with authored payload beyond Marker presence or a single numeric Value.
@@ -124,7 +114,7 @@ Example:
 }
 ```
 
-Nadir owns one generic Travel Action. Travel triggers when Nadir is dropped on a card with `path`.
+Body owns one generic Travel Action. Travel triggers when Body is dropped on a card with `path`.
 
 The Travel Action reads destination and duration from that Path. Route cards do not need their own Travel Actions, and travel destination/time must not also be duplicated in room data or a separate `go` effect.
 
@@ -134,9 +124,9 @@ Different route-card masters may still share the same visible name while carryin
 
 Cards that can be eaten carry a `food` attribute.
 
-Nadir owns one generic Eat Action. Eat triggers when Nadir receives a card with `food`.
+Body owns one generic Eat Action. Eat triggers when Body receives a card with `food`.
 
-The Food attribute owns the concrete completion effects of eating that card. Nadir must not contain a list of every edible master or duplicate the food's effects.
+The Food attribute owns the concrete completion effects of eating that card. Body must not contain a list of every edible master or duplicate the food's effects.
 
 Conceptually:
 
@@ -157,7 +147,7 @@ Conceptually:
 }
 ```
 
-A different food can provide different effects without changing Nadir or the Eat Action. For example, spoiled food may add an additional negative effect.
+A different food can provide different effects without changing Body or the Eat Action. For example, spoiled food may add an additional negative effect.
 
 Do not duplicate the same sustenance number both as a Food property and as an effect amount unless a future mechanic genuinely needs both representations.
 
@@ -165,7 +155,7 @@ Do not duplicate the same sustenance number both as a Food property and as an ef
 
 Cards that can be drunk from carry a `hydration` attribute.
 
-Nadir owns one generic Drink Action. Drink triggers when Nadir receives a card with `hydration`.
+Body owns one generic Drink Action. Drink triggers when Body receives a card with `hydration`.
 
 The Hydration attribute owns the concrete completion effects of drinking from that card.
 
@@ -244,7 +234,7 @@ Every active Process updates exactly once on every global world tick.
 
 Process authored data must not contain `interval`, `intervalMinutes`, or another per-Process clock.
 
-Nadir's Hydration loss is the first concrete recurring Process:
+Body Hydration is the first concrete recurring Process:
 
 ```json
 {
@@ -289,8 +279,6 @@ Cards may contain both visible and hidden numeric state.
 
 - **Values** are player-facing numeric attributes and are rendered on the card.
 - **Hidden Values** are card-instance numeric state used for internal game logic and are not rendered in normal UI.
-
-Nadir's survival state that the player needs in order to make routine decisions must remain visible on Nadir. Hidden Values are not a license to recreate opaque survival bars or invisible hunger/fullness systems.
 
 Hidden Values:
 

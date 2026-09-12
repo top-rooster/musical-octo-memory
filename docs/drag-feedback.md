@@ -38,16 +38,11 @@ As soon as a card starts being dragged, every legal accepting target should show
 
 If one interaction has several known direct attribute changes, **all of those changes should be shown simultaneously** on the affected cards/attributes. Do not collapse them to a single representative change or wait for hover to reveal additional effects.
 
-The preview belongs on or immediately adjacent to each affected visible attribute on the affected card.
+The preview belongs on or immediately adjacent to each affected attribute on the accepting card. Examples include:
 
-Nadir is one anchored card in Inventory, so ordinary survival previews appear directly on that card. Examples:
-
-- dragging Rat Meat while Nadir has `Satiation 67` shows `67 -> 82` on Nadir immediately;
-- dragging Canned Food while Nadir has `Satiation 67` shows `67 -> 92` on Nadir immediately;
-- dragging a drink while Nadir has `Hydration 50` may show `50 -> 75` on Nadir immediately;
-- dragging a source with several known direct effects shows every affected Value change at once, potentially across more than one affected card.
-
-This is an important readability rule: the player should be able to see the current value and the predicted result in the same place where that stat normally lives. The preview must not require the player to remember how much a food or drink restores, inspect a separate tooltip, or infer the result from hidden state.
+- dragging Rat Meat while Body has `Satiation 67` shows `67 → 82` on Body immediately;
+- dragging Canned Food while Body has `Satiation 67` shows `67 → 92` on Body immediately;
+- dragging a source with several known direct effects shows every affected Value change at once, potentially across more than one accepting/affected card.
 
 This applies only to consequences that Nadir/the player currently understands. Knowledge-dependent uncertainty and undiscovered consequences remain governed by the broader preview rules in `docs/game-design.md`.
 
