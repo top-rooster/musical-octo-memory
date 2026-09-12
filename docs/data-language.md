@@ -8,23 +8,21 @@ Safe Room's runtime-authored content has one source of truth:
 - `data/rooms.json` owns world composition, Nadir state cards, room instances, opening configuration, and Search decks;
 - `data/attributes.json` owns player-facing attribute names and descriptions.
 
-All three files are strict JSON: no comments, JSONC, or trailing commas. Design notes and unresolved values belong in focused documents or `docs/backlog.md`, not runtime data.
+All three files are strict JSON. Design notes and unresolved values belong in focused documents or `docs/backlog.md`, not runtime data.
 
 ## Schema discipline
 
 Do not invent new JSON structure unless Simon explicitly asks for it.
 
-In particular, do not introduce a new field, object shape, array shape, wrapper, or special-purpose datatype merely because it would make implementation convenient. Reuse the already-decided concepts such as Markers, Values, References, Actions, Processes, and the explicitly decided structured attributes.
+Do not introduce a new field, object shape, array shape, wrapper, or special-purpose authored datatype merely because it would make implementation convenient.
 
-If a required mechanic cannot be represented with the existing decided model, record the missing design decision instead of silently creating a new JSON schema.
+Reuse structures that are already explicitly decided. If a mechanic cannot be represented with the currently decided schema, record the missing design decision instead of silently creating syntax.
 
-Documentation must not present speculative JSON as though it were decided authored data. Where exact existing Reference syntax is not being restated from the authoritative implementation/schema, describe the semantic Reference requirement without inventing syntax.
+Documentation must not present speculative JSON as decided authored data.
 
 ## Stable identity
 
-Card, room, deck, Marker, Value, Reference target, structured-attribute, and equipment-slot references use stable lowercase kebab-case IDs. Object keys define master identities. Display names are presentation metadata and may change or be duplicated without changing runtime identity.
-
-For example, `go-tunnels-from-office` and `go-tunnels-from-deep-tunnels` are distinct masters even though both display as **Go to tunnels**. Runtime code must not derive IDs by slugifying display names.
+Card, room, deck, Marker, Value, structured-attribute, and equipment-slot IDs use stable lowercase kebab-case IDs. Display names are presentation metadata and may change without changing runtime identity.
 
 ## Attributes
 
@@ -34,13 +32,13 @@ Card-master Markers are ID arrays and Values are ID-to-integer maps.
 
 Values use bounds `0..100` unless a concrete Value explicitly defines otherwise. Instance Marker overrides may change mutable Marker state. Instance Value overrides may replace Values already present on the master.
 
-Cards may also carry typed structured attributes with authored payload. The currently decided concrete examples are `path`, `food`, and `hydration`.
+The currently decided concrete structured attributes are `path`, `food`, and `hydration`.
 
-`contains-water` remains a Marker representing current water presence. It is not replaced by the `hydration` structured attribute.
+`contains-water` remains a Marker representing current water presence. It is not replaced by `hydration`.
 
 ### Item size
 
-Item size uses the ordinary Marker system. The current size Markers are:
+Item size uses the ordinary Marker system:
 
 - `small`;
 - `medium`;
@@ -50,35 +48,58 @@ A size-based carried item has exactly one size Marker. There is no separate card
 
 ### Storage capacity
 
-Carried-storage capacity uses ordinary Values rather than a separate `storage` object. The current capacity Values are:
+Carried-storage capacity uses ordinary Values:
 
 - `storage-small`;
 - `storage-medium`;
 - `storage-large`.
 
-Pants have `storage-small = 2`. Simple Backpack has `storage-medium = 5`.
+Current examples:
 
-An equipped card contributes its storage-capacity Values to the flat carried Inventory. A carried but unequipped storage item does not contribute those Values as active capacity.
+- Pants: `storage-small = 2`;
+- Simple Backpack: `storage-medium = 5`.
 
-Storage/packing code matches item size Markers against the aggregated equipped `storage-*` Values. Do not duplicate size or storage capacity in parallel fields.
+Only equipped cards contribute their storage-capacity Values to active carried capacity. Storage/packing matches item size Markers against aggregated equipped `storage-*` Values.
 
-## Equipment compatibility uses References
+There is no separate `storage` object in the target model.
 
-Compatibility with non-Hand equipment slots is represented through the existing **Reference** mechanism, not through a separate `equip` field.
+## Equipment compatibility and References
 
-For example, a T-Shirt's relationship to the Chest slot is an equipment-slot Reference. The exact JSON syntax must use the project's existing Reference representation; this document deliberately does not invent or redefine that structure.
+Simon has decided that compatibility with non-Hand equipment slots is a **Reference**, not an `equip` array or another special-purpose equipment field.
 
-Hands are different: every ordinary movable card may be placed in Left Hand or Right Hand by the general Hand rule. Cards therefore do **not** need authored References to `left-hand` or `right-hand` merely to be holdable.
+Required semantics include:
 
-Anchored world cards and Nadir-state cards remain excluded from Hands by the general rule.
+- T-Shirt references Chest;
+- Pants reference Legs;
+- Glasses reference Eyes;
+- Simple Backpack references Back.
+
+Hands are different: every ordinary movable card may be placed in Left Hand or Right Hand by the general Hand rule. Ordinary cards do not need authored Hand References merely to be holdable. Anchored world cards and Nadir-state cards cannot be held.
+
+### Reference JSON representation is not yet decided
+
+The current repository does **not** contain a generic authored Reference representation to reuse. The function named `reference(...)` in `src/data/jsonValidation.ts` only validates that a string points to a known ID; it is not a JSON Reference schema.
+
+Therefore the JSON representation for card References is currently an open schema decision.
+
+Do not invent it.
+
+Until Simon explicitly decides the Reference encoding:
+
+- do not migrate non-Hand equipment compatibility out of legacy `equip` data;
+- do not add a `references`, `reference`, `ref`, or similar field;
+- do not infer a shape from implementation convenience;
+- treat Reference encoding as an implementation blocker for that specific migration.
+
+The semantic decision that equipment compatibility is a Reference remains decided; only its authored JSON representation is open.
 
 ## Card masters and Actions
 
-`cards.json` uses card IDs as top-level keys. Concrete authored data may include display metadata, Markers, Values, Hidden Values, References, the explicitly decided structured attributes, Actions, Processes, and equipped modifiers according to already-decided schema.
+`cards.json` uses card IDs as top-level keys.
 
-There is no separate `size` field, no separate `storage` field, and no separate `equip` field in the target model.
+The target model removes separate `size` and `storage` data because those concepts are represented by Markers and Values.
 
-There is no receiver-owned `accept` gameplay model in the current design.
+The target model also removes the receiver-owned `accept` gameplay model in favor of trigger-based Actions as defined in `docs/action-process-model.md`.
 
 For card-on-card drag/drop:
 
@@ -89,11 +110,11 @@ For card-on-card drag/drop:
 
 Trigger selectors may combine stable card IDs, Marker requirements, and structured-attribute presence. Combined requirements are conjunctive.
 
-For Drink, `contains-water` is part of legality. The incoming card's `hydration` attribute owns the concrete completion effects. Drinking may remove `contains-water` while leaving the reusable hydration behavior payload on the same container.
+For Drink, `contains-water` is part of legality. The incoming card's `hydration` attribute owns the concrete completion effects.
 
-Use only concrete effect forms required by authored behavior. Do not introduce a generic scripting language.
+Every executable Action must resolve an explicit duration. There is no default duration. Travel uses `path.time`.
 
-Every executable Action must resolve an explicit duration. Instant Actions use `0m`. Duration may be authored directly on the Action or supplied by a structured attribute when that attribute owns the duration. Travel uses `path.time`.
+Do not introduce a generic scripting language.
 
 ## Structured attributes
 
@@ -113,30 +134,23 @@ Current water presence is separate mutable state expressed by `contains-water`, 
 
 ## World composition and instances
 
-`rooms.json` defines `start`, the shared `searchBack`, persistent Nadir state card IDs, and a stable-ID `rooms` object. Rooms own display/background/light metadata, opening configuration, placed card instances, and stable-ID Search decks.
+`rooms.json` defines the start room, persistent Nadir state cards, room composition, opening configuration, and Search decks.
 
 Runtime creation clones a master's starting state before applying valid overrides. Instances never mutate their master or one another.
 
-Search duration is deck data. Search decks are room-local interactive objects, not cards.
+Search decks are room-local interactive objects, not cards.
 
 ## Validation
 
 The centralized JSON loading path validates all authored documents before transforming them into typed runtime structures.
 
-Validation must cover at least:
+Validation must cover the concrete schema that has actually been decided, including stable IDs, cross-file IDs, instance overrides, Action duration resolution, effect targets, trigger validity, and Action ambiguity.
 
-- stable ID form;
-- cross-file references;
-- valid References and Reference targets;
-- structured-attribute references such as `path.room`;
-- explicit/resolvable Action durations;
-- instance overrides;
-- supported effect targets;
-- Action trigger validity;
-- overlapping Action match domains that could yield more than one Action for the same card pair;
-- size Marker validity: size-based carried cards use exactly one of `small`, `medium`, or `large`, and no standalone `size` field is permitted;
-- storage capacity validity: capacity is represented through `storage-small`, `storage-medium`, and `storage-large` Values, and no standalone `storage` field is permitted;
-- equipment compatibility is expressed through References for non-Hand slots; a standalone `equip` field is not permitted;
-- ordinary Hand compatibility is not authored per card.
+For the current migrations:
+
+- size-based carried cards use exactly one of `small`, `medium`, or `large`, and no standalone `size` field remains;
+- storage capacity uses `storage-small`, `storage-medium`, and `storage-large` Values, and no standalone `storage` field remains;
+- ordinary Hand compatibility is not authored per card;
+- non-Hand equipment compatibility eventually uses References, but Reference JSON validation must not be implemented until Simon decides the authored Reference representation.
 
 Invalid authored data fails startup rather than falling back to a legacy format.
