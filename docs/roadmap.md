@@ -213,7 +213,7 @@ During Opening Room:
 
 Body, Mind, Spirit, and normal survival simulation begin on entering Tunnels.
 
-## 9. Equipment and size correction
+## 9. Equipment, size, and storage correction
 
 Replace `Neck` with:
 
@@ -234,10 +234,20 @@ Migrate item size into the existing Marker system:
 - remove the standalone card `size` field/type;
 - size-based carried items have exactly one size Marker;
 - add player-facing attribute metadata for the three size Markers;
-- storage/packing rules inspect the size Marker rather than a dedicated size property;
-- keep existing Small/Medium/Large capacity behavior and smallest-fitting-capacity allocation convention.
+- storage/packing rules inspect the size Marker rather than a dedicated size property.
 
-Do not keep both a Marker and a separate `size` field as parallel sources of truth.
+Migrate storage capacity into the existing Value system:
+
+- use `storage-small`, `storage-medium`, and `storage-large` Values;
+- remove the standalone card `storage` object/type;
+- Pants use `values: { "storage-small": 2 }`;
+- Simple Backpack uses `values: { "storage-medium": 5 }`;
+- add player-facing attribute metadata for the three storage Values;
+- only equipped cards contribute their storage Values to carried capacity;
+- the opening's separate five-offered-card rule remains a scene rule rather than a `phase` property embedded in storage data;
+- keep the existing smallest-fitting-capacity allocation convention.
+
+Do not keep Marker/Value data and old `size`/`storage` fields as parallel sources of truth.
 
 ## 10. Correct Stack semantics
 
@@ -335,7 +345,9 @@ Do not consider the pass complete until:
 - the temporary travel adapter is removed;
 - Opening Room no longer exposes Body/Mind/Spirit;
 - item size is represented only by `small`/`medium`/`large` Markers and the old standalone `size` field is removed;
-- storage packing uses the size Markers without changing the decided capacity semantics;
+- storage capacity is represented only by `storage-small`/`storage-medium`/`storage-large` Values and the old standalone `storage` field is removed;
+- equipped gear is the only source of active storage-capacity Values;
+- storage packing uses the size Markers and storage Values without changing the decided allocation semantics;
 - Stack, equipment, Puddle, and Flashlight corrections obey current design decisions;
 - UI issues above are manually browser-verified;
 - focused technical documentation matches implementation;
