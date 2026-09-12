@@ -48,7 +48,7 @@ Conditions that deserve their own identity/lifecycle may appear as separate anch
 
 Every card instance has a stable master identity plus independent instance state.
 
-A reusable card master supplies display data, starting attributes, explicitly decided structured attributes, Actions, Processes, and other already-decided authored behavior.
+A reusable card master supplies display data, starting attributes, References, explicitly decided structured attributes, Actions, Processes, and other already-decided authored behavior.
 
 Instances clone master starting state and then evolve independently.
 
@@ -58,9 +58,14 @@ Player-facing card state is primarily expressed through:
 
 - **Markers** - presence/absence represented by an icon;
 - **Values** - integer state represented by an icon and number;
+- **References** - named relationships to stable target IDs;
 - explicitly decided structured attributes where payload beyond Marker/Value state is required.
 
-References are also a decided semantic concept for relationships such as non-Hand equipment compatibility, but the authored JSON representation of References is not yet decided.
+References are authored as:
+
+```json
+"references": { "<reference name>": "<reference target id>" }
+```
 
 Values normally use `0..100` unless explicitly designed otherwise.
 
@@ -100,9 +105,7 @@ If the current decided schema cannot express a required mechanic, that is a desi
 
 Documentation must not present speculative JSON examples as decided schema.
 
-The current repository does not contain a generic authored Reference JSON schema. The `reference(...)` helper in `src/data/jsonValidation.ts` only validates ordinary ID strings and is not a Reference representation.
-
-Therefore Reference encoding remains an explicit open schema decision.
+The decided Reference schema is specifically the `references` object mapping one reference name to one target ID. Do not expand that representation into arrays, nested objects, wrappers, or alternate forms without an explicit design decision.
 
 ## Universal interaction language
 
@@ -289,18 +292,16 @@ Current slots:
 
 ### Equipment compatibility
 
-Simon has decided that compatibility with non-Hand equipment slots is a **Reference** relationship.
+Compatibility with non-Hand equipment slots uses a Reference named `equip`.
 
-Required semantics:
+Current examples:
 
-- T-Shirt references Chest;
-- Pants reference Legs;
-- Glasses reference Eyes;
-- Simple Backpack references Back.
+- T-Shirt: `"references": { "equip": "chest" }`;
+- Pants: `"references": { "equip": "legs" }`;
+- Glasses: `"references": { "equip": "eyes" }`;
+- Simple Backpack: `"references": { "equip": "back" }`.
 
-There should not be a dedicated `equip` array in the final model.
-
-However, the JSON representation for References is still open. The current runtime has no generic authored Reference schema, so the migration away from legacy non-Hand `equip` data must wait until Simon explicitly decides that encoding.
+The legacy standalone `equip` array is not part of the target model.
 
 Hands are a general rule rather than authored compatibility. Any ordinary movable card may be placed in either Hand without authored Hand compatibility. Anchored world cards and Nadir-state cards may not be held.
 
@@ -427,6 +428,6 @@ His notes may reflect moral tension between player choices, past trauma, and the
 
 A suggestion is not a decision.
 
-Do not invent missing durations, rates, Values, Markers, probabilities, Process rules, Reference encoding, JSON structures, or extra systems to make implementation appear complete.
+Do not invent missing durations, rates, Values, Markers, probabilities, Process rules, Reference encodings, JSON structures, or extra systems to make implementation appear complete.
 
 Prefer concrete gameplay needs over abstract infrastructure. Keep the number of systems small, and reuse existing mechanisms before introducing new concepts.
