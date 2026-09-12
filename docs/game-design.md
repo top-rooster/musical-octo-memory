@@ -1,400 +1,380 @@
-# Safe Room — current game design
+# Safe Room - current game design
 
 ## Design goal
 
-Safe Room is a narrative survival/stealth game about isolation, preparation, and risk. The interface should feel like a physical workspace: **all interactable entities are represented as cards**. Rooms are stable spatial contexts; the player learns and acts on the world primarily through cards rather than navigating separate interaction menus.
+Safe Room is a narrative survival/stealth game about isolation, preparation, and risk.
 
-The game should create complexity from interactions between a relatively small number of visible systems. Avoid exposing many redundant bars, sub-stats, or overlapping resource models when the same decision can be expressed directly on cards.
+The interface should feel like a physical workspace. Interactable world entities are represented as cards, and complexity should emerge from interactions between a relatively small number of visible systems rather than from many overlapping hidden bars and sub-systems.
 
-## Current interaction model
+The player should usually be able to understand the state needed for a decision by looking at the cards in front of them.
 
-### Cards
+## Core workspace
 
-All interactable entities are cards. Confirmed examples include materials, machines, food, Nadir, and passages to other rooms.
+The main play space has two top-level zones:
 
-For the first release, every normal card face shows only:
+- **Room** - the currently viewed physical location;
+- **Inventory** - persistent carried/equipped/Nadir state that remains present across room changes.
 
-- a name/title,
-- a picture,
-- zero or more visible attributes.
+Cards can be positioned freely within their legal areas. Ordinary placement may not overlap other cards. A legal Room/Inventory move is free unless an authored Action says otherwise.
 
-Description text is deferred.
+### Anchored cards
 
-Cards do not currently have separate categories, tags, or capabilities. A card is functionally defined only by its attributes unless a concrete future need proves that insufficient.
+`Anchored` prevents a card from coming to rest outside its home zone.
 
-#### Master definitions and instances
+Anchored cards may still cross zone boundaries while being dragged and may participate in legal cross-zone interactions. If released illegally in another zone, they return to their legal/home position.
 
-Each reusable card type has one **master definition** supplying name/title, picture, and starting attributes.
+Body, Mind, Spirit, and Nadir condition cards are anchored to Inventory.
 
-Cards created from that master are separate **card instances**. Each instance receives the starting attributes and thereafter maintains its own current attributes independently.
+## Nadir
 
-Two identical objects are therefore still two distinct card instances. A Stack can compress their presentation, but it does not merge them into one underlying card.
+Nadir Veylan is represented by three persistent anchored cards in Inventory:
 
-When something remains the same card identity, its Values and Markers may change in place. When it becomes a materially different card identity, preserve the physical-card analogy: **discard the old card and draw the replacement card** rather than changing the existing instance into another master definition. The replacement is placed at the exact location occupied by the discarded card unless a specific rule says otherwise.
+- **Body** - physical state and bodily survival needs;
+- **Mind** - perception/cognitive state;
+- **Spirit** - emotional/spiritual state.
 
-Confirmed example: when a `Dead Rat` reaches `Spoilage 100`, discard the Dead Rat and draw `Rotten Meat` at exactly the same position.
+This split is intentional. There is no separate generic Nadir card.
 
-#### Authored data and level design
+Current confirmed permanent player-facing Values include:
 
-All authored card data lives in plain text files and is loaded by the game code. The text files are the source of truth for card master definitions and their authored state/behavior; TypeScript/React code may parse, validate, index, and transform that data into runtime structures but should not duplicate the card masters as code constants.
+- Body: `Hydration 50`, `Satiation 50`;
+- Mind: `Vision 4`.
 
-The same authoring approach is used for **level design**. Rooms and the card instances/starting state placed in them are read from text data rather than built through room-specific setup code. As more authored world relationships become implementation-relevant, they should be added to the text-data format instead of being moved into application code.
+Spirit exists as a persistent part of the representation even where its concrete Values are not yet decided.
 
-The authoring format follows the earlier Safe Room **Data language** direction: very low boilerplate, pleasant to edit from a phone, no required braces or tabs, no explicit array/list lengths, dynamic lists, and no repeated field labels such as `name` or `damage` when context already makes their meaning obvious. It should remain a purpose-built terse text format rather than being replaced by JSON, YAML, TOON, or the older modified-properties approach for implementation convenience.
+Conditions that deserve their own identity/lifecycle may appear as separate anchored cards, for example wounds, Fever, or Exhausted.
 
-Every Action and Process has explicit time in authored data. Instant Actions use `0m`; there is no implicit duration. Parser-friendly numeric conditions use explicit `start..end` ranges. Parser-facing attribute names may use hyphens and render as spaces in the UI, e.g. `Contains-Water` displays as **Contains Water**.
+The intent is to keep each persistent card readable and compact while allowing exceptional state to become separate cards when that adds useful gameplay.
 
-Detailed authoring constraints are maintained in `docs/data-language.md`. The language should grow only when concrete Safe Room data requires new syntax rather than being designed upfront as a general-purpose configuration language.
+## Cards
 
-### Attributes
+Every card instance has a stable master identity plus independent instance state.
 
-All card attributes are visible on the card. There are no hidden/internal card attributes in the current model.
+A reusable card master supplies display data, starting attributes, structured attributes, Actions, Processes, and other authored behavior.
 
-Every attribute is represented by an icon. There are two official forms:
+Instances clone master starting state and then evolve independently.
 
-- **Marker** — icon only; presence carries the meaning.
-- **Value** — icon plus an integer value.
+When something becomes a materially different object, discard the old card and draw the replacement rather than silently changing its master ID.
 
-Examples include `Player`, `Anchored`, `Powered`, `Cutting Tool`, `Fabric`, `Dressed`, `Sterilized`, `Container`, `Contains-Water`, `Hydration 50`, `Satiation 50`, `Progress 42`, `Durability 80`, `Spoilage 63`, and `Infection 50`.
+### Visible state
 
-Unless Simon explicitly defines a different range for a particular Value, every Value is bounded and clamped from **0 to 100**.
+Player-facing card state is primarily expressed through:
 
-`Sterilized` is the Marker used on fabric that is safe to use as wound dressing. A wound-dressing source must carry both `Fabric` and `Sterilized`, expressed in authored data as `Fabric+Sterilized`.
+- **Markers** - presence/absence represented by an icon;
+- **Values** - integer state represented by an icon and number;
+- structured attributes when they require player-facing representation.
 
-`Contains-Water` is a mutable Marker meaning that a container currently contains water. It is displayed to the player as **Contains Water**. A `Plastic Bottle` remains the same card when filled or emptied: adding/removing `Contains-Water` changes its state without changing its identity.
+Values normally use `0..100` unless explicitly designed otherwise.
 
-Wounds do not have a separate cleanliness Value; their cleanliness/infection state is represented by the `Infection` Value.
+Hidden Values are allowed for concrete internal mechanics, but they must not be used simply to make routine survival decisions opaque.
 
-Markers may describe functional roles used by interaction matching. `Cutting Tool` is a confirmed example. Anything Nadir can eat or otherwise ingest must also carry an ingestion Marker; its final user-facing name has not yet been fixed.
+## Authored data
 
-`Durability` is an ordinary Value. A tool therefore does not need a generic `Reusable` Marker: a knife can be a `Cutting Tool` with a current `Durability` value.
+Runtime authored content uses strict JSON:
 
-Process progress is also represented as a normal visible Value, but its **player-facing name may be specific to the Process**. Mechanically/code-wise, these are the same progress concept. `Spoilage` on `Dead Rat` is the confirmed example: it is the visible name of that card's Process progress, not a separate timed-state system.
+- `data/cards.json` - card masters and card-owned behavior;
+- `data/rooms.json` - world composition, instances, Nadir-state/equipment/opening state, Search decks;
+- `data/attributes.json` - player-facing attribute metadata.
 
-Wounds keep treatment state in the same attribute model: `Infection` is a Value where lower is better and higher is worse, while `Dressed` is a Marker whose presence means the wound is currently dressed. A newly created wound starts at `Infection 50`. Once added, `Dressed` remains until the wound card itself is discarded.
+Runtime identity uses stable lowercase kebab-case IDs separate from display names.
 
-#### Anchored
+Design notes and unresolved values belong in docs/backlog, not runtime JSON.
 
-`Anchored` is a Marker that prevents a card from coming to rest outside its home zone.
+Room data describes world composition. Card behavior remains card-owned.
 
-Anchored does **not** mean the card cannot cross a zone boundary while being dragged. An anchored card can still:
+## Universal interaction language
 
-- be repositioned within its home zone,
-- cross into another zone during a drag,
-- be dragged onto another card in another zone for a legal interaction.
+Gameplay interactions are initiated by dragging one card onto another.
 
-If an anchored card is released onto bare space in another zone, or otherwise released without a legal interaction that accepts it, it returns to its home zone rather than remaining in the foreign zone.
+For card-on-card drag/drop:
 
-A legal cross-zone interaction does not transfer the anchored card's persistent home.
+- the dragged card is **accepted**;
+- the card underneath is **received**.
 
-All cards representing Nadir or conditions currently applying to him are `Anchored` to Inventory.
+A given accepted/received pair may resolve at most one Action. The player is not asked to choose between several possible verbs after dropping.
 
-### Zones and positioning
+A legal drop is the commitment to perform the interaction. There is no separate confirmation dialog.
 
-The main play space has two zones:
+### Trigger directions
 
-- **Room** — the currently viewed physical space. Its contents change when Nadir moves to another room.
-- **Inventory** — persistent cards that remain on screen when Nadir moves to another room.
+Actions may be authored on either participating card:
 
-There is no separate Nadir zone. Nadir is represented entirely through cards in Inventory.
+- `on` - Action belongs to accepted and matches received;
+- `receive` - Action belongs to received and matches accepted.
 
-Inventory currently has a provisional capacity of **five non-anchored cards**. Anchored cards do not count toward that limit, so Body, Mind, Spirit, and anchored condition cards do not consume ordinary carrying capacity. Every non-anchored Inventory card instance consumes one slot. Five is a tuning value and may change after playtesting.
+Selectors may match stable card IDs, Marker requirements, or structured-attribute presence. These selector requirements may be combined when the interaction needs all of them.
 
-Inventory does **not** use `Stack` presentation. Identical carried cards remain separate card instances and therefore each consume one of the five ordinary Inventory slots. With the current two-zone model, Stacks are confined to Room.
+Resolution must yield:
 
-Inventory cards, including Nadir's anchored cards and condition cards, may still participate in **Processes** and **Connections**.
+- 0 matching Actions - no Action;
+- 1 matching Action - execute it;
+- 2+ matches - invalid authored data.
 
-Equipment is represented by ordinary cards. An equipment card is considered **equipped while it is in Inventory** and unequipped when moved out. There is no separate equipment zone, equipment-slot system, attachment relationship, or `Equipped` Marker.
+Authored validation must detect overlapping match domains.
 
-Within a zone, every card can be positioned to the player's liking. Cards may not overlap in ordinary placement. Deliberately combined cards snap into a neat aligned presentation.
+## Actions describe what Nadir does
 
-A legal transfer of a card between **Room** and **Inventory** is always free. The zone change itself does not advance game time, create noise, or cause another gameplay consequence.
+Generic verbs belong on the relevant Nadir state card; object-specific data/effects belong with the object used.
 
-For now, **only two rules can prevent a card from coming to rest in the other top-level zone**: `Anchored` and the five-card non-anchored Inventory capacity. There are no additional contextual Room/Inventory transfer blockers.
+Current examples:
 
-Movement is distinct from interaction.
+```text
+Travel -> Body is dropped on a card with Path
+Eat    -> food is dropped on Body
+Drink  -> a water-containing card is dropped on Body
+```
 
-### Universal interaction language
+Body therefore owns generic Travel, Eat, and Drink Actions rather than item-specific lists.
 
-**Every gameplay interaction is initiated by putting one card on top of another card.**
+### Structured attributes
 
-An interaction always has:
+Current concrete structured attributes are:
 
-- a source card being dragged,
-- a target card receiving it.
+- `path` - destination Room ID and travel time;
+- `food` - concrete completion effects contributed when eaten;
+- `hydration` - concrete completion effects contributed when drunk.
 
-A given source-card/target-card pair supports **at most one interaction**. If the pair is legal, the resulting interaction is unambiguous; the player is never asked to choose between multiple Actions, Processes, Connections, or other outcomes for that same pair.
+For Drink, current water presence remains explicit card state: the incoming card must carry `contains-water` as part of the trigger. The `hydration` structured attribute supplies the concrete effect payload; it does not replace `Contains Water` as the mutable state saying that the card currently contains water.
 
-A legal card-on-card drop is also the **commitment** to perform that interaction. There is no separate confirmation dialog or second "are you sure?" step, including for dangerous interactions. Whatever consequence, warning, or risk information Nadir currently understands should be communicated before the drop; once the player releases the card onto the legal target, the interaction proceeds.
+The principle is:
 
-An Action window is part of executing and displaying an Action, not a confirmation prompt. Dropping the source card commits the Action before its window runs.
+> Action = what Nadir does. Triggering card state/attributes = the concrete eligibility and data/effects contributed by the object.
 
-Interaction legality is attribute-driven rather than hard-coded to exact card identities alone. A target may accept source cards carrying one or more required Markers. Compound Marker requirements use `+` in authored data.
+Do not generalize this into an unrestricted scripting system.
 
-Confirmed examples:
+## Drag feedback and previews
 
-- `Dead Rat` accepts a source carrying `Cutting Tool` and maps it to `Skin` / the `Skinning` Action. A knife works because it has the `Cutting Tool` Marker, not because the rat specifically recognizes a knife master definition.
-- Nadir's ingestion interaction accepts cards carrying the ingestion Marker. Eating uses **Body** as the receiving card; Rotten Meat explicitly authors this as `eat Body`.
-- a wound accepts a source carrying `Contains-Water` for the wound-cleaning Action;
-- a wound accepts a source carrying both `Fabric` and `Sterilized` for the wound-dressing Action, authored as `Fabric+Sterilized`;
-- a Plastic Bottle can use `action Body Drink 0m` when it itself has `Contains-Water`.
+Dragging should expose interaction possibilities immediately.
 
-Bare zone space can receive a card for legal movement/placement, but that is movement rather than an interaction.
+When a card starts being dragged:
 
-A card-on-card interaction does not have to remain stacked afterward. It may resolve immediately, start an Action, discard a card, draw a card, alter attributes, create a Stack, start a Process, create a Connection, or produce another interaction-specific result.
+- every card that can legally receive it highlights;
+- ordinary legal targets use the normal legal highlight;
+- when hovered for commitment they become yellow;
+- a rejecting hovered card becomes red;
+- Stack targets remain green because stacking has no gameplay consequence;
+- legal zone placement receives a subtle zone highlight.
 
-**Only Actions advance game time.** Immediate interactions, movement, Stack changes, Process creation, and Connection changes do not consume game time by themselves. If an interaction is intended to consume time, it must be represented as an Action. An instant Action is still explicitly authored as `0m` and advances zero minutes.
+Known direct effects should be previewed on the affected visible attributes as soon as dragging begins, not only after hovering.
 
-Consumption or continued use is an interaction outcome rather than a universal `Consumable`/`Reusable` classification. For example, Skinning returns the cutting tool but discards the dead rat; eating consumes/discards the ingested card; drinking removes `Contains-Water` from a Plastic Bottle while keeping the bottle card.
+For Body this means examples such as:
 
-### Stack, Action, Process, and Connection
+- Rat Meat with `Satiation 67` -> show `67 -> 82` on Body;
+- Canned Food with `Satiation 67` -> show `67 -> 92` on Body;
+- a known water source with `Hydration 50` -> show the resulting Hydration value on Body.
 
-For now, the defined relationship model is considered complete. There are three persistent forms of deliberate card state/combination: **Stack**, **Process**, and **Connection**. **Action** is a separate interaction type for work Nadir personally performs; it resolves through a temporary Action window instead of remaining as an ongoing card combination.
+If an interaction has several understood direct effects, show all relevant previews at once.
 
-#### Stack
+The player should not need to memorize food restoration values or inspect an invisible stomach/fullness system to decide whether to eat.
 
-A Stack exists solely to reduce visual card clutter in Room by compressing identical cards.
+Unknown consequences remain knowledge-dependent. Serious danger should still be telegraphed without necessarily revealing exact probabilities or outcomes.
 
-- The cards remain separate card instances.
-- All cards in the Stack come from the same master definition.
-- All cards have identical current attributes.
-- If any Marker differs, or any Value/value differs, they cannot share a Stack.
-- The Stack shows a count.
-- It has no mechanical effect merely because it exists.
-- Stacks are not allowed in Inventory; with the current two-zone model, Stack presentation exists only in Room.
+## Actions and world time
 
-Dragging a Stack peels off its top card:
+An **Action** is work Nadir personally performs and is the only mechanism that advances world time.
 
-- Stack 3 → dragged card + Stack 2,
-- Stack 2 → dragged card + ordinary card.
+Every executable Action resolves an explicit duration. There is no implicit duration.
 
-A single remaining card is shown normally rather than as Stack 1. The Stack count is presentation, not currently a normal `Value` attribute.
+A duration may come from the Action itself or from a triggering structured attribute. Travel uses `path.time`.
 
-#### Action
+Normal Action effects execute at completion.
 
-An **Action** is work that requires Nadir's personal involvement and is the **only mechanism that advances game time**. If something is meant to take game time, it must be an Action.
+Only one Action executes at a time.
 
-Every Action explicitly states a time in data. Confirmed examples include:
+Execution is atomic: unsupported or invalid effects must not partially apply.
 
-- `Skin 15m`,
-- `Sleep 8h`,
-- wound cleaning `15m`,
-- wound dressing `15m`,
-- `Drink 0m`.
+### Global world ticks
 
-The initiating cards do not have to include a Nadir card. What matters is that Nadir must personally perform the work.
+The world has one global quarter-hour update grid:
 
-When an Action is committed:
+- `:00`;
+- `:15`;
+- `:30`;
+- `:45`.
 
-1. an Action window opens,
-2. the window displays the Action and its participating cards,
-3. the window animation represents the Action's duration,
-4. the corresponding amount of game time advances,
-5. active Processes update from that elapsed game time,
-6. the Action completes as soon as the window animation terminates,
-7. the Action-specific result is applied.
+Every crossed boundary while an Action advances time causes one world tick.
 
-Actions do **not** use Process progress. Their progress/time passage is already represented by the Action window.
+If Action completion lands exactly on a tick boundary:
 
-Concrete example: skinning a dead rat.
+1. world tick resolves;
+2. Process consequences resolve;
+3. Action completes;
+4. completion effects apply.
 
-1. `Dead Rat` accepts a source card carrying `Cutting Tool` as the starter for `Skin`.
-2. The player moves a cutting tool, such as a knife, onto `Dead Rat`.
-3. The rat card displays `Skin`, the available Action.
-4. Dropping the cutting tool commits it.
-5. A window appears displaying `Skinning` and the cutting tool and dead rat cards.
-6. The Action represents **15 minutes** of game time.
-7. When the window animation terminates, the cutting tool returns to where it came from.
-8. The `Dead Rat` is discarded.
-9. A `Rat Skin` card and a `Rat Meat` card are drawn as the Action outputs.
+Search, Travel, and every future time-consuming Action use the same centralized time-advance mechanism.
 
-A knife is a concrete `Cutting Tool` and has a `Durability` Value. The exact effect of Skinning on Durability has not yet been fixed.
+## Processes
 
-The duration and result belong to the specific Action. Other Actions may use different durations and completion effects.
+A **Process** is unattended change that progresses when Actions advance world time.
 
-#### Process
+Processes have no private intervals or timers. Every active Process updates once on every crossed global world tick.
 
-A **Process** is unattended change that can continue while Nadir performs Actions.
+JSON ordering must not become gameplay ordering.
 
-Starting or existing as a Process does **not** advance game time. Instead, it progresses when an Action advances game time.
+Finite/staged Processes use card state, effects, and conditions/thresholds rather than independent clocks.
 
-Every Process explicitly states either its required elapsed duration or its repeat/tick interval in data.
+### First recurring survival Process
 
-A Process can involve several cards, as with cooking or fabric sterilization, or it can be embodied by a single card whose state changes over time, as with spoilage, an injury, Fever, or Body's Hydration loss.
+Body starts with `Hydration 50`.
 
-Processes are allowed in both Room and Inventory, including on or between Nadir-related cards in Inventory.
+Each world tick applies:
 
-Most Processes use a visible progress Value on a 0–100 scale, but a Process may also directly modify another Value rather than maintaining a separate progress bar. Body's Hydration Process is a confirmed example.
+`Hydration -2`
 
-Mechanically/code-wise, contextual Process progress names are still the same underlying progress concept. `Spoilage` on `Dead Rat` is the confirmed named-progress example.
+Hydration 0 causes game over.
 
-There is no universal progress calculation: each Process defines its own progression from relevant state and elapsed game time. Conditions may speed up, slow down, stop, or reverse progress.
+Do not invent recurring Satiation loss until explicitly decided.
 
-Concrete examples:
+## Survival design principle
 
-- `Dead Rat` is a single-card Process whose visible progress is `Spoilage`. At 100, discard the Dead Rat and draw `Rotten Meat` at exactly the same location.
-- `Rat Meat` placed on a lit camp fire starts a cooking Process. Its exact duration is still undecided.
-- Fabric sterilization is a three-card Process requiring an appropriate heat source, a card carrying `Contains-Water`, and `Fabric` without `Sterilized`. It completes after one hour of elapsed game time, removes `Contains-Water` from the water card, and adds `Sterilized` to the fabric.
-- All injuries use the Process model for now. `Flesh Wound` and `Burn Wound` are concrete single-card injury Processes whose progress represents healing.
-- `Fever` is a single-card Process whose progress represents recovery.
-- **Body** has a Process evaluated every `15m` of elapsed game time that applies `Hydration -2`.
+Current permanent survival Values are Hydration and Satiation on Body.
 
-When a Process reaches its completion state, the result is Process-specific. A Process can discard cards, draw replacement/output cards, change attributes, separate participants, or combine these effects.
+Avoid adding hidden stomach contents, fullness, eating-frequency adaptation, or similar invisible simulation merely to create complexity.
 
-#### Connection
+If future hidden state is introduced, it should solve a concrete gameplay problem rather than reproduce the uncertainty that makes routine survival choices hard to read in other card-survival games.
 
-A Connection is a persistent mechanically meaningful relationship between cards. Creating it starts the effect immediately.
+## Stack
 
-Connections are allowed in both Room and Inventory, including relationships involving Nadir-related cards in Inventory.
+Stack exists only to reduce Room clutter.
 
-Every participating card remains individually identifiable and every card name stays visible.
+Underlying cards remain separate instances and Stack has no mechanical effect.
 
-A Connection lasts until the player separates its cards. Effects granted by the Connection disappear when it is broken.
+Current Stack eligibility:
 
-Example: connecting a machine to a power outlet gives the machine the `Powered` Marker. Disconnecting removes `Powered`. One outlet can power only one card at a time.
+- same master ID;
+- same current Marker set;
+- cards containing visible Values do not Stack;
+- Stack presentation is Room-only.
 
-### Nadir
+Dragging a Stack peels off one card.
 
-Nadir Veylan is represented by cards in **Inventory**, not by a separate character sheet or zone.
+Whether Hidden Values affect Stack eligibility remains undecided.
 
-For now, his persistent representation is divided across three cards:
+## Equipment and carried Inventory
 
-- **Body** — physical state,
-- **Mind** — cognitive / will state,
-- **Spirit** — emotional / spiritual state.
+Equipment uses explicit slots in the persistent Inventory interface.
 
-More persistent Nadir cards may be added later if a concrete need appears.
+Current slots:
 
-Conditions that currently apply to Nadir are represented as **temporary cards in Inventory** rather than being forced into Body, Mind, or Spirit.
+- Left Hand;
+- Right Hand;
+- Head;
+- Eyes;
+- Trinket 1;
+- Trinket 2;
+- Chest;
+- Back;
+- Legs;
+- Feet.
 
-Confirmed examples include:
+Any ordinary movable card may be held in either Hand. A card in a compatible equipment slot is active/equipped; a merely carried card is not.
 
-- `Exhausted`,
-- `Flesh Wound`,
-- `Burn Wound`,
-- `Fever`.
+Carried storage uses size capacities rather than a permanent five-card generic limit.
 
-All of Nadir's persistent cards and temporary condition cards are `Anchored` to Inventory. They cannot come to rest in Room as ordinary placement, but they can cross the boundary while being dragged and can be dropped onto a Room card for a legal interaction. If released in Room without a legal accepting interaction, they return to Inventory.
+Current contributions include:
 
-Nadir-related cards may participate in **Processes** and **Connections** while remaining in Inventory. They may not be compressed into `Stacks` there.
+- Pants: 2 Small;
+- Simple Backpack: 5 Medium during the main game.
 
-#### Condition lifecycles
+The opening evacuation separately limits the player to taking five offered card instances.
 
-Condition lifecycles are condition-specific rather than using one universal timer/removal rule.
+## Vision and lighting
 
-**All injuries use the Process model for now.** This is the default representation for injury conditions unless a later concrete design need leads to revisiting the rule. `Flesh Wound` and `Burn Wound` are the current concrete examples.
+Vision is a visible Value on Mind and starts at 4.
 
-**Exhausted** is removed by sleeping. Dragging `Exhausted` onto **Body** exposes the `Sleep` Action. `Sleep` takes **8 hours**, advances game time through the normal Action window, and discards the `Exhausted` card when complete. Any additional sleep effects are still undecided.
+Current modifiers include:
 
-**Flesh Wound** and **Burn Wound** are single-card Processes:
+- Glasses in Eyes: +1;
+- active Flashlight in Hand with Battery > 0: +1;
+- Bright: 0;
+- Dim: -1;
+- Twilight: -3;
+- Darkness: -4.
 
-- each has a Process progress Value from 0 to 100 representing healing; its eventual player-facing label can be process-specific, but no exact label is fixed yet;
-- each is discarded when its Process progress reaches 100;
-- each starts at `Infection 50`;
-- `Infection` uses the default 0–100 Value bounds; lower is better and higher is worse;
-- a wound may carry the `Dressed` Marker; once added, it remains until the wound card is discarded;
-- a source carrying `Contains-Water` can clean the wound;
-- a source carrying both `Fabric` and `Sterilized` can dress the wound;
-- cleaning is a **15-minute Action**, reduces `Infection` by **40** to a minimum of 0, and removes `Contains-Water` from the source card;
-- dressing is a **15-minute Action**, consumes the fabric source card, and adds `Dressed` to the wound;
-- fabric sterilization is a one-hour Process requiring an appropriate heat source, a card carrying `Contains-Water`, and `Fabric` without `Sterilized`; on completion the water card loses `Contains-Water` and the fabric gains `Sterilized`;
-- `Dressed` improves healing and causes Infection to decrease over time; exact rates remain open;
-- severe Infection can spawn `Fever`; the Fever threshold remains open.
+Current effective-Vision consequences:
 
-**Flesh Wound** has a confirmed 15-minute healing tick. Its current authored bands are:
+- <=0: cannot Search; travel x3;
+- 1: Search x3; travel x2;
+- 2: Search x2;
+- >=3: Search normal.
 
-- `if Infection 0..24 progress +2`
-- `if Infection 25..49 progress +1`
-- `if Infection 50..74 progress +0`
-- `if Infection 75..100 progress -1`
+Deep Tunnels are soft-gated by Vision rather than hard-gated by possession of a specific item.
 
-The bands are non-overlapping and cover the full default Infection range.
+## Rooms and travel
 
-`Burn Wound` also accelerates loss of Body `Hydration`. Hydration itself is now a confirmed Body Value; the exact burn-specific modifier Value/name and acceleration formula remain open.
+Persistent first-slice rooms are:
 
-`Fever` is cumulative. If Nadir has **three Fever cards**, he dies.
+- Tunnels;
+- Abandoned Office;
+- Deep Tunnels.
 
-Each `Fever` card is itself a single-card Process. Its Process progress represents recovery as Actions advance game time and the card is discarded when that progress reaches 100. Its eventual player-facing progress label and recovery rate are not yet fixed.
+Travel points are anchored route cards carrying `path`.
 
-A source carrying `Contains-Water` can also be dropped onto Fever. That immediate interaction discards the target Fever and removes `Contains-Water` from the source. It does not currently advance game time.
+Body is dragged onto a route card to Travel.
 
-### Discovery, knowledge, risk, and previews
+Current links:
 
-Safe Room should preserve substantial discovery rather than revealing the complete causal future of an interaction before commitment. Understanding can come from two sources:
+- Tunnels -> Abandoned Office: 15m;
+- Abandoned Office -> Tunnels: 15m;
+- Tunnels -> Deep Tunnels: 30m;
+- Deep Tunnels -> Tunnels: 30m.
 
-- **relational understanding** — the player can infer danger or opportunity from visible cards, attributes, room state, and relationships between them;
-- **exploratory play and knowledge unlocks** — using, observing, reading about, or otherwise learning a system can improve what Nadir and the player understand about it later.
+Route cards may share display names while remaining different masters.
 
-Previews should therefore be **knowledge-dependent** rather than omniscient. Known consequences can be shown accurately. Undiscovered relationships should not automatically be spoiled by hovering cards together.
+## Search decks
 
-However, exploratory play should not unexpectedly inflict severe punishment that the player had no reasonable way to anticipate. Serious danger must be sufficiently telegraphed through visible context, Nadir's existing understanding, or an explicit qualitative warning. Nadir may articulate obvious danger when appropriate.
+Search decks are room-local interactive objects, not cards.
 
-Example: a flooded room containing exposed electrical outlets is likely to electrocute Nadir. The danger does not need an exact numerical preview because the relevant elements are visible and their relationship is understandable; Nadir may also explicitly recognize that the room is dangerous.
+Search is an Action with authored base duration, modified by Vision where applicable.
 
-Uncertainty can remain after the danger is understood. Attempting to repair an exposed electrical outlet may carry a known risk of electric shock. A shock can result in a burn wound, while a successful risk outcome can leave a functional outlet. The player should be able to understand that the repair is dangerous without being shown the exact result in advance.
+Each room deck is shuffled once at new-game creation and keeps that hidden order for the run. There is no reshuffle/reroll and no visible remaining-card count.
 
-When Nadir understands an uncertain risk, the UI should communicate **likelihood clearly but normally without numerical probability**. The wording must have enough resolution that the player can distinguish materially different odds — for example, a roughly even gamble from an outcome that is clearly favored — without displaying percentages such as `50%` or `75%`.
+## Opening
 
-Coarse labels such as only `Low`, `Moderate`, and `High` are not precise enough for this purpose. The exact user-facing wording remains provisional and can be revisited after UI testing; it is not locked yet.
+The game begins with an evacuation/loadout interlude before normal survival simulation.
 
-The intended information progression is therefore closer to **unknown → suspected → understood** than to either complete opacity or complete prediction.
+Nadir may take at most five offered card instances. Equipped/held offered items count toward the five.
 
-A legal interaction does not change target-highlight colors merely because it is dangerous. Green/yellow/red remain a legality language: a dangerous but legal interaction uses the normal legal-target and release-to-commit states, while known danger or uncertainty is communicated separately through previews, warnings, or risk presentation.
+During the opening, Body, Mind, Spirit, and normal survival interaction/state are hidden until Escape transitions into Tunnels and the main simulation starts.
 
-### Drag affordances
+Nadir begins wearing Pants and T-Shirt and is barefoot.
 
-Whenever the player drags a card:
+Current offered items include Pocket Knife, two water bottles, two Canned Food, Simple Lighter, Flashlight, Spare Batteries, Pain Killers, Simple Backpack, and Glasses.
 
-1. Every card that can legally receive it as an interaction target highlights.
-2. Attribute matching is part of legality: targets may accept a dragged card because it carries required Markers such as `Cutting Tool`, `Contains-Water`, `Fabric+Sterilized`, or the ingestion Marker.
-3. Each legal source/target pair has at most one interaction, so a highlighted target never requires a follow-up interaction chooser.
-4. Legal zone placement for movement should remain legible without being confused with a card interaction target.
-5. Consequences that Nadir/the player currently understands may be previewed before the drop is committed.
-6. Meaningful known danger may be communicated even when an exact outcome remains uncertain.
-7. Known uncertain likelihood should be communicated with calibrated plain language rather than routine percentages; exact wording remains provisional.
-8. An available Action may communicate its name on the target before commitment, as `Skin` does when a cutting tool is moved onto a dead rat.
-9. Releasing a card on a legal interaction target commits the interaction immediately; there is no follow-up confirmation step.
-10. Invalid targets should not suggest that they accept the card.
-11. Danger does not alter target legality colors; dangerous-but-legal interactions still use the normal legal highlight and release-to-commit state, with risk signaled separately.
+## Water and containers
 
-Examples of direct known previews include:
+Puddle of Water is anchored and currently has `Water 3`.
 
-- Rat Meat at `Satiation 67`: `67 → 82`
-- Canned Food at `Satiation 67`: `67 → 92`
-- `Hydration 50 → 75`
+An empty container is a card with `container` and without `contains-water`.
 
-The preview should appear on or immediately adjacent to the affected stat.
+A successful fill consumes one Puddle Water unit and adds `contains-water` to the container. Puddle is discarded at 0.
 
-### Eating and spoilage
+`contains-water` is part of the Drink trigger. It is the mutable state that tells the interaction system whether that container currently contains water.
 
-Anything Nadir can eat or otherwise ingest must carry a visible ingestion Marker. The exact final name of that Marker is not yet fixed.
+The fill Action duration remains undecided and must not be invented.
 
-The ingestion Marker is what makes the card a legal source for Nadir's ingestion interaction. Eating uses **Body** as the receiving card.
+## Flashlight
 
-The two food cards selected for the first interaction prototype are **Rat Meat** and **Canned Food**. Both are ingestible and are used to test that two legal sources can produce different exact Satiation previews:
+The opening Flashlight starts at `Battery 20`.
 
-- eating Rat Meat applies `Satiation +15` to Body;
-- eating Canned Food applies `Satiation +25` to Body.
+The Deep Tunnels Search Flashlight starts at `Battery 0`.
 
-Dropping an ingestible food card on Body applies the food's interaction-specific effects, consumes/discards the food card, and updates affected visible state immediately. Because eating is not currently an Action, it does not advance game time. If eating is later intended to consume time, it must be modeled as an Action.
+Flashlight gives Vision +1 only while active in a Hand and Battery > 0.
 
-`Dead Rat` is a single-card Process whose visible progress is named `Spoilage`. Spoilage increases only as Actions advance game time. When it reaches **100**, discard the Dead Rat and draw a `Rotten Meat` card in exactly the same position.
+Exact Battery drain remains undecided.
 
-`Rotten Meat` remains ingestible and explicitly targets **Body** in authored data (`eat Body`). If Nadir eats it:
+## Narrative direction
 
-- the Rotten Meat card is consumed/discarded,
-- Nadir receives a mood debuff,
-- a `Fever` card is drawn/created.
+Nadir is a good man shaped and damaged by a toxic military system. He uses self-deception as a survival mechanism for things he has done or caused and cannot comfortably live with.
 
-The exact representation, magnitude, and duration of the mood debuff are not yet fixed.
+His flight from returning to military service must remain compatible with the relationship being a genuine love story with Elina rather than reducing her to a calculated escape tool.
 
-For the first prototype, do **not** add a second hidden stomach/fullness system. This remains a prototype simplification rather than a permanent design rule.
+His notes may reflect moral tension between player choices, past trauma, and the stories he tells himself without making him appear foolish.
 
-### Survival pressures
+## Design discipline
 
-The confirmed permanent Body survival Values are:
+A suggestion is not a decision.
 
-- Hydration,
-- Satiation.
+Do not invent missing durations, rates, Values, Markers, probabilities, Process rules, or extra systems to make implementation appear complete.
 
-They both start at 50. Reaching 0 in either causes game over.
+Prefer concrete gameplay needs over abstract infrastructure. Keep the number of systems small, but allow attributes and interactions to create depth.
