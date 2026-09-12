@@ -70,6 +70,8 @@ Hidden Values are allowed for concrete internal mechanics, but they must not be 
 
 Item size deliberately does not introduce another attribute category. `small`, `medium`, and `large` are ordinary Markers. A size-based carried item has exactly one of those Markers, and there is no separate `size` field containing the same information.
 
+Storage capacity also deliberately uses the existing attribute system. `storage-small`, `storage-medium`, and `storage-large` are ordinary Values on equipment cards. There is no separate `storage` object carrying the same information.
+
 ## Authored data
 
 Runtime authored content uses strict JSON:
@@ -273,14 +275,19 @@ Current slots:
 
 Any ordinary movable card may be held in either Hand. A card in a compatible equipment slot is active/equipped; a merely carried card is not.
 
-Carried storage uses Small/Medium/Large capacities rather than a permanent five-card generic limit. Item size itself is expressed by ordinary Markers: `small`, `medium`, or `large`.
+Carried storage uses the normal Marker/Value system rather than dedicated size/storage datatypes:
+
+- item size is one Marker: `small`, `medium`, or `large`;
+- storage capacity is expressed by Values such as `storage-small`, `storage-medium`, or `storage-large` on equipped gear;
+- only equipped gear contributes its storage-capacity Values;
+- there is no standalone `size` field and no standalone `storage` object.
 
 Current contributions include:
 
-- Pants: 2 Small;
-- Simple Backpack: 5 Medium during the main game.
+- Pants: `Storage Small 2`;
+- Simple Backpack: `Storage Medium 5` during the main game.
 
-Small capacity accepts `small`; Medium accepts `small` or `medium`; Large accepts all three size Markers. There is no standalone item-size datatype outside the Marker system.
+`storage-small` accepts `small`; `storage-medium` accepts `small` or `medium`; `storage-large` accepts all three size Markers. When multiple capacity classes can fit an item, use the smallest fitting capacity first.
 
 The opening evacuation separately limits the player to taking five offered card instances.
 
