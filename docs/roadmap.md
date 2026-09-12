@@ -162,14 +162,14 @@ Many Processes may be active while the one Action executes.
 
 All active Processes participate in one world update. JSON ordering must not become gameplay ordering.
 
-### First concrete Process
+### First concrete recurring survival Process
 
 Body:
 
-- starts Hydration 50;
+- starts Hydration 50 and Satiation 50;
 - each global world tick applies Hydration -2;
-- Hydration 0 is game over;
-- do not invent Satiation decay.
+- each global world tick applies Satiation -1;
+- Hydration 0 is game over.
 
 Finite/staged Processes use card state, effects, and conditions/thresholds rather than independent timers.
 
@@ -317,8 +317,9 @@ Do not consider the pass complete until:
 - only one Action may execute at a time;
 - all time-consuming Actions use centralized world-time advancement;
 - Processes have no individual timers and all active Processes update on global 15-minute ticks;
+- each global world tick applies Hydration -2 and Satiation -1 to Body;
 - world tick resolves before Action completion when both occur at the same timestamp;
-- Hydration visibly updates on crossed world ticks;
+- Hydration and Satiation visibly update on crossed world ticks;
 - Hidden Values can exist as non-player-facing card-instance state;
 - the temporary travel adapter is removed;
 - Opening Room no longer exposes Body/Mind/Spirit;
