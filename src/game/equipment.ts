@@ -9,9 +9,14 @@ import type {
 import { getValue, isAnchored } from "./rules";
 
 export const EQUIPMENT_SLOTS: EquipmentSlot[] = [
-  "Left Hand", "Right Hand", "Head", "Eyes", "Neck", "Chest", "Back", "Legs", "Feet",
+  "left-hand", "right-hand", "head", "eyes", "trinket-1", "chest", "back", "legs", "feet",
 ];
 export const ITEM_SIZES: ItemSize[] = ["Small", "Medium", "Large"];
+export function equipmentSlotName(slot: EquipmentSlot): string {
+  // Preserve the current Milestone 2 rack until the later Trinket layout pass.
+  if (slot === "trinket-1") return "Neck";
+  return slot.split("-").map((word) => word[0].toUpperCase() + word.slice(1)).join(" ");
+}
 export type CapacityCounts = Record<ItemSize, number>;
 
 function masterFor(masters: CardMaster[], card: CardInstance): CardMaster | undefined {
@@ -19,7 +24,7 @@ function masterFor(masters: CardMaster[], card: CardInstance): CardMaster | unde
 }
 
 export function isHandSlot(slot: EquipmentSlot): boolean {
-  return slot === "Left Hand" || slot === "Right Hand";
+  return slot === "left-hand" || slot === "right-hand";
 }
 
 export function canEquip(
@@ -39,7 +44,7 @@ export function isEquipped(card: CardInstance): boolean {
 
 export function isEquipmentActive(card: CardInstance, master: CardMaster): boolean {
   if (!isEquipped(card) || !card.equipmentSlot || !canEquip(master, card.equipmentSlot, card)) return false;
-  if (master.whileEquipped.length && getValue(card, "Battery")?.value === 0) return false;
+  if (master.whileEquipped.length && getValue(card, "battery")?.value === 0) return false;
   return true;
 }
 

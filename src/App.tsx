@@ -19,7 +19,7 @@ import type {
   Zone,
 } from "./domain/types";
 import { CARD_HEIGHT, CARD_WIDTH, SEARCH_DECK_HEIGHT, SEARCH_DECK_WIDTH } from "./game/constants";
-import { allocateCarriedCapacity, canCarryCard, canEquip, EQUIPMENT_SLOTS, openingSelectionCount } from "./game/equipment";
+import { allocateCarriedCapacity, canCarryCard, canEquip, EQUIPMENT_SLOTS, equipmentSlotName, openingSelectionCount } from "./game/equipment";
 import { measureClientBox } from "./game/geometry";
 import {
   applyInteraction,
@@ -384,7 +384,7 @@ export function App() {
     if (slot) {
       if (canDropInSlot(game, sourceCard, slot)) {
         setGame(equipCard(game, sourceCard.id, slot));
-        setMessage(`Equipped ${sourceCard.title} in ${slot}.`);
+        setMessage(`Equipped ${sourceCard.title} in ${equipmentSlotName(slot)}.`);
       } else {
         setMessage("That equipment slot cannot receive this card.");
       }
@@ -579,7 +579,7 @@ export function App() {
                   data-equipment-slot={slot}
                   key={slot}
                 >
-                  <span>{slot}</span>
+                  <span>{equipmentSlotName(slot)}</span>
                   {equipped && renderCard(equipped)}
                 </div>
               );

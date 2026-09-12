@@ -1,0 +1,89 @@
+{
+  "start": "opening-room",
+  "searchBack": "images/search-back.jpg",
+  "nadir": ["body", "mind", "spirit"],
+  "rooms": {
+    "opening-room": {
+      "name": "Opening Room",
+      "background": "images/opening-room-background.jpg",
+      "light": "Bright",
+      "opening": {
+        "takeLimit": 5,
+        "escape": "tunnels",
+        "equipped": {
+          "legs": "pants",
+          "chest": "t-shirt"
+        },
+        "offered": [
+          "pocket-knife",
+          { "card": "plastic-bottle", "markers": ["contains-water"] },
+          { "card": "plastic-bottle", "markers": ["contains-water"] },
+          "canned-food",
+          "canned-food",
+          { "card": "simple-lighter", "values": { "fuel": 50 } },
+          { "card": "flashlight", "values": { "battery": 20 } },
+          "spare-batteries",
+          "pain-killers",
+          "simple-backpack",
+          "glasses"
+        ]
+      }
+    },
+    "tunnels": {
+      "name": "Tunnels",
+      "background": "images/tunnels-background.jpg",
+      "light": "Dim",
+      "decks": {
+        "explore": {
+          "name": "Explore",
+          "time": "15m",
+          "cards": [
+            "scrap-metal",
+            "scrap-metal",
+            "pipe",
+            "squatter",
+            "dead-rat",
+            "plastic-bottle",
+            "puddle-of-water",
+            "go-deep-tunnels",
+            "go-abandoned-office",
+            { "card": "service-cabinet", "markers": ["locked"] }
+          ]
+        }
+      }
+    },
+    "abandoned-office": {
+      "name": "Abandoned Office",
+      "background": "images/abandoned-office-background.jpg",
+      "light": "Bright",
+      "cards": ["go-tunnels-from-office"],
+      "decks": {
+        "search": {
+          "name": "Search",
+          "time": "15m",
+          "cards": [
+            "placeholder", "placeholder", "placeholder", "placeholder", "placeholder",
+            "placeholder", "placeholder", "placeholder", "placeholder", "placeholder"
+          ]
+        }
+      }
+    },
+    "deep-tunnels": {
+      "name": "Deep Tunnels",
+      "background": "images/deep-tunnels-background.jpg",
+      "light": "Twilight",
+      "cards": ["go-tunnels-from-deep-tunnels"],
+      "decks": {
+        "search": {
+          "name": "Search",
+          "time": "15m",
+          "cards": [
+            { "card": "flashlight", "values": { "battery": 0 } },
+            "placeholder", "placeholder", "placeholder", "placeholder", "placeholder",
+            "placeholder", "placeholder", "placeholder", "placeholder"
+          ]
+        }
+      }
+    }
+  }
+}

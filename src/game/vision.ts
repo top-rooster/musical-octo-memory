@@ -11,12 +11,12 @@ export const LIGHT_MODIFIERS: Record<LightLevel, number> = {
 
 export function effectiveVision(state: GameState, roomId = state.currentRoomId): number {
   const mind = state.cards.find((card) => card.masterId === "mind");
-  const base = mind ? getValue(mind, "Vision")?.value ?? 0 : 0;
+  const base = mind ? getValue(mind, "vision")?.value ?? 0 : 0;
   const equipment = state.cards.reduce((sum, card) => {
     const master = state.masters.find((candidate) => candidate.id === card.masterId);
     if (!master || !isAuthoredEquipmentEffectActive(card, master)) return sum;
     return sum + master.whileEquipped
-      .filter((modifier) => modifier.attribute === "Vision")
+      .filter((modifier) => modifier.attribute === "vision")
       .reduce((amount, modifier) => amount + modifier.amount, 0);
   }, 0);
   const light = roomId && state.rooms?.[roomId]?.light;

@@ -21,7 +21,7 @@ export interface InteractionOutcome {
   sourceId: string;
   targetId: string;
   valueChanges: ValueChangePreview[];
-  consumeSource: boolean;
+  discardSource: boolean;
 }
 
 export interface DragOrigin {
@@ -31,18 +31,14 @@ export interface DragOrigin {
   equipmentSlot?: CardInstance["equipmentSlot"];
 }
 
-export function displayAttributeName(name: string): string {
-  return name.replaceAll("-", " ");
-}
-
-export function hasMarker(card: Pick<CardInstance | CardMaster, "attributes">, name: string): boolean {
+export function hasMarker(card: Pick<CardInstance | CardMaster, "attributes">, id: string): boolean {
   return card.attributes.some(
-    (attribute) => attribute.kind === "marker" && attribute.name === name,
+    (attribute) => attribute.kind === "marker" && attribute.id === id,
   );
 }
 
 export function isAnchored(card: Pick<CardInstance | CardMaster, "attributes">): boolean {
-  return hasMarker(card, "Anchored");
+  return hasMarker(card, "anchored");
 }
 
 export function canCrossZoneBoundaryDuringDrag(_card: CardInstance): boolean {
@@ -64,11 +60,11 @@ export function clampValue(value: number, min = 0, max = 100): number {
 
 export function getValue(
   card: Pick<CardInstance, "attributes">,
-  name: string,
+  id: string,
 ): ValueAttribute | undefined {
   return card.attributes.find(
     (attribute): attribute is ValueAttribute =>
-      attribute.kind === "value" && attribute.name === name,
+      attribute.kind === "value" && attribute.id === id,
   );
 }
 
@@ -115,34 +111,41 @@ function masterFor(state: GameState, card: CardInstance): CardMaster | undefined
   return state.masters.find((master) => master.id === card.masterId);
 }
 
+function isSupportedInteractionEffect(effect: CardMaster["accept"][number]["action"]["effects"][number]): boolean {
+  return ("change" in effect && effect.target === "receiver") ||
+    ("discard" in effect && effect.discard === "source");
+}
+
 export function calculateInteractionOutcome(
   state: GameState,
   source: CardInstance,
   target: CardInstance,
 ): InteractionOutcome | null {
-  const interaction = masterFor(state, source)?.interactions.find(
-    (candidate) => candidate.targetTitle === target.title,
+  const interaction = masterFor(state, target)?.accept.find(
+    (candidate) =>
+      (!candidate.card || candidate.card === source.masterId) &&
+      (candidate.markers ?? []).every((marker) => hasMarker(source, marker)),
   );
-  if (!interaction) return null;
+  if (!interaction || !interaction.action.effects.every(isSupportedInteractionEffect)) return null;
 
   const valueChanges: ValueChangePreview[] = [];
-  let consumeSource = false;
-  for (const effect of interaction.effects) {
-    if (effect.kind === "consume-source") {
-      consumeSource = true;
-      continue;
+  let discardSource = false;
+  for (const effect of interaction.action.effects) {
+    if ("discard" in effect) {
+      discardSource = true;
+    } else if ("change" in effect) {
+      const value = getValue(target, effect.change);
+      if (!value) return null;
+      valueChanges.push({
+        cardId: target.id,
+        attribute: effect.change,
+        before: value.value,
+        after: clampValue(value.value + effect.amount, value.min, value.max),
+      });
     }
-    const value = getValue(target, effect.attribute);
-    if (!value) return null;
-    valueChanges.push({
-      cardId: target.id,
-      attribute: effect.attribute,
-      before: value.value,
-      after: clampValue(value.value + effect.amount, value.min, value.max),
-    });
   }
 
-  return { sourceId: source.id, targetId: target.id, valueChanges, consumeSource };
+  return { sourceId: source.id, targetId: target.id, valueChanges, discardSource };
 }
 
 export function canInteract(
@@ -152,15 +155,15 @@ export function canInteract(
 ): boolean {
   return (
     calculateInteractionOutcome(state, source, target) !== null ||
-    (source.masterId === "body" && Boolean(target.travel))
+    source.masterId === target.travel?.acceptedCardId
   );
 }
 
 function visibleAttributeIdentity(card: CardInstance): string[] {
   return card.attributes.map((attribute) =>
     attribute.kind === "marker"
-      ? `marker:${attribute.name}`
-      : `value:${attribute.name}:${attribute.value}`,
+      ? `marker:${attribute.id}`
+      : `value:${attribute.id}:${attribute.value}`,
   ).sort();
 }
 
@@ -192,7 +195,7 @@ function applyValueChanges(
 ): CardAttribute[] {
   return attributes.map((attribute) => {
     if (attribute.kind !== "value") return attribute;
-    const change = changes.find((candidate) => candidate.attribute === attribute.name);
+    const change = changes.find((candidate) => candidate.attribute === attribute.id);
     return change ? { ...attribute, value: change.after } : attribute;
   });
 }
@@ -210,7 +213,7 @@ export function applyInteraction(
   if (!outcome) return state;
 
   const cards = state.cards
-    .filter((card) => !(outcome.consumeSource && card.id === sourceId))
+    .filter((card) => !(outcome.discardSource && card.id === sourceId))
     .map((card) =>
       card.id === targetId
         ? { ...card, attributes: applyValueChanges(card.attributes, outcome.valueChanges) }

@@ -21,7 +21,7 @@ The textbox should be positioned so it remains readable and does not run outside
 
 ### Description authoring
 
-Card descriptions are authored in `data/cards.txt` as part of the card master definition.
+Card descriptions are authored in `data/cards.json` as part of the card master definition.
 
 The description is a line beginning with `>` immediately after the picture path. Example:
 
@@ -44,7 +44,7 @@ The absence of a description must therefore never suppress the inspection textbo
 
 Attribute explanatory text is defined centrally as a **master description for each attribute** and reused on every card carrying that attribute. The same `Hydration`, `Anchored`, `Satiation`, `Cutting Tool`, etc. explanation should not be copied into individual card definitions.
 
-The master attribute descriptions live in `data/attributes.txt`.
+The master attribute descriptions live in `data/attributes.json`.
 
 Each attribute entry uses the attribute name as its first line and its explanatory paragraph as the following line, with blank lines separating entries. Example:
 
@@ -59,6 +59,6 @@ Anchored
 This card belongs permanently to its home zone.
 ```
 
-If a visible attribute has no matching master entry in `data/attributes.txt`, the inspection textbox must still list that attribute and display exactly `missing description` as its explanation. Missing authored help must never cause a visible attribute to disappear from inspection.
+If a visible attribute has no matching master entry in `data/attributes.json`, the inspection textbox must still list that attribute and display exactly `missing description` as its explanation. Missing authored help must never cause a visible attribute to disappear from inspection.
 
 Attribute descriptions are authored data, not hard-coded tooltip prose in React components.

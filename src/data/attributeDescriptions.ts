@@ -1,5 +1,7 @@
-import authoredAttributes from "../../data/attributes.txt?raw";
-import { parseAttributeDescriptions } from "./attributeParser";
+import { AUTHORED_DATA } from "./authoredData";
 
-export const ATTRIBUTE_DESCRIPTION_SOURCE = "data/attributes.txt";
-export const ATTRIBUTE_DESCRIPTIONS = parseAttributeDescriptions(authoredAttributes);
+export const ATTRIBUTE_DESCRIPTION_SOURCE = "data/attributes.json";
+export const ATTRIBUTE_METADATA = AUTHORED_DATA.attributes;
+export const ATTRIBUTE_DESCRIPTIONS = Object.fromEntries(
+  Object.entries(ATTRIBUTE_METADATA).map(([id, metadata]) => [id, metadata.description]),
+);

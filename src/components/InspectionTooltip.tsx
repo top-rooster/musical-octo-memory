@@ -1,6 +1,5 @@
 import type { CardInstance } from "../domain/types";
-import { ATTRIBUTE_DESCRIPTIONS } from "../data/attributeDescriptions";
-import { displayAttributeName } from "../game/rules";
+import { ATTRIBUTE_METADATA } from "../data/attributeDescriptions";
 
 interface Props { card: CardInstance; x: number; y: number; }
 export const MISSING_DESCRIPTION = "missing description";
@@ -17,12 +16,12 @@ export function InspectionTooltip({ card, x, y }: Props) {
       {card.attributes.length > 0 && (
         <dl>
           {card.attributes.map((attribute) => (
-            <div key={attribute.name}>
+            <div key={attribute.id}>
               <dt>
-                {displayAttributeName(attribute.name)}
+                {ATTRIBUTE_METADATA[attribute.id]?.name ?? attribute.id}
                 {attribute.kind === "value" ? ` ${attribute.value}` : ""}
               </dt>
-              <dd>{ATTRIBUTE_DESCRIPTIONS[attribute.name] || MISSING_DESCRIPTION}</dd>
+              <dd>{ATTRIBUTE_METADATA[attribute.id]?.description || MISSING_DESCRIPTION}</dd>
             </div>
           ))}
         </dl>

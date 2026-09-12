@@ -39,7 +39,7 @@ Preserve the interaction semantics already specified in those issues and focused
 
 ## Part B - authored world data
 
-Add and load `data/rooms.txt` as the Milestone 2 room/level source of truth.
+Load `data/rooms.json` as the Milestone 2 room/level source of truth.
 
 The file defines:
 
@@ -54,7 +54,7 @@ The file defines:
 
 Do not hard-code the current room graph or deck compositions into React components or TypeScript constants.
 
-The first room-file syntax is deliberately small and may evolve later. Follow `docs/data-language.md` and the comments in `data/rooms.txt` rather than designing a general-purpose level language.
+The JSON schema is deliberately concrete and may evolve later. Follow `docs/data-language.md` rather than designing a general-purpose scripting language.
 
 ## Part C - opening evacuation
 
@@ -212,7 +212,7 @@ All search decks:
 
 Drawing a card should visibly animate a card outward from the deck and settle it in the nearest legal free Room location.
 
-Tunnels uses the exact 10-card Explore composition in `docs/explore-deck.md` and `data/rooms.txt`.
+Tunnels uses the exact 10-card Explore composition in `docs/explore-deck.md` and `data/rooms.json`.
 
 Abandoned Office uses 10 explicit placeholder entries for now.
 
@@ -263,13 +263,13 @@ Do not implement Torch crafting or burn behavior in Milestone 2.
 
 ## Part J - data additions
 
-Add card masters needed by the playable slice to `data/cards.txt`. At minimum this includes the opening equipment/items, room/search discoveries, and travel cards referenced by `data/rooms.txt`.
+Add card masters needed by the playable slice to `data/cards.json`. At minimum this includes the opening equipment/items, room/search discoveries, and travel cards referenced by `data/rooms.json`.
 
 Extend the parser only for syntax the milestone actually uses.
 
-Add `data/attributes.txt` for hover help required by issue #5. Missing descriptions must still fall back exactly as specified by that issue.
+Use `data/attributes.json` for hover help required by issue #5. Missing descriptions must still fall back exactly as specified by that issue.
 
-Do not attempt to make every older unfinished Action/Process in `data/cards.txt` executable in this iteration.
+Do not attempt to make every unfinished Action/Process in `data/cards.json` executable in this iteration.
 
 ## Art assets
 

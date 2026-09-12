@@ -10,8 +10,6 @@ import type {
 import { isAnchored } from "./rules";
 import { generateGridPositions, generateRoomPlacements } from "./placement";
 
-const STARTING_INVENTORY_TITLES = ["Body", "Mind", "Spirit"] as const;
-
 function cloneAttributes(attributes: CardAttribute[]): CardAttribute[] {
   return attributes.map((attribute) => ({ ...attribute }));
 }
@@ -44,6 +42,7 @@ function insetBounds(bounds: Bounds, horizontal: number, top: number, bottom: nu
 
 export function createInitialGameState(
   masters: CardMaster[],
+  nadirMasterIds: string[],
   roomBounds: Bounds,
   inventoryBounds: Bounds,
   random: () => number = Math.random,
@@ -55,10 +54,10 @@ export function createInitialGameState(
     random,
   );
 
-  const inventoryMasters = STARTING_INVENTORY_TITLES.map((title) => {
-    const master = masters.find((candidate) => candidate.title === title);
-    if (!master) throw new Error(`Missing required card master: ${title}`);
-    if (!isAnchored(master)) throw new Error(`${title} must carry the Anchored marker`);
+  const inventoryMasters = nadirMasterIds.map((id) => {
+    const master = masters.find((candidate) => candidate.id === id);
+    if (!master) throw new Error(`Missing required card master: ${id}`);
+    if (!isAnchored(master)) throw new Error(`${id} must carry the anchored marker`);
     return master;
   });
   const inventoryPositions = generateGridPositions(

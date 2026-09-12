@@ -479,7 +479,7 @@ Desired visual hierarchy:
 **Status:** OPEN - SIMON TO DECIDE
 **Priority:** P2
 
-The exact player-facing healing progress name and any unfinished Infection-over-time behavior remain undecided unless a focused design document has since superseded this entry.
+The old TXT draft sketched a 15-minute Flesh Wound healing Process with Infection-dependent progress bands and removal at full progress. Its starting progress Value and final player-facing progress design were never decided, so the incomplete Process remains out of runtime JSON until those details are resolved. Any unfinished Infection-over-time behavior also remains undecided unless a focused design document supersedes this entry.
 
 ## PROCESS-OPEN-02 - Burn Wound healing
 **Status:** OPEN - SIMON TO DECIDE
@@ -516,6 +516,12 @@ The two Trinket slots are decided. Which future items use them and what effects 
 **Priority:** P3
 
 Torch may later provide portable light, but recipe, burn duration, and other behavior are not part of the current prototype.
+
+## CAMPFIRE-OPEN-01 - Heat-source attribute
+**Status:** OPEN - SIMON TO DECIDE
+**Priority:** P2
+
+The old card-data draft noted that Campfire should eventually identify as a heat source, but the player-facing Marker name remains undecided. Do not add a heat-source Marker to runtime data until it is named.
 
 ---
 

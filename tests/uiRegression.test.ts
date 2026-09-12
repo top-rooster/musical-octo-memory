@@ -19,13 +19,13 @@ describe("issues #2–#5 regression coverage", () => {
   });
 
   it("loads authored card descriptions", () => {
-    expect(CARD_MASTERS.find((master) => master.title === "Body")?.description)
+    expect(CARD_MASTERS.find((master) => master.id === "body")?.description)
       .toBe("Nadir's physical condition and basic survival needs.");
   });
 
   it("loads shared attribute descriptions and uses the exact missing fallback", () => {
-    expect(ATTRIBUTE_DESCRIPTION_SOURCE).toBe("data/attributes.txt");
-    expect(ATTRIBUTE_DESCRIPTIONS.Satiation).toMatch(/well fed/i);
+    expect(ATTRIBUTE_DESCRIPTION_SOURCE).toBe("data/attributes.json");
+    expect(ATTRIBUTE_DESCRIPTIONS.satiation).toMatch(/well fed/i);
     expect(MISSING_DESCRIPTION).toBe("missing description");
   });
 });

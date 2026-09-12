@@ -1,0 +1,78 @@
+{
+  "anchored": {
+    "name": "Anchored",
+    "description": "This card belongs to a fixed home location or part of Nadir and cannot come to rest elsewhere through ordinary placement."
+  },
+  "hydration": {
+    "name": "Hydration",
+    "description": "How well hydrated Nadir is. Reaching zero is fatal."
+  },
+  "satiation": {
+    "name": "Satiation",
+    "description": "How well fed Nadir is. Reaching zero is fatal."
+  },
+  "vision": {
+    "name": "Vision",
+    "description": "How well Nadir can see well enough to act. Room light and active equipment modify the effective value used for tasks, searching, and travel."
+  },
+  "infection": {
+    "name": "Infection",
+    "description": "How infected a wound is. Lower is better."
+  },
+  "dressed": {
+    "name": "Dressed",
+    "description": "The wound has been covered with a sterile dressing."
+  },
+  "sterilized": {
+    "name": "Sterilized",
+    "description": "This material has been sterilized and can be used where sterile fabric is required."
+  },
+  "fabric": {
+    "name": "Fabric",
+    "description": "This card can be used as fabric in interactions that require it."
+  },
+  "container": {
+    "name": "Container",
+    "description": "This card can hold a substance such as water."
+  },
+  "contains-water": {
+    "name": "Contains Water",
+    "description": "This container currently contains water."
+  },
+  "cutting-tool": {
+    "name": "Cutting Tool",
+    "description": "This card can perform interactions that require a cutting tool."
+  },
+  "durability": {
+    "name": "Durability",
+    "description": "How much usable life remains in the item before wear makes it unusable."
+  },
+  "spoilage": {
+    "name": "Spoilage",
+    "description": "How far food or organic material has progressed toward spoiling."
+  },
+  "fuel": {
+    "name": "Fuel",
+    "description": "How much usable fuel remains."
+  },
+  "battery": {
+    "name": "Battery",
+    "description": "How much battery charge remains."
+  },
+  "locked": {
+    "name": "Locked",
+    "description": "This object is currently locked."
+  },
+  "powered": {
+    "name": "Powered",
+    "description": "This object currently has electrical power."
+  },
+  "progress": {
+    "name": "Progress",
+    "description": "How far an ongoing Process has progressed toward completion."
+  },
+  "water": {
+    "name": "Water",
+    "description": "How many units of water remain in this source."
+  }
+}
