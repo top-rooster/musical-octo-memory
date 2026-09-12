@@ -27,7 +27,7 @@ He begins wearing:
 
 He is **barefoot**. Feet are empty.
 
-Both Hands are empty. Head, Eyes, Neck, and Back are also empty.
+Both Hands are empty. Head, Eyes, Trinket 1, Trinket 2, and Back are also empty.
 
 The Pants provide 2 Small carried-Inventory capacity. Other things taken during the opening can also be held/equipped in compatible slots. The five-card evacuation limit remains the overriding limit on how many offered cards leave with Nadir.
 
@@ -70,6 +70,8 @@ The earlier fixed five-card permanent Inventory model is superseded by `docs/equ
 The earlier rule that a Flashlight is required to enter Deep Tunnels is superseded. Deep Tunnels are soft-gated by the general Vision system instead.
 
 The earlier offered T-Shirt is superseded by Nadir already wearing a T-Shirt when the opening begins.
+
+The earlier `Neck` equipment slot is superseded by `Trinket 1` and `Trinket 2`.
 
 ## OPEN
 
