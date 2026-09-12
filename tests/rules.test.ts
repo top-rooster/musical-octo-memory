@@ -3,6 +3,7 @@ import { CARD_MASTERS } from "../src/data/cardMasters";
 import { WORLD_DEFINITION } from "../src/data/worldDefinition";
 import type { CardInstance, GameState } from "../src/domain/types";
 import { createInitialGameState } from "../src/game/initialState";
+import { createWorldGameState } from "../src/game/world";
 import {
   applyInteraction,
   calculateInteractionOutcome,
@@ -52,6 +53,9 @@ describe("Milestone 1 rules", () => {
   it("applies Rat Meat Satiation +15 and consumes the source", () => {
     const body = card(state, "body");
     const ratMeat = card(state, "rat-meat");
+    expect(calculateInteractionOutcome(state, ratMeat, body)?.valueChanges).toContainEqual({
+      cardId: body.id, attribute: "satiation", before: 50, after: 65,
+    });
     const next = applyInteraction(state, ratMeat.id, body.id);
     expect(getValue(card(next, "body"), "satiation")?.value).toBe(65);
     expect(next.cards.some((candidate) => candidate.id === ratMeat.id)).toBe(false);
@@ -62,6 +66,72 @@ describe("Milestone 1 rules", () => {
     const cannedFood = card(state, "canned-food");
     const next = applyInteraction(state, cannedFood.id, body.id);
     expect(getValue(card(next, "body"), "satiation")?.value).toBe(75);
+    expect(next.cards.some((candidate) => candidate.id === cannedFood.id)).toBe(false);
+  });
+
+  it("does not partially execute Drink while remove Marker is unsupported", () => {
+    state = {
+      ...state,
+      cards: state.cards.map((candidate) => candidate.masterId === "plastic-bottle"
+        ? { ...candidate, attributes: [...candidate.attributes, { kind: "marker" as const, id: "contains-water" }] }
+        : candidate),
+    };
+    const bottle = card(state, "plastic-bottle");
+    const body = card(state, "body");
+    const beforeHydration = getValue(body, "hydration")?.value;
+
+    expect(canInteract(state, bottle, body)).toBe(false);
+    expect(calculateInteractionOutcome(state, bottle, body)).toBeNull();
+    expect(applyInteraction(state, bottle.id, body.id)).toBe(state);
+    expect(getValue(card(state, "body"), "hydration")?.value).toBe(beforeHydration);
+    expect(hasMarker(card(state, "plastic-bottle"), "contains-water")).toBe(true);
+  });
+
+  it("does not partially execute Skin while draw effects are unsupported", () => {
+    const knife = card(state, "pocket-knife");
+    const deadRat = card(state, "dead-rat");
+    const beforeRatSkin = state.cards.filter((candidate) => candidate.masterId === "rat-skin").length;
+    const beforeRatMeat = state.cards.filter((candidate) => candidate.masterId === "rat-meat").length;
+
+    expect(canInteract(state, knife, deadRat)).toBe(false);
+    expect(calculateInteractionOutcome(state, knife, deadRat)).toBeNull();
+    expect(applyInteraction(state, knife.id, deadRat.id)).toBe(state);
+    expect(state.cards.some((candidate) => candidate.id === deadRat.id)).toBe(true);
+    expect(state.cards.filter((candidate) => candidate.masterId === "rat-skin")).toHaveLength(beforeRatSkin);
+    expect(state.cards.filter((candidate) => candidate.masterId === "rat-meat")).toHaveLength(beforeRatMeat);
+  });
+
+  it("blocks an entire otherwise-supported Action when one effect is unsupported", () => {
+    const body = card(state, "body");
+    const cannedFood = card(state, "canned-food");
+    state = {
+      ...state,
+      masters: state.masters.map((master) => master.id === "body" ? {
+        ...master,
+        accept: master.accept.map((acceptance) => acceptance.card === "canned-food" ? {
+          ...acceptance,
+          action: { ...acceptance.action, effects: [...acceptance.action.effects, { draw: "fever" }] },
+        } : acceptance),
+      } : master),
+    };
+
+    expect(canInteract(state, cannedFood, body)).toBe(false);
+    expect(calculateInteractionOutcome(state, cannedFood, body)).toBeNull();
+    expect(applyInteraction(state, cannedFood.id, body.id)).toBe(state);
+    expect(getValue(card(state, "body"), "satiation")?.value).toBe(50);
+    expect(state.cards.some((candidate) => candidate.id === cannedFood.id)).toBe(true);
+  });
+
+  it("keeps card-authored travel available through the compatibility adapter", () => {
+    const world = createWorldGameState(
+      CARD_MASTERS, WORLD_DEFINITION, { x: 0, y: 0, width: 1400, height: 800 }, () => 0.5,
+    );
+    const body = card(world, "body");
+    const route = card(world, "go-tunnels-from-office");
+    expect(canInteract(world, body, route)).toBe(true);
+    expect(route.travel).toEqual({
+      acceptedCardId: "body", destinationRoomId: "tunnels", baseMinutes: 15,
+    });
   });
 
   it("clamps preview and committed Satiation at 100 using the same outcome", () => {

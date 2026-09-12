@@ -22,7 +22,6 @@ export interface InteractionOutcome {
   targetId: string;
   valueChanges: ValueChangePreview[];
   discardSource: boolean;
-  discardReceiver: boolean;
 }
 
 export interface DragOrigin {
@@ -112,6 +111,11 @@ function masterFor(state: GameState, card: CardInstance): CardMaster | undefined
   return state.masters.find((master) => master.id === card.masterId);
 }
 
+function isSupportedInteractionEffect(effect: CardMaster["accept"][number]["action"]["effects"][number]): boolean {
+  return ("change" in effect && effect.target === "receiver") ||
+    ("discard" in effect && effect.discard === "source");
+}
+
 export function calculateInteractionOutcome(
   state: GameState,
   source: CardInstance,
@@ -122,16 +126,14 @@ export function calculateInteractionOutcome(
       (!candidate.card || candidate.card === source.masterId) &&
       (candidate.markers ?? []).every((marker) => hasMarker(source, marker)),
   );
-  if (!interaction) return null;
+  if (!interaction || !interaction.action.effects.every(isSupportedInteractionEffect)) return null;
 
   const valueChanges: ValueChangePreview[] = [];
   let discardSource = false;
-  let discardReceiver = false;
   for (const effect of interaction.action.effects) {
     if ("discard" in effect) {
-      discardSource ||= effect.discard === "source";
-      discardReceiver ||= effect.discard === "receiver";
-    } else if ("change" in effect && (effect.target ?? "receiver") === "receiver") {
+      discardSource = true;
+    } else if ("change" in effect) {
       const value = getValue(target, effect.change);
       if (!value) return null;
       valueChanges.push({
@@ -143,7 +145,7 @@ export function calculateInteractionOutcome(
     }
   }
 
-  return { sourceId: source.id, targetId: target.id, valueChanges, discardSource, discardReceiver };
+  return { sourceId: source.id, targetId: target.id, valueChanges, discardSource };
 }
 
 export function canInteract(
@@ -211,10 +213,7 @@ export function applyInteraction(
   if (!outcome) return state;
 
   const cards = state.cards
-    .filter((card) => !(
-      (outcome.discardSource && card.id === sourceId) ||
-      (outcome.discardReceiver && card.id === targetId)
-    ))
+    .filter((card) => !(outcome.discardSource && card.id === sourceId))
     .map((card) =>
       card.id === targetId
         ? { ...card, attributes: applyValueChanges(card.attributes, outcome.valueChanges) }
