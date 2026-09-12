@@ -90,7 +90,7 @@ There is no fixed generic five-card carrying capacity independent of equipment.
 
 Cards are not visually or mechanically nested inside Backpack, Pants, pockets, or other equipment cards. Carried cards remain ordinary cards in one flat Inventory area.
 
-Equipped storage gear contributes carrying capacity to that flat area.
+Equipped storage gear contributes carrying capacity to that flat area immediately whenever it is equipped, including during the opening evacuation.
 
 Cards occupying equipment slots, including Hands, are equipped rather than carried and do not consume carried-storage capacity.
 
@@ -119,9 +119,11 @@ Confirmed examples:
 - Pants: `storage-small = 2`;
 - Simple Backpack: `storage-medium = 5`.
 
-These Values contribute capacity only while the card is equipped. A Backpack carried flat in Inventory does not provide active carrying capacity.
+These Values contribute capacity whenever the card is equipped. A Backpack carried flat in Inventory does not provide active carrying capacity.
 
-The opening evacuation remains governed by its explicit five-offered-card selection rule. Normal storage data therefore does not need a separate phase property.
+There is no scene-specific suppression of storage Values in Opening. If Simple Backpack is equipped in Back during Opening, its `storage-medium = 5` applies immediately.
+
+The opening evacuation is still limited to five offered card instances. Extra storage capacity affects legal carried placement, but it does not increase how many offered cards may leave the scene.
 
 The Inventory UI should show current/maximum readouts for all three capacity classes.
 
@@ -146,7 +148,9 @@ At the beginning of the evacuation interlude:
 - both Hands are empty;
 - Head, Eyes, both Trinket slots, and Back are empty.
 
-The worn Pants therefore provide the initial main-game carried-storage capacity of `Storage Small 2`.
+The worn Pants therefore provide the initial carried-storage capacity of `Storage Small 2` from the start of Opening.
+
+If the player chooses Simple Backpack and equips it in Back, it immediately adds `Storage Medium 5` during Opening as well.
 
 ## Equipment as progression
 
@@ -162,7 +166,8 @@ The following earlier rules are superseded:
 - representing item size through a separate `size` field/type rather than Markers;
 - representing carrying capacity through a separate `storage` object/type rather than Values;
 - treating Hand compatibility as authored per-card equipment compatibility;
-- representing non-Hand equipment compatibility through the legacy `equip` array instead of References.
+- representing non-Hand equipment compatibility through the legacy `equip` array instead of References;
+- suppressing Simple Backpack storage capacity until after the Opening scene.
 
 ## Schema discipline
 
