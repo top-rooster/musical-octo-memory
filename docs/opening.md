@@ -31,6 +31,8 @@ He is **barefoot**. Feet are empty.
 
 Both Hands are empty. Head, Eyes, Trinket 1, Trinket 2, and Back are also empty.
 
+The evacuation is a loadout-selection scene rather than the normal survival simulation. Body, Mind, and Spirit do not appear and cannot be used as interaction targets during Opening. Vision and elapsed-time survival readouts appear when Nadir reaches Tunnels.
+
 The Pants provide 2 Small carried-Inventory capacity. Other things taken during the opening can also be held/equipped in compatible slots and can provide their normal equipped effects, including storage capacity. The five-card evacuation limit remains the overriding limit on how many offered cards leave with Nadir.
 
 ### Items available in the opening room

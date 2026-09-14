@@ -3,7 +3,7 @@ import { CARD_MASTERS } from "../src/data/cardMasters";
 import { WORLD_DEFINITION } from "../src/data/worldDefinition";
 import type { CardInstance, GameState } from "../src/domain/types";
 import { createInitialGameState } from "../src/game/initialState";
-import { createWorldGameState } from "../src/game/world";
+import { createWorldGameState, escapeOpening } from "../src/game/world";
 import {
   applyInteraction,
   calculateInteractionOutcome,
@@ -123,9 +123,9 @@ describe("Milestone 1 rules", () => {
   });
 
   it("keeps card-authored travel available through the compatibility adapter", () => {
-    const world = createWorldGameState(
+    const world = escapeOpening(createWorldGameState(
       CARD_MASTERS, WORLD_DEFINITION, { x: 0, y: 0, width: 1400, height: 800 }, () => 0.5,
-    );
+    )).state;
     const body = card(world, "body");
     const route = card(world, "go-tunnels-from-office");
     expect(canInteract(world, body, route)).toBe(true);
@@ -212,21 +212,31 @@ describe("Milestone 1 rules", () => {
     expect(stackedSource.roomId).toBe(target.roomId);
   });
 
-  it("rejects Stack targets with different current visible state or outside Room", () => {
-    const source = { ...card(state, "flashlight"), roomId: "test-room" };
+  it("rejects Stack targets with different Marker sets", () => {
+    const source = { ...card(state, "canned-food"), zone: "room" as const, roomId: "test-room" };
     const changed = {
       ...source,
-      id: "changed-flashlight",
-      attributes: source.attributes.map((attribute) =>
-        attribute.kind === "value" && attribute.id === "battery"
-          ? { ...attribute, value: attribute.value - 1 }
-          : { ...attribute },
-      ),
+      id: "marked-canned-food",
+      attributes: [...source.attributes, { kind: "marker" as const, id: "opened" }],
     };
     expect(canStackCards(source, changed)).toBe(false);
+  });
+
+  it("never stacks cards carrying visible Values, even when their Values match", () => {
+    const source = { ...card(state, "flashlight"), zone: "room" as const, roomId: "test-room" };
+    const target = {
+      ...source,
+      id: "matching-flashlight",
+      attributes: source.attributes.map((attribute) => ({ ...attribute })),
+    };
+    expect(canStackCards(source, target)).toBe(false);
+  });
+
+  it("keeps Stack relationships Room-only", () => {
+    const source = { ...card(state, "canned-food"), zone: "room" as const, roomId: "test-room" };
     expect(canStackCards(
       { ...source, zone: "inventory", roomId: undefined },
-      { ...source, id: "carried-copy", zone: "inventory", roomId: undefined },
+      { ...source, id: "room-copy" },
     )).toBe(false);
   });
 });

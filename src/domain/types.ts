@@ -67,6 +67,7 @@ export interface CardInstance {
   roomId?: string;
   equipmentSlot?: EquipmentSlot;
   stackRootId?: string;
+  nadirState?: boolean;
   offered?: boolean;
   travel?: TravelDefinition;
   animation?: "draw";

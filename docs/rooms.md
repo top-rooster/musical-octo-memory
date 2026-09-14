@@ -136,7 +136,7 @@ For the current implementation, an exhausted Search deck disappears immediately 
 - Squatter x1
 - Dead Rat x1
 - Plastic Bottle x1, empty
-- Puddle of Water x1
+- Puddle of Water x1, starting at `Water 3`
 - Go to deep tunnels x1
 - Go to abandoned office x1
 - Service Cabinet x1, locked
@@ -147,7 +147,7 @@ Detailed behavior is also recorded in `docs/explore-deck.md`.
 
 **Deep Tunnels** currently has:
 
-- Flashlight x1;
+- Flashlight x1, starting at `Battery 0` through an authored instance override;
 - Placeholder x9.
 
 The Flashlight is a decided useful find in Deep Tunnels. The other nine entries are temporary scaffolding.
@@ -180,4 +180,4 @@ Still open beyond Milestone 2:
 - future deck behavior after exhaustion;
 - day/night changes in Abandoned Office;
 - additional rooms and routes;
-- future mechanics for the currently inert Pipe, Squatter, Puddle of Water, Service Cabinet, and Placeholder content.
+- future mechanics for the currently inert Pipe, Squatter, Service Cabinet, and Placeholder content, plus executable Puddle filling after its Action duration is decided.

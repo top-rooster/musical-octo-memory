@@ -66,9 +66,9 @@ Nadir begins surprised and only partly dressed:
 - `T-Shirt` equipped in Chest;
 - Feet empty: he is barefoot;
 - both Hands empty;
-- Eyes, Head, Neck, and Back empty.
+- Eyes, Head, Trinket 1, Trinket 2, and Back empty.
 
-Body, Mind, and Spirit remain Nadir's persistent state cards.
+Body, Mind, and Spirit remain Nadir's persistent state cards, but the evacuation is a loadout-selection scene: those three cards and the survival-state Vision/elapsed-time readout are hidden and unavailable until Nadir reaches Tunnels.
 
 The player may take **at most five offered card instances** before leaving. Equipped offered items count toward that five-card limit exactly like carried offered items.
 
@@ -100,7 +100,8 @@ Render fixed equipment-slot indentations/placeholders in the persistent Nadir/In
 - Right Hand
 - Head
 - Eyes
-- Neck
+- Trinket 1
+- Trinket 2
 - Chest
 - Back
 - Legs
@@ -123,7 +124,7 @@ The Inventory UI shows **current / maximum** capacity for Small, Medium, and Lar
 Decided storage contributions:
 
 - equipped Pants add **2 Small** storage;
-- equipped Simple Backpack adds **5 Medium** storage once the main game begins in Tunnels.
+- equipped Simple Backpack adds **5 Medium** storage immediately, including during Opening. This does not increase the separate five-card evacuation limit.
 
 Cards are not nested inside Pants or Backpack. They remain ordinary cards in one flat carried-Inventory area.
 
@@ -149,7 +150,7 @@ For this milestone the only equipment effects that must materially use that dist
 - Glasses in Eyes: `Vision +1`;
 - Flashlight in either Hand, while `Battery > 0`: `Vision +1` and it is considered switched on/active;
 - Pants in Legs: +2 Small storage;
-- Simple Backpack in Back: +5 Medium storage in the main survival phase.
+- Simple Backpack in Back: +5 Medium storage whenever equipped, including during Opening.
 
 Do not invent a general requirement that every directly used tool must first be placed in a Hand unless a concrete Milestone 2 interaction requires it.
 
@@ -216,9 +217,9 @@ Tunnels uses the exact 10-card Explore composition in `docs/explore-deck.md` and
 
 Abandoned Office uses 10 explicit placeholder entries for now.
 
-Deep Tunnels uses 1 Flashlight and 9 placeholder entries for now.
+Deep Tunnels uses 1 Flashlight with an authored `Battery 0` instance override and 9 placeholder entries for now.
 
-Do not infer mechanics for Pipe, Squatter, Puddle of Water, Service Cabinet, or placeholder cards.
+Do not infer mechanics for Pipe, Squatter, Service Cabinet, or placeholder cards. Puddle of Water retains its decided `Water 3` state and fill-result semantics, but executable filling remains deferred until its Action duration is decided; do not invent a zero-minute interaction.
 
 ## Part I - Vision and room light
 
@@ -296,7 +297,7 @@ Do not expand into:
 - full Hydration/Satiation ticking;
 - NPC behavior for Squatter;
 - Service Cabinet unlocking;
-- Puddle of Water behavior;
+- executable Puddle of Water filling until its Action duration is decided;
 - Pipe mechanics;
 - day/night simulation for Abandoned Office;
 - stealth/search-team simulation;

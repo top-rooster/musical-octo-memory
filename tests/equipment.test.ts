@@ -5,6 +5,8 @@ import {
   allocateCarriedCapacity,
   canEquip,
   canTakeOpeningCard,
+  EQUIPMENT_SLOTS,
+  equipmentSlotName,
   isAuthoredEquipmentEffectActive,
   isEquipmentActive,
   openingSelectionCount,
@@ -62,6 +64,16 @@ describe("equipment, opening, and carried capacity", () => {
     expect(canEquip(bodyMaster, "left-hand", body)).toBe(false);
   });
 
+  it("uses two Trinket slots instead of the superseded Neck slot", () => {
+    expect(EQUIPMENT_SLOTS).toEqual([
+      "left-hand", "right-hand", "head", "eyes", "trinket-1", "trinket-2",
+      "chest", "back", "legs", "feet",
+    ]);
+    expect(EQUIPMENT_SLOTS).not.toContain("neck");
+    expect(equipmentSlotName("trinket-1")).toBe("Trinket 1");
+    expect(equipmentSlotName("trinket-2")).toBe("Trinket 2");
+  });
+
   it("distinguishes equipped cards from merely carried cards", () => {
     const glasses = find(state, "glasses");
     const master = CARD_MASTERS.find((item) => item.id === glasses.masterId)!;
@@ -71,13 +83,17 @@ describe("equipment, opening, and carried capacity", () => {
     expect(isEquipmentActive(find(state, "glasses"), master)).toBe(true);
   });
 
-  it("provides Pants capacity and phase-gated Backpack capacity", () => {
+  it("keeps equipped storage active during Opening without changing the take limit", () => {
     expect(storageCapacity(state.cards, state.masters, "opening")).toEqual({
       Small: 2, Medium: 0, Large: 0,
     });
     state = equipCard(state, find(state, "simple-backpack").id, "back");
-    expect(storageCapacity(state.cards, state.masters, "opening").Medium).toBe(0);
+    expect(storageCapacity(state.cards, state.masters, "opening").Medium).toBe(5);
     expect(storageCapacity(state.cards, state.masters, "main").Medium).toBe(5);
+    const remaining = state.cards.filter((card) => card.offered && card.zone === "room");
+    remaining.slice(0, 4).forEach((card) => { state = moveToInventory(state, card.id); });
+    expect(openingSelectionCount(state)).toBe(5);
+    expect(canTakeOpeningCard(state, remaining[4])).toBe(false);
   });
 
   it("holds Medium opening items in Hands without using carried capacity", () => {

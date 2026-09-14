@@ -108,7 +108,7 @@ The intent is that entering Deep Tunnels without preparing for the lighting cond
 If the player did not take either Glasses or Flashlight during the opening evacuation, the game still has recovery paths rather than becoming hard-locked:
 
 - a Torch can later be crafted and used for `Vision +1`;
-- a Flashlight can be found by searching in **Deep Tunnels**.
+- a Flashlight with `Battery 0` can be found by searching in **Deep Tunnels**.
 
 Finding that Flashlight is deliberately somewhat self-rescuing: reaching and searching Deep Tunnels without good Vision is inefficient, but success can improve future trips to the same area.
 

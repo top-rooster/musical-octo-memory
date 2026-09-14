@@ -62,7 +62,7 @@ The Tunnels Explore deck contains exactly:
 - `Squatter` x1
 - `Dead Rat` x1
 - `Plastic Bottle` x1, starting empty
-- `Puddle of Water` x1
+- `Puddle of Water` x1, starting at `Water 3`
 - `Go to deep tunnels` x1
 - `Go to abandoned office` x1
 - `Service Cabinet` x1, starting `Locked`
@@ -80,7 +80,7 @@ Both are `Anchored` to Tunnels.
 
 Vision may multiply travel time. A Flashlight is not a hard requirement for Deep Tunnels.
 
-The mechanics of Pipe, Squatter, Puddle of Water, and Service Cabinet remain intentionally undefined for Milestone 2.
+The mechanics of Pipe, Squatter, and Service Cabinet remain intentionally undefined for Milestone 2. Puddle of Water has decided fill-result semantics, but fill duration remains open, so the executable interaction must not be introduced as a free zero-minute action.
 
 ## OPEN
 

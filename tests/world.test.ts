@@ -5,10 +5,13 @@ import type { GameState } from "../src/domain/types";
 import { drawFromDeck } from "../src/game/decks";
 import {
   createWorldGameState,
+  equipCard,
   escapeOpening,
   searchRoom,
   transitionRoom,
 } from "../src/game/world";
+import { isCardAvailableInPhase, rectanglesOverlap } from "../src/game/rules";
+import { CARD_HEIGHT, CARD_WIDTH } from "../src/game/constants";
 
 function seeded(seed = 52) {
   return () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x80000000);
@@ -20,6 +23,44 @@ describe("persistent world and Search decks", () => {
   beforeEach(() => {
     state = createWorldGameState(CARD_MASTERS, WORLD_DEFINITION, bounds, seeded());
     state = escapeOpening(state).state;
+  });
+
+  it("keeps Nadir state hidden and unavailable during Opening, then activates it after Escape", () => {
+    let opening = createWorldGameState(CARD_MASTERS, WORLD_DEFINITION, bounds, seeded());
+    const nadir = opening.cards.filter((card) => card.nadirState);
+    const body = nadir.find((card) => card.masterId === "body")!;
+    const food = opening.cards.find((card) => card.masterId === "canned-food")!;
+
+    expect(nadir.map((card) => card.masterId)).toEqual(["body", "mind", "spirit"]);
+    expect(nadir.every((card) => !isCardAvailableInPhase(opening, card))).toBe(true);
+    expect(isCardAvailableInPhase(opening, food)).toBe(true);
+
+    opening = equipCard(opening, food.id, "left-hand");
+    const main = escapeOpening(opening).state;
+    expect(nadir.map((card) => main.cards.find((candidate) => candidate.id === card.id)!)
+      .every((card) => isCardAvailableInPhase(main, card))).toBe(true);
+    expect(main.cards.find((card) => card.id === body.id)).toBeDefined();
+  });
+
+  it("reflows newly visible Nadir state around carried cards on Escape", () => {
+    let opening = createWorldGameState(CARD_MASTERS, WORLD_DEFINITION, bounds, seeded());
+    const pocketKnife = opening.cards.find((card) => card.masterId === "pocket-knife")!;
+    opening = {
+      ...opening,
+      cards: opening.cards.map((card) => card.id === pocketKnife.id
+        ? { ...card, zone: "inventory", roomId: undefined, position: { x: 276, y: 0 } }
+        : card),
+    };
+    const main = escapeOpening(opening, { x: 0, y: 0, width: 519, height: 392 }).state;
+    const flat = main.cards.filter((card) => card.zone === "inventory" && !card.equipmentSlot);
+    for (const [index, card] of flat.entries()) {
+      expect(card.position.x).toBeGreaterThanOrEqual(0);
+      expect(card.position.y).toBeGreaterThanOrEqual(0);
+      expect(card.position.x + CARD_WIDTH).toBeLessThanOrEqual(519);
+      expect(card.position.y + CARD_HEIGHT).toBeLessThanOrEqual(392);
+      expect(flat.slice(index + 1).every((other) =>
+        !rectanglesOverlap(card.position, other.position))).toBe(true);
+    }
   });
 
   it("shuffles every deck once into deterministic fixed order with controlled RNG", () => {

@@ -41,6 +41,10 @@ export function isAnchored(card: Pick<CardInstance | CardMaster, "attributes">):
   return hasMarker(card, "anchored");
 }
 
+export function isCardAvailableInPhase(state: GameState, card: CardInstance): boolean {
+  return state.phase !== "opening" || !card.nadirState;
+}
+
 export function canCrossZoneBoundaryDuringDrag(_card: CardInstance): boolean {
   return true;
 }
@@ -121,6 +125,7 @@ export function calculateInteractionOutcome(
   source: CardInstance,
   target: CardInstance,
 ): InteractionOutcome | null {
+  if (!isCardAvailableInPhase(state, source) || !isCardAvailableInPhase(state, target)) return null;
   const interaction = masterFor(state, target)?.accept.find(
     (candidate) =>
       (!candidate.card || candidate.card === source.masterId) &&
@@ -153,29 +158,30 @@ export function canInteract(
   source: CardInstance,
   target: CardInstance,
 ): boolean {
+  if (!isCardAvailableInPhase(state, source) || !isCardAvailableInPhase(state, target)) return false;
   return (
     calculateInteractionOutcome(state, source, target) !== null ||
     source.masterId === target.travel?.acceptedCardId
   );
 }
 
-function visibleAttributeIdentity(card: CardInstance): string[] {
-  return card.attributes.map((attribute) =>
-    attribute.kind === "marker"
-      ? `marker:${attribute.id}`
-      : `value:${attribute.id}:${attribute.value}`,
-  ).sort();
+function markerIdentity(card: CardInstance): string[] {
+  return card.attributes
+    .filter((attribute) => attribute.kind === "marker")
+    .map((attribute) => attribute.id)
+    .sort();
 }
 
 export function canStackCards(source: CardInstance, target: CardInstance): boolean {
   if (source.id === target.id || source.masterId !== target.masterId) return false;
-  if (target.zone !== "room" || !target.roomId) return false;
-  if (source.zone === "room" && source.roomId !== target.roomId) return false;
-  if (source.zone === "inventory" && isAnchored(source)) return false;
-  const sourceAttributes = visibleAttributeIdentity(source);
-  const targetAttributes = visibleAttributeIdentity(target);
-  return sourceAttributes.length === targetAttributes.length &&
-    sourceAttributes.every((attribute, index) => attribute === targetAttributes[index]);
+  if (source.zone !== "room" || target.zone !== "room" || !target.roomId) return false;
+  if (source.roomId !== target.roomId) return false;
+  if (source.attributes.some((attribute) => attribute.kind === "value") ||
+      target.attributes.some((attribute) => attribute.kind === "value")) return false;
+  const sourceMarkers = markerIdentity(source);
+  const targetMarkers = markerIdentity(target);
+  return sourceMarkers.length === targetMarkers.length &&
+    sourceMarkers.every((attribute, index) => attribute === targetMarkers[index]);
 }
 
 export type CardTargetKind = "interaction" | "stack" | null;

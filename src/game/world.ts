@@ -75,7 +75,12 @@ export function createWorldGameState(
   };
 
   start.nadir.forEach((authored, index) => {
-    cards.push(makeCard(authored, "inventory", { x: 16 + index * (CARD_WIDTH + CARD_GAP), y: 0 }));
+    cards.push(makeCard(
+      authored,
+      "inventory",
+      { x: 16 + index * (CARD_WIDTH + CARD_GAP), y: 0 },
+      { nadirState: true },
+    ));
   });
   start.equipped.forEach((authored) => {
     cards.push(makeCard(authored, "inventory", { x: 0, y: 0 }, { equipmentSlot: authored.slot }));
@@ -266,7 +271,31 @@ export function equipCard(state: GameState, cardId: string, slot: EquipmentSlot)
   };
 }
 
-export function escapeOpening(state: GameState): { state: GameState; reason?: "capacity" } {
+function reflowFlatInventory(cards: CardInstance[], bounds: Bounds): CardInstance[] {
+  const flat = cards.filter((card) => card.zone === "inventory" && !card.equipmentSlot);
+  const columns = Math.max(1, Math.floor(bounds.width / CARD_WIDTH));
+  const rows = Math.ceil(flat.length / columns);
+  if (rows * CARD_HEIGHT > bounds.height) return cards;
+  const usedColumns = Math.min(columns, flat.length);
+  const horizontalGap = usedColumns > 1
+    ? Math.min(CARD_GAP, (bounds.width - usedColumns * CARD_WIDTH) / (usedColumns - 1))
+    : 0;
+  const verticalGap = rows > 1
+    ? Math.min(CARD_GAP, (bounds.height - rows * CARD_HEIGHT) / (rows - 1))
+    : 0;
+  const positions = new Map(flat.map((card, index) => [card.id, {
+    x: (index % columns) * (CARD_WIDTH + horizontalGap),
+    y: Math.floor(index / columns) * (CARD_HEIGHT + verticalGap),
+  }]));
+  return cards.map((card) => positions.has(card.id)
+    ? { ...card, position: positions.get(card.id)! }
+    : card);
+}
+
+export function escapeOpening(
+  state: GameState,
+  carriedBounds?: Bounds,
+): { state: GameState; reason?: "capacity" } {
   if (state.phase !== "opening" || !state.openingEscapeRoomId) return { state };
   const mainAllocation = allocateCarriedCapacity(state.cards, state.masters, "main");
   if (mainAllocation.unplacedIds.length) return { state, reason: "capacity" };
@@ -275,6 +304,7 @@ export function escapeOpening(state: GameState): { state: GameState; reason?: "c
   return {
     state: {
       ...state,
+      cards: carriedBounds ? reflowFlatInventory(state.cards, carriedBounds) : state.cards,
       phase: "main",
       currentRoomId: destination.id,
       rooms: { ...state.rooms, [destination.id]: { ...destination, discovered: true } },
