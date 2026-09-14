@@ -1,50 +1,48 @@
-# Repository guidance
+# Repository operating guide
 
-## Purpose
+## Documentation authority
 
-This repository contains **Safe Room**, a narrative survival/stealth game centered on legible card interactions, a static room/blueprint view, and persistent Nadir/equipment/inventory state.
+Read the active Markdown files before material work. Their authority is:
 
-## Sources of truth
+1. `docs/next-iteration.md` is the only source of current implementation scope. It contains task IDs only.
+2. `docs/backlog.md` is the single detailed authority for approved rules, tasks, acceptance criteria, implementation status, open questions, suggestions, superseded decisions, and useful history. Completed tasks remain there.
+3. `docs/game-design.md` describes Safe Room only at a high level. It is not authority for detailed mechanics or implementation scope.
+4. Runtime JSON is authored content and implementation input, not evidence that Simon approved an undocumented design choice.
 
-Before making material changes, read:
+Git is the archive. Do not create milestone, history, roadmap, or parallel detailed-design Markdown files. Keep active documentation within this four-file structure.
 
-- `docs/milestone-2.md` for the **active implementation slice and acceptance criteria**.
-- `docs/game-design.md` for broad product and interaction context.
-- the focused design notes referenced by `docs/milestone-2.md` for newer decisions about opening, equipment, rooms, search, lighting/Vision, drag feedback, card inspection, and animation.
-- `docs/data-language.md` for authoring rules for card and level data.
-- `docs/backlog.md` for the historical decision register, future candidates, open questions, priorities, and rationale.
+## Mandatory scope validation
 
-Design ownership still matters:
+Before implementing anything from `docs/next-iteration.md`:
 
-- **DECIDED BY SIMON** means an explicit design decision and may be treated as a constraint.
-- **OPEN - SIMON TO DECIDE**, **DEFERRED**, and **SUGGESTED BY CHATGPT** are not design commitments.
-- Never promote a suggestion or open question into an accepted design rule merely because it appears in repository documentation.
+1. read every task ID in the file;
+2. find exactly one matching task in `docs/backlog.md`;
+3. verify that its `Decision` is exactly `APPROVED BY SIMON`.
 
-Some older broad documents still contain Milestone 1 rules that have since been explicitly superseded. For Milestone 2, when a focused design note contains an explicit **SUPERSEDES** statement, that newer focused decision overrides the older conflicting rule. Do not resurrect the old fixed five-card Inventory model, `Inventory = equipped`, or `all interactables are cards` where newer docs define equipment slots and Search decks separately.
+If any ID is missing, duplicated/ambiguous, or not approved, **STOP IMMEDIATELY**. Do not modify source code or data. Do not guess approval, substitute another task, or silently remove the invalid ID. Report the inconsistency to Simon.
 
-`docs/roadmap.md` records Milestone 1. `docs/milestone-2.md` is the active code-iteration contract until Simon replaces it.
+Only listed IDs are scope. Priority, approval, importance, or implementation status does not independently put a task in scope.
 
-Keep this file short. Put detailed design decisions in `docs/` rather than expanding `AGENTS.md` into an encyclopedia.
+## Design discipline
 
-## Working practices
+- Simon owns design decisions. `QUESTION FOR SIMON` and `SUGGESTED BY CHATGPT` are never requirements and cannot be implemented as decisions.
+- Each detailed rule has one authoritative backlog-task owner. Cross-reference that task instead of copying competing specifications.
+- Never invent JSON fields, structures, wrappers, or datatypes. If approved requirements do not fit the approved schema, record or update a `QUESTION FOR SIMON` task and stop that part of the implementation.
+- Treat code as evidence of implementation status, not design approval. When code and approved design differ, document the discrepancy rather than redefining the rule.
+- If implementation exposes a design hole, update the backlog with a question instead of silently choosing behavior. Record material implementation discoveries and status changes in the owning task.
+- Preserve unrelated user work and keep changes within validated scope. Do not add frameworks or broad abstractions without a concrete approved need.
+- Card masters and behavior belong in `data/cards.json`; world composition and instances belong in `data/rooms.json`; shared attribute presentation belongs in `data/attributes.json`. Do not duplicate authored content in components.
+- Keep game rules and state transitions separate from React rendering where practical.
 
-- Inspect the repository before making changes and preserve unrelated user work.
-- Keep changes focused on the active milestone; do not add frameworks, dependencies, or broad scaffolding without a concrete need.
-- Prefer small vertical slices that can be run and evaluated immediately.
-- Card master data belongs in `data/cards.json`, not duplicated as TypeScript/React constants. Code may validate and transform it into runtime structures.
-- Milestone 2 level/world state comes from `data/rooms.json`; do not hard-code the current room graph, Search-deck compositions, Nadir cards, starting equipment, or opening offers into UI components.
-- Runtime authored data is strict JSON. Keep stable lowercase kebab-case IDs separate from player-facing names and keep the schema concrete rather than inventing a generic scripting language.
-- Prioritize player legibility: state changes should be visible before an action is committed when the design calls for a preview.
-- Keep game-rule/state-transition code separate from React rendering where practical.
-- Run the narrowest relevant checks after changes. At milestone completion run both tests and production build.
-- Update documentation when behavior, setup, or important decisions change.
-- Never commit credentials, tokens, private keys, or generated secrets. Use environment variables or workspace secret configuration instead.
+## Verification and delivery
 
-## Toolchain
-
-The prototype uses React, TypeScript, Vite, Vitest, and pnpm. This remains a prototyping choice rather than an irreversible engine decision.
+The prototype uses React, TypeScript, Vite, Vitest, and pnpm.
 
 - Install: `pnpm install`
-- Run: `pnpm dev`
+- Run locally: `pnpm dev`
 - Test: `pnpm test`
 - Build: `pnpm build`
+
+Run focused checks during implementation. At the end of every code or data iteration, run the full tests and production build. Such iterations must also satisfy the GitHub Pages verification in `DEPLOY-01`, including a successful workflow and a deployed build that loads and supports testing the implemented behavior. Documentation-only iterations do not require a Pages deployment.
+
+Never commit credentials, tokens, private keys, generated secrets, dependency directories, build output, or temporary local backups.
