@@ -9,12 +9,10 @@ import type {
 import { getValue, isAnchored } from "./rules";
 
 export const EQUIPMENT_SLOTS: EquipmentSlot[] = [
-  "left-hand", "right-hand", "head", "eyes", "trinket-1", "chest", "back", "legs", "feet",
+  "left-hand", "right-hand", "head", "eyes", "trinket-1", "trinket-2", "chest", "back", "legs", "feet",
 ];
 export const ITEM_SIZES: ItemSize[] = ["Small", "Medium", "Large"];
 export function equipmentSlotName(slot: EquipmentSlot): string {
-  // Preserve the current Milestone 2 rack until the later Trinket layout pass.
-  if (slot === "trinket-1") return "Neck";
   return slot.split("-").map((word) => word[0].toUpperCase() + word.slice(1)).join(" ");
 }
 export type CapacityCounts = Record<ItemSize, number>;

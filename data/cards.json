@@ -272,7 +272,7 @@
     "description": "A simple backpack that greatly increases what Nadir can carry.",
     "size": "Medium",
     "equip": ["back"],
-    "storage": { "size": "Medium", "count": 5, "phase": "main" }
+    "storage": { "size": "Medium", "count": 5 }
   },
   "glasses": {
     "name": "Glasses",

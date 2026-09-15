@@ -26,6 +26,7 @@ import {
   calculateInteractionOutcome,
   canRestInZone,
   cardTargetKind,
+  isCardAvailableInPhase,
   isWithinBounds,
   positionIsFree,
   stackCards,
@@ -67,9 +68,12 @@ interface PlacementCheck { zone?: Zone; position?: Position; legal?: boolean; }
 const MIN_ZOOM = 0.7;
 const MAX_ZOOM = 1.45;
 const ZOOM_STEP = 0.15;
-const EQUIPMENT_SCALE = 0.4;
-const SLOT_CARD_LEFT = 10;
-const SLOT_CARD_TOP = 2;
+const EQUIPMENT_SCALE = 0.38;
+const SLOT_CARD_TOP = 14;
+
+function slotCardLeft(slotWidth: number): number {
+  return Math.max(4, (slotWidth - CARD_WIDTH * EQUIPMENT_SCALE) / 2);
+}
 
 function assetUrl(path: string): string {
   return `${import.meta.env.BASE_URL}${path.replace(/^\//, "")}`;
@@ -101,7 +105,7 @@ function cardScreenRect(card: CardInstance, layout: Layout, zoom: number): Scree
     const slot = layout.slots[card.equipmentSlot];
     if (!slot) return { x: 0, y: 0, width: 0, height: 0 };
     return {
-      x: slot.x + SLOT_CARD_LEFT,
+      x: slot.x + slotCardLeft(slot.width),
       y: slot.y + SLOT_CARD_TOP,
       width: CARD_WIDTH * EQUIPMENT_SCALE,
       height: CARD_HEIGHT * EQUIPMENT_SCALE,
@@ -119,9 +123,10 @@ function cardScreenRect(card: CardInstance, layout: Layout, zoom: number): Scree
 }
 function localCardStyle(card: CardInstance, layout: Layout, zoom: number): CSSProperties {
   if (card.equipmentSlot) {
+    const slot = layout.slots[card.equipmentSlot];
     return {
       position: "absolute",
-      left: SLOT_CARD_LEFT,
+      left: slotCardLeft(slot?.width ?? 0),
       top: SLOT_CARD_TOP,
       transform: `scale(${EQUIPMENT_SCALE})`,
       transformOrigin: "top left",
@@ -232,8 +237,10 @@ export function App() {
   const visibleCards = useMemo(() => {
     if (!game) return [];
     return game.cards.filter((card) =>
-      card.zone === "inventory" ||
-      (card.zone === "room" && card.roomId === game.currentRoomId),
+      isCardAvailableInPhase(game, card) && (
+        card.zone === "inventory" ||
+        (card.zone === "room" && card.roomId === game.currentRoomId)
+      ),
     );
   }, [game]);
   const sourceCard = drag && game?.cards.find((card) => card.id === drag.sourceId);
@@ -295,7 +302,8 @@ export function App() {
     const bounds = localBounds(zone === "room" ? layout.room : layout.carried);
     const anchored = !canRestInZone(card, zone).legal;
     const capacity = zone === "inventory" ? canCarryCard(state, card).legal : true;
-    const free = positionIsFree(card.id, zone, position, state.cards, zone === "room" ? state.currentRoomId : undefined);
+    const availableCards = state.cards.filter((candidate) => isCardAvailableInPhase(state, candidate));
+    const free = positionIsFree(card.id, zone, position, availableCards, zone === "room" ? state.currentRoomId : undefined);
     return {
       zone,
       position,
@@ -476,7 +484,7 @@ export function App() {
   };
   const leaveOpening = () => {
     if (!game) return;
-    const result = escapeOpening(game);
+    const result = escapeOpening(game, layout ? localBounds(layout.carried) : undefined);
     if (result.reason === "capacity") {
       setMessage("That loadout will not fit after evacuation. Equip the backpack or return carried cards.");
     } else {
@@ -491,6 +499,24 @@ export function App() {
   const vision = game ? effectiveVision(game) : 0;
   const selected = game ? openingSelectionCount(game) : 0;
   const lightClass = currentRoom?.light.toLowerCase() ?? "bright";
+  const dragSlot = drag?.hoveredSlot ? layout?.slots[drag.hoveredSlot] : undefined;
+  const dragCardStyle: CSSProperties | undefined = drag
+    ? dragSlot
+      ? {
+          position: "fixed",
+          left: dragSlot.x + slotCardLeft(dragSlot.width),
+          top: dragSlot.y + SLOT_CARD_TOP,
+          transform: `scale(${EQUIPMENT_SCALE})`,
+          transformOrigin: "top left",
+        }
+      : {
+          position: "fixed",
+          left: drag.left,
+          top: drag.top,
+          transform: `scale(${drag.scale})`,
+          transformOrigin: "top left",
+        }
+    : undefined;
 
   return (
     <main className="app">
@@ -498,20 +524,25 @@ export function App() {
         className={`zone room room--${lightClass} ${drag?.ordinaryZone === "room" && drag.ordinaryLegal ? "zone--drop-legal" : ""}`}
         ref={roomRef}
         aria-label="Room"
-        style={currentRoom ? {
-          backgroundImage: `linear-gradient(rgba(12,16,17,.18),rgba(12,16,17,.22)), url("${assetUrl(currentRoom.background)}")`,
-        } : undefined}
       >
+        {currentRoom && (
+          <div
+            className="room__backdrop"
+            style={{ backgroundImage: `url("${assetUrl(currentRoom.background)}")` }}
+          />
+        )}
         <div className="room__light-filter" />
         <header className="zone__header">
           <div>
             <span className="zone__eyebrow">{game?.phase === "opening" ? "EVACUATION" : currentRoom?.light}</span>
             <h1>{currentRoom?.name ?? "Loading Room"}</h1>
           </div>
-          <div className="room-stats">
-            <span>Vision <strong>{vision}</strong></span>
-            <span>Elapsed <strong>{formatTime(game?.elapsedMinutes ?? 0)}</strong></span>
-          </div>
+          {game?.phase === "main" && (
+            <div className="room-stats">
+              <span>Vision <strong>{vision}</strong></span>
+              <span>Elapsed <strong>{formatTime(game?.elapsedMinutes ?? 0)}</strong></span>
+            </div>
+          )}
           <div className="zoom-controls" aria-label="Room card zoom controls">
             <button type="button" aria-label="Zoom Room cards out" onClick={() => setRoomZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP))}>−</button>
             <input type="range" min={MIN_ZOOM} max={MAX_ZOOM} step={ZOOM_STEP} value={roomZoom}
@@ -602,10 +633,8 @@ export function App() {
           <CardView
             card={sourceCard}
             dragging
-            style={{
-              position: "fixed", left: drag.left, top: drag.top,
-              transform: `scale(${drag.scale})`, transformOrigin: "top left",
-            }}
+            compact={Boolean(dragSlot)}
+            style={dragCardStyle!}
           />
         </div>
       )}

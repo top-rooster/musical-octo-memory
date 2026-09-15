@@ -1,438 +1,48 @@
-# Safe Room - current game design
+# Safe Room
 
-## Design goal
+## Premise
 
-Safe Room is a narrative survival/stealth game about isolation, preparation, and risk.
+Safe Room is a narrative survival/stealth game about isolation, preparation, and risk. Nadir Veylan is a good man shaped and damaged by a toxic military system. His flight from returning to military service must remain compatible with his genuine love for Elina rather than reducing her to an escape tool.
 
-The interface should feel like a physical workspace. Interactable world entities are represented as cards, and complexity should emerge from interactions between a relatively small number of visible systems rather than from many overlapping hidden bars and special-purpose subsystems.
+Nadir survives partly through self-deception about things he has done or caused. The narrative may explore the tension between player choices, past trauma, and the stories he tells himself without making him appear foolish.
 
-The player should usually be able to understand the state needed for a decision by looking at the cards in front of them.
+## Intended experience
+
+The interface should feel like a physical workspace. The player learns the world by arranging cards, understanding visible state, combining objects, preparing equipment, searching uncertain places, and deciding when time and risk are worth spending.
+
+Complexity should emerge from interactions among a relatively small number of legible systems. Routine survival decisions should be understandable from the cards and world state in front of the player rather than from redundant bars, hidden accumulators, or special-purpose menus.
 
 ## Core workspace
 
-The main play space has two top-level zones:
+The play space has two major areas:
 
-- **Room** - the currently viewed physical location;
-- **Inventory** - persistent carried/equipped/Nadir state that remains present across room changes.
+- **Room** represents the currently viewed physical location and its local cards and objects.
+- **Inventory** persists across travel and contains Nadir's carried items, equipment interface, and character state.
 
-Cards can be positioned freely within their legal areas. Ordinary placement may not overlap other cards. A legal Room/Inventory move is free unless an authored Action says otherwise.
+Rooms are stable spatial contexts rather than scrolling levels. Room state persists while off-screen. Search, routes, lighting, carried resources, and equipment make exploration a matter of preparation and consequence.
 
-### Anchored cards
-
-`Anchored` prevents a card from coming to rest outside its home zone.
-
-Anchored cards may still cross zone boundaries while being dragged and may participate in legal cross-zone interactions. If released illegally in another zone, they return to their legal/home position.
-
-Body, Mind, Spirit, and Nadir condition cards are anchored to Inventory.
+Cards are the primary language for interactable world entities and visible state. Other interface objects may exist when they are conceptually distinct; Search decks, for example, are room-local objects rather than cards.
 
 ## Nadir
 
-Nadir Veylan is represented by three persistent anchored cards in Inventory:
+Nadir is represented by three persistent cards:
 
-- **Body** - physical state and bodily survival needs;
-- **Mind** - perception/cognitive state;
-- **Spirit** - emotional/spiritual state.
+- **Body** for physical state and survival needs;
+- **Mind** for perception and cognition;
+- **Spirit** for emotional and spiritual state.
 
-There is no generic Nadir card.
+There is no generic Nadir card. Conditions with their own identity may appear as additional cards when they become relevant.
 
-Current confirmed permanent player-facing Values include:
+## Survival and exploration philosophy
 
-- Body: `Hydration 50`, `Satiation 50`;
-- Mind: `Vision 4`.
+Actions are deliberate work performed by Nadir. Time matters because the world and ongoing conditions continue to change while he acts. Equipment and light should open practical possibilities without turning exploration into arbitrary item gates.
 
-Spirit remains a persistent part of the representation even where its concrete Values are not yet decided.
+The game should create foreseeable, learnable pressure. Severe danger should be communicated well enough that choices feel risky rather than capricious. Discovery may come from both explicit relationships and experimentation, but known direct consequences should be legible before commitment.
 
-Conditions that deserve their own identity/lifecycle may appear as separate anchored cards, for example wounds, Fever, or Exhausted.
-
-## Cards and visible state
-
-Every card instance has a stable master identity plus independent instance state.
-
-A reusable card master supplies display data, starting attributes, References, explicitly decided structured attributes, Actions, Processes, and other already-decided authored behavior.
-
-Instances clone master starting state and then evolve independently.
-
-When something becomes a materially different object, discard the old card and draw the replacement rather than silently changing its master ID.
-
-Player-facing card state is primarily expressed through:
-
-- **Markers** - presence/absence represented by an icon;
-- **Values** - integer state represented by an icon and number;
-- **References** - named relationships to stable target IDs;
-- explicitly decided structured attributes where payload beyond Marker/Value state is required.
-
-References are authored as:
-
-```json
-"references": { "<reference name>": "<reference target id>" }
-```
-
-Values normally use `0..100` unless explicitly designed otherwise.
-
-Hidden Values are allowed for concrete internal mechanics, but they must not be used simply to make routine survival decisions opaque.
-
-### Size and storage use existing systems
-
-Item size is not a separate field/type.
-
-- `small`, `medium`, and `large` are ordinary Markers;
-- a size-based carried item has exactly one of them.
-
-Storage capacity is not a separate object/type.
-
-- `storage-small`, `storage-medium`, and `storage-large` are ordinary Values on equipment cards;
-- only equipped gear contributes those Values as active carrying capacity;
-- equipped storage Values apply whenever the item is equipped, including during Opening.
-
-There is no standalone `size` field and no standalone `storage` object in the target model.
-
-## Authored data and schema discipline
-
-Runtime authored content uses strict JSON:
-
-- `data/cards.json` - card masters and card-owned behavior;
-- `data/rooms.json` - world composition, instances, Nadir-state/equipment/opening state, Search decks;
-- `data/attributes.json` - player-facing attribute metadata.
-
-Runtime identity uses stable lowercase kebab-case IDs separate from display names.
-
-Design notes and unresolved values belong in docs/backlog, not runtime JSON.
-
-### Do not invent JSON structure
-
-ChatGPT and Codex must not invent new JSON fields, object shapes, arrays, wrappers, or special-purpose authored datatypes unless Simon explicitly asks for a new JSON structure.
-
-If the current decided schema cannot express a required mechanic, that is a design question. Record it as unresolved instead of creating syntax to solve it.
-
-Documentation must not present speculative JSON examples as decided schema.
-
-The decided Reference schema is specifically the `references` object mapping one reference name to one target ID. Do not expand that representation into arrays, nested objects, wrappers, or alternate forms without an explicit design decision.
-
-## Universal interaction language
-
-Gameplay interactions are initiated by dragging one card onto another.
-
-For card-on-card drag/drop:
-
-- the dragged card is **accepted**;
-- the card underneath is **received**.
-
-A given accepted/received pair may resolve at most one Action. The player is not asked to choose between several verbs after dropping.
-
-A legal drop is the commitment to perform the interaction. There is no separate confirmation dialog.
-
-### Trigger directions
-
-Actions may be authored on either participating card:
-
-- `on` - Action belongs to accepted and matches received;
-- `receive` - Action belongs to received and matches accepted.
-
-Selectors may match stable card IDs, Marker requirements, or structured-attribute presence. These requirements may be conjunctive.
-
-Resolution must yield:
-
-- 0 matching Actions - no Action;
-- 1 matching Action - execute it;
-- 2+ matches - invalid authored data.
-
-Authored validation must detect overlapping match domains.
-
-## Actions describe what Nadir does
-
-Generic physical verbs belong on Body; object-specific eligibility/data/effects belong with the object used.
-
-Current examples:
-
-```text
-Travel -> Body is dropped on a card with Path
-Eat    -> food is dropped on Body
-Drink  -> a water-containing card is dropped on Body
-```
-
-Body owns generic Travel, Eat, and Drink Actions rather than item-specific lists.
-
-### Structured attributes
-
-Current concrete structured attributes are:
-
-- `path` - destination Room ID and travel time;
-- `food` - concrete completion effects contributed when eaten;
-- `hydration` - concrete completion effects contributed when drunk.
-
-For Drink, current water presence remains explicit state: the incoming card must carry `contains-water` as part of the trigger. `hydration` supplies the concrete effect payload and does not replace `Contains Water`.
-
-The principle is:
-
-> Action = what Nadir does. Triggering card state/attributes = the concrete eligibility and data/effects contributed by the object.
-
-Do not generalize this into an unrestricted scripting system.
-
-## Drag feedback and previews
-
-Dragging should expose interaction possibilities immediately.
-
-When a card starts being dragged:
-
-- every card that can legally receive it highlights;
-- ordinary legal targets use the normal legal highlight;
-- when hovered for commitment they become yellow;
-- a rejecting hovered card becomes red;
-- Stack targets remain green because stacking has no gameplay consequence;
-- legal zone placement receives a subtle zone highlight.
-
-Known direct effects should be previewed on the affected visible attributes as soon as dragging begins, not only after hovering.
-
-Examples on Body include:
-
-- Rat Meat with `Satiation 67` -> `67 -> 82`;
-- Canned Food with `Satiation 67` -> `67 -> 92`;
-- a known water source with `Hydration 50` -> the resulting Hydration value.
-
-If an interaction has several understood direct effects, show all relevant previews at once.
-
-## Actions and world time
-
-An **Action** is work Nadir personally performs and is the only mechanism that advances world time.
-
-Every executable Action resolves an explicit duration. There is no implicit duration.
-
-A duration may come from the Action itself or from a triggering structured attribute. Travel uses `path.time`.
-
-Normal Action effects execute at completion.
-
-Only one Action executes at a time.
-
-Execution is atomic: unsupported or invalid effects must not partially apply.
-
-### Global world ticks
-
-The world has one global quarter-hour update grid:
-
-- `:00`;
-- `:15`;
-- `:30`;
-- `:45`.
-
-Every crossed boundary while an Action advances time causes one world tick.
-
-If Action completion lands exactly on a tick boundary:
-
-1. world tick resolves;
-2. Process consequences resolve;
-3. Action completes;
-4. completion effects apply.
-
-Search, Travel, and every future time-consuming Action use the same centralized time-advance mechanism.
-
-## Processes
-
-A **Process** is unattended change that progresses when Actions advance world time.
-
-Processes have no private intervals or timers. Every active Process updates once on every crossed global world tick.
-
-JSON ordering must not become gameplay ordering.
-
-Finite/staged Processes use card state, effects, and conditions/thresholds rather than independent clocks.
-
-### Current survival drain
-
-Body starts with:
-
-- `Hydration 50`;
-- `Satiation 50`.
-
-Each global 15-minute world tick applies:
-
-- `Hydration -2`;
-- `Satiation -1`.
-
-Hydration 0 causes game over.
-
-## Survival design principle
-
-Current permanent survival Values are Hydration and Satiation on Body.
-
-Avoid adding hidden stomach contents, fullness, eating-frequency adaptation, or similar invisible simulation merely to create complexity.
-
-If future hidden state is introduced, it should solve a concrete gameplay problem rather than make routine survival choices unreadable.
-
-## Stack
-
-Stack exists only to reduce Room clutter.
-
-Underlying cards remain separate instances and Stack has no mechanical effect.
-
-Current Stack eligibility:
-
-- same master ID;
-- same current Marker set;
-- cards containing visible Values do not Stack;
-- Stack presentation is Room-only.
-
-Dragging a Stack peels off one card.
-
-Whether Hidden Values affect Stack eligibility remains undecided.
-
-## Equipment and carried Inventory
-
-Equipment uses explicit slots in the persistent Inventory interface.
-
-Current slots:
-
-- Left Hand;
-- Right Hand;
-- Head;
-- Eyes;
-- Trinket 1;
-- Trinket 2;
-- Chest;
-- Back;
-- Legs;
-- Feet.
-
-### Equipment compatibility
-
-Compatibility with non-Hand equipment slots uses a Reference named `equip`.
-
-Current examples:
-
-- T-Shirt: `"references": { "equip": "chest" }`;
-- Pants: `"references": { "equip": "legs" }`;
-- Glasses: `"references": { "equip": "eyes" }`;
-- Simple Backpack: `"references": { "equip": "back" }`.
-
-The legacy standalone `equip` array is not part of the target model.
-
-Hands are a general rule rather than authored compatibility. Any ordinary movable card may be placed in either Hand without authored Hand compatibility. Anchored world cards and Nadir-state cards may not be held.
-
-A card in a compatible equipment slot is active/equipped. A merely carried card is not.
-
-### Carrying capacity
-
-Carried storage uses ordinary Marker/Value systems:
-
-- item size is one Marker: `small`, `medium`, or `large`;
-- storage capacity is expressed by Values `storage-small`, `storage-medium`, and `storage-large` on equipped gear;
-- only equipped gear contributes storage Values.
-
-Current contributions:
-
-- Pants: `storage-small = 2`;
-- Simple Backpack: `storage-medium = 5`.
-
-Simple Backpack contributes `storage-medium = 5` immediately whenever equipped in Back, including during Opening. There is no scene-specific delay until Tunnels.
-
-Packing convention:
-
-- `storage-small` accepts `small`;
-- `storage-medium` accepts `small` or `medium`;
-- `storage-large` accepts all three size Markers;
-- use the smallest fitting available capacity first.
-
-Equipment slots, including Hands, do not consume carried capacity.
-
-The opening evacuation separately limits the player to taking five offered card instances. Additional storage capacity does not raise that five-card limit.
-
-## Vision and lighting
-
-Vision is a visible Value on Mind and starts at 4.
-
-Current modifiers include:
-
-- Glasses in Eyes: +1;
-- active Flashlight in Hand with Battery > 0: +1;
-- Bright: 0;
-- Dim: -1;
-- Twilight: -3;
-- Darkness: -4.
-
-Current effective-Vision consequences:
-
-- <=0: cannot Search; travel x3;
-- 1: Search x3; travel x2;
-- 2: Search x2;
-- >=3: Search normal.
-
-Deep Tunnels are soft-gated by Vision rather than hard-gated by possession of a specific item.
-
-## Rooms and travel
-
-Persistent first-slice rooms are:
-
-- Tunnels;
-- Abandoned Office;
-- Deep Tunnels.
-
-Travel points are anchored route cards carrying `path`.
-
-Body is dragged onto a route card to Travel.
-
-Current links:
-
-- Tunnels -> Abandoned Office: 15m;
-- Abandoned Office -> Tunnels: 15m;
-- Tunnels -> Deep Tunnels: 30m;
-- Deep Tunnels -> Tunnels: 30m.
-
-Route cards may share display names while remaining different masters.
-
-## Search decks
-
-Search decks are room-local interactive objects, not cards.
-
-Search is an Action with authored base duration, modified by Vision where applicable.
-
-Each room deck is shuffled once at new-game creation and keeps that hidden order for the run. There is no reshuffle/reroll and no visible remaining-card count.
-
-## Opening
-
-The game begins with an evacuation/loadout interlude before normal survival simulation.
-
-Nadir may take at most five offered card instances. Equipped/held offered items count toward the five.
-
-Equipped storage gear still provides its normal storage Values during Opening. In particular, Simple Backpack provides `storage-medium = 5` as soon as it is equipped in Back. The five-card take limit remains independent and authoritative.
-
-During the opening, Body, Mind, Spirit, and normal survival interaction/state are hidden until Escape transitions into Tunnels and the main simulation starts.
-
-Nadir begins wearing Pants and T-Shirt and is barefoot.
-
-Current offered items include Pocket Knife, two water bottles, two Canned Food, Simple Lighter, Flashlight, Spare Batteries, Pain Killers, Simple Backpack, and Glasses.
-
-## Water and containers
-
-Puddle of Water is anchored and currently has `Water 3`.
-
-An empty container is a card with `container` and without `contains-water`.
-
-A successful fill consumes one Puddle Water unit and adds `contains-water` to the container. Puddle is discarded at 0.
-
-`contains-water` is part of the Drink trigger.
-
-The fill Action duration remains undecided and must not be invented.
-
-## Flashlight
-
-The opening Flashlight starts at `Battery 20`.
-
-The Deep Tunnels Search Flashlight starts at `Battery 0`.
-
-Flashlight gives Vision +1 only while active in a Hand and Battery > 0.
-
-Exact Battery drain remains undecided.
-
-## Narrative direction
-
-Nadir is a good man shaped and damaged by a toxic military system. He uses self-deception as a survival mechanism for things he has done or caused and cannot comfortably live with.
-
-His flight from returning to military service must remain compatible with the relationship being a genuine love story with Elina rather than reducing her to a calculated escape tool.
-
-His notes may reflect moral tension between player choices, past trauma, and the stories he tells himself without making him appear foolish.
+Permanent character state should remain compact. New systems, hidden state, and simulation detail should be introduced only when they create a concrete player decision that existing cards, attributes, or conditions cannot express cleanly.
 
 ## Design discipline
 
-A suggestion is not a decision.
+Simon owns product and design decisions. Open questions and ChatGPT suggestions are not requirements.
 
-Do not invent missing durations, rates, Values, Markers, probabilities, Process rules, Reference encodings, JSON structures, or extra systems to make implementation appear complete.
-
-Prefer concrete gameplay needs over abstract infrastructure. Keep the number of systems small, and reuse existing mechanisms before introducing new concepts.
+The detailed authoritative rules, implementation tasks, decisions, questions, acceptance criteria, superseded rules, and implementation history live in `docs/backlog.md`. The current implementation scope is defined only by the task IDs in `docs/next-iteration.md`.
