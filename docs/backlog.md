@@ -1080,7 +1080,7 @@ Origin: Simon
 
 What final durations, easing, trajectories, and discard visual language should ordinary draw/discard animations use? Current prototype timing is implementation evidence, not a permanent design decision.
 
-## DEPLOY-01 — Verify code/data iterations on GitHub Pages
+## DEPLOY-01 — Complete every iteration through main and GitHub Pages
 
 Priority: P0
 Decision: APPROVED BY SIMON
@@ -1088,17 +1088,21 @@ Origin: Simon
 
 ### Rule
 
-For code or game-data implementation iterations, the resulting game should ultimately be verifiable as a working GitHub Pages deployment at the repository project path. Documentation-only iterations do not require deployment. Local development must remain sensible while production assets honor the `/musical-octo-memory/` base.
+Every iteration, without exception, including documentation-only iterations, ends with its intended work integrated into `main`, present on `origin/main`, and deployed through a successful GitHub Pages workflow. The deployed Safe Room game must load and remain actively testable through basic browser verification with no obvious broken assets or runtime errors. This workflow invariant does not expand implementation scope and does not require `DEPLOY-01` to appear in `docs/next-iteration.md`. Local development must remain sensible while production assets honor the `/musical-octo-memory/` base.
 
 ### Acceptance criteria
 
-- Automated tests pass.
-- The production build passes.
-- Relevant implementation is integrated into the intended branch/history.
+- The intended iteration work is complete.
+- Validation, automated tests, and the production build appropriate to the repository pass.
+- The iteration is integrated into `main`, and `origin/main` contains the result.
 - The GitHub Pages workflow installs the declared pnpm version with the lockfile, tests, builds, uploads `dist`, and deploys successfully.
-- The deployed game loads at the public project URL with its real assets.
-- The current implemented behavior can be exercised from the deployed build.
+- The deployed game loads at the public project URL with its real assets and without obvious runtime errors.
+- Basic browser verification confirms that the current implemented behavior remains actively testable from the deployed build.
 
 ### Implementation status
 
-Implemented as a workflow and Vite configuration for the current prototype; each code/data iteration must re-verify it. Not run for this documentation-only reorganization.
+Implemented as a workflow and Vite configuration for the current prototype. Every iteration must re-verify main integration and the deployed build, including documentation-only iterations.
+
+### History
+
+The earlier documentation-only deployment exception is superseded by Simon's decision that no iteration is complete without main integration and verified GitHub Pages deployment.

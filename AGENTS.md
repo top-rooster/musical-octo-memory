@@ -43,6 +43,20 @@ The prototype uses React, TypeScript, Vite, Vitest, and pnpm.
 - Test: `pnpm test`
 - Build: `pnpm build`
 
-Run focused checks during implementation. At the end of every code or data iteration, run the full tests and production build. Such iterations must also satisfy the GitHub Pages verification in `DEPLOY-01`, including a successful workflow and a deployed build that loads and supports testing the implemented behavior. Documentation-only iterations do not require a Pages deployment.
+Run focused checks during implementation.
+
+### Mandatory iteration completion
+
+Every iteration, without exception, is incomplete until:
+
+1. the intended iteration work is complete;
+2. validation, tests, and build checks appropriate to the repository have passed;
+3. the iteration is merged or otherwise integrated into `main`;
+4. `origin/main` contains that result;
+5. the GitHub Pages workflow has completed successfully;
+6. the deployed Safe Room game loads successfully;
+7. basic browser verification confirms that the deployed game remains testable and has no obvious broken assets or runtime errors.
+
+This is a repository workflow invariant, not implementation scope. `docs/next-iteration.md` remains the sole source of backlog tasks that may be implemented, and `DEPLOY-01` does not need to be listed there for this invariant to apply.
 
 Never commit credentials, tokens, private keys, generated secrets, dependency directories, build output, or temporary local backups.
