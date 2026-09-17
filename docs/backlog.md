@@ -1106,3 +1106,31 @@ Implemented as a workflow and Vite configuration for the current prototype. Ever
 ### History
 
 The earlier documentation-only deployment exception is superseded by Simon's decision that no iteration is complete without main integration and verified GitHub Pages deployment.
+
+## BUILD-01 — Display and verify deployed build metadata
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Safe Room displays its build number and build date/time unobtrusively in a fixed corner of the game window. Production GitHub Pages builds use GitHub Actions `GITHUB_RUN_NUMBER` as the build number and a UTC timestamp generated for the build being produced; the concrete values are injected into the production bundle at build time rather than fetched by the browser. Local development uses a safe `dev` fallback, and a production deployment must never silently show that fallback.
+
+The display is small, subdued, always readable, unaffected by Room zoom, and visible across Opening and normal rooms without covering important gameplay controls or cards. The preferred location is the bottom-right corner.
+
+As part of the permanent iteration-completion invariant in DEPLOY-01, deployment verification confirms that the visible build number matches the GitHub Actions run number, that the visible timestamp matches the metadata injected into that build, and that the deployed page is not showing stale metadata from an earlier deployment. `BUILD-01` does not need to remain in `docs/next-iteration.md` after implementation for this verification rule to continue applying.
+
+### Acceptance criteria
+
+- The application visibly renders build metadata in the format `Build <number> · YYYY-MM-DD HH:mm UTC` in a fixed bottom-right position.
+- Production builds receive their build number from `GITHUB_RUN_NUMBER` and receive an unambiguous UTC build timestamp generated during the workflow/build.
+- The production bundle contains the concrete number and timestamp and does not fetch GitHub APIs at runtime for them.
+- Local development has a safe `dev` fallback, while the GitHub Pages production build fails rather than silently displaying `dev`.
+- The metadata remains visible across Opening and normal rooms, is unaffected by Room zoom, and does not obscure important gameplay UI.
+- Automated tests cover supplied metadata rendering and any nontrivial formatting or production-fallback protection.
+- Deployment browser verification matches the displayed values to the successful workflow run and injected build metadata, rules out stale deployment content, confirms assets and basic interaction, and finds no new console errors.
+
+### Implementation status
+
+Implemented with Vite-injected compile-time metadata, a fixed bottom-right display, GitHub Actions run-number/timestamp injection, focused tests, and permanent deployment-verification instructions.

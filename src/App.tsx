@@ -7,6 +7,7 @@ import {
   type PointerEvent,
 } from "react";
 import { CardView } from "./components/CardView";
+import { BuildMetadataBadge } from "./components/BuildMetadataBadge";
 import { InspectionTooltip } from "./components/InspectionTooltip";
 import { CARD_MASTERS } from "./data/cardMasters";
 import { WORLD_DEFINITION } from "./data/worldDefinition";
@@ -627,6 +628,7 @@ export function App() {
 
       {startupError && <div className="startup-error">{startupError}</div>}
       <div className="status" role="status">{message}</div>
+      <BuildMetadataBadge />
       {inspection && !drag && <InspectionTooltip {...inspection} />}
       {drag && sourceCard && (
         <div className="drag-layer" aria-hidden="true">

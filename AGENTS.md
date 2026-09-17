@@ -56,7 +56,8 @@ Every iteration, without exception, is incomplete until:
 5. the GitHub Pages workflow has completed successfully;
 6. the deployed Safe Room game loads successfully;
 7. basic browser verification confirms that the deployed game remains testable and has no obvious broken assets or runtime errors.
+8. browser verification confirms that the visible build number matches the deployment's GitHub Actions run number, the visible build timestamp matches the metadata injected into that build, and the deployed page is not showing stale build metadata.
 
-This is a repository workflow invariant, not implementation scope. `docs/next-iteration.md` remains the sole source of backlog tasks that may be implemented, and `DEPLOY-01` does not need to be listed there for this invariant to apply.
+This is a repository workflow invariant, not implementation scope. `docs/next-iteration.md` remains the sole source of backlog tasks that may be implemented, and neither `DEPLOY-01` nor `BUILD-01` needs to be listed there for this invariant to apply.
 
 Never commit credentials, tokens, private keys, generated secrets, dependency directories, build output, or temporary local backups.
