@@ -64,7 +64,7 @@ Origin: Simon
 
 Implemented for the current JSON model; future additions must preserve the boundary.
 
-## DATA-D04 — Actions require explicit duration
+## DATA-D04 — Time-consuming Actions require explicit spend-time
 
 Priority: P0
 Decision: APPROVED BY SIMON
@@ -72,17 +72,17 @@ Origin: Simon
 
 ### Rule
 
-Every executable Action resolves an explicit duration. There is no implicit or default duration. Duration may be authored on the Action or supplied by an approved structured triggering attribute such as `path.time`.
+Every time-consuming Action contains or resolves an explicit `spend-time` effect in its ordered `effects` array. `spend-time` uses either a numeric constant or a Value on `self` or `other` as defined by DATA-08. There is no implicit/default time cost and no separate generic Action-duration mechanism.
 
 ### Acceptance criteria
 
-- Validation rejects an executable Action whose duration cannot be resolved.
-- All Action paths use the resolved explicit duration.
-- No code supplies a silent default.
+- Validation rejects a time-consuming Action whose `spend-time` effect cannot be resolved completely before execution.
+- All world-time advancement occurs through an explicit, prevalidated `spend-time` effect.
+- No authored duration field or code-supplied time default bypasses `spend-time`.
 
 ### Implementation status
 
-Partially implemented. Existing Search and travel paths have durations, but the common Action model does not yet enforce the rule.
+Not implemented in the common Action model. Existing Search and travel paths advance time through separate legacy transitions.
 
 ## DATA-D05 — JSON schema cannot be invented
 
@@ -137,33 +137,168 @@ Origin: Simon
 
 ### Rule
 
-The runtime model must validate the concrete approved schema, including unique IDs, references, Action match cardinality, structured attributes, Markers, Values, instance overrides, room contents, and Search entries. Migration must remove legacy representations only after all current content has an approved equivalent.
+The runtime model must validate the concrete approved schema, including unique IDs, References, Action IDs/names, `applicable.on`/`applicable.receive`, selectors, ordered effects, Action match cardinality, Markers, Values, instance overrides, room contents, and Search entries. Migration must remove legacy representations only after all current content has an approved equivalent.
 
 ### Acceptance criteria
 
 - Focused tests cover valid and malformed authored data.
 - Unknown references and duplicate IDs fail clearly.
-- Legacy `accept`, size, storage, and equipment representations are removed when their approved replacements are implemented.
+- Legacy `accept`, Action-duration, path, size, storage, and equipment representations are removed when their approved replacements are implemented.
 - Card masters and world composition continue to originate from authored JSON rather than TypeScript constants.
 - Invalid authored data fails startup rather than falling back to a legacy format.
 
 ### Implementation status
 
-Partially implemented. Strict JSON loading exists, but the next Action/equipment representations and validation remain outstanding.
+Partially implemented. Strict JSON loading exists, but the approved Action, Marker/Value/Reference, and equipment representations and validation remain outstanding.
 
-## DATA-08 — Approve the concrete Action and structured-attribute JSON shapes
+## DATA-08 — Concrete Action JSON schema
 
 Priority: P0
-Decision: QUESTION FOR SIMON
-Origin: ChatGPT
+Decision: APPROVED BY SIMON
+Origin: Simon
 
-### Question
+### Rule
 
-What exact JSON object shapes represent `actions`, `on`/`receive` triggers, requirements, effect targets, and the payloads for `path`, `food`, and `hydration`? Their ownership and runtime semantics are approved, but the former Action/Process document explicitly labelled its JSON examples conceptual and said the exact layout could evolve. The current runtime only has the superseded `accept` structure. DATA-D05 therefore prevents Codex from choosing a target shape during implementation without explicit approval.
+`actions` is an array. Every Action has a stable internal `id`, a player-facing `name`, one `applicable` object, and an ordered `effects` array:
+
+```json
+"actions": [
+  {
+    "id": "eat",
+    "name": "Eat",
+    "applicable": {
+      "receive": { "marker": "food" }
+    },
+    "effects": []
+  }
+]
+```
+
+`applicable` contains exactly one of `on` or `receive`. These keys determine the relationship between the Action owner and the other card. Within the Action, `self` is always the card that owns the Action and `other` is the card or object matched by applicability. Effect targets use only `self` and `other`; `accepted` and `received` describe drag/drop roles and determine which card owns or matches an `on`/`receive` Action, but they are not effect targets.
+
+Approved selector primitives are `marker`, a Value comparison, `and`, `or`, and `not`. Selectors must not match specific card/master IDs. `and` and `or` take arrays, `not` takes one selector, and boolean selectors may be nested:
+
+```json
+{
+  "and": [
+    { "marker": "container" },
+    { "not": { "marker": "contains-water" } }
+  ]
+}
+```
+
+A Value selector names one Value and uses exactly one of `>`, `>=`, `<`, `<=`, `=`, or `<>`. Ranges use boolean composition rather than multiple comparison operators in one selector:
+
+```json
+{
+  "and": [
+    { "value": "infection", ">=": 25 },
+    { "value": "infection", "<": 50 }
+  ]
+}
+```
+
+`effects` executes from top to bottom, but the complete Action must validate before its first effect executes. An invalid Action must not partially mutate state. Generic effects support adding a Marker, removing a Marker, changing a Value, and discarding a card:
+
+```json
+{ "target": "self", "add-marker": "dressed" }
+```
+
+```json
+{ "target": "other", "remove-marker": "contains-water" }
+```
+
+Value operations use exactly one of `=`, `+=`, or `-=`. The right-hand side is either a numeric constant or a Value on `self` or `other`:
+
+```json
+{ "target": "self", "value": "satiation", "+=": 25 }
+```
+
+```json
+{
+  "target": "self",
+  "value": "satiation",
+  "+=": { "target": "other", "value": "food-value" }
+}
+```
+
+Discard is a generic effect:
+
+```json
+{ "target": "other", "discard": true }
+```
+
+`set-room` is the unique world effect. It changes the active Room through a Reference on `self` or `other`:
+
+```json
+{
+  "set-room": {
+    "target": "other",
+    "reference": "destination"
+  }
+}
+```
+
+`spend-time` is the unique effect that advances world time. It uses either a numeric constant or a Value on `self` or `other`:
+
+```json
+{ "spend-time": 15 }
+```
+
+```json
+{
+  "spend-time": {
+    "target": "other",
+    "value": "travel-time"
+  }
+}
+```
+
+There is no separate Action-duration mechanism. The position of `spend-time` in the ordered effects array determines when time passes relative to other effects. When it crosses global Process boundaries, world time advances, every crossed Process tick resolves, and only then does execution continue to the next effect. The complete Action is still prevalidated before any effect executes.
+
+`food`, `hydration`, and `path` are Markers, not structured attributes. Their concrete data uses ordinary Values and References with these approved stable names:
+
+- Marker `food` with Value `food-value`;
+- Marker `hydration` with Value `hydration-value`;
+- Marker `path` with Value `travel-time` and Reference `destination`.
+
+Conceptually:
+
+```json
+{
+  "markers": ["food"],
+  "values": { "food-value": 25 }
+}
+```
+
+```json
+{
+  "markers": ["hydration"],
+  "values": { "hydration-value": 25 }
+}
+```
+
+```json
+{
+  "markers": ["path"],
+  "values": { "travel-time": 30 },
+  "references": { "destination": "deep-tunnels" }
+}
+```
+
+### Acceptance criteria
+
+- Validation enforces stable Action IDs, player-facing names, exactly one applicability direction, the approved selector primitives/operators, and ordered effect shapes.
+- Selectors cannot reference specific card/master IDs and Value selectors contain exactly one comparison operator.
+- All Action effect targets resolve as `self` or `other`; legacy `accepted`/`received` effect targets are rejected.
+- The complete Action validates before execution, and effects then execute in authored order without partial mutation from an invalid Action.
+- Generic Marker, Value, discard, `set-room`, and `spend-time` effects support exactly the approved operand forms.
+- `food`, `hydration`, and `path` migrate to the approved Marker/Value/Reference representation without special card-name logic.
+- `spend-time` resolves crossed Process ticks before the following ordered effect.
 
 ### Implementation status
 
-Blocked on an exact schema decision. This does not reopen the approved semantics in ACTION-D01 through ACTION-D04.
+Approved but not implemented. The current runtime and JSON still use legacy `accept`, interaction, and path representations.
 
 ## NADIR-D01 — Body, Mind, and Spirit are persistent Nadir cards
 
@@ -338,12 +473,12 @@ Origin: Simon
 
 ### Rule
 
-For drag/drop, the dragged card is `accepted` and the card underneath is `received`. An `on` Action belongs to accepted and matches received. A `receive` Action belongs to received and matches accepted. Approved selectors may match card IDs, Markers, approved structured-attribute presence, or conjunctions of those. Zero matches means no Action; exactly one executes; two or more is invalid authored data and must be protected in validation and runtime.
+For drag/drop, the dragged card is `accepted` and the card underneath is `received`. An `on` Action belongs to accepted, so accepted is `self` and received is `other`. A `receive` Action belongs to received, so received is `self` and accepted is `other`. Applicability uses the DATA-08 selector primitives over Markers and Values with boolean composition; selectors never match a specific card/master ID. Zero matches means no Action; exactly one executes; two or more is invalid authored data and must be protected in validation and runtime.
 
 ### Acceptance criteria
 
 - Highlight, preview, and commit use the same Action-matching result.
-- Both `on` and `receive` directions work with the approved roles.
+- Both `on` and `receive` directions map accepted/received to `self`/`other` correctly.
 - Overlapping match domains fail validation where detectable and never choose silently at runtime.
 - An invalid match count leaves state unchanged.
 
@@ -359,19 +494,19 @@ Origin: Simon
 
 ### Rule
 
-Current generic Body Actions are Travel, Eat, and Drink. Body dropped on a card with `path` performs Travel. Body receives a card with `food` to Eat. Body receives a card with `contains-water` and the `hydration` payload to Drink. Triggering objects own their eligibility, data, and concrete effects; Body must not contain item-name lists.
+Current generic Body Actions are Travel, Eat, and Drink. Body dropped on a card with the `path` Marker performs Travel. Body receives a card with the `food` Marker to Eat. Body receives a card carrying both `contains-water` and `hydration` Markers to Drink. Triggering objects own their eligibility and concrete data through their approved Markers, Values, and References; Body must not contain item-name lists.
 
 ### Acceptance criteria
 
 - Newly authored food, water containers, and routes work without adding master-name conditionals to code or Body.
-- Body owns the generic Action while the object supplies its payload.
+- Body owns the generic Action while the object supplies its approved Markers, Values, and References.
 - Nonmatching movable cards do not become legal targets merely because they can be moved.
 
 ### Implementation status
 
 Not implemented in the approved Action model. Authored eating works through legacy interaction data.
 
-## ACTION-D03 — Approved structured Action attributes
+## ACTION-D03 — Approved Action data uses Markers, Values, and References
 
 Priority: P0
 Decision: APPROVED BY SIMON
@@ -379,20 +514,22 @@ Origin: Simon
 
 ### Rule
 
-The currently approved structured attributes are only `path`, `food`, and `hydration`. `path` owns destination and base travel time; those facts are not duplicated in room composition, a route-specific Travel Action, or a separate `go` effect. `food` owns the concrete eating effect and consumption behavior without duplicating the same sustenance amount in another property. `hydration` owns the concrete drinking payload. `contains-water` remains the mutable Marker indicating a container currently holds water and remains part of the Drink trigger; drinking removes that Marker while the refillable card's hydration payload may remain.
+`path`, `food`, and `hydration` are ordinary Markers, not structured attributes. A path card carries the `path` Marker, `travel-time` Value, and `destination` Reference. Food carries the `food` Marker and `food-value` Value. A refillable hydration source carries the `hydration` Marker and `hydration-value` Value. `contains-water` remains the mutable Marker indicating that a container currently holds water and remains part of the Drink applicability selector; drinking removes `contains-water`, while `hydration` and `hydration-value` may remain on the refillable card.
+
+Travel, Eat, and Drink Actions read those Values and References through DATA-08 effects. Destination, base travel time, sustenance, and hydration amounts are not duplicated in room composition, item-name logic, or special-purpose payloads.
 
 ### Acceptance criteria
 
-- The three approved structures are validated and executed without card-name special cases.
-- Food migration preserves the concrete effects owned by FOOD-01.
+- The approved Marker/Value/Reference combinations are validated and executed without card-name special cases.
+- Food migration preserves the concrete effects owned by FOOD-01 through `food-value`.
 - A filled container gains `contains-water`; drinking eligibility requires it.
-- No additional structured attribute is introduced without an approved backlog task.
+- No special-purpose `path`, `food`, or `hydration` payload is retained after migration.
 
 ### Implementation status
 
-Not implemented. Current data uses legacy interaction and path representations.
+Not implemented. Current data uses legacy interaction and path representations rather than the approved Markers, Values, References, and Action effects.
 
-## ACTION-D04 — Actions execute atomically
+## ACTION-D04 — Actions prevalidate completely and execute ordered effects
 
 Priority: P0
 Decision: APPROVED BY SIMON
@@ -400,12 +537,14 @@ Origin: Simon
 
 ### Rule
 
-Only one Action executes at a time. Effect targets in card-on-card Actions use the stable roles `accepted` and `received`. Time and Process consequences resolve through TIME-D01 and PROCESS-D01; normal Action effects resolve once on completion rather than once per tick. An unsupported or invalid Action must not partially advance time, discard a card, or mutate Values, Markers, rooms, decks, or positions. An explicitly authored `0m` Action starts and completes at the same world time and crosses no tick.
+Only one Action executes at a time. Its complete applicability, operands, References, and ordered effects validate before the first effect executes. Effect targets use `self` and `other` as defined by DATA-08. Effects then execute from top to bottom. An unsupported or invalid Action must not partially advance time, discard a card, or mutate Values, Markers, rooms, decks, or positions.
+
+When execution reaches `spend-time`, TIME-D01 advances world time and PROCESS-D01 resolves every crossed tick before execution continues to the next effect. Normal effects execute once when their position in the ordered array is reached, not once per tick. An explicitly authored `spend-time: 0` crosses no tick.
 
 ### Acceptance criteria
 
-- A pure planning/validation step establishes one legal complete Action before mutation.
-- Completion applies the Action as one state transition.
+- A pure planning/validation step establishes one legal complete Action and resolves all operands before mutation.
+- Effects execute exactly once in authored order, including Process resolution at `spend-time` boundaries.
 - Failure leaves the pre-Action state unchanged.
 - Preview calculations share effect rules with committed results.
 
@@ -421,18 +560,18 @@ Origin: Simon
 
 ### Rule
 
-Rat Meat is edible by Body, applies Satiation +15 to Body, and is discarded after completion. Canned Food is edible by Body, applies Satiation +25, and is discarded after completion. The resulting Satiation clamps at 100. These effects belong to each card's `food` payload under ACTION-D03; there is no required ingestible Marker and no card-name branch in game rules.
+Rat Meat carries the `food` Marker and `food-value` 15. Canned Food carries the `food` Marker and `food-value` 25. Body's generic Eat Action reads `food-value` from `other`, applies that amount to Body Satiation, and discards `other`. The resulting Satiation clamps at 100. There is no card-name branch in game rules.
 
 ### Acceptance criteria
 
-- Body recognizes both foods through the generic Eat Action.
+- Body recognizes both foods through the generic Eat Action's `food` Marker selector.
 - Preview and commit use the same bounded effect calculation, including `67 → 82`, `67 → 92`, and `90 → 100` where applicable.
 - Successful eating updates Body once and visibly consumes the accepted food instance.
 - A non-food card cannot be eaten and an invalid attempt changes no state.
 
 ### Implementation status
 
-Implemented through legacy authored interactions. Migration to the approved `food` payload/common Action executor remains part of ACTION-D01 through ACTION-D04.
+Implemented through legacy authored interactions. Migration to the approved `food` Marker, `food-value`, and common Action executor remains part of ACTION-D01 through ACTION-D04.
 
 ## ACTION-05 — Direct interactions commit without a chooser
 
@@ -462,11 +601,12 @@ Origin: Simon
 
 ### Rule
 
-Only Actions advance elapsed world time. Card movement, equipment changes, Inventory organization, and Stack operations are free. Every time-consuming Action uses one centralized time-advance mechanism so crossed global ticks and completion order are consistent.
+Only an Action's `spend-time` effect advances elapsed world time. Card movement, equipment changes, Inventory organization, and Stack operations are free. Every `spend-time` effect uses one centralized time-advance mechanism so crossed global ticks and ordered-effect execution are consistent. There is no separate Action-duration mechanism.
 
 ### Acceptance criteria
 
-- Search, travel, and future Actions use one time transition.
+- Search, travel, and future time-consuming Actions use the same `spend-time` transition.
+- Each `spend-time` effect resolves every crossed Process tick before the following Action effect executes.
 - Free organization never changes elapsed time.
 - Elapsed time persists across room changes.
 
@@ -482,12 +622,12 @@ Origin: Simon
 
 ### Rule
 
-Processes have no private timers, intervals, or durations. Each active Process runs once for every world-time boundary crossed at `:00`, `:15`, `:30`, and `:45`. If an Action completes exactly on a boundary, tick and Process consequences resolve first, then Action completion effects. Many Processes may be active while only one Action runs. JSON ordering must not become gameplay ordering. Finite or staged Processes use card state, effects, conditions, and thresholds rather than private clocks.
+Processes have no private timers, intervals, or durations. Each active Process runs once for every world-time boundary crossed at `:00`, `:15`, `:30`, and `:45`. When `spend-time` reaches or crosses a boundary, world time advances and the tick's Process consequences resolve before the Action continues to its next ordered effect. Many Processes may be active while only one Action runs. JSON ordering must not become gameplay ordering. Finite or staged Processes use card state, effects, conditions, and thresholds rather than private clocks.
 
 ### Acceptance criteria
 
 - Advancing across multiple boundaries runs every active Process once per boundary.
-- Exact-boundary tests prove Process-before-completion order.
+- Exact-boundary tests prove Process-before-next-effect order.
 - Tick counts satisfy `floor(newElapsedMinutes / 15) - floor(oldElapsedMinutes / 15)`: 10→14 gives 0, 10→16 gives 1, 14→31 gives 2, 44→61 gives 2, and a 0-minute Action gives 0.
 - Process-authored data contains no per-Process interval field.
 - Inactive rooms remain in world state so future room-local Processes can continue without being architecturally erased.
@@ -589,7 +729,7 @@ Origin: Simon
 
 ### Rule
 
-A Flesh Wound is a persistent condition card with healing progress and Infection state. Dressing it requires one source card carrying both `fabric` and `sterilized`. The Dress Action takes 15 minutes, consumes that source card at completion, and adds `dressed` to the wound.
+A Flesh Wound is a persistent condition card with healing progress and Infection state. Dressing it requires one source card carrying both `fabric` and `sterilized`. The Dress Action has an explicit `spend-time: 15` effect, consumes that source card, and adds `dressed` to the wound in its authored effect order.
 
 On each global tick, Flesh Wound healing progress changes by its current Infection band: below 25 gives +2; 25–49 gives +1; 50–75 gives 0; above 75 gives -1. The Flesh Wound is discarded when healing progress reaches 100. The final player-facing name of that progress Value is unresolved in PROCESS-02.
 
@@ -843,14 +983,14 @@ Origin: Simon
 
 ### Rule
 
-Puddle of Water is Anchored and begins with Water 3. A valid empty container has `container` and lacks `contains-water`. A successful fill adds `contains-water` to that container, reduces Puddle Water by 1, and visibly discards/exhausts the Puddle when Water reaches 0. `contains-water` remains part of the generic Drink trigger with `hydration`. Fill is an Action and cannot execute until WATER-01 supplies its duration.
+Puddle of Water is Anchored and begins with Water 3. A valid empty container has `container` and lacks `contains-water`. A successful fill adds `contains-water` to that container, reduces Puddle Water by 1, and visibly discards/exhausts the Puddle when Water reaches 0. `contains-water` remains part of the generic Drink applicability selector with the `hydration` Marker; the concrete amount comes from `hydration-value`. Fill is an Action and cannot execute until WATER-01 supplies its `spend-time` amount.
 
 ### Acceptance criteria
 
 - Eligibility, preview, and completion use attributes rather than master-name cases.
 - Each completed fill changes exactly one container and decrements Water exactly once.
 - A Puddle at 0 cannot fill again and leaves play according to the discard rule.
-- No free or zero-minute fallback exists while duration is unresolved.
+- No absent, implicit, or zero-minute `spend-time` fallback exists while its amount is unresolved.
 
 ### Implementation status
 
@@ -860,7 +1000,7 @@ Partially implemented. Puddle Water 3, container state, and depletion rules exis
 
 This supersedes an older Milestone 2 direct/free filling prototype.
 
-## WATER-01 — Decide Puddle fill duration
+## WATER-01 — Decide Puddle fill spend-time
 
 Priority: P0
 Decision: QUESTION FOR SIMON
@@ -868,7 +1008,7 @@ Origin: Simon
 
 ### Question
 
-How many minutes does filling a valid empty container from a Puddle take? This blocks the Action; no implicit, zero-minute, or direct interaction duration may be introduced.
+How many minutes should the Fill Action's explicit `spend-time` effect consume? This blocks the Action; no absent, implicit, zero-minute, or direct time advancement may be introduced.
 
 ## ROOM-01 — Persistent authored rooms and world state
 
@@ -899,11 +1039,11 @@ Origin: Simon
 
 ### Rule
 
-Navigation cards are ordinary room-local Anchored cards carrying approved `path` data. Dropping Body on one invokes Body's generic Travel Action. Current routes are Tunnels to Abandoned Office 15 minutes, Abandoned Office to Tunnels 15 minutes, Tunnels to Deep Tunnels 30 minutes, and Deep Tunnels to Tunnels 30 minutes. The two outbound Tunnels routes begin inside its Search deck and become visible navigation cards only when drawn. Vision modifies duration through VISION-01; there is no special Flashlight requirement.
+Navigation cards are ordinary room-local Anchored cards carrying the `path` Marker, a `travel-time` Value, and a `destination` Reference. Dropping Body on one invokes Body's generic Travel Action. Its `set-room` effect resolves `destination` from `other`, and its `spend-time` effect resolves `travel-time` from `other` in the approved ordered effects. Current routes are Tunnels to Abandoned Office 15 minutes, Abandoned Office to Tunnels 15 minutes, Tunnels to Deep Tunnels 30 minutes, and Deep Tunnels to Tunnels 30 minutes. The two outbound Tunnels routes begin inside its Search deck and become visible navigation cards only when drawn. Vision modifies travel time through VISION-01; there is no special Flashlight requirement.
 
 ### Acceptance criteria
 
-- Destination and base time come from `path`, not component conditionals.
+- Destination comes from the path card's `destination` Reference and base time from its `travel-time` Value, not component conditionals.
 - Travel uses ACTION-D01 through ACTION-D04 and centralized time.
 - Discovered route cards remain in their room with exact identity and position.
 - Arrival preserves all world and Nadir state.
@@ -930,7 +1070,7 @@ Origin: Simon
 
 ### Rule
 
-A Search deck is a clicked room-local interactive object, not a card, and does not inherit card rules such as Anchored, Stack, inspection, or discard. Every deck, including undiscovered-room decks, is shuffled exactly once when a new game starts; its hidden finite order persists and never rerolls between draws. It uses the shared full-face `images/search-back.jpg`, shows no remaining count, and disappears immediately when exhausted. Searching is a base 15-minute Action modified by VISION-01; at Vision 0 or lower it is unavailable.
+A Search deck is a clicked room-local interactive object, not a card, and does not inherit card rules such as Anchored, Stack, inspection, or discard. Every deck, including undiscovered-room decks, is shuffled exactly once when a new game starts; its hidden finite order persists and never rerolls between draws. It uses the shared full-face `images/search-back.jpg`, shows no remaining count, and disappears immediately when exhausted. Search is an Action with an explicit base `spend-time` amount of 15 minutes, modified by VISION-01; at Vision 0 or lower it is unavailable.
 
 Current authored compositions are:
 
@@ -943,7 +1083,7 @@ No mechanics are implied for Squatter, Pipe, Service Cabinet, Puddle beyond WATE
 ### Acceptance criteria
 
 - A controlled RNG proves deterministic one-time shuffle and stable hidden order.
-- Each completed Search advances centralized time, draws exactly one instance, and depletes exactly one entry.
+- Each completed Search advances centralized time through `spend-time`, then draws exactly one instance and depletes exactly one entry.
 - Undiscovered room decks are shuffled at new-game creation.
 - Exhausted decks become unavailable and are removed from presentation.
 
