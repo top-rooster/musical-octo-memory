@@ -8,15 +8,31 @@ import {
   equipCard,
   escapeOpening,
   searchRoom,
-  transitionRoom,
 } from "../src/game/world";
-import { isCardAvailableInPhase, rectanglesOverlap } from "../src/game/rules";
+import { applyInteraction, getValue, hasMarker, isCardAvailableInPhase, rectanglesOverlap } from "../src/game/rules";
 import { CARD_HEIGHT, CARD_WIDTH } from "../src/game/constants";
 
 function seeded(seed = 52) {
   return () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x80000000);
 }
 const bounds = { x: 0, y: 0, width: 1400, height: 800 };
+
+function searchUntil(state: GameState, masterId: string): GameState {
+  let current = state;
+  while (!current.cards.some((card) => card.roomId === current.currentRoomId && card.masterId === masterId)) {
+    const deck = current.rooms![current.currentRoomId!].decks[0];
+    const result = searchRoom(current, deck.id, bounds);
+    if (result.reason) throw new Error(`Could not discover ${masterId}: ${result.reason}`);
+    current = result.state;
+  }
+  return current;
+}
+
+function travelWith(state: GameState, routeMasterId: string): GameState {
+  const body = state.cards.find((card) => card.masterId === "body")!;
+  const route = state.cards.find((card) => card.masterId === routeMasterId)!;
+  return applyInteraction(state, body.id, route.id);
+}
 
 describe("persistent world and Search decks", () => {
   let state: GameState;
@@ -84,16 +100,36 @@ describe("persistent world and Search decks", () => {
   });
 
   it("discovers navigation cards by drawing them from the Tunnels deck", () => {
-    expect(state.cards.some((card) => card.roomId === "tunnels" && card.travel)).toBe(false);
+    expect(state.cards.some((card) => card.roomId === "tunnels" && hasMarker(card, "path"))).toBe(false);
     let current = state;
-    while (!current.cards.some((card) => card.roomId === "tunnels" && card.travel)) {
+    while (!current.cards.some((card) => card.roomId === "tunnels" && hasMarker(card, "path"))) {
       current = searchRoom(current, current.rooms!.tunnels.decks[0].id, bounds).state;
     }
-    expect(current.cards.some((card) => card.roomId === "tunnels" && card.travel)).toBe(true);
+    expect(current.cards.some((card) => card.roomId === "tunnels" && hasMarker(card, "path"))).toBe(true);
+  });
+
+  it("runs Search through centralized time and resolves its tick before one draw", () => {
+    const beforeCount = state.cards.length;
+    const result = searchRoom(state, state.rooms!.tunnels.decks[0].id, bounds);
+    expect(result.reason).toBeUndefined();
+    expect(result.minutes).toBe(15);
+    expect(result.processTicks).toBe(1);
+    expect(result.state.elapsedMinutes).toBe(15);
+    expect(result.state.cards).toHaveLength(beforeCount + 1);
+    expect(getValue(result.state.cards.find((card) => card.masterId === "body")!, "hydration")?.value).toBe(48);
+    expect(getValue(result.state.cards.find((card) => card.masterId === "body")!, "satiation")?.value).toBe(49);
+  });
+
+  it("applies the Vision multiplier before Search spends time", () => {
+    state = { ...state, currentRoomId: "deep-tunnels" };
+    const result = searchRoom(state, state.rooms!["deep-tunnels"].decks[0].id, bounds);
+    expect(result.minutes).toBe(45);
+    expect(result.state.elapsedMinutes).toBe(45);
+    expect(getValue(result.state.cards.find((card) => card.masterId === "body")!, "hydration")?.value).toBe(44);
   });
 
   it("preserves exact inactive-room card state across transitions", () => {
-    const searched = searchRoom(state, state.rooms!.tunnels.decks[0].id, bounds).state;
+    const searched = searchUntil(state, "go-abandoned-office");
     const card = searched.cards.find((item) => item.roomId === "tunnels")!;
     const moved = {
       ...searched,
@@ -101,18 +137,27 @@ describe("persistent world and Search decks", () => {
         ? { ...item, position: { x: 777.25, y: 222.75 } }
         : item),
     };
-    const away = transitionRoom(moved, "abandoned-office", 15);
-    const back = transitionRoom(away, "tunnels", 15);
+    const away = travelWith(moved, "go-abandoned-office");
+    const back = travelWith(away, "go-tunnels-from-office");
     expect(back.cards.find((item) => item.id === card.id)?.position)
       .toEqual({ x: 777.25, y: 222.75 });
   });
 
   it("transitions rooms, marks discovery, and advances central elapsed time", () => {
-    const next = transitionRoom(state, "deep-tunnels", 30);
+    state = searchUntil(state, "go-deep-tunnels");
+    const beforeTravel = state.elapsedMinutes!;
+    const next = travelWith(state, "go-deep-tunnels");
     expect(next.currentRoomId).toBe("deep-tunnels");
     expect(next.rooms!["deep-tunnels"].discovered).toBe(true);
-    expect(next.elapsedMinutes).toBe(30);
-    const returning = transitionRoom(next, "tunnels", 30);
-    expect(returning.elapsedMinutes).toBe(90);
+    expect(next.elapsedMinutes! - beforeTravel).toBe(30);
+    const hydrationAfterOutbound = getValue(findBody(next), "hydration")!.value;
+    expect(hydrationAfterOutbound).toBe(getValue(findBody(state), "hydration")!.value - 4);
+    const returning = travelWith(next, "go-tunnels-from-deep-tunnels");
+    expect(returning.elapsedMinutes! - next.elapsedMinutes!).toBe(60);
+    expect(getValue(findBody(returning), "hydration")!.value).toBe(hydrationAfterOutbound - 8);
   });
 });
+
+function findBody(state: GameState) {
+  return state.cards.find((card) => card.masterId === "body")!;
+}

@@ -69,7 +69,7 @@ describe("Milestone 1 rules", () => {
     expect(next.cards.some((candidate) => candidate.id === cannedFood.id)).toBe(false);
   });
 
-  it("does not partially execute Drink while remove Marker is unsupported", () => {
+  it("executes Drink through authored hydration state and keeps the reusable bottle", () => {
     state = {
       ...state,
       cards: state.cards.map((candidate) => candidate.masterId === "plastic-bottle"
@@ -78,13 +78,20 @@ describe("Milestone 1 rules", () => {
     };
     const bottle = card(state, "plastic-bottle");
     const body = card(state, "body");
-    const beforeHydration = getValue(body, "hydration")?.value;
+    expect(canInteract(state, bottle, body)).toBe(true);
+    const next = applyInteraction(state, bottle.id, body.id);
+    expect(getValue(card(next, "body"), "hydration")?.value).toBe(75);
+    expect(hasMarker(card(next, "plastic-bottle"), "contains-water")).toBe(false);
+    expect(next.cards.some((candidate) => candidate.id === bottle.id)).toBe(true);
+  });
 
+  it("rejects Drink from an empty hydration container", () => {
+    const bottle = card(state, "plastic-bottle");
+    const body = card(state, "body");
+    expect(hasMarker(bottle, "hydration")).toBe(true);
+    expect(hasMarker(bottle, "contains-water")).toBe(false);
     expect(canInteract(state, bottle, body)).toBe(false);
-    expect(calculateInteractionOutcome(state, bottle, body)).toBeNull();
     expect(applyInteraction(state, bottle.id, body.id)).toBe(state);
-    expect(getValue(card(state, "body"), "hydration")?.value).toBe(beforeHydration);
-    expect(hasMarker(card(state, "plastic-bottle"), "contains-water")).toBe(true);
   });
 
   it("does not partially execute Skin while draw effects are unsupported", () => {
@@ -101,17 +108,23 @@ describe("Milestone 1 rules", () => {
     expect(state.cards.filter((candidate) => candidate.masterId === "rat-meat")).toHaveLength(beforeRatMeat);
   });
 
-  it("blocks an entire otherwise-supported Action when one effect is unsupported", () => {
+  it("blocks an entire Action when one Value operand is unresolved", () => {
     const body = card(state, "body");
     const cannedFood = card(state, "canned-food");
     state = {
       ...state,
       masters: state.masters.map((master) => master.id === "body" ? {
         ...master,
-        accept: master.accept.map((acceptance) => acceptance.card === "canned-food" ? {
-          ...acceptance,
-          action: { ...acceptance.action, effects: [...acceptance.action.effects, { draw: "fever" }] },
-        } : acceptance),
+        actions: master.actions.map((action) => action.id === "eat" ? {
+          ...action,
+          effects: [...action.effects, {
+            kind: "value" as const,
+            target: "self" as const,
+            value: "missing-value",
+            operator: "+=" as const,
+            operand: 1,
+          }],
+        } : action),
       } : master),
     };
 
@@ -122,16 +135,16 @@ describe("Milestone 1 rules", () => {
     expect(state.cards.some((candidate) => candidate.id === cannedFood.id)).toBe(true);
   });
 
-  it("keeps card-authored travel available through the compatibility adapter", () => {
+  it("matches Travel from Body's on Action and the route's authored state", () => {
     const world = escapeOpening(createWorldGameState(
       CARD_MASTERS, WORLD_DEFINITION, { x: 0, y: 0, width: 1400, height: 800 }, () => 0.5,
     )).state;
     const body = card(world, "body");
     const route = card(world, "go-tunnels-from-office");
     expect(canInteract(world, body, route)).toBe(true);
-    expect(route.travel).toEqual({
-      acceptedCardId: "body", destinationRoomId: "tunnels", baseMinutes: 15,
-    });
+    expect(hasMarker(route, "path")).toBe(true);
+    expect(getValue(route, "travel-time")?.value).toBe(15);
+    expect(route.references.destination).toBe("tunnels");
   });
 
   it("clamps preview and committed Satiation at 100 using the same outcome", () => {
@@ -184,7 +197,7 @@ describe("Milestone 1 rules", () => {
   });
 
   it("classifies identical Room cards as Stack targets without a Stack Marker", () => {
-    const source = { ...card(state, "canned-food"), roomId: "test-room" };
+    const source = { ...card(state, "rat-skin"), roomId: "test-room" };
     const target = {
       ...source,
       id: "canned-food-copy",
@@ -213,10 +226,10 @@ describe("Milestone 1 rules", () => {
   });
 
   it("rejects Stack targets with different Marker sets", () => {
-    const source = { ...card(state, "canned-food"), zone: "room" as const, roomId: "test-room" };
+    const source = { ...card(state, "rat-skin"), zone: "room" as const, roomId: "test-room" };
     const changed = {
       ...source,
-      id: "marked-canned-food",
+      id: "marked-rat-skin",
       attributes: [...source.attributes, { kind: "marker" as const, id: "opened" }],
     };
     expect(canStackCards(source, changed)).toBe(false);
@@ -233,7 +246,7 @@ describe("Milestone 1 rules", () => {
   });
 
   it("keeps Stack relationships Room-only", () => {
-    const source = { ...card(state, "canned-food"), zone: "room" as const, roomId: "test-room" };
+    const source = { ...card(state, "rat-skin"), zone: "room" as const, roomId: "test-room" };
     expect(canStackCards(
       { ...source, zone: "inventory", roomId: undefined },
       { ...source, id: "room-copy" },

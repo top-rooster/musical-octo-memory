@@ -7,7 +7,6 @@ import type {
   GameState,
   Position,
   SearchDeckState,
-  TravelDefinition,
 } from "../domain/types";
 import type {
   CardInstanceDefinition,
@@ -15,10 +14,11 @@ import type {
 } from "../data/worldDefinition";
 import { CARD_GAP, CARD_HEIGHT, CARD_WIDTH, SEARCH_DECK_HEIGHT, SEARCH_DECK_WIDTH } from "./constants";
 import { drawFromDeck, shuffleOnce } from "./decks";
+import { executeStandaloneAction } from "./actions";
 import { allocateCarriedCapacity, canEquip, canTakeOpeningCard } from "./equipment";
 import { generateRoomPlacements } from "./placement";
-import { isAnchored, rectanglesOverlap } from "./rules";
-import { effectiveVision, searchDuration, travelDuration } from "./vision";
+import { isAnchored } from "./cardState";
+import { rectanglesOverlap } from "./rules";
 
 function cloneAttributes(attributes: CardAttribute[]): CardAttribute[] {
   return attributes.map((attribute) => ({ ...attribute }));
@@ -28,19 +28,6 @@ function masterById(masters: CardMaster[], id: string): CardMaster {
   if (!master) throw new Error(`Missing card master "${id}"`);
   return master;
 }
-function travelFor(master: CardMaster): TravelDefinition | undefined {
-  for (const acceptance of master.accept) {
-    const destination = acceptance.action.effects.find((effect) => "go" in effect);
-    if (destination && "go" in destination && acceptance.card) {
-      return {
-        acceptedCardId: acceptance.card,
-        destinationRoomId: destination.go,
-        baseMinutes: acceptance.action.baseMinutes,
-      };
-    }
-  }
-}
-
 export function createWorldGameState(
   masters: CardMaster[],
   definition: WorldDefinition,
@@ -66,10 +53,10 @@ export function createWorldGameState(
       image: master.image,
       description: master.description,
       attributes: cloneAttributes(authored.attributes),
+      references: { ...authored.references },
       zone,
       homeZone: isAnchored(master) ? zone : undefined,
       position: { ...position },
-      travel: travelFor(master),
       ...options,
     };
   };
@@ -124,6 +111,7 @@ export function createWorldGameState(
         id: nextId(`deck-card-${card.masterId}`),
         masterId: card.masterId,
         attributes: cloneAttributes(card.attributes),
+        references: { ...card.references },
       })), random),
     }));
     return [room.id, {
@@ -194,7 +182,8 @@ export interface SearchResult {
   state: GameState;
   drawnCardId?: string;
   minutes?: number;
-  reason?: "too-dark" | "no-deck" | "no-space";
+  processTicks?: number;
+  reason?: "too-dark" | "no-deck" | "no-space" | "action-invalid";
 }
 
 export function searchRoom(state: GameState, deckId: string, bounds: Bounds): SearchResult {
@@ -202,12 +191,18 @@ export function searchRoom(state: GameState, deckId: string, bounds: Bounds): Se
   const room = roomId ? state.rooms?.[roomId] : undefined;
   const deck = room?.decks.find((candidate) => candidate.id === deckId);
   if (!roomId || !room || !deck || state.phase !== "main") return { state, reason: "no-deck" };
-  const minutes = searchDuration(deck.baseMinutes, effectiveVision(state, roomId));
-  if (minutes === null) return { state, reason: "too-dark" };
   const position = nearestFreeRoomPosition(state, roomId, deck.position, bounds);
   if (!position) return { state, reason: "no-space" };
   const result = drawFromDeck(deck);
   if (!result.drawn) return { state, reason: "no-deck" };
+  const execution = executeStandaloneAction(state, {
+    id: "search",
+    name: "Search",
+    effects: [{ kind: "spend-time", operand: deck.baseMinutes }],
+  });
+  if (!execution.success) {
+    return { state, reason: execution.reason === "too-dark" ? "too-dark" : "action-invalid" };
+  }
   const master = masterById(state.masters, result.drawn.masterId);
   const drawnCard: CardInstance = {
     id: result.drawn.id,
@@ -216,11 +211,11 @@ export function searchRoom(state: GameState, deckId: string, bounds: Bounds): Se
     image: master.image,
     description: master.description,
     attributes: cloneAttributes(result.drawn.attributes),
+    references: { ...result.drawn.references },
     zone: "room",
     homeZone: isAnchored(master) ? "room" : undefined,
     roomId,
     position,
-    travel: travelFor(master),
     animation: "draw",
     drawOrigin: { ...deck.position },
   };
@@ -229,33 +224,14 @@ export function searchRoom(state: GameState, deckId: string, bounds: Bounds): Se
     .filter((candidate): candidate is SearchDeckState => Boolean(candidate));
   return {
     state: {
-      ...state,
-      elapsedMinutes: (state.elapsedMinutes ?? 0) + minutes,
-      cards: [...state.cards, drawnCard],
-      rooms: { ...state.rooms, [roomId]: { ...room, decks } },
+      ...execution.state,
+      cards: [...execution.state.cards, drawnCard],
+      rooms: { ...execution.state.rooms, [roomId]: { ...room, decks } },
     },
     drawnCardId: drawnCard.id,
-    minutes,
+    minutes: execution.minutes,
+    processTicks: execution.processTicks,
   };
-}
-
-export function transitionRoom(state: GameState, destinationRoomId: string, baseMinutes: number): GameState {
-  const destination = state.rooms?.[destinationRoomId];
-  if (!destination) return state;
-  const minutes = travelDuration(baseMinutes, effectiveVision(state));
-  return {
-    ...state,
-    currentRoomId: destinationRoomId,
-    elapsedMinutes: (state.elapsedMinutes ?? 0) + minutes,
-    rooms: {
-      ...state.rooms,
-      [destinationRoomId]: { ...destination, discovered: true },
-    },
-  };
-}
-
-export function canTravelWith(source: CardInstance, target: CardInstance): boolean {
-  return source.masterId === target.travel?.acceptedCardId;
 }
 
 export function equipCard(state: GameState, cardId: string, slot: EquipmentSlot): GameState {

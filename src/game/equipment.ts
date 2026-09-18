@@ -6,7 +6,7 @@ import type {
   GameState,
   ItemSize,
 } from "../domain/types";
-import { getValue, isAnchored } from "./rules";
+import { getValue, isAnchored } from "./cardState";
 
 export const EQUIPMENT_SLOTS: EquipmentSlot[] = [
   "left-hand", "right-hand", "head", "eyes", "trinket-1", "trinket-2", "chest", "back", "legs", "feet",

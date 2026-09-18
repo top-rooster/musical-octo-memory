@@ -1,14 +1,17 @@
 import type {
-  AcceptanceDefinition,
+  ActionDefinition,
   ActionEffect,
+  ActionRole,
+  ActionSelector,
   CardAttribute,
   CardMaster,
+  ComparisonOperator,
   EquipmentSlot,
   GamePhase,
   ItemSize,
   LightLevel,
   ProcessDefinition,
-  ThresholdDefinition,
+  ValueOperand,
 } from "../domain/types";
 import type {
   CardInstanceDefinition,
@@ -34,12 +37,51 @@ function attributes(card: JsonObject): CardAttribute[] {
   ];
 }
 
-function action(raw: JsonObject) {
+function selector(raw: JsonObject): ActionSelector {
+  if (raw.marker !== undefined) return { kind: "marker", marker: raw.marker };
+  if (raw.value !== undefined) {
+    const operator = ([">", ">=", "<", "<=", "=", "<>"] as ComparisonOperator[])
+      .find((candidate) => raw[candidate] !== undefined)!;
+    return { kind: "value", value: raw.value, operator, operand: raw[operator] };
+  }
+  if (raw.and !== undefined) return { kind: "and", selectors: raw.and.map(selector) };
+  if (raw.or !== undefined) return { kind: "or", selectors: raw.or.map(selector) };
+  return { kind: "not", selector: selector(raw.not) };
+}
+
+function operand(raw: number | JsonObject): number | ValueOperand {
+  return typeof raw === "number" ? raw : { target: raw.target as ActionRole, value: raw.value };
+}
+
+function effect(raw: JsonObject): ActionEffect {
+  if (raw["add-marker"] !== undefined) {
+    return { kind: "add-marker", target: raw.target, marker: raw["add-marker"] };
+  }
+  if (raw["remove-marker"] !== undefined) {
+    return { kind: "remove-marker", target: raw.target, marker: raw["remove-marker"] };
+  }
+  if (raw.value !== undefined) {
+    const operator = (["=", "+=", "-="] as const).find((candidate) => raw[candidate] !== undefined)!;
+    return { kind: "value", target: raw.target, value: raw.value, operator, operand: operand(raw[operator]) };
+  }
+  if (raw.discard !== undefined) return { kind: "discard", target: raw.target };
+  if (raw["set-room"] !== undefined) {
+    return {
+      kind: "set-room",
+      target: raw["set-room"].target,
+      reference: raw["set-room"].reference,
+    };
+  }
+  return { kind: "spend-time", operand: operand(raw["spend-time"]) };
+}
+
+function action(raw: JsonObject): ActionDefinition {
+  const direction = raw.applicable.on !== undefined ? "on" : "receive";
   return {
-    name: raw.name as string | undefined,
-    time: raw.time as string,
-    baseMinutes: minutes(raw.time),
-    effects: raw.effects as ActionEffect[],
+    id: raw.id,
+    name: raw.name,
+    applicable: { direction, selector: selector(raw.applicable[direction]) },
+    effects: raw.effects.map(effect),
   };
 }
 
@@ -52,6 +94,7 @@ export function loadCardMasters(rawCards: unknown): CardMaster[] {
       image: raw.image,
       description: raw.description,
       attributes: attributes(raw),
+      references: { ...(raw.references ?? {}) },
       size: raw.size as ItemSize | undefined,
       equipSlots: (raw.equip ?? []) as EquipmentSlot[],
       storage: raw.storage && {
@@ -60,18 +103,9 @@ export function loadCardMasters(rawCards: unknown): CardMaster[] {
         phase: raw.storage.phase as GamePhase | undefined,
       },
       whileEquipped: raw.whileEquipped ?? [],
-      accept: (raw.accept ?? []).map((entry: JsonObject): AcceptanceDefinition => ({
-        card: entry.card,
-        markers: entry.markers,
-        action: action(entry.action),
-      })),
+      actions: (raw.actions ?? []).map(action),
       processes: (raw.processes ?? []).map((process: JsonObject): ProcessDefinition => ({
-        interval: process.interval,
-        intervalMinutes: minutes(process.interval),
-        effects: process.effects,
-      })),
-      when: (raw.when ?? []).map((entry: JsonObject): ThresholdDefinition => ({
-        value: entry.value, equals: entry.equals, effects: entry.effects,
+        effects: process.effects.map(effect),
       })),
     };
   });
@@ -92,7 +126,7 @@ function instance(raw: string | JsonObject, masters: CardMaster[]): CardInstance
       if (current?.kind === "value") current.value = value as number;
     }
   }
-  return { masterId, attributes: result };
+  return { masterId, attributes: result, references: { ...master.references } };
 }
 
 export function loadWorldDefinition(rawWorld: unknown, masters: CardMaster[]): WorldDefinition {

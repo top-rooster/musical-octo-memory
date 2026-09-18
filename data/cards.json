@@ -5,59 +5,51 @@
     "description": "Nadir's physical condition and basic survival needs.",
     "markers": ["anchored"],
     "values": { "hydration": 50, "satiation": 50 },
-    "accept": [
+    "actions": [
       {
-        "card": "rat-meat",
-        "action": {
-          "name": "Eat",
-          "time": "0m",
-          "effects": [
-            { "change": "satiation", "target": "receiver", "amount": 15 },
-            { "discard": "source" }
-          ]
-        }
+        "id": "travel",
+        "name": "Travel",
+        "applicable": { "on": { "marker": "path" } },
+        "effects": [
+          { "spend-time": { "target": "other", "value": "travel-time" } },
+          { "set-room": { "target": "other", "reference": "destination" } }
+        ]
       },
       {
-        "card": "canned-food",
-        "action": {
-          "name": "Eat",
-          "time": "0m",
-          "effects": [
-            { "change": "satiation", "target": "receiver", "amount": 25 },
-            { "discard": "source" }
-          ]
-        }
+        "id": "eat",
+        "name": "Eat",
+        "applicable": { "receive": { "marker": "food" } },
+        "effects": [
+          { "spend-time": 0 },
+          { "target": "self", "value": "satiation", "+=": { "target": "other", "value": "food-value" } },
+          { "target": "other", "discard": true }
+        ]
       },
       {
-        "card": "rotten-meat",
-        "action": {
-          "name": "Eat",
-          "time": "0m",
-          "effects": [{ "discard": "source" }, { "draw": "fever" }]
-        }
-      },
-      {
-        "card": "plastic-bottle",
-        "markers": ["contains-water"],
-        "action": {
-          "name": "Drink",
-          "time": "0m",
-          "effects": [
-            { "change": "hydration", "target": "receiver", "amount": 25 },
-            { "remove": "contains-water", "target": "source" }
-          ]
-        }
+        "id": "drink",
+        "name": "Drink",
+        "applicable": {
+          "receive": {
+            "and": [
+              { "marker": "hydration" },
+              { "marker": "contains-water" }
+            ]
+          }
+        },
+        "effects": [
+          { "spend-time": 0 },
+          { "target": "self", "value": "hydration", "+=": { "target": "other", "value": "hydration-value" } },
+          { "target": "other", "remove-marker": "contains-water" }
+        ]
       }
     ],
     "processes": [
       {
-        "interval": "15m",
-        "effects": [{ "change": "hydration", "amount": -2 }]
+        "effects": [
+          { "target": "self", "value": "hydration", "-=": 2 },
+          { "target": "self", "value": "satiation", "-=": 1 }
+        ]
       }
-    ],
-    "when": [
-      { "value": "hydration", "equals": 0, "effects": [{ "gameOver": true }] },
-      { "value": "satiation", "equals": 0, "effects": [{ "gameOver": true }] }
     ]
   },
   "mind": {
@@ -77,75 +69,21 @@
     "name": "Exhausted",
     "image": "images/exhausted.png",
     "description": "Nadir is too exhausted to function normally.",
-    "markers": ["anchored"],
-    "accept": [
-      {
-        "card": "body",
-        "action": { "name": "Sleep", "time": "8h", "effects": [{ "discard": "receiver" }] }
-      }
-    ]
+    "markers": ["anchored"]
   },
   "flesh-wound": {
     "name": "Flesh Wound",
     "image": "images/flesh-wound.png",
     "description": "An open injury that can heal or become infected.",
     "markers": ["anchored"],
-    "values": { "infection": 50 },
-    "accept": [
-      {
-        "markers": ["contains-water"],
-        "action": {
-          "name": "Clean",
-          "time": "15m",
-          "effects": [
-            { "change": "infection", "target": "receiver", "amount": -40 },
-            { "remove": "contains-water", "target": "source" }
-          ]
-        }
-      },
-      {
-        "markers": ["fabric", "sterilized"],
-        "action": {
-          "name": "Dress",
-          "time": "15m",
-          "effects": [
-            { "discard": "source" },
-            { "add": "dressed", "target": "receiver" }
-          ]
-        }
-      }
-    ]
+    "values": { "infection": 50 }
   },
   "burn-wound": {
     "name": "Burn Wound",
     "image": "images/burn-wound.png",
     "description": "A burn injury requiring treatment and time to heal.",
     "markers": ["anchored"],
-    "values": { "infection": 50 },
-    "accept": [
-      {
-        "markers": ["contains-water"],
-        "action": {
-          "name": "Clean",
-          "time": "15m",
-          "effects": [
-            { "change": "infection", "target": "receiver", "amount": -40 },
-            { "remove": "contains-water", "target": "source" }
-          ]
-        }
-      },
-      {
-        "markers": ["fabric", "sterilized"],
-        "action": {
-          "name": "Dress",
-          "time": "15m",
-          "effects": [
-            { "discard": "source" },
-            { "add": "dressed", "target": "receiver" }
-          ]
-        }
-      }
-    ]
+    "values": { "infection": 50 }
   },
   "fever": {
     "name": "Fever",
@@ -157,21 +95,7 @@
     "name": "Dead Rat",
     "image": "images/dead-rat.png",
     "description": "A dead rat. It can provide food and material if Nadir has a cutting tool.",
-    "size": "Medium",
-    "accept": [
-      {
-        "markers": ["cutting-tool"],
-        "action": {
-          "name": "Skin",
-          "time": "15m",
-          "effects": [
-            { "discard": "receiver" },
-            { "draw": "rat-skin" },
-            { "draw": "rat-meat" }
-          ]
-        }
-      }
-    ]
+    "size": "Medium"
   },
   "rotten-meat": {
     "name": "Rotten Meat",
@@ -189,13 +113,17 @@
     "name": "Rat Meat",
     "image": "images/rat-meat.png",
     "description": "Raw meat cut from a rat.",
-    "size": "Small"
+    "size": "Small",
+    "markers": ["food"],
+    "values": { "food-value": 15 }
   },
   "canned-food": {
     "name": "Canned Food",
     "image": "images/canned-food.png",
     "description": "Shelf-stable food in a sealed can.",
-    "size": "Medium"
+    "size": "Medium",
+    "markers": ["food"],
+    "values": { "food-value": 25 }
   },
   "knife": {
     "name": "Knife",
@@ -221,7 +149,8 @@
     "image": "images/plastic-bottle.png",
     "description": "A reusable plastic bottle that may contain drinking water.",
     "size": "Medium",
-    "markers": ["container"]
+    "markers": ["container", "hydration"],
+    "values": { "hydration-value": 25 }
   },
   "pants": {
     "name": "Pants",
@@ -317,29 +246,33 @@
     "name": "Go to abandoned office",
     "image": "images/go-to-abandoned-office.png",
     "description": "A discovered route from the tunnels to an abandoned office.",
-    "markers": ["anchored"],
-    "accept": [{ "card": "body", "action": { "time": "15m", "effects": [{ "go": "abandoned-office" }] } }]
+    "markers": ["anchored", "path"],
+    "values": { "travel-time": 15 },
+    "references": { "destination": "abandoned-office" }
   },
   "go-deep-tunnels": {
     "name": "Go to deep tunnels",
     "image": "images/go-to-deep-tunnels.png",
     "description": "A route leading farther into the dark tunnel system.",
-    "markers": ["anchored"],
-    "accept": [{ "card": "body", "action": { "time": "30m", "effects": [{ "go": "deep-tunnels" }] } }]
+    "markers": ["anchored", "path"],
+    "values": { "travel-time": 30 },
+    "references": { "destination": "deep-tunnels" }
   },
   "go-tunnels-from-office": {
     "name": "Go to tunnels",
     "image": "images/go-to-tunnels.png",
     "description": "A route returning to the tunnels.",
-    "markers": ["anchored"],
-    "accept": [{ "card": "body", "action": { "time": "15m", "effects": [{ "go": "tunnels" }] } }]
+    "markers": ["anchored", "path"],
+    "values": { "travel-time": 15 },
+    "references": { "destination": "tunnels" }
   },
   "go-tunnels-from-deep-tunnels": {
     "name": "Go to tunnels",
     "image": "images/go-to-tunnels.png",
     "description": "A route returning to the tunnels.",
-    "markers": ["anchored"],
-    "accept": [{ "card": "body", "action": { "time": "30m", "effects": [{ "go": "tunnels" }] } }]
+    "markers": ["anchored", "path"],
+    "values": { "travel-time": 30 },
+    "references": { "destination": "tunnels" }
   },
   "placeholder": {
     "name": "Placeholder",

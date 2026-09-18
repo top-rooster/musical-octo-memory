@@ -34,12 +34,10 @@ import {
   type DragOrigin,
 } from "./game/rules";
 import {
-  canTravelWith,
   createWorldGameState,
   equipCard,
   escapeOpening,
   searchRoom,
-  transitionRoom,
 } from "./game/world";
 import { effectiveVision } from "./game/vision";
 
@@ -375,16 +373,19 @@ export function App() {
       } else if (targetKind === "stack") {
         setGame(stackCards(game, sourceCard.id, target.id));
         setMessage(`${sourceCard.title} joined an identical Room Stack.`);
-      } else if (canTravelWith(sourceCard, target) && target.travel) {
-        const next = transitionRoom(game, target.travel.destinationRoomId, target.travel.baseMinutes);
-        const minutes = (next.elapsedMinutes ?? 0) - (game.elapsedMinutes ?? 0);
-        setGame(next);
-        setMessage(`Travelled to ${next.rooms?.[next.currentRoomId!]?.name} in ${minutes}m.`);
       } else {
-        setDiscardGhost({ card: sourceCard, left: finalDrag.left, top: finalDrag.top, scale: finalDrag.scale });
-        setGame(applyInteraction(game, sourceCard.id, target.id));
-        window.setTimeout(() => setDiscardGhost(null), 420);
-        setMessage(`${sourceCard.title} was used on ${target.title}.`);
+        const outcome = calculateInteractionOutcome(game, sourceCard, target)!;
+        const next = applyInteraction(game, sourceCard.id, target.id);
+        if (outcome.discardedCardIds.includes(sourceCard.id)) {
+          setDiscardGhost({ card: sourceCard, left: finalDrag.left, top: finalDrag.top, scale: finalDrag.scale });
+          window.setTimeout(() => setDiscardGhost(null), 420);
+        }
+        setGame(next);
+        if (outcome.actionId === "travel") {
+          setMessage(`Travelled to ${next.rooms?.[next.currentRoomId!]?.name} in ${outcome.minutes}m.`);
+        } else {
+          setMessage(`${outcome.actionName}: ${sourceCard.title} on ${target.title}.`);
+        }
       }
       setDrag(null);
       return;
@@ -471,6 +472,7 @@ export function App() {
     const result = searchRoom(game, deckId, localBounds(layout.room));
     if (result.reason === "too-dark") setMessage("It is too dark to Search. Leaving remains possible.");
     else if (result.reason === "no-space") setMessage("There is no legal free Room position beside the Search deck.");
+    else if (result.reason === "action-invalid") setMessage("Search could not complete because its Action is invalid.");
     else if (result.drawnCardId) {
       const drawn = result.state.cards.find((card) => card.id === result.drawnCardId);
       setGame(result.state);
@@ -542,6 +544,7 @@ export function App() {
             <div className="room-stats">
               <span>Vision <strong>{vision}</strong></span>
               <span>Elapsed <strong>{formatTime(game?.elapsedMinutes ?? 0)}</strong></span>
+              {game?.gameOver && <span role="alert"><strong>Game over — dehydration</strong></span>}
             </div>
           )}
           <div className="zoom-controls" aria-label="Room card zoom controls">

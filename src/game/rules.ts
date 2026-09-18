@@ -1,14 +1,14 @@
 import type {
   Bounds,
-  CardAttribute,
   CardInstance,
-  CardMaster,
   GameState,
   Position,
-  ValueAttribute,
   Zone,
 } from "../domain/types";
 import { CARD_HEIGHT, CARD_WIDTH } from "./constants";
+import { executeCardInteraction } from "./actions";
+export { clampValue, getValue, hasMarker, isAnchored } from "./cardState";
+import { isAnchored } from "./cardState";
 
 export interface ValueChangePreview {
   cardId: string;
@@ -20,8 +20,12 @@ export interface ValueChangePreview {
 export interface InteractionOutcome {
   sourceId: string;
   targetId: string;
+  actionId: string;
+  actionName: string;
   valueChanges: ValueChangePreview[];
-  discardSource: boolean;
+  discardedCardIds: string[];
+  minutes: number;
+  processTicks: number;
 }
 
 export interface DragOrigin {
@@ -29,16 +33,6 @@ export interface DragOrigin {
   position: Position;
   roomId?: string;
   equipmentSlot?: CardInstance["equipmentSlot"];
-}
-
-export function hasMarker(card: Pick<CardInstance | CardMaster, "attributes">, id: string): boolean {
-  return card.attributes.some(
-    (attribute) => attribute.kind === "marker" && attribute.id === id,
-  );
-}
-
-export function isAnchored(card: Pick<CardInstance | CardMaster, "attributes">): boolean {
-  return hasMarker(card, "anchored");
 }
 
 export function isCardAvailableInPhase(state: GameState, card: CardInstance): boolean {
@@ -56,20 +50,6 @@ export function canRestInZone(
   return isAnchored(card) && card.homeZone !== zone
     ? { legal: false, reason: "anchored" }
     : { legal: true };
-}
-
-export function clampValue(value: number, min = 0, max = 100): number {
-  return Math.min(max, Math.max(min, value));
-}
-
-export function getValue(
-  card: Pick<CardInstance, "attributes">,
-  id: string,
-): ValueAttribute | undefined {
-  return card.attributes.find(
-    (attribute): attribute is ValueAttribute =>
-      attribute.kind === "value" && attribute.id === id,
-  );
 }
 
 export function isWithinBounds(position: Position, bounds: Bounds): boolean {
@@ -111,46 +91,24 @@ export function positionIsFree(
   );
 }
 
-function masterFor(state: GameState, card: CardInstance): CardMaster | undefined {
-  return state.masters.find((master) => master.id === card.masterId);
-}
-
-function isSupportedInteractionEffect(effect: CardMaster["accept"][number]["action"]["effects"][number]): boolean {
-  return ("change" in effect && effect.target === "receiver") ||
-    ("discard" in effect && effect.discard === "source");
-}
-
 export function calculateInteractionOutcome(
   state: GameState,
   source: CardInstance,
   target: CardInstance,
 ): InteractionOutcome | null {
   if (!isCardAvailableInPhase(state, source) || !isCardAvailableInPhase(state, target)) return null;
-  const interaction = masterFor(state, target)?.accept.find(
-    (candidate) =>
-      (!candidate.card || candidate.card === source.masterId) &&
-      (candidate.markers ?? []).every((marker) => hasMarker(source, marker)),
-  );
-  if (!interaction || !interaction.action.effects.every(isSupportedInteractionEffect)) return null;
-
-  const valueChanges: ValueChangePreview[] = [];
-  let discardSource = false;
-  for (const effect of interaction.action.effects) {
-    if ("discard" in effect) {
-      discardSource = true;
-    } else if ("change" in effect) {
-      const value = getValue(target, effect.change);
-      if (!value) return null;
-      valueChanges.push({
-        cardId: target.id,
-        attribute: effect.change,
-        before: value.value,
-        after: clampValue(value.value + effect.amount, value.min, value.max),
-      });
-    }
-  }
-
-  return { sourceId: source.id, targetId: target.id, valueChanges, discardSource };
+  const result = executeCardInteraction(state, source, target);
+  if (!result.success || !result.match) return null;
+  return {
+    sourceId: source.id,
+    targetId: target.id,
+    actionId: result.match.action.id,
+    actionName: result.match.action.name,
+    valueChanges: result.valueChanges,
+    discardedCardIds: result.discardedCardIds,
+    minutes: result.minutes,
+    processTicks: result.processTicks,
+  };
 }
 
 export function canInteract(
@@ -159,10 +117,7 @@ export function canInteract(
   target: CardInstance,
 ): boolean {
   if (!isCardAvailableInPhase(state, source) || !isCardAvailableInPhase(state, target)) return false;
-  return (
-    calculateInteractionOutcome(state, source, target) !== null ||
-    source.masterId === target.travel?.acceptedCardId
-  );
+  return calculateInteractionOutcome(state, source, target) !== null;
 }
 
 function markerIdentity(card: CardInstance): string[] {
@@ -195,17 +150,6 @@ export function cardTargetKind(
   return canStackCards(source, target) ? "stack" : null;
 }
 
-function applyValueChanges(
-  attributes: CardAttribute[],
-  changes: ValueChangePreview[],
-): CardAttribute[] {
-  return attributes.map((attribute) => {
-    if (attribute.kind !== "value") return attribute;
-    const change = changes.find((candidate) => candidate.attribute === attribute.id);
-    return change ? { ...attribute, value: change.after } : attribute;
-  });
-}
-
 export function applyInteraction(
   state: GameState,
   sourceId: string,
@@ -215,17 +159,7 @@ export function applyInteraction(
   const target = state.cards.find((card) => card.id === targetId);
   if (!source || !target) return state;
 
-  const outcome = calculateInteractionOutcome(state, source, target);
-  if (!outcome) return state;
-
-  const cards = state.cards
-    .filter((card) => !(outcome.discardSource && card.id === sourceId))
-    .map((card) =>
-      card.id === targetId
-        ? { ...card, attributes: applyValueChanges(card.attributes, outcome.valueChanges) }
-        : card,
-    );
-  return { ...state, cards };
+  return executeCardInteraction(state, source, target).state;
 }
 
 export function stackCards(state: GameState, sourceId: string, targetId: string): GameState {

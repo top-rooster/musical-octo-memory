@@ -20,20 +20,42 @@ export interface MarkerAttribute { kind: "marker"; id: string; }
 export interface ValueAttribute { kind: "value"; id: string; value: number; min: number; max: number; }
 export type CardAttribute = MarkerAttribute | ValueAttribute;
 
-export type EffectTarget = "source" | "receiver";
-export interface ChangeValueEffect { change: string; amount: number; target?: EffectTarget; }
-export interface AddMarkerEffect { add: string; target: EffectTarget; }
-export interface RemoveMarkerEffect { remove: string; target: EffectTarget; }
-export interface DiscardEffect { discard: EffectTarget; }
-export interface DrawEffect { draw: string; }
-export interface GoEffect { go: string; }
-export interface GameOverEffect { gameOver: true; }
-export type ActionEffect = ChangeValueEffect | AddMarkerEffect | RemoveMarkerEffect |
-  DiscardEffect | DrawEffect | GoEffect | GameOverEffect;
-export interface ActionDefinition { name?: string; time: string; baseMinutes: number; effects: ActionEffect[]; }
-export interface AcceptanceDefinition { card?: string; markers?: string[]; action: ActionDefinition; }
-export interface ProcessDefinition { interval: string; intervalMinutes: number; effects: ActionEffect[]; }
-export interface ThresholdDefinition { value: string; equals: number; effects: ActionEffect[]; }
+export type ActionRole = "self" | "other";
+export type ComparisonOperator = ">" | ">=" | "<" | "<=" | "=" | "<>";
+export interface MarkerSelector { kind: "marker"; marker: string; }
+export interface ValueSelector {
+  kind: "value";
+  value: string;
+  operator: ComparisonOperator;
+  operand: number;
+}
+export interface AndSelector { kind: "and"; selectors: ActionSelector[]; }
+export interface OrSelector { kind: "or"; selectors: ActionSelector[]; }
+export interface NotSelector { kind: "not"; selector: ActionSelector; }
+export type ActionSelector = MarkerSelector | ValueSelector | AndSelector | OrSelector | NotSelector;
+
+export interface ValueOperand { target: ActionRole; value: string; }
+export interface AddMarkerEffect { kind: "add-marker"; target: ActionRole; marker: string; }
+export interface RemoveMarkerEffect { kind: "remove-marker"; target: ActionRole; marker: string; }
+export interface ChangeValueEffect {
+  kind: "value";
+  target: ActionRole;
+  value: string;
+  operator: "=" | "+=" | "-=";
+  operand: number | ValueOperand;
+}
+export interface DiscardEffect { kind: "discard"; target: ActionRole; }
+export interface SetRoomEffect { kind: "set-room"; target: ActionRole; reference: string; }
+export interface SpendTimeEffect { kind: "spend-time"; operand: number | ValueOperand; }
+export type ActionEffect = AddMarkerEffect | RemoveMarkerEffect | ChangeValueEffect |
+  DiscardEffect | SetRoomEffect | SpendTimeEffect;
+export interface ActionDefinition {
+  id: string;
+  name: string;
+  applicable: { direction: "on" | "receive"; selector: ActionSelector };
+  effects: ActionEffect[];
+}
+export interface ProcessDefinition { effects: ActionEffect[]; }
 
 export interface StorageEffect { size: ItemSize; count: number; phase?: GamePhase; }
 export interface EquippedModifier { attribute: string; amount: number; }
@@ -44,16 +66,14 @@ export interface CardMaster {
   image: string;
   description?: string;
   attributes: CardAttribute[];
+  references: Record<string, string>;
   size?: ItemSize;
   equipSlots: EquipmentSlot[];
   storage?: StorageEffect;
   whileEquipped: EquippedModifier[];
-  accept: AcceptanceDefinition[];
+  actions: ActionDefinition[];
   processes: ProcessDefinition[];
-  when: ThresholdDefinition[];
 }
-
-export interface TravelDefinition { acceptedCardId: string; destinationRoomId: string; baseMinutes: number; }
 
 export interface CardInstance {
   id: string;
@@ -62,6 +82,7 @@ export interface CardInstance {
   image: string;
   description?: string;
   attributes: CardAttribute[];
+  references: Record<string, string>;
   zone: Zone;
   homeZone?: Zone;
   roomId?: string;
@@ -69,7 +90,6 @@ export interface CardInstance {
   stackRootId?: string;
   nadirState?: boolean;
   offered?: boolean;
-  travel?: TravelDefinition;
   animation?: "draw";
   drawOrigin?: Position;
   position: Position;
@@ -79,6 +99,7 @@ export interface DeckCardState {
   id: string;
   masterId: string;
   attributes: CardAttribute[];
+  references: Record<string, string>;
 }
 export interface SearchDeckState {
   id: string;
@@ -104,6 +125,7 @@ export interface GameState {
   currentRoomId?: string;
   rooms?: Record<string, RoomRuntimeState>;
   elapsedMinutes?: number;
+  gameOver?: boolean;
   openingTakeLimit?: number;
   openingEscapeRoomId?: string;
   searchBack?: string;

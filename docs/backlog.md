@@ -82,7 +82,7 @@ Every time-consuming Action contains or resolves an explicit `spend-time` effect
 
 ### Implementation status
 
-Not implemented in the common Action model. Existing Search and travel paths advance time through separate legacy transitions.
+Implemented. Every active time-consuming path resolves an explicit `spend-time` effect through the common Action executor, and the legacy Search/travel elapsed-time mutations have been removed.
 
 ## DATA-D05 — JSON schema cannot be invented
 
@@ -149,7 +149,7 @@ The runtime model must validate the concrete approved schema, including unique I
 
 ### Implementation status
 
-Partially implemented. Strict JSON loading exists, but the approved Action, Marker/Value/Reference, and equipment representations and validation remain outstanding.
+Partially implemented. Strict JSON loading and the approved Action/Marker/Value/Reference cutover are implemented, including rejection of legacy `accept`. The separately approved size, storage, and equipment migrations remain outside this iteration.
 
 ## DATA-08 — Concrete Action JSON schema
 
@@ -298,7 +298,7 @@ Conceptually:
 
 ### Implementation status
 
-Approved but not implemented. The current runtime and JSON still use legacy `accept`, interaction, and path representations.
+Implemented with strict authored-data validation, typed loading, selector evaluation, common prevalidation/execution, and focused malformed-data coverage.
 
 ## NADIR-D01 — Body, Mind, and Spirit are persistent Nadir cards
 
@@ -484,7 +484,7 @@ For drag/drop, the dragged card is `accepted` and the card underneath is `receiv
 
 ### Implementation status
 
-Not implemented. The current interaction engine uses the legacy `accept` model.
+Implemented. Drag highlighting, preview, and commit share the same Action matcher/executor, both applicability directions use `self`/`other`, and ambiguous matches fail unchanged.
 
 ## ACTION-D02 — Generic physical Actions belong on Body
 
@@ -504,7 +504,7 @@ Current generic Body Actions are Travel, Eat, and Drink. Body dropped on a card 
 
 ### Implementation status
 
-Not implemented in the approved Action model. Authored eating works through legacy interaction data.
+Implemented. Body owns authored generic Travel, Eat, and Drink Actions, while matched cards supply the approved Markers, Values, and References.
 
 ## ACTION-D03 — Approved Action data uses Markers, Values, and References
 
@@ -527,7 +527,7 @@ Travel, Eat, and Drink Actions read those Values and References through DATA-08 
 
 ### Implementation status
 
-Not implemented. Current data uses legacy interaction and path representations rather than the approved Markers, Values, References, and Action effects.
+Implemented for food, hydration, and paths. Their legacy special-purpose representations are absent from active authored data and runtime logic.
 
 ## ACTION-D04 — Actions prevalidate completely and execute ordered effects
 
@@ -550,7 +550,7 @@ When execution reaches `spend-time`, TIME-D01 advances world time and PROCESS-D0
 
 ### Implementation status
 
-Not implemented as a common executor; current interactions, Search, and travel use separate paths.
+Implemented through one pure planning/execution path. Complete Actions resolve before mutation, effects execute in order, Process ticks resolve at `spend-time`, and failures return the original state.
 
 ## FOOD-01 — Authored food effects and consumption
 
@@ -612,7 +612,7 @@ Only an Action's `spend-time` effect advances elapsed world time. Card movement,
 
 ### Implementation status
 
-Partially implemented. Elapsed time is central state, but Search and travel currently increment it through separate legacy paths.
+Implemented. `advanceWorldTime` is the only active elapsed-time mutation path, reached only through `spend-time`; Search and Travel no longer mutate elapsed time directly.
 
 ## PROCESS-D01 — Processes use global quarter-hour ticks
 
@@ -634,7 +634,7 @@ Processes have no private timers, intervals, or durations. Each active Process r
 
 ### Implementation status
 
-Not implemented.
+Implemented with centralized quarter-hour boundary counting, deterministic non-conflicting Process batches, Process-before-next-effect ordering, and preservation of inactive-room state.
 
 ## PROCESS-D02 — Body drains Hydration and Satiation on every tick
 
@@ -655,7 +655,7 @@ At each global quarter-hour tick, Body receives Hydration -2 and Satiation -1. H
 
 ### Implementation status
 
-Not implemented.
+Implemented. Body loses Hydration 2 and Satiation 1 per crossed global tick in the main phase; Hydration 0 exposes game-over state, while Opening and unresolved Satiation-zero behavior remain unchanged.
 
 ## PROCESS-02 — Resolve unfinished Process behavior
 
@@ -1050,7 +1050,7 @@ Navigation cards are ordinary room-local Anchored cards carrying the `path` Mark
 
 ### Implementation status
 
-Partially implemented through a legacy travel path; migration to the common Action system remains.
+Implemented through Body's common Travel Action. Route cards author `path`, `travel-time`, and `destination`; Vision adjusts resolved `spend-time`, Processes tick before `set-room`, and the legacy travel adapter is removed.
 
 ## ROOM-03 — Resolve future rooms, routes, and room objects
 
@@ -1089,7 +1089,7 @@ No mechanics are implied for Squatter, Pipe, Service Cabinet, Puddle beyond WATE
 
 ### Implementation status
 
-Implemented for the current slice through a dedicated Search transition; common Action/time integration remains.
+Implemented through the common Action/time path. Search resolves Vision-adjusted `spend-time`, Processes tick before the draw, and deck depletion/placement then persist without a separate elapsed-time mutation.
 
 ### History
 

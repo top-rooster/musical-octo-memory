@@ -7,7 +7,7 @@ import type {
   Position,
   Zone,
 } from "../domain/types";
-import { isAnchored } from "./rules";
+import { isAnchored } from "./cardState";
 import { generateGridPositions, generateRoomPlacements } from "./placement";
 
 function cloneAttributes(attributes: CardAttribute[]): CardAttribute[] {
@@ -25,6 +25,7 @@ function createInstance(
     title: master.title,
     image: master.image,
     attributes: cloneAttributes(master.attributes),
+    references: { ...master.references },
     zone,
     homeZone: isAnchored(master) ? zone : undefined,
     position: { ...position },

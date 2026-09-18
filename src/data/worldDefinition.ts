@@ -1,7 +1,11 @@
 import type { CardAttribute, EquipmentSlot, LightLevel } from "../domain/types";
 import { AUTHORED_DATA } from "./authoredData";
 
-export interface CardInstanceDefinition { masterId: string; attributes: CardAttribute[]; }
+export interface CardInstanceDefinition {
+  masterId: string;
+  attributes: CardAttribute[];
+  references: Record<string, string>;
+}
 export interface EquippedDefinition extends CardInstanceDefinition { slot: EquipmentSlot; }
 export interface DeckDefinition {
   id: string;

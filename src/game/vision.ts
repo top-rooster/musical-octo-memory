@@ -1,5 +1,5 @@
 import type { GameState, LightLevel } from "../domain/types";
-import { getValue } from "./rules";
+import { getValue } from "./cardState";
 import { isAuthoredEquipmentEffectActive } from "./equipment";
 
 export const LIGHT_MODIFIERS: Record<LightLevel, number> = {

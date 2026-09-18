@@ -9,7 +9,27 @@
   },
   "satiation": {
     "name": "Satiation",
-    "description": "How well fed Nadir is. Reaching zero is fatal."
+    "description": "How well fed Nadir is."
+  },
+  "food": {
+    "name": "Food",
+    "description": "This card can be eaten through Body's generic Eat Action."
+  },
+  "food-value": {
+    "name": "Food Value",
+    "description": "How much Satiation this food restores."
+  },
+  "hydration-value": {
+    "name": "Hydration Value",
+    "description": "How much Hydration this source restores when consumed."
+  },
+  "path": {
+    "name": "Path",
+    "description": "This card represents a route to another Room."
+  },
+  "travel-time": {
+    "name": "Travel Time",
+    "description": "The route's base travel time in minutes before Vision modifies it."
   },
   "vision": {
     "name": "Vision",
