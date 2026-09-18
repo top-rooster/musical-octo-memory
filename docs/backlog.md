@@ -1283,6 +1283,33 @@ Origin: Simon
 
 What final durations, easing, trajectories, and discard visual language should ordinary draw/discard animations use? Current prototype timing is implementation evidence, not a permanent design decision.
 
+## UI-06 — Card artwork must remain visually stable
+
+Priority: P1
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Card artwork must remain visually stable during interaction.
+
+The first click or first drag of a card must not cause its artwork to flicker, disappear, visibly remount, or appear to reload.
+
+Selection, drag state, and click/release without movement must preserve the currently displayed artwork.
+
+The existing fallback behavior for genuinely missing artwork remains valid.
+
+### Acceptance criteria
+
+- No artwork flicker on first click.
+- No artwork flicker on first drag.
+- Click/release without movement preserves the artwork.
+- Selection or drag state does not visibly reload or remount the image.
+- Missing artwork still uses the established fallback.
+- Verified in Opening.
+- Verified in at least one normal Room.
+- When implemented, verified on the deployed GitHub Pages build.
+
 ## DEPLOY-01 — Complete every iteration through main and GitHub Pages
 
 Priority: P0
