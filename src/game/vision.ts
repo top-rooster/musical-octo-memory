@@ -1,6 +1,6 @@
 import type { GameState, LightLevel } from "../domain/types";
 import { getValue } from "./cardState";
-import { isAuthoredEquipmentEffectActive } from "./equipment";
+import { isEquipmentEffectActive } from "./equipment";
 
 export const LIGHT_MODIFIERS: Record<LightLevel, number> = {
   Bright: 0,
@@ -14,7 +14,7 @@ export function effectiveVision(state: GameState, roomId = state.currentRoomId):
   const base = mind ? getValue(mind, "vision")?.value ?? 0 : 0;
   const equipment = state.cards.reduce((sum, card) => {
     const master = state.masters.find((candidate) => candidate.id === card.masterId);
-    if (!master || !isAuthoredEquipmentEffectActive(card, master)) return sum;
+    if (!master || !isEquipmentEffectActive(card, master)) return sum;
     return sum + master.whileEquipped
       .filter((modifier) => modifier.attribute === "vision")
       .reduce((amount, modifier) => amount + modifier.amount, 0);

@@ -5,6 +5,9 @@ const SLOT_IDS = new Set([
   "left-hand", "right-hand", "head", "eyes", "trinket-1", "trinket-2",
   "chest", "back", "legs", "feet",
 ]);
+const HAND_SLOT_IDS = new Set(["left-hand", "right-hand"]);
+const SIZE_MARKERS = new Set(["small", "medium", "large"]);
+const STORAGE_VALUES = new Set(["storage-small", "storage-medium", "storage-large"]);
 const COMPARISONS = new Set([">", ">=", "<", "<=", "=", "<>"]);
 const VALUE_OPERATORS = new Set(["=", "+=", "-="]);
 
@@ -156,19 +159,17 @@ function validateInstance(
   attributes: Set<string>,
   location: string,
 ): void {
-  if (typeof raw === "string") {
-    reference(raw, cardIds, location);
-    return;
-  }
-  const instance = object(raw, location);
-  reference(instance.card, cardIds, `${location}.card`);
-  const master = object(cards[instance.card], `cards.${instance.card}`);
-  if (instance.markers !== undefined) {
+  const instance = typeof raw === "string" ? undefined : object(raw, location);
+  if (instance) exactKeys(instance, ["card", "markers", "values"], location);
+  const masterId = typeof raw === "string" ? raw : instance!.card;
+  reference(masterId, cardIds, typeof raw === "string" ? location : `${location}.card`);
+  const master = object(cards[masterId], `cards.${masterId}`);
+  if (instance?.markers !== undefined) {
     for (const [index, marker] of array(instance.markers, `${location}.markers`).entries()) {
       reference(marker, attributes, `${location}.markers[${index}]`);
     }
   }
-  if (instance.values !== undefined) {
+  if (instance?.values !== undefined) {
     const masterValues = object(master.values ?? {}, `cards.${instance.card}.values`);
     for (const [valueId, value] of Object.entries(object(instance.values, `${location}.values`))) {
       reference(valueId, attributes, `${location}.values.${valueId}`);
@@ -177,6 +178,15 @@ function validateInstance(
       }
       number(value, `${location}.values.${valueId}`);
     }
+  }
+  const markers = [
+    ...array(master.markers ?? [], `cards.${masterId}.markers`),
+    ...array(instance?.markers ?? [], `${location}.markers`),
+  ];
+  const sizes = markers.filter((marker) => typeof marker === "string" && SIZE_MARKERS.has(marker));
+  if (sizes.length > 1) throw new Error(`${location} has multiple size Markers`);
+  if (!markers.includes("anchored") && sizes.length !== 1) {
+    throw new Error(`${location} requires exactly one authored size Marker for carried Inventory legality`);
   }
 }
 
@@ -206,17 +216,36 @@ export function validateAuthoredData(
     const card = object(cards[cardId], `cards.${cardId}`);
     string(card.name, `cards.${cardId}.name`);
     string(card.image, `cards.${cardId}.image`);
+    for (const legacy of ["size", "storage", "equip"] as const) {
+      if (card[legacy] !== undefined) {
+        throw new Error(`cards.${cardId}.${legacy} is a removed legacy representation`);
+      }
+    }
     if (card.accept !== undefined) throw new Error(`cards.${cardId}.accept is a removed legacy representation`);
     if (card.when !== undefined) throw new Error(`cards.${cardId}.when is a removed legacy representation`);
+    exactKeys(card, [
+      "name", "image", "description", "markers", "values", "references",
+      "whileEquipped", "actions", "processes",
+    ], `cards.${cardId}`);
     if (card.markers !== undefined) {
-      for (const [index, marker] of array(card.markers, `cards.${cardId}.markers`).entries()) {
+      const markers = array(card.markers, `cards.${cardId}.markers`);
+      for (const [index, marker] of markers.entries()) {
         reference(marker, attributeIds, `cards.${cardId}.markers[${index}]`);
+      }
+      if (markers.filter((marker) => typeof marker === "string" && SIZE_MARKERS.has(marker)).length > 1) {
+        throw new Error(`cards.${cardId}.markers contains multiple size Markers`);
       }
     }
     if (card.values !== undefined) {
       for (const [valueId, value] of Object.entries(object(card.values, `cards.${cardId}.values`))) {
         reference(valueId, attributeIds, `cards.${cardId}.values.${valueId}`);
         number(value, `cards.${cardId}.values.${valueId}`);
+        if (valueId.startsWith("storage-") && !STORAGE_VALUES.has(valueId)) {
+          throw new Error(`cards.${cardId}.values.${valueId} is not an approved storage Value`);
+        }
+        if (STORAGE_VALUES.has(valueId) && (!Number.isInteger(value) || value < 0)) {
+          throw new Error(`cards.${cardId}.values.${valueId} must be a non-negative integer`);
+        }
       }
     }
     if (card.references !== undefined) {
@@ -226,12 +255,12 @@ export function validateAuthoredData(
         id(target, `cards.${cardId}.references.${referenceId}`);
         reference(target, referenceTargets, `cards.${cardId}.references.${referenceId}`);
         if (referenceId === "destination") reference(target, roomIds, `cards.${cardId}.references.destination`);
-        if (referenceId === "equip") reference(target, SLOT_IDS, `cards.${cardId}.references.equip`);
-      }
-    }
-    if (card.equip !== undefined) {
-      for (const [index, slot] of array(card.equip, `cards.${cardId}.equip`).entries()) {
-        reference(slot, SLOT_IDS, `cards.${cardId}.equip[${index}]`);
+        if (referenceId === "equip") {
+          reference(target, SLOT_IDS, `cards.${cardId}.references.equip`);
+          if (HAND_SLOT_IDS.has(target)) {
+            throw new Error(`cards.${cardId}.references.equip must target a non-Hand equipment slot`);
+          }
+        }
       }
     }
     if (card.whileEquipped !== undefined) {
@@ -305,6 +334,15 @@ export function validateAuthoredData(
       for (const [slot, instance] of Object.entries(equipped)) {
         reference(slot, SLOT_IDS, `rooms.${roomId}.opening.equipped.${slot}`);
         validateInstance(instance, cards, cardIds, attributeIds, `rooms.${roomId}.opening.equipped.${slot}`);
+        if (!HAND_SLOT_IDS.has(slot)) {
+          const masterId = typeof instance === "string" ? instance : object(instance, `rooms.${roomId}.opening.equipped.${slot}`).card;
+          string(masterId, `rooms.${roomId}.opening.equipped.${slot}.card`);
+          const master = object(cards[masterId], `cards.${masterId}`);
+          const references = object(master.references ?? {}, `cards.${masterId}.references`);
+          if (references.equip !== slot) {
+            throw new Error(`rooms.${roomId}.opening.equipped.${slot} requires references.equip = "${slot}"`);
+          }
+        }
       }
       array(opening.offered, `rooms.${roomId}.opening.offered`).forEach((instance, index) =>
         validateInstance(instance, cards, cardIds, attributeIds, `rooms.${roomId}.opening.offered[${index}]`));

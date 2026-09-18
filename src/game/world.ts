@@ -236,8 +236,7 @@ export function searchRoom(state: GameState, deckId: string, bounds: Bounds): Se
 
 export function equipCard(state: GameState, cardId: string, slot: EquipmentSlot): GameState {
   const card = state.cards.find((candidate) => candidate.id === cardId);
-  const master = card && state.masters.find((candidate) => candidate.id === card.masterId);
-  if (!card || !master || !canEquip(master, slot, card) || !canTakeOpeningCard(state, card)) return state;
+  if (!card || !canEquip(card, slot) || !canTakeOpeningCard(state, card)) return state;
   if (state.cards.some((candidate) => candidate.id !== cardId && candidate.equipmentSlot === slot)) return state;
   return {
     ...state,
@@ -273,7 +272,7 @@ export function escapeOpening(
   carriedBounds?: Bounds,
 ): { state: GameState; reason?: "capacity" } {
   if (state.phase !== "opening" || !state.openingEscapeRoomId) return { state };
-  const mainAllocation = allocateCarriedCapacity(state.cards, state.masters, "main");
+  const mainAllocation = allocateCarriedCapacity(state.cards);
   if (mainAllocation.unplacedIds.length) return { state, reason: "capacity" };
   const destination = state.rooms?.[state.openingEscapeRoomId];
   if (!destination) return { state };

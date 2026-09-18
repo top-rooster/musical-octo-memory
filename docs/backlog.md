@@ -127,7 +127,7 @@ Non-Hand equipment compatibility uses the existing relation name `equip`, for ex
 
 ### Implementation status
 
-Not implemented. Current data and code still use legacy equipment fields.
+Implemented. Card References load through the approved mapping representation, non-Hand compatibility reads the instance's `references.equip`, known targets are validated, and legacy `equip` fields are rejected.
 
 ## DATA-07 — Validate and complete the approved JSON migration
 
@@ -300,6 +300,33 @@ Conceptually:
 
 Implemented with strict authored-data validation, typed loading, selector evaluation, common prevalidation/execution, and focused malformed-data coverage.
 
+## DATA-09 — Card gameplay data is authored as attributes
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+All gameplay-relevant information belonging to a card must be represented in authored card attributes. Approved card attribute categories include the existing Markers, Values, References, Actions, and Processes. Runtime code may define the generic meaning and behavior of attribute types, but it must not define data that belongs to an individual card or master.
+
+Examples include Flashlight and Canned Food size coming from their size Markers, Pants storage coming from `storage-small`, Simple Backpack storage coming from `storage-medium`, equipment compatibility coming from `references.equip`, food quantity coming from `food-value`, hydration quantity coming from `hydration-value`, and route travel time/destination coming from authored Values and References.
+
+Runtime code must not branch on card master IDs or display names to supply gameplay facts, use lookup tables mapping cards to size or equipment slots, keep hidden storage metadata outside ordinary Values, or provide fallback/default gameplay values when required authored attributes are missing. If required authored card data is missing or malformed, validation fails rather than deriving or inventing it.
+
+### Acceptance criteria
+
+- No size, storage, or equipment gameplay decision depends on master ID or display name.
+- No legacy size, storage, or equipment metadata remains active.
+- Required authored data is validated.
+- Missing required data cannot silently fall back to code-defined card properties.
+- Runtime interprets attributes rather than defining card-specific facts.
+- Tests prove at least two different masters with equivalent attributes behave equivalently without card-name or master-ID branches.
+
+### Implementation status
+
+Implemented for the selected size, storage, equipment-compatibility, and carried-Inventory domains. Runtime rules interpret current instance Markers, Values, and References without master-ID/name lookup or fallback gameplay facts. The pre-existing passive `whileEquipped` representation is outside these domains and is recorded for Simon in EQUIP-05 rather than silently redesigned.
+
 ## NADIR-D01 — Body, Mind, and Spirit are persistent Nadir cards
 
 Priority: P0
@@ -407,7 +434,7 @@ Size is not a separate field or structured attribute. A size-based carried item 
 
 ### Implementation status
 
-Not implemented; current data uses a legacy size field.
+Implemented. Every currently size-based master uses exactly one `small`, `medium`, or `large` Marker; allocation reads current instance Markers, and validation rejects multiple Markers and the legacy `size` field.
 
 ## CARD-D05 — Storage capacity uses Values
 
@@ -428,7 +455,7 @@ Storage capacity is represented by `storage-small`, `storage-medium`, and `stora
 
 ### Implementation status
 
-Not implemented in the approved representation; equivalent legacy behavior exists.
+Implemented. Equipped Pants and Simple Backpack contribute their visible `storage-small` and `storage-medium` Values through the common capacity calculation; carried or Room storage gear contributes nothing, including during Opening.
 
 ## CARD-06 — Anchored movement and ordinary placement
 
@@ -464,6 +491,32 @@ Should Hidden Values affect Stack eligibility, and what generic bounds or clampi
 ### Implementation status
 
 Not implemented beyond the existing explicit `0..100` Value behavior where already authored.
+
+## CARD-08 — Starting clothing exposes authored gameplay attributes
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Opening starting clothing derives its gameplay behavior entirely from authored attributes. Pants are equipped in Legs, carry `references.equip = "legs"`, and carry Value `storage-small = 2`. T-Shirt is equipped in Chest and carries `references.equip = "chest"`. Opening still starts with Pants and T-Shirt equipped.
+
+The Pants `storage-small = 2` Value is visible through the normal player-facing Value presentation and inspection rather than existing only as hidden runtime metadata. Equipment compatibility comes from the authored Reference. No additional clothing effects are implied.
+
+### Acceptance criteria
+
+- Pants authored data contains `storage-small = 2`.
+- Pants authored data contains `references.equip = "legs"`.
+- T-Shirt authored data contains `references.equip = "chest"`.
+- Opening still starts with Pants in Legs and T-Shirt in Chest.
+- Removing or equipping Pants immediately changes capacity through the same generic attribute rules used by all storage equipment.
+- Pants visibly expose the `storage-small` Value through normal card attribute presentation.
+- No Pants/T-Shirt master-ID-specific storage or slot logic is required.
+
+### Implementation status
+
+Implemented. Pants author visible `storage-small = 2` and `references.equip = "legs"`; T-Shirt authors `references.equip = "chest"`; Opening continues to equip both through authored world setup.
 
 ## ACTION-D01 — Card-on-card roles and Action matching
 
@@ -787,7 +840,7 @@ Non-Hand compatibility is read from the approved Reference mapping under `refere
 
 ### Implementation status
 
-Not implemented in the approved representation; equivalent slot behavior currently reads legacy fields.
+Implemented. Non-Hand slot legality reads current instance `references.equip`; either Hand accepts ordinary movable cards, Anchored/Nadir cards are rejected, and the legacy `equip` field and loader path are removed.
 
 ## EQUIP-03 — Equipped state controls active effects
 
@@ -828,7 +881,7 @@ There is no permanent generic five-card Inventory limit and no nested pocket/bac
 
 ### Implementation status
 
-Partially implemented with legacy size/storage fields. Approved Marker/Value migration remains.
+Implemented through one pure allocation calculation reading current size Markers and equipped storage Values. Placement, display, Opening escape, and storage-equipment removal legality share that calculation; equipped cards consume no capacity.
 
 ## EQUIP-04 — Resolve remaining equipment design
 
@@ -839,6 +892,16 @@ Origin: Simon
 ### Question
 
 Which cards can use Trinket slots and what effects do they have? Do any equipment changes later consume time, do any items occupy multiple slots, and how should the player resolve unequipping capacity-providing gear when carried items no longer fit? Final capacity-supplier presentation and any equipment effects beyond those in EQUIP-03 also remain undecided. Potential progression domains recorded in the earlier equipment note include storage, protection, warmth, access, visibility, concealment, comfort, and mood, but no concrete mechanic is implied by that list.
+
+## EQUIP-05 — Decide passive equipped-effect attribute representation
+
+Priority: P1
+Decision: QUESTION FOR SIMON
+Origin: Implementation audit
+
+### Question
+
+How should passive equipped effects such as the existing Glasses and Flashlight Vision modifiers be represented within the approved Marker/Value/Reference/Action/Process attribute model? The current authored `whileEquipped` field predates DATA-09. It remains isolated from size, storage, compatibility, and Inventory legality in this iteration because no approved attribute representation exists for replacing it; current Vision behavior must not be redesigned or broken by inference.
 
 ## OPENING-01 — Opening evacuation and offered-item limit
 

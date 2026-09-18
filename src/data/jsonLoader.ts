@@ -7,8 +7,6 @@ import type {
   CardMaster,
   ComparisonOperator,
   EquipmentSlot,
-  GamePhase,
-  ItemSize,
   LightLevel,
   ProcessDefinition,
   ValueOperand,
@@ -95,13 +93,6 @@ export function loadCardMasters(rawCards: unknown): CardMaster[] {
       description: raw.description,
       attributes: attributes(raw),
       references: { ...(raw.references ?? {}) },
-      size: raw.size as ItemSize | undefined,
-      equipSlots: (raw.equip ?? []) as EquipmentSlot[],
-      storage: raw.storage && {
-        size: raw.storage.size as ItemSize,
-        count: raw.storage.count,
-        phase: raw.storage.phase as GamePhase | undefined,
-      },
       whileEquipped: raw.whileEquipped ?? [],
       actions: (raw.actions ?? []).map(action),
       processes: (raw.processes ?? []).map((process: JsonObject): ProcessDefinition => ({

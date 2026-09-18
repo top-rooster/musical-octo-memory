@@ -3,6 +3,30 @@
     "name": "Anchored",
     "description": "This card belongs to a fixed home location or part of Nadir and cannot come to rest elsewhere through ordinary placement."
   },
+  "small": {
+    "name": "Small",
+    "description": "This card uses Small carried Inventory capacity."
+  },
+  "medium": {
+    "name": "Medium",
+    "description": "This card uses Medium-compatible carried Inventory capacity."
+  },
+  "large": {
+    "name": "Large",
+    "description": "This card requires Large carried Inventory capacity."
+  },
+  "storage-small": {
+    "name": "Small Storage",
+    "description": "How many Small carried cards this equipment supports while equipped."
+  },
+  "storage-medium": {
+    "name": "Medium Storage",
+    "description": "How many Small or Medium carried cards this equipment supports while equipped."
+  },
+  "storage-large": {
+    "name": "Large Storage",
+    "description": "How many Small, Medium, or Large carried cards this equipment supports while equipped."
+  },
   "hydration": {
     "name": "Hydration",
     "description": "How well hydrated Nadir is. Reaching zero is fatal."

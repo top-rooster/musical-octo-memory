@@ -277,9 +277,8 @@ export function App() {
     });
   };
   const canDropInSlot = (state: GameState, card: CardInstance, slot: EquipmentSlot): boolean => {
-    const master = state.masters.find((candidate) => candidate.id === card.masterId);
     return Boolean(
-      master && canEquip(master, slot, card) &&
+      canEquip(card, slot) &&
       !state.cards.some((candidate) => candidate.id !== card.id && candidate.equipmentSlot === slot) &&
       (card.zone === "inventory" || state.phase !== "opening" ||
         !card.offered || openingSelectionCount(state) < (state.openingTakeLimit ?? 0)),
@@ -497,7 +496,7 @@ export function App() {
   };
 
   const allocation = game
-    ? allocateCarriedCapacity(game.cards, game.masters, game.phase ?? "main")
+    ? allocateCarriedCapacity(game.cards)
     : { capacity: { Small: 0, Medium: 0, Large: 0 }, used: { Small: 0, Medium: 0, Large: 0 }, unplacedIds: [] };
   const vision = game ? effectiveVision(game) : 0;
   const selected = game ? openingSelectionCount(game) : 0;

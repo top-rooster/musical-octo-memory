@@ -50,8 +50,12 @@ describe("JSON authored Action data", () => {
       expect.objectContaining({ kind: "value", id: "travel-time", value: 15 }),
     ]));
     expect(state.rooms!.tunnels.decks[0].definitionId).toBe("explore");
-    expect(CARD_MASTERS.find((master) => master.id === "pants")?.storage)
-      .toEqual({ size: "Small", count: 2, phase: undefined });
+    const pants = CARD_MASTERS.find((master) => master.id === "pants")!;
+    expect(pants.attributes).toEqual(expect.arrayContaining([
+      { kind: "marker", id: "medium" },
+      expect.objectContaining({ kind: "value", id: "storage-small", value: 2 }),
+    ]));
+    expect(pants.references).toEqual({ equip: "legs" });
   });
 
   it("loads Body's generic Actions and global-tick Process", () => {
@@ -73,16 +77,36 @@ describe("JSON authored Action data", () => {
   });
 
   it("migrates food, hydration, and path to Markers, Values, and References", () => {
-    expect(cards["rat-meat"]).toMatchObject({ markers: ["food"], values: { "food-value": 15 } });
-    expect(cards["canned-food"]).toMatchObject({ markers: ["food"], values: { "food-value": 25 } });
+    expect(cards["rat-meat"]).toMatchObject({ values: { "food-value": 15 } });
+    expect(cards["rat-meat"].markers).toEqual(expect.arrayContaining(["small", "food"]));
+    expect(cards["canned-food"]).toMatchObject({ values: { "food-value": 25 } });
+    expect(cards["canned-food"].markers).toEqual(expect.arrayContaining(["medium", "food"]));
     expect(cards["plastic-bottle"]).toMatchObject({
-      markers: ["container", "hydration"], values: { "hydration-value": 25 },
+      values: { "hydration-value": 25 },
     });
+    expect(cards["plastic-bottle"].markers).toEqual(expect.arrayContaining(["medium", "container", "hydration"]));
     expect(cards["go-deep-tunnels"]).toMatchObject({
       markers: ["anchored", "path"],
       values: { "travel-time": 30 },
       references: { destination: "deep-tunnels" },
     });
+  });
+
+  it("migrates size, storage, and non-Hand equipment compatibility to attributes", () => {
+    expect(cards.pants).toMatchObject({
+      markers: ["medium"], values: { "storage-small": 2 }, references: { equip: "legs" },
+    });
+    expect(cards["t-shirt"]).toMatchObject({ markers: ["medium"], references: { equip: "chest" } });
+    expect(cards["simple-backpack"]).toMatchObject({
+      markers: ["medium"], values: { "storage-medium": 5 }, references: { equip: "back" },
+    });
+    expect(cards.glasses).toMatchObject({ markers: ["small"], references: { equip: "eyes" } });
+    expect(cards.flashlight.markers).toContain("small");
+    expect(cards["canned-food"].markers).toContain("medium");
+    const text = JSON.stringify(cards);
+    expect(text).not.toContain('"size":');
+    expect(text).not.toContain('"storage":');
+    expect(text).not.toContain('"equip":[');
   });
 
   it("removes legacy Action, duration, threshold, and interval representations", () => {
@@ -131,6 +155,53 @@ describe("JSON authored Action data", () => {
     const oldTarget = structuredClone(cards);
     oldTarget.body.actions[1].effects[1].target = "received";
     expect(() => validateAuthoredData(oldTarget, rooms, attributes)).toThrow(/self.*other/);
+  });
+
+  it("rejects legacy size, storage, and equipment representations", () => {
+    for (const [field, value] of [
+      ["size", "Small"],
+      ["storage", { size: "Small", count: 2 }],
+      ["equip", ["legs"]],
+    ] as const) {
+      const legacy = structuredClone(cards);
+      legacy.pants[field] = value;
+      expect(() => validateAuthoredData(legacy, rooms, attributes)).toThrow(/removed legacy representation/);
+    }
+  });
+
+  it("rejects ambiguous size Markers and invalid equipment References", () => {
+    const multipleSizes = structuredClone(cards);
+    multipleSizes.flashlight.markers.push("medium");
+    expect(() => validateAuthoredData(multipleSizes, rooms, attributes)).toThrow(/multiple size Markers/);
+
+    const unknownSlot = structuredClone(cards);
+    unknownSlot.pants.references.equip = "waist";
+    expect(() => validateAuthoredData(unknownSlot, rooms, attributes)).toThrow(/unknown ID/);
+
+    const handReference = structuredClone(cards);
+    handReference.flashlight.references = { equip: "left-hand" };
+    expect(() => validateAuthoredData(handReference, rooms, attributes)).toThrow(/non-Hand equipment slot/);
+  });
+
+  it("rejects invalid storage Values and incompatible authored starting equipment", () => {
+    const invalidStorageId = structuredClone(cards);
+    invalidStorageId.pants.values["storage-pocket"] = 2;
+    expect(() => validateAuthoredData(invalidStorageId, rooms, attributes)).toThrow(/unknown ID/);
+
+    const invalidStorageAmount = structuredClone(cards);
+    invalidStorageAmount.pants.values["storage-small"] = -1;
+    expect(() => validateAuthoredData(invalidStorageAmount, rooms, attributes)).toThrow(/non-negative integer/);
+
+    const wrongStartingSlot = structuredClone(cards);
+    wrongStartingSlot.pants.references.equip = "chest";
+    expect(() => validateAuthoredData(wrongStartingSlot, rooms, attributes))
+      .toThrow(/requires references\.equip = "legs"/);
+  });
+
+  it("rejects missing size data when a movable world instance needs carried legality", () => {
+    const missing = structuredClone(cards);
+    missing.flashlight.markers = [];
+    expect(() => validateAuthoredData(missing, rooms, attributes)).toThrow(/exactly one authored size Marker/);
   });
 
   it("rejects duplicate Action IDs and readily detectable overlapping selectors", () => {

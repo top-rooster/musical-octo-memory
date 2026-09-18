@@ -57,7 +57,6 @@ export interface ActionDefinition {
 }
 export interface ProcessDefinition { effects: ActionEffect[]; }
 
-export interface StorageEffect { size: ItemSize; count: number; phase?: GamePhase; }
 export interface EquippedModifier { attribute: string; amount: number; }
 
 export interface CardMaster {
@@ -67,9 +66,6 @@ export interface CardMaster {
   description?: string;
   attributes: CardAttribute[];
   references: Record<string, string>;
-  size?: ItemSize;
-  equipSlots: EquipmentSlot[];
-  storage?: StorageEffect;
   whileEquipped: EquippedModifier[];
   actions: ActionDefinition[];
   processes: ProcessDefinition[];

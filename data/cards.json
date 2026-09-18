@@ -95,49 +95,45 @@
     "name": "Dead Rat",
     "image": "images/dead-rat.png",
     "description": "A dead rat. It can provide food and material if Nadir has a cutting tool.",
-    "size": "Medium"
+    "markers": ["medium"]
   },
   "rotten-meat": {
     "name": "Rotten Meat",
     "image": "images/rotten-meat.png",
     "description": "Spoiled meat that is dangerous to eat.",
-    "size": "Medium"
+    "markers": ["medium"]
   },
   "rat-skin": {
     "name": "Rat Skin",
     "image": "images/rat-skin.png",
     "description": "Skin removed from a rat.",
-    "size": "Small"
+    "markers": ["small"]
   },
   "rat-meat": {
     "name": "Rat Meat",
     "image": "images/rat-meat.png",
     "description": "Raw meat cut from a rat.",
-    "size": "Small",
-    "markers": ["food"],
+    "markers": ["small", "food"],
     "values": { "food-value": 15 }
   },
   "canned-food": {
     "name": "Canned Food",
     "image": "images/canned-food.png",
     "description": "Shelf-stable food in a sealed can.",
-    "size": "Medium",
-    "markers": ["food"],
+    "markers": ["medium", "food"],
     "values": { "food-value": 25 }
   },
   "knife": {
     "name": "Knife",
     "image": "images/knife.png",
     "description": "A general cutting tool.",
-    "size": "Small",
-    "markers": ["cutting-tool"]
+    "markers": ["small", "cutting-tool"]
   },
   "pocket-knife": {
     "name": "Pocket Knife",
     "image": "images/pocket-knife.png",
     "description": "A very basic folding knife. It is a poor weapon but a useful small cutting tool.",
-    "size": "Small",
-    "markers": ["cutting-tool"]
+    "markers": ["small", "cutting-tool"]
   },
   "campfire": {
     "name": "Campfire",
@@ -148,38 +144,36 @@
     "name": "Plastic Bottle",
     "image": "images/plastic-bottle.png",
     "description": "A reusable plastic bottle that may contain drinking water.",
-    "size": "Medium",
-    "markers": ["container", "hydration"],
+    "markers": ["medium", "container", "hydration"],
     "values": { "hydration-value": 25 }
   },
   "pants": {
     "name": "Pants",
     "image": "images/pants.png",
     "description": "Ordinary pants with two usable small pockets.",
-    "size": "Medium",
-    "equip": ["legs"],
-    "storage": { "size": "Small", "count": 2 }
+    "markers": ["medium"],
+    "values": { "storage-small": 2 },
+    "references": { "equip": "legs" }
   },
   "t-shirt": {
     "name": "T-Shirt",
     "image": "images/t-shirt.png",
     "description": "A plain T-shirt Nadir is wearing when he is forced to flee.",
-    "size": "Medium",
-    "equip": ["chest"]
+    "markers": ["medium"],
+    "references": { "equip": "chest" }
   },
   "simple-lighter": {
     "name": "Simple Lighter",
     "image": "images/simple-lighter.png",
     "description": "A cheap disposable lighter useful for starting fires.",
-    "size": "Small",
+    "markers": ["small"],
     "values": { "fuel": 100 }
   },
   "flashlight": {
     "name": "Flashlight",
     "image": "images/flashlight.png",
     "description": "A small battery-powered flashlight.",
-    "size": "Small",
-    "equip": ["left-hand", "right-hand"],
+    "markers": ["small"],
     "values": { "battery": 100 },
     "whileEquipped": [{ "attribute": "vision", "amount": 1 }]
   },
@@ -187,41 +181,41 @@
     "name": "Spare Batteries",
     "image": "images/spare-batteries.png",
     "description": "Spare batteries for a flashlight.",
-    "size": "Small"
+    "markers": ["small"]
   },
   "pain-killers": {
     "name": "Pain Killers",
     "image": "images/pain-killers.png",
     "description": "Basic pain medication.",
-    "size": "Small"
+    "markers": ["small"]
   },
   "simple-backpack": {
     "name": "Simple Backpack",
     "image": "images/simple-backpack.png",
     "description": "A simple backpack that greatly increases what Nadir can carry.",
-    "size": "Medium",
-    "equip": ["back"],
-    "storage": { "size": "Medium", "count": 5 }
+    "markers": ["medium"],
+    "values": { "storage-medium": 5 },
+    "references": { "equip": "back" }
   },
   "glasses": {
     "name": "Glasses",
     "image": "images/glasses.png",
     "description": "Nadir's prescription glasses.",
-    "size": "Small",
-    "equip": ["eyes"],
+    "markers": ["small"],
+    "references": { "equip": "eyes" },
     "whileEquipped": [{ "attribute": "vision", "amount": 1 }]
   },
   "scrap-metal": {
     "name": "Scrap Metal",
     "image": "images/scrap-metal.png",
     "description": "A useful piece of salvaged metal.",
-    "size": "Medium"
+    "markers": ["medium"]
   },
   "pipe": {
     "name": "Pipe",
     "image": "images/pipe.png",
     "description": "A length of pipe found in the tunnels.",
-    "size": "Medium"
+    "markers": ["medium"]
   },
   "squatter": {
     "name": "Squatter",
