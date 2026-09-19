@@ -518,6 +518,36 @@ The Pants `storage-small = 2` Value is visible through the normal player-facing 
 
 Implemented. Pants author visible `storage-small = 2` and `references.equip = "legs"`; T-Shirt authors `references.equip = "chest"`; Opening continues to equip both through authored world setup.
 
+## CARD-09 — Card classes classify presentation without defining behavior
+
+Priority: P1
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Every card has one of the defined classes: `item`, `person`, `path`, `aspect`, or `feature`. Body, Mind, and Spirit are `aspect` cards. Puddle is a `feature` card.
+
+`class` is classification and presentation data only. It does not currently define or imply gameplay behavior. `anchored` remains separate gameplay data: `item` does not automatically mean movable, and `person`, `path`, `aspect`, and `feature` do not automatically mean Anchored. Selectors, Actions, Processes, equipment rules, travel behavior, movement, and other gameplay rules must not depend on card class unless a later approved task explicitly introduces such a rule.
+
+Card classes should eventually be visually distinguishable, but no concrete visual treatment is approved.
+
+### Acceptance criteria
+
+- The defined class set is exactly `item`, `person`, `path`, `aspect`, and `feature`.
+- Body, Mind, and Spirit map to `aspect`; Puddle maps to `feature`.
+- Runtime gameplay behavior does not branch on card class.
+- Anchored and movement legality remain governed by their existing independent data and rules.
+- No selector, Action, Process, equipment, travel, or other gameplay mechanic gains class-dependent behavior through this task.
+
+### Open question
+
+How should classes become visually distinguishable? Border, color, icon, and layout are possible dimensions, but none is selected or implied yet.
+
+### Implementation status
+
+Not implemented and not implementation-ready until the visual treatment is approved.
+
 ## ACTION-D01 — Card-on-card roles and Action matching
 
 Priority: P0
@@ -697,18 +727,19 @@ Origin: Simon
 
 ### Rule
 
-At each global quarter-hour tick, Body receives Hydration -2 and Satiation -1. Hydration reaching 0 causes game over. Satiation-at-zero behavior is owned by SURV-03 and must not be inferred.
+At each global quarter-hour tick, Body receives Hydration -2 and Satiation -1. Hydration reaching 0 triggers the generic GAMEOVER-01 state with cause `Dehydration`. Satiation reaching 0 is not immediate Game Over; its unresolved starvation progression is owned by SURV-03 and must not be inferred.
 
 ### Acceptance criteria
 
 - Every crossed tick applies both changes exactly once.
 - Value changes obey their approved bounds.
-- Hydration 0 exposes game-over state.
+- Hydration 0 triggers GAMEOVER-01 with cause `Dehydration`.
+- Satiation 0 does not itself trigger immediate Game Over.
 - Opening does not run the main survival simulation before transition to Tunnels.
 
 ### Implementation status
 
-Implemented. Body loses Hydration 2 and Satiation 1 per crossed global tick in the main phase; Hydration 0 exposes game-over state, while Opening and unresolved Satiation-zero behavior remain unchanged.
+Partially implemented. Body loses Hydration 2 and Satiation 1 per crossed global tick in the main phase. Hydration 0 exposes the current non-terminal game-over message, but GAMEOVER-01's terminal state and screen are not implemented. Opening remains unchanged, and SURV-03's starvation progression remains unresolved.
 
 ## PROCESS-02 — Resolve unfinished Process behavior
 
@@ -754,15 +785,65 @@ Survival state should be expressed through visible Values on Body or separate pe
 
 Partially implemented for Body Values and previews.
 
-## SURV-03 — Decide Satiation-at-zero behavior
+## SURV-03 — Starving cards and Starvation loss
 
 Priority: P1
-Decision: QUESTION FOR SIMON
+Decision: APPROVED BY SIMON
 Origin: Simon
 
-### Question
+### Rule
 
-What happens when Satiation reaches 0? Hydration 0 is approved as game over, but no corresponding Satiation rule is approved.
+`Starving` is a card with class `aspect`. Multiple Starving cards may exist simultaneously. When Nadir has three Starving cards, the game enters the generic GAMEOVER-01 state with cause `Starvation`.
+
+Satiation reaching 0 is not itself immediate Game Over. It participates in a starvation progression whose timing, triggers, and recovery remain unresolved below.
+
+### Acceptance criteria
+
+- Starving cards use the `aspect` class defined by CARD-09.
+- More than one Starving card can exist at the same time.
+- Exactly three simultaneous Starving cards trigger GAMEOVER-01 with cause `Starvation`.
+- Satiation 0 alone does not trigger immediate Game Over.
+- No starvation timing or recovery behavior is inferred from the approved loss threshold.
+
+### Open questions
+
+- What triggers creation of the first Starving card?
+- How long passes before subsequent Starving cards are created?
+- Does starvation progression occur only while Satiation is 0?
+- What happens when Nadir eats again?
+- Are existing Starving cards removed?
+- If they are removed, how quickly and by what mechanism?
+- Is there any other recovery behavior?
+
+### Implementation status
+
+Not implemented and not implementation-ready until the progression and recovery questions are answered.
+
+## GAMEOVER-01 — Game Over is a generic terminal state
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Game Over is a real terminal gameplay state with a cause. Hydration reaching 0 enters Game Over with cause `Dehydration`. A dedicated Game Over screen tells the player why the game was lost.
+
+Once Game Over is active, normal gameplay stops. The player cannot continue through Actions, Search, Travel, Eat or Drink, card drag/drop, equip or unequip, other gameplay interactions, normal time progression, or Process progression caused by continued player gameplay.
+
+The mechanism is generic rather than Dehydration-specific. Future approved loss conditions use the same state with their own cause; SURV-03 already approves `Starvation` as the cause when three Starving cards coexist. At present, `Dehydration` is the only already-active loss cause.
+
+### Acceptance criteria
+
+- Hydration reaching 0 enters Game Over exactly once with cause `Dehydration`.
+- A dedicated terminal screen visibly explains the loss cause.
+- All normal gameplay interaction and player-driven time or Process progression are blocked after Game Over.
+- The terminal-state architecture accepts a cause and contains no Dehydration-specific control flow.
+- Existing and future loss conditions can enter the same Game Over state with distinct causes.
+
+### Implementation status
+
+Implementation-ready but not implemented. The current build displays `Game Over = Dehydration` when Hydration reaches 0, yet gameplay continues; that observed behavior does not satisfy the terminal-state rule.
 
 ## DURABILITY-01 — Decide tool Durability
 
@@ -899,9 +980,19 @@ Priority: P1
 Decision: QUESTION FOR SIMON
 Origin: Implementation audit
 
+### Approved direction
+
+Card-specific equipped-dependent behavior must not live as card-ID or card-name knowledge in runtime code. Whether a card's effect depends on that card being equipped should eventually be authored in card JSON/data, while runtime may implement a generic equipped-dependent effect mechanism. Runtime must not encode rules such as “Glasses have this effect while equipped.”
+
+The existing authored `whileEquipped` field predates DATA-09. It remains isolated from size, storage, compatibility, and Inventory legality because its replacement has not been designed; current Vision behavior must not be redesigned or broken by inference.
+
 ### Question
 
-How should passive equipped effects such as the existing Glasses and Flashlight Vision modifiers be represented within the approved Marker/Value/Reference/Action/Process attribute model? The current authored `whileEquipped` field predates DATA-09. It remains isolated from size, storage, compatibility, and Inventory legality in this iteration because no approved attribute representation exists for replacing it; current Vision behavior must not be redesigned or broken by inference.
+What concrete JSON/schema representation should express generic equipped-dependent effects within the approved authored-data model? Simon is deliberately deferring that redesign, so no field, wrapper, selector, effect shape, or migration is approved now.
+
+### Implementation status
+
+Open design task. Do not place EQUIP-05 into an implementation iteration until the schema is explicitly approved.
 
 ## OPENING-01 — Opening evacuation and offered-item limit
 
@@ -1046,32 +1137,77 @@ Origin: Simon
 
 ### Rule
 
-Puddle of Water is Anchored and begins with Water 3. A valid empty container has `container` and lacks `contains-water`. A successful fill adds `contains-water` to that container, reduces Puddle Water by 1, and visibly discards/exhausts the Puddle when Water reaches 0. `contains-water` remains part of the generic Drink applicability selector with the `hydration` Marker; the concrete amount comes from `hydration-value`. Fill is an Action and cannot execute until WATER-01 supplies its `spend-time` amount.
+Puddle of Water is Anchored and begins with Value `water = 3`. A valid empty container has `container` and lacks `contains-water`. A successful fill adds `contains-water` to that container and reduces Puddle `water` by 1. A Puddle with `water = 0` remains in the world, cannot fill a container until water regenerates, and must not be discarded permanently. Regeneration is owned by WATER-02. `contains-water` remains part of the generic Drink applicability selector with the `hydration` Marker; the concrete amount comes from `hydration-value`. Fill is an Action whose explicit `spend-time` is owned by WATER-01.
 
 ### Acceptance criteria
 
 - Eligibility, preview, and completion use attributes rather than master-name cases.
-- Each completed fill changes exactly one container and decrements Water exactly once.
-- A Puddle at 0 cannot fill again and leaves play according to the discard rule.
-- No absent, implicit, or zero-minute `spend-time` fallback exists while its amount is unresolved.
+- Each completed fill changes exactly one container and decrements `water` exactly once.
+- A Puddle at `water = 0` remains present and unavailable for filling until WATER-02 regenerates water.
+- The Fill Action spends exactly the duration approved in WATER-01.
 
 ### Implementation status
 
-Partially implemented. Puddle Water 3, container state, and depletion rules exist, but filling is correctly blocked pending WATER-01.
+Partially implemented. Puddle `water = 3` and container state exist, but the current depletion behavior discards the empty Puddle and filling was blocked while WATER-01 was unresolved. The approved persistent-empty behavior, one-minute Fill Action, and WATER-02 regeneration are not implemented.
 
 ### History
 
-This supersedes an older Milestone 2 direct/free filling prototype.
+This supersedes both the older Milestone 2 direct/free filling prototype and the later provisional rule that discarded an empty Puddle.
 
-## WATER-01 — Decide Puddle fill spend-time
+## WATER-01 — Puddle filling takes one minute
 
 Priority: P0
-Decision: QUESTION FOR SIMON
+Decision: APPROVED BY SIMON
 Origin: Simon
 
-### Question
+### Rule
 
-How many minutes should the Fill Action's explicit `spend-time` effect consume? This blocks the Action; no absent, implicit, zero-minute, or direct time advancement may be introduced.
+Filling one bottle from the Puddle is an Action with an explicit `spend-time` effect of exactly 1 minute.
+
+### Acceptance criteria
+
+- Each completed Fill Action advances centralized world time by exactly 1 minute.
+- The duration is authored through the common Action model and has no direct or implicit time mutation.
+- Eligibility and Puddle/container state changes remain owned by WATER-D01.
+
+### Implementation status
+
+Not implemented. This resolves the former open duration question.
+
+## WATER-02 — Puddle regeneration
+
+Priority: P1
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Puddle has Value `water`, starting at 3 with maximum 3, and Value `refill`, starting at 0. Values must support authored game-start values. `refill` is internal gameplay state and must not be visible to the player.
+
+Puddle remains in the world when `water = 0`. Its Process is evaluated on every global 15-minute tick using approved nested if/then/else logic:
+
+- If `water = 3`, do nothing; `refill` does not increase.
+- If `water < 3` and `refill < 95`, apply `refill += 1`.
+- Otherwise, apply `water += 1` and `refill = 0`.
+
+Starting from `refill = 0`, exactly 96 ticks regenerate one Water. At 15 minutes per global tick, this is exactly 24 hours.
+
+### Acceptance criteria
+
+- Authored game-start state creates Puddle with `water = 3` and `refill = 0`.
+- `water` never exceeds 3.
+- A full Puddle does not accumulate `refill`.
+- An unfilled Puddle regenerates exactly one Water on the 96th tick from `refill = 0`, then resets `refill` to 0.
+- `refill` never appears on the card, in inspection, or in ordinary player-facing previews.
+- Empty Puddles persist and can become usable again through the same generic Process system.
+
+### Open schema question
+
+What exact authored JSON representation defines a non-player-facing Value such as `refill`? Hidden Values are approved conceptually by CARD-D02, but no concrete generic JSON representation is approved. Do not invent syntax.
+
+### Implementation status
+
+Not implemented and not fully implementation-ready until the hidden-Value representation is approved.
 
 ## ROOM-01 — Persistent authored rooms and world state
 
@@ -1141,7 +1277,7 @@ Current authored compositions are:
 - Abandoned Office: ten Placeholder cards.
 - Deep Tunnels: one Flashlight with Battery 0 and nine Placeholder cards.
 
-No mechanics are implied for Squatter, Pipe, Service Cabinet, Puddle beyond WATER-D01, or Placeholder cards.
+No mechanics are implied for Squatter, Pipe, Service Cabinet, Puddle beyond WATER-D01 and WATER-02, or Placeholder cards.
 
 ### Acceptance criteria
 
