@@ -1075,6 +1075,10 @@ Each Starving card owns a Process that uses LOGIC-D04 to count cards matching bo
 
 PROCESS-D03 applies when a starvation Process creates a card: the new instance is appended to the active card/Process order, so a newly created third Starving card can run its own Process and trigger Game Over in the same Process cycle.
 
+### SUGGESTED BY CHATGPT — Future Mood interaction
+
+Eating while carrying one or more Starving cards could provide a significant positive Mood effect. Simon explicitly postponed this idea until MOOD-01 defines a Mood system. No Mood amount, scaling rule, trigger detail, or other mechanic is approved, and this suggestion must not be implemented or inferred from the approved starvation rules.
+
 ### Acceptance criteria
 
 - Body starts with hidden authored Value `starvation = 0`.
@@ -1087,11 +1091,43 @@ PROCESS-D03 applies when a starvation Process creates a card: the new instance i
 - Each Starving card owns the generic count-based Process; a count of at least three matching Inventory cards triggers GAMEOVER-01 with cause `Starvation`.
 - Satiation 0 alone does not trigger immediate Game Over.
 - Creation and loss behavior use generic Process, logic, and Game Over mechanisms without a starvation-specific runtime subsystem.
-- No Mood effect is inferred from eating while Starving; Mood-related behavior remains postponed until a Mood system exists.
+- The MOOD-01-dependent eating suggestion remains unimplemented and supplies no inferred Mood value, scaling, or trigger behavior.
 
 ### Implementation status
 
 Implementation-ready but not implemented, subject to the generic dependencies in DATA-10, LOGIC-D01 through LOGIC-D04, PROCESS-D03, and GAMEOVER-01. Starvation timing, counter, and recovery are no longer open design questions.
+
+## MOOD-01 — Mood system
+
+Priority: P2
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Safe Room is expected to gain a player-facing or otherwise gameplay-relevant Mood system. This approval establishes the need for the system only; it approves no representation, values, effects, thresholds, or lifecycle mechanics.
+
+SURV-03 remains authoritative for starvation and records one postponed `SUGGESTED BY CHATGPT` interaction that depends on this task. That suggestion does not define any Mood behavior.
+
+### QUESTION FOR SIMON — Mood mechanics
+
+- How is Mood represented?
+- What scale or range does it use?
+- What is its starting value?
+- How is it made visible to the player?
+- How does Mood change?
+- Is Mood a Value or another mechanism?
+- What does low Mood do?
+- What does high Mood do?
+- Are there Mood thresholds, and if so what are they?
+- Which Actions or Processes affect Mood?
+- How does Mood recover?
+- How does Mood interact with long-term conditions?
+- Should eating while carrying one or more Starving cards affect Mood, and if so what are the exact effect, value, scaling, and trigger rules?
+
+### Implementation status
+
+Open design task. The need for a Mood system is approved, but none of its mechanics are implementation-ready. Do not add MOOD-01 to an implementation iteration until the required rules are explicitly approved.
 
 ## GAMEOVER-01 — Game Over is a generic terminal state
 
@@ -1626,6 +1662,37 @@ Service Corridor is a persistent Room. The approved topology is Tunnels to Servi
 
 The Room and both required Path travel times are implementation-ready but not implemented. Additional content remains optional and unapproved unless separately decided.
 
+## ROOM-06 — Future room candidates
+
+Priority: P3
+Decision: SUGGESTED BY CHATGPT
+Origin: ChatGPT
+
+### Design candidates
+
+The following locations were discussed as possible future additions but are not approved Rooms:
+
+- **Maintenance Room:** possible technical area near the tunnels, with tools or spares and a relatively safer utility-space character.
+- **Storm Drain:** possible wet, dark infrastructure area and potential water-related location.
+- **Abandoned Station:** possible larger underground location and future navigation hub.
+- **Basement:** possible transition toward occupied or civilian buildings above ground.
+- **Storage Room:** possible concentrated supply location.
+- **Utility Plant / Boiler Room:** possible machinery- and noise-oriented location.
+- **Courtyard:** possible semi-exposed, surface-adjacent location.
+
+This task preserves candidates only. It does not add them to the world map, create Path cards, assign travel times, approve backgrounds, define contents or decks, or make any candidate implementation-ready. Back Alley and Service Corridor are excluded because ROOM-04 and ROOM-05 already own them.
+
+If Simon later approves a candidate, it should receive its own Room task and follow PATH-D01's authored Path-card rule rather than gaining authority from this suggestion record.
+
+### QUESTION FOR SIMON — Candidate selection and design
+
+- Which, if any, candidate locations should become approved Rooms?
+- For each approved candidate, what topology, Paths, travel times, background, light, contents, decks, interactions, and other authored behavior are required?
+
+### Implementation status
+
+Open design record only. None of these candidate Rooms or their tentative purposes are approved or implementation-ready.
+
 ## PATH-D01 — Every Room connection uses authored Path cards
 
 Priority: P0
@@ -1924,7 +1991,7 @@ The approved visual direction is:
 - **Path:** blueprint, map, or navigation character with a technically drawn/map-like texture, clearly differentiated from physical objects. Destination and direction information remain dynamic UI, not baked artwork.
 - **Feature:** industrial or environmental character with a heavier or mounted appearance, potentially resembling metal, a plaque, or industrial labeling. It is intended for room objects such as Puddle, Dumpster, Cabinet, and similar fixed/interactable environmental objects.
 
-All four roles remain parts of the same Safe Room visual language. A special condition-card treatment, including for Starving, is outside UI-07 v1; condition cards may retain their current presentation. No fifth material is approved.
+All four roles remain parts of the same Safe Room visual language. A special condition-card treatment, including for Starving, is outside UI-07 v1; condition cards may retain their current presentation. UI-08 owns the future design work for condition-card presentation. No fifth material or presentation value is approved.
 
 ### Production asset contract
 
@@ -1980,12 +2047,38 @@ UI-06 remains the authority for artwork stability. The layered renderer must not
 - The supplied 512 × 768 RGBA PNG production frames comply with the asset contract and are composed with existing art and dynamic UI as independent layers.
 - Production builds and GitHub Pages deploy all four assets at their base-path-correct URLs.
 - Dynamic state and interaction styling never require regenerating a frame asset.
-- Condition cards retain their current presentation in v1.
+- Condition cards retain their current presentation in v1; their future treatment remains isolated in UI-08.
 - UI-06 artwork-stability criteria remain satisfied across normal interaction.
 
 ### Implementation status
 
 Implementation-ready but not implemented. The production assets are present, DATA-11 resolves exact role selection and legacy fallback, and no unrelated UI-07 design question remains.
+
+## UI-08 — Condition card presentation
+
+Priority: P2
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Safe Room must revisit the visual presentation of condition or state cards such as Starving in a future design pass. The need for that future work is approved, but no concrete visual treatment is approved.
+
+UI-07 v1 remains limited to Food, Item, Path, and Feature. Condition cards retain their existing legacy presentation for that implementation. This task does not add a fifth `presentation` value or expand DATA-11's production vocabulary.
+
+### QUESTION FOR SIMON — Condition-card visual language
+
+- What frame or material treatment should condition cards use?
+- What silhouette should they have?
+- What information hierarchy should they use?
+- Should condition cards share one future presentation value?
+- Should condition severity affect their appearance?
+- How should they remain visually distinct from Food, Item, Path, and Feature?
+- How should they fit the overall Safe Room visual language?
+
+### Implementation status
+
+Open design task. The need to design condition-card presentation is approved, but its treatment and data representation are not implementation-ready. Do not add UI-08 to an implementation iteration until those decisions are approved.
 
 ## DEPLOY-01 — Complete every iteration through main and GitHub Pages
 
