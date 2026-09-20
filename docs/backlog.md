@@ -53,7 +53,7 @@ Origin: Simon
 
 ### Rule
 
-`cards.json` owns card identity, starting state, approved structured attributes, Actions, Processes, References, and card-owned behavior. `rooms.json` owns world composition, Nadir/equipment/opening state, card instances, Search decks, routes through their instances, and instance overrides. `attributes.json` owns player-facing shared attribute metadata. A room entry must not define card behavior merely because an instance is placed there.
+`cards.json` owns card identity, starting state, approved structured attributes, Actions, Processes, References, card-owned behavior, and card-owned deck definitions where approved by DECK-D01. `rooms.json` owns world composition, Nadir/equipment state, card instances, Room-owned decks, routes through their instances, and instance overrides. `attributes.json` owns player-facing shared attribute metadata. A room entry must not define card behavior merely because an instance is placed there.
 
 ### Acceptance criteria
 
@@ -167,7 +167,7 @@ Origin: Simon
     "id": "eat",
     "name": "Eat",
     "applicable": {
-      "receive": { "marker": "food" }
+      "receive": { "target": "other", "marker": "food" }
     },
     "effects": []
   }
@@ -176,18 +176,18 @@ Origin: Simon
 
 `applicable` contains exactly one of `on` or `receive`. These keys determine the relationship between the Action owner and the other card. Within the Action, `self` is always the card that owns the Action and `other` is the card or object matched by applicability. Effect targets use only `self` and `other`; `accepted` and `received` describe drag/drop roles and determine which card owns or matches an `on`/`receive` Action, but they are not effect targets.
 
-Approved selector primitives are `marker`, a Value comparison, `and`, `or`, and `not`. Selectors must not match specific card/master IDs. `and` and `or` take arrays, `not` takes one selector, and boolean selectors may be nested:
+Action applicability uses the shared condition language owned by LOGIC-D01 through LOGIC-D04 and TIME-D02. The original approved primitives are `marker`, a Value comparison, `and`, `or`, and `not`; the shared language adds the separately approved target, location-literal, count, and world-clock semantics. Conditions must not match specific card/master IDs. `and` and `or` take arrays, `not` takes one condition, and boolean conditions may be nested. Under LOGIC-D02 an omitted target means `self`, so applicability conditions that inspect the counterpart use explicit `target: "other"`:
 
 ```json
 {
   "and": [
-    { "marker": "container" },
-    { "not": { "marker": "contains-water" } }
+    { "target": "other", "marker": "container" },
+    { "not": { "target": "other", "marker": "contains-water" } }
   ]
 }
 ```
 
-A Value selector names one Value and uses exactly one of `>`, `>=`, `<`, `<=`, `=`, or `<>`. Ranges use boolean composition rather than multiple comparison operators in one selector:
+A Value condition names one Value and uses exactly one of `>`, `>=`, `<`, `<=`, `=`, or `<>`. Ranges use boolean composition rather than multiple comparison operators in one condition:
 
 ```json
 {
@@ -298,7 +298,7 @@ Conceptually:
 
 ### Implementation status
 
-Implemented with strict authored-data validation, typed loading, selector evaluation, common prevalidation/execution, and focused malformed-data coverage.
+Partially implemented. Strict authored-data validation, typed loading, the original selector subset, common prevalidation/execution, and focused malformed-data coverage exist. The shared evaluator, explicit/default condition targets, logical literals, count, world-clock conditions, and Value visibility remain unimplemented under LOGIC-D01 through LOGIC-D04, TIME-D02, and DATA-10.
 
 ## DATA-09 — Card gameplay data is authored as attributes
 
@@ -327,6 +327,35 @@ Runtime code must not branch on card master IDs or display names to supply gamep
 
 Implemented for the selected size, storage, equipment-compatibility, and carried-Inventory domains. Runtime rules interpret current instance Markers, Values, and References without master-ID/name lookup or fallback gameplay facts. The pre-existing passive `whileEquipped` representation is outside these domains and is recorded for Simon in EQUIP-05 rather than silently redesigned.
 
+## DATA-10 — Every authored Value has explicit visibility
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Every authored Value has a mandatory `visibility` field. There is no implicit visibility default. `visibility` is exactly one of:
+
+- `true`;
+- `false`;
+- a logical expression in the condition language owned by LOGIC-D01 through LOGIC-D04 and TIME-D02.
+
+`visibility` controls only whether the Value is player-facing. It does not control whether the Value exists, whether Actions or Processes can read it, or whether effects can mutate it.
+
+For Puddle, `water.visibility = true` and `refill.visibility = false`.
+
+### Acceptance criteria
+
+- Validation requires `visibility` on every authored Value and rejects an omitted or unsupported form.
+- Boolean visibility is honored directly, and expression visibility is evaluated by the shared logic evaluator.
+- Hidden Values remain ordinary authored instance state available to Actions, Processes, conditions, and effects.
+- Puddle exposes `water` but never exposes `refill` through player-facing card, inspection, or preview presentation.
+
+### Implementation status
+
+Implementation-ready but not implemented. This task resolves the generic hidden-Value representation previously left open by CARD-D02 and WATER-02 without changing unrelated Value semantics.
+
 ## NADIR-D01 — Body, Mind, and Spirit are persistent Nadir cards
 
 Priority: P0
@@ -335,18 +364,18 @@ Origin: Simon
 
 ### Rule
 
-There is no generic Nadir card. Nadir is represented by persistent anchored Inventory cards: Body for physical state, Mind for perception/cognition, and Spirit for emotional/spiritual state. Body starts with Hydration 50 and Satiation 50; Mind starts with Vision 4. During Opening these three cards and the main survival simulation are hidden or unavailable, becoming available on entering Tunnels.
+There is no generic Nadir card. Nadir is represented by persistent anchored Inventory cards: Body for physical state, Mind for perception/cognition, and Spirit for emotional/spiritual state. Body starts with Hydration 50 and Satiation 50; Mind starts with Vision 4. Body, Mind, Spirit, and the normal survival simulation are available from the start in Apartment under OPENING-01.
 
 ### Acceptance criteria
 
 - A new game creates exactly one persistent Body, Mind, and Spirit.
 - They survive room transitions with their instance state intact.
-- They are not available during Opening and appear when the main simulation starts.
+- They are available from the start in Apartment.
 - Their approved initial Values come from authored data/world setup.
 
 ### Implementation status
 
-Implemented, including Opening phase visibility.
+Current implementation hides them during the legacy Opening phase. That behavior is superseded by OPENING-01 and must be removed when Apartment is implemented.
 
 ## CARD-D01 — Card masters and instances are separate
 
@@ -376,20 +405,20 @@ Origin: Simon
 
 ### Rule
 
-Visible Markers and Values carry routine gameplay state. A Marker is conceptually icon-only; a Value is icon plus integer. Visible Values use `0..100` unless a concrete Value explicitly defines otherwise.
+Player-facing Markers and Values carry routine gameplay state. A Marker is conceptually icon-only; a player-facing Value is icon plus integer. Player-facing Values use `0..100` unless a concrete Value explicitly defines otherwise.
 
-Hidden Values may exist for concrete internal card mechanics. They use stable IDs, belong to individual instances, clone master starting state, may receive instance overrides, and may be referenced by Actions, Processes, and conditions. They do not require player-facing metadata and do not automatically appear on cards, in inspection, or in previews. They must not conceal information needed for ordinary survival decisions; SURV-02 separately prohibits unapproved hidden character-survival accumulators.
+Every authored Value has the explicit mandatory `visibility` owned by DATA-10. A Value that is not currently player-facing still uses a stable ID, belongs to its individual instance, clones master starting state, may receive instance overrides, and may be referenced by Actions, Processes, conditions, and effects. Visibility does not change existence or gameplay accessibility. Non-player-facing Values must not conceal information needed for ordinary survival decisions; SURV-02 separately prohibits unapproved hidden character-survival accumulators.
 
 ### Acceptance criteria
 
 - Markers and Values remain visually distinguishable.
 - Known routine consequences are visible or previewed before commitment where specified.
-- Hidden Values remain instance state and do not leak into player-facing attribute lists.
+- Values whose DATA-10 visibility resolves false remain instance state and do not leak into player-facing attribute lists.
 - Hidden state is introduced only by an approved detailed task.
 
 ### Implementation status
 
-Implemented for current visible attributes; no general Hidden Value model exists.
+Implemented for current visible attributes. The mandatory DATA-10 visibility model is approved but not implemented.
 
 ## CARD-D03 — Stack is Room-only presentation
 
@@ -444,18 +473,18 @@ Origin: Simon
 
 ### Rule
 
-Storage capacity is represented by `storage-small`, `storage-medium`, and `storage-large` Values, not a separate storage object. Pants provide `storage-small = 2`. Simple Backpack provides `storage-medium = 5`. Only equipped gear contributes its storage Values, including during Opening.
+Storage capacity is represented by `storage-small`, `storage-medium`, and `storage-large` Values, not a separate storage object. Pants provide `storage-small = 2`. Simple Backpack provides `storage-medium = 5`. Only equipped gear contributes its storage Values. Apartment uses the same ordinary equipment and capacity rules as every other Room.
 
 ### Acceptance criteria
 
 - Capacity is derived from Values on active equipped instances.
 - Pants and Simple Backpack supply the approved capacities.
 - Carried or Room storage gear supplies no capacity.
-- Opening applies equipped Backpack storage without changing its separate five-offer limit.
+- Apartment has no separate offered-item limit or capacity exception.
 
 ### Implementation status
 
-Implemented. Equipped Pants and Simple Backpack contribute their visible `storage-small` and `storage-medium` Values through the common capacity calculation; carried or Room storage gear contributes nothing, including during Opening.
+Implemented for the current equipment calculation. Equipped Pants and Simple Backpack contribute their visible `storage-small` and `storage-medium` Values through the common capacity calculation; carried or Room storage gear contributes nothing. The legacy Opening limit is superseded by OPENING-01.
 
 ## CARD-06 — Anchored movement and ordinary placement
 
@@ -486,7 +515,7 @@ Origin: Simon
 
 ### Question
 
-Should Hidden Values affect Stack eligibility, and what generic bounds or clamping rules, if any, apply to visible or hidden Values beyond explicitly authored bounds? Current Stack eligibility intentionally excludes visible Values; no universal hidden-state or clamping rule is approved.
+Should Values whose DATA-10 visibility currently resolves false affect Stack eligibility, and what generic bounds or clamping rules, if any, apply to Values beyond explicitly authored bounds? Current Stack eligibility intentionally excludes player-facing Values; no universal Stack rule for non-player-facing state or generic clamping rule is approved.
 
 ### Implementation status
 
@@ -500,7 +529,7 @@ Origin: Simon
 
 ### Rule
 
-Opening starting clothing derives its gameplay behavior entirely from authored attributes. Pants are equipped in Legs, carry `references.equip = "legs"`, and carry Value `storage-small = 2`. T-Shirt is equipped in Chest and carries `references.equip = "chest"`. Opening still starts with Pants and T-Shirt equipped.
+Apartment starting clothing derives its gameplay behavior entirely from authored attributes. Pants are equipped in Legs, carry `references.equip = "legs"`, and carry Value `storage-small = 2`. T-Shirt is equipped in Chest and carries `references.equip = "chest"`. Apartment starts with Pants and T-Shirt equipped.
 
 The Pants `storage-small = 2` Value is visible through the normal player-facing Value presentation and inspection rather than existing only as hidden runtime metadata. Equipment compatibility comes from the authored Reference. No additional clothing effects are implied.
 
@@ -509,16 +538,16 @@ The Pants `storage-small = 2` Value is visible through the normal player-facing 
 - Pants authored data contains `storage-small = 2`.
 - Pants authored data contains `references.equip = "legs"`.
 - T-Shirt authored data contains `references.equip = "chest"`.
-- Opening still starts with Pants in Legs and T-Shirt in Chest.
+- Apartment starts with Pants in Legs and T-Shirt in Chest.
 - Removing or equipping Pants immediately changes capacity through the same generic attribute rules used by all storage equipment.
 - Pants visibly expose the `storage-small` Value through normal card attribute presentation.
 - No Pants/T-Shirt master-ID-specific storage or slot logic is required.
 
 ### Implementation status
 
-Implemented. Pants author visible `storage-small = 2` and `references.equip = "legs"`; T-Shirt authors `references.equip = "chest"`; Opening continues to equip both through authored world setup.
+Implemented for the authored clothing attributes. Pants author visible `storage-small = 2` and `references.equip = "legs"`; T-Shirt authors `references.equip = "chest"`. The current legacy Opening equips both; Apartment must preserve that normal starting equipment state.
 
-## CARD-09 — Card classes classify presentation without defining behavior
+## CARD-09 — Card-class proposal is superseded and closed
 
 Priority: P1
 Decision: APPROVED BY SIMON
@@ -526,27 +555,177 @@ Origin: Simon
 
 ### Rule
 
-Every card has one of the defined classes: `item`, `person`, `path`, `aspect`, or `feature`. Body, Mind, and Spirit are `aspect` cards. Puddle is a `feature` card.
+Safe Room does not introduce a card-class system. The proposed classes `item`, `person`, `path`, `aspect`, `feature`, `edible`, and `drinkable` are rejected as authored classification, validation contracts, or gameplay authority.
 
-`class` is classification and presentation data only. It does not currently define or imply gameplay behavior. `anchored` remains separate gameplay data: `item` does not automatically mean movable, and `person`, `path`, `aspect`, and `feature` do not automatically mean Anchored. Selectors, Actions, Processes, equipment rules, travel behavior, movement, and other gameplay rules must not depend on card class unless a later approved task explicitly introduces such a rule.
-
-Card classes should eventually be visually distinguishable, but no concrete visual treatment is approved.
+Cards are too dynamic for a class system to remain useful without creating redundant or derived state. Gameplay authority remains in authored Markers, Values, References, Actions, and Processes. `anchored` remains explicit authored gameplay data.
 
 ### Acceptance criteria
 
-- The defined class set is exactly `item`, `person`, `path`, `aspect`, and `feature`.
-- Body, Mind, and Spirit map to `aspect`; Puddle maps to `feature`.
-- Runtime gameplay behavior does not branch on card class.
-- Anchored and movement legality remain governed by their existing independent data and rules.
-- No selector, Action, Process, equipment, travel, or other gameplay mechanic gains class-dependent behavior through this task.
-
-### Open question
-
-How should classes become visually distinguishable? Border, color, icon, and layout are possible dimensions, but none is selected or implied yet.
+- No card class field or class registry is added to authored data.
+- Validation and runtime rules do not derive behavior from a class.
+- Anchored and movement legality remain governed by explicit authored data and their existing rules.
+- Card-role presentation work remains separate in UI-07 and does not recreate a class system.
 
 ### Implementation status
 
-Not implemented and not implementation-ready until the visual treatment is approved.
+Closed and superseded before implementation.
+
+### History
+
+The earlier approved proposal defined `item`, `person`, `path`, `aspect`, and `feature` as presentation-only classes, with Body, Mind, and Spirit mapped to `aspect` and Puddle mapped to `feature`. Simon later rejected the class system after concluding that dynamic cards would make it redundant or derived. UI-07 preserves the separate goal of stronger visual differentiation without classes.
+
+## LOGIC-D01 — Shared logic evaluator
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Exactly one reusable logic-evaluation component owns the approved condition language. Action applicability/selectors, Process `if`, Value `visibility`, future passive-effect conditions, and future authored conditions using the same language must all use it. Feature-specific code must not independently reimplement condition evaluation.
+
+The evaluator is a separate component with a small reusable API. Feature code supplies an evaluation context and receives a boolean result. The component ultimately owns consistent behavior for `and`, `or`, `not`, Marker conditions, Value comparisons, logical literals, targets, nested expressions, count matching, world-clock conditions, and invalid-expression handling.
+
+### Acceptance criteria
+
+- One evaluator is used by every approved consumer of the condition language.
+- The evaluation context supplies `self`, optional `other`, world/card access required by approved conditions, and the authoritative world clock without feature-specific card-name knowledge.
+- Invalid expressions fail consistently and never become truthy through a feature-specific fallback.
+- Central tests cover the language; individual features test integration without duplicating the evaluator's language matrix.
+
+### Implementation status
+
+Architecture approved but not yet fully implementation-ready. LOGIC-D04 and TIME-D02 still require exact authored JSON representation before the whole language can be implemented without inventing schema.
+
+## LOGIC-D02 — Atomic conditions support self and other targets
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Every atomic condition may specify `target`. If `target` is omitted, `target = self` is implicit. This applies to Marker conditions, Value conditions, and logical literal conditions.
+
+These Marker conditions are equivalent:
+
+```json
+{ "marker": "food" }
+```
+
+```json
+{ "target": "self", "marker": "food" }
+```
+
+Likewise, `{ "value": "battery", ">": 0 }` defaults to `self`. Explicit `other` is supported where the supplied evaluation context has an `other`. The meanings of `self` and `other` remain consistent with DATA-08's effect language; a condition requiring missing `other` is invalid rather than silently redirected.
+
+### Acceptance criteria
+
+- Marker, Value, and logical literal conditions accept omitted, `self`, and context-valid `other` targets.
+- Omitted and explicit `self` behave identically.
+- `other` never resolves through card ID/name knowledge and cannot be used when the evaluation context has no `other`.
+- Existing Action applicability is migrated coherently: conditions inspecting the matched counterpart use explicit `other` rather than relying on the old implicit matched-card interpretation.
+
+### Implementation status
+
+Implementation-ready but not implemented.
+
+## LOGIC-D03 — Placement is expressed through logical literals
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+The shared condition language includes logical literals `in-inventory`, `in-room`, and `equipped`. They can be combined through `and`, `or`, and `not`, and follow LOGIC-D02: omitted target means `self`, while explicit `other` is valid when the evaluation context supplies it.
+
+For an ordinary movable card:
+
+- `in-inventory` means the card is in flat carried Inventory and not in an equipment slot;
+- `in-room` means the card is currently lying in the active Room;
+- `equipped` means the card is in any equipment slot, including Left Hand or Right Hand.
+
+These three placement states are mutually exclusive for ordinary movable cards. Runtime must not introduce card-specific placement checks.
+
+### Acceptance criteria
+
+- All three literals are evaluated by LOGIC-D01 against authoritative placement state.
+- Hands count as equipped and never as flat carried Inventory.
+- Boolean nesting and `self`/`other` targeting behave consistently with all other conditions.
+- Equivalent placement behavior does not depend on master ID or display name.
+
+### Implementation status
+
+Implementation-ready but not implemented.
+
+## LOGIC-D04 — Count cards matching a condition expression
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+The logic system supports counting cards that match an ordinary condition expression and comparing the resulting count with a number. LOGIC-D01 owns evaluation of the condition against candidate cards and returns the number that match.
+
+The current required use case counts cards that have Marker `starving` and satisfy `in-inventory`, then compares the count with `>= 3`. The example below is illustrative, not approved JSON syntax:
+
+```json
+{
+  "count": {
+    "and": [
+      { "marker": "starving" },
+      "in-inventory"
+    ]
+  },
+  ">=": 3
+}
+```
+
+This approval does not introduce a broader query language.
+
+### Acceptance criteria
+
+- Count applies the shared condition semantics to cards and returns exactly the number of matches.
+- The Starvation use case can combine Marker `starving` with `in-inventory` and compare the result with 3.
+- Counting uses the same nested conditions, targets, literals, and invalid-expression behavior as LOGIC-D01.
+- No card-name-specific counting path exists.
+
+### Open schema question
+
+What exact JSON representation expresses count and its numeric comparison? The example above is conceptual only and must not be implemented as schema without a separate approved representation.
+
+### Implementation status
+
+Not fully implementation-ready until the exact authored representation is approved.
+
+## TIME-D02 — Conditions can evaluate the authoritative world clock
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+LOGIC-D01 can evaluate authored conditions against TIME-D01's authoritative world clock. Runtime must not add hardcoded time concepts such as `night` for one Room.
+
+For the current world, night means `22:00 <= time OR time < 06:00`. The language must also express exact authored clock conditions such as `12:00` for Process behavior. Back Alley's access and Dumpster's daily Process use these generic world-clock conditions.
+
+### Acceptance criteria
+
+- Conditions can express inclusive/exclusive clock ranges that cross midnight.
+- Conditions can express an exact clock time such as 12:00.
+- All consumers read the same authoritative world clock through LOGIC-D01.
+- Runtime contains no Back Alley-, Dumpster-, or named-`night` special case.
+
+### Open schema question
+
+What exact JSON representation expresses world-clock comparison and equality? The semantics are approved, but syntax must not be invented.
+
+### Implementation status
+
+Not fully implementation-ready until the exact authored representation is approved.
 
 ## ACTION-D01 — Card-on-card roles and Action matching
 
@@ -556,7 +735,7 @@ Origin: Simon
 
 ### Rule
 
-For drag/drop, the dragged card is `accepted` and the card underneath is `received`. An `on` Action belongs to accepted, so accepted is `self` and received is `other`. A `receive` Action belongs to received, so received is `self` and accepted is `other`. Applicability uses the DATA-08 selector primitives over Markers and Values with boolean composition; selectors never match a specific card/master ID. Zero matches means no Action; exactly one executes; two or more is invalid authored data and must be protected in validation and runtime.
+For drag/drop, the dragged card is `accepted` and the card underneath is `received`. An `on` Action belongs to accepted, so accepted is `self` and received is `other`. A `receive` Action belongs to received, so received is `self` and accepted is `other`. Applicability uses the shared condition language in LOGIC-D01 through LOGIC-D04 and TIME-D02; conditions never match a specific card/master ID. Under LOGIC-D02 an omitted target is the Action owner (`self`), so conditions about the matched card use explicit `other`. Zero matches means no Action; exactly one executes; two or more is invalid authored data and must be protected in validation and runtime.
 
 ### Acceptance criteria
 
@@ -567,7 +746,7 @@ For drag/drop, the dragged card is `accepted` and the card underneath is `receiv
 
 ### Implementation status
 
-Implemented. Drag highlighting, preview, and commit share the same Action matcher/executor, both applicability directions use `self`/`other`, and ambiguous matches fail unchanged.
+Partially implemented. Drag highlighting, preview, and commit share the same Action matcher/executor, both applicability directions map `self`/`other`, and ambiguous matches fail unchanged. The current applicability representation still requires migration to LOGIC-D01 and LOGIC-D02's target semantics.
 
 ## ACTION-D02 — Generic physical Actions belong on Body
 
@@ -705,7 +884,7 @@ Origin: Simon
 
 ### Rule
 
-Processes have no private timers, intervals, or durations. Each active Process runs once for every world-time boundary crossed at `:00`, `:15`, `:30`, and `:45`. When `spend-time` reaches or crosses a boundary, world time advances and the tick's Process consequences resolve before the Action continues to its next ordered effect. Many Processes may be active while only one Action runs. JSON ordering must not become gameplay ordering. Finite or staged Processes use card state, effects, conditions, and thresholds rather than private clocks.
+Processes have no private timers, intervals, or durations. Each active Process runs once for every world-time boundary crossed at `:00`, `:15`, `:30`, and `:45`. When `spend-time` reaches or crosses a boundary, world time advances and the tick's Process consequences resolve before the Action continues to its next ordered effect. Many Processes may be active while only one Action runs. JSON ordering must not become accidental gameplay ordering; PROCESS-D03 defines the intentional deterministic order for cards created during a cycle. Finite or staged Processes use card state, effects, conditions, and thresholds rather than private clocks.
 
 ### Acceptance criteria
 
@@ -735,11 +914,11 @@ At each global quarter-hour tick, Body receives Hydration -2 and Satiation -1. H
 - Value changes obey their approved bounds.
 - Hydration 0 triggers GAMEOVER-01 with cause `Dehydration`.
 - Satiation 0 does not itself trigger immediate Game Over.
-- Opening does not run the main survival simulation before transition to Tunnels.
+- Apartment runs the normal survival simulation from the start.
 
 ### Implementation status
 
-Partially implemented. Body loses Hydration 2 and Satiation 1 per crossed global tick in the main phase. Hydration 0 exposes the current non-terminal game-over message, but GAMEOVER-01's terminal state and screen are not implemented. Opening remains unchanged, and SURV-03's starvation progression remains unresolved.
+Partially implemented. Body loses Hydration 2 and Satiation 1 per crossed global tick in the current main phase. Hydration 0 exposes the current non-terminal game-over message, but GAMEOVER-01's terminal state and screen are not implemented. The legacy Opening exclusion is superseded by OPENING-01, and SURV-03's starvation timing and recovery remain unresolved.
 
 ## PROCESS-02 — Resolve unfinished Process behavior
 
@@ -754,6 +933,29 @@ What are the remaining concrete rules for cooking, wound healing/recovery presen
 ### Implementation status
 
 Not implemented beyond isolated existing prototypes.
+
+## PROCESS-D03 — Newly created cards join the active Process cycle
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+When a Process creates a new card during the current Process cycle, the card is appended to the end of the relevant active card/Process order. Resolution must not use a fixed snapshot that excludes newly created cards. The new card's own Process may therefore execute later in the same cycle.
+
+Ordering is deterministic. This rule does not approve concurrency, cancellation, or any additional interruption behavior.
+
+### Acceptance criteria
+
+- A card created during Process resolution is appended after the cards/Processes already ordered for that cycle.
+- Its Process can run once later in the same cycle and is not deferred automatically to the next global tick.
+- Existing entries retain their relative order.
+- Tests prove that a newly created third Starving card can evaluate its own Process and trigger GAMEOVER-01 in the same tick.
+
+### Implementation status
+
+Implementation-ready but not implemented.
 
 ## SURV-01 — Decide additional permanent survival pressures
 
@@ -793,31 +995,35 @@ Origin: Simon
 
 ### Rule
 
-`Starving` is a card with class `aspect`. Multiple Starving cards may exist simultaneously. When Nadir has three Starving cards, the game enters the generic GAMEOVER-01 state with cause `Starvation`.
+`Starving` is a card with Marker `starving`. Multiple Starving cards may exist simultaneously and are carried in flat Inventory. Starving cards are created through authored Processes, not special runtime starvation code.
 
-Satiation reaching 0 is not itself immediate Game Over. It participates in a starvation progression whose timing, triggers, and recovery remain unresolved below.
+Each Starving card owns a Process that uses LOGIC-D04 to count cards matching both Marker `starving` and logical literal `in-inventory`. If that count is `>= 3`, the Process enters the generic GAMEOVER-01 state with cause `Starvation`.
+
+PROCESS-D03 applies when a starvation Process creates a card: the new instance is appended to the active card/Process order, so a newly created third Starving card can run its own Process and trigger Game Over in the same Process cycle.
+
+Satiation reaching 0 is not itself immediate Game Over. It participates in starvation progression whose timing, counter, and recovery remain unresolved below.
 
 ### Acceptance criteria
 
-- Starving cards use the `aspect` class defined by CARD-09.
+- Starving cards carry Marker `starving` and are in flat Inventory.
 - More than one Starving card can exist at the same time.
-- Exactly three simultaneous Starving cards trigger GAMEOVER-01 with cause `Starvation`.
+- Each Starving card owns the generic count-based Process; a count of at least three matching Inventory cards triggers GAMEOVER-01 with cause `Starvation`.
 - Satiation 0 alone does not trigger immediate Game Over.
-- No starvation timing or recovery behavior is inferred from the approved loss threshold.
+- Creation and loss behavior use generic Process, logic, and Game Over mechanisms without a starvation-specific runtime subsystem.
+- No starvation timing, counter, or recovery behavior is inferred from the approved loss threshold.
 
 ### Open questions
 
-- What triggers creation of the first Starving card?
-- How long passes before subsequent Starving cards are created?
-- Does starvation progression occur only while Satiation is 0?
-- What happens when Nadir eats again?
-- Are existing Starving cards removed?
-- If they are removed, how quickly and by what mechanism?
-- Is there any other recovery behavior?
+- What exact interval passes before a Starving card is created?
+- What exact generic mechanism or counter measures prolonged starvation?
+- What happens to starvation progression when Satiation rises above 0?
+- Can existing Starving cards be removed?
+- If recovery removes them, how quickly and through what mechanism?
+- Are there any Mood or other recovery effects?
 
 ### Implementation status
 
-Not implemented and not implementation-ready until the progression and recovery questions are answered.
+Not implemented and not implementation-ready until the progression, counter, and recovery questions are answered and LOGIC-D04's exact count syntax is approved.
 
 ## GAMEOVER-01 — Game Over is a generic terminal state
 
@@ -962,7 +1168,7 @@ There is no permanent generic five-card Inventory limit and no nested pocket/bac
 
 ### Implementation status
 
-Implemented through one pure allocation calculation reading current size Markers and equipped storage Values. Placement, display, Opening escape, and storage-equipment removal legality share that calculation; equipped cards consume no capacity.
+Implemented through one pure allocation calculation reading current size Markers and equipped storage Values. Placement, display, and storage-equipment removal legality share that calculation; equipped cards consume no capacity. The legacy Opening escape check is superseded by OPENING-01.
 
 ## EQUIP-04 — Resolve remaining equipment design
 
@@ -984,7 +1190,7 @@ Origin: Implementation audit
 
 Card-specific equipped-dependent behavior must not live as card-ID or card-name knowledge in runtime code. Whether a card's effect depends on that card being equipped should eventually be authored in card JSON/data, while runtime may implement a generic equipped-dependent effect mechanism. Runtime must not encode rules such as “Glasses have this effect while equipped.”
 
-The existing authored `whileEquipped` field predates DATA-09. It remains isolated from size, storage, compatibility, and Inventory legality because its replacement has not been designed; current Vision behavior must not be redesigned or broken by inference.
+The existing authored `whileEquipped` field predates DATA-09. It remains isolated from size, storage, compatibility, and Inventory legality because its replacement has not been designed; current Vision behavior must not be redesigned or broken by inference. LOGIC-D03's approved `equipped` literal is the generic primitive for determining whether a card is equipped, but it does not decide the surrounding passive-effect schema.
 
 ### Question
 
@@ -994,7 +1200,7 @@ What concrete JSON/schema representation should express generic equipped-depende
 
 Open design task. Do not place EQUIP-05 into an implementation iteration until the schema is explicitly approved.
 
-## OPENING-01 — Opening evacuation and offered-item limit
+## OPENING-01 — Apartment is a normal one-way Room
 
 Priority: P0
 Decision: APPROVED BY SIMON
@@ -1002,31 +1208,45 @@ Origin: Simon
 
 ### Rule
 
-The special authored Opening room starts with Pants equipped in Legs and T-Shirt equipped in Chest; both Hands, Back, Eyes, Head, Trinket 1, Trinket 2, and Feet are empty, so Nadir is barefoot. Body, Mind, Spirit, and survival simulation are unavailable until Tunnels. The offered instances are exactly: Pocket Knife; two Plastic Bottles, each with `contains-water`; two Canned Food; Simple Lighter with Fuel 50; Flashlight with Battery 20; Spare Batteries; Pain Killers; Simple Backpack; Glasses.
+The player-facing Room formerly named `Opening Room` is `Apartment`. Apartment is an ordinary Room using the same normal Inventory, equipment, Action, Process, Path, and Travel systems as other Rooms. Body, Mind, and Spirit are available from the start, and normal survival simulation is active.
 
-The player may take at most five offered instances. An offered item counts whether carried, held, or equipped. Already-worn Pants and T-Shirt do not count. Equipped Simple Backpack storage is active immediately but does not raise the five-offer limit. There is no real-time countdown. Choosing Escape transitions to Tunnels, begins the main simulation, and does not require a return route in the current slice.
+The special Opening flow is superseded: there is no Escape button, `takeLimit`, special `offered` mechanism, or separate Opening gameplay mode/phase. The player leaves through an authored Apartment-to-Tunnels Path using normal Travel. There is no Tunnels-to-Apartment Path, so Apartment is one-way under PATH-D01.
+
+Starting equipment remains ordinary equipment state: Pants are equipped in Legs and T-Shirt is equipped in Chest. Apartment contains exactly two Plastic Bottles, one starting with `contains-water` and one starting empty. The two Canned Food instances and Simple Backpack are removed from the legacy Opening contents. Retain the other approved items: Pocket Knife, Simple Lighter, Flashlight, Spare Batteries, Pain Killers, and Glasses.
+
+Apartment's background must be replaced with a homely residential apartment. The visual goal is to make the player feel that Nadir is leaving a safe, private home and entering the dangerous outside world. This approval introduces no additional Apartment mechanic.
 
 ### Acceptance criteria
 
-- Authored opening setup and exact offer list load from room/world data.
-- The sixth offered instance is rejected across carried and equipped locations.
-- Worn starting clothes are excluded from the selection count.
-- Backpack capacity works during Opening.
-- Escape persists selected/equipped items and reveals the persistent Nadir state in Tunnels.
+- Authored Apartment setup and exact contents load from room/world data as a normal persistent Room.
+- No Opening-only mode, limit, offered state, Escape control, or transition code remains active.
+- Body, Mind, Spirit, survival, Inventory, equipment, Actions, and Processes behave normally from game start.
+- Apartment has one authored Path to Tunnels; Tunnels has no return Path to Apartment.
+- Pants begin in Legs and T-Shirt in Chest through ordinary equipment state.
+- The two Bottles start in their approved different states, and Canned Food and Simple Backpack are absent.
+- The background communicates a homely residential apartment rather than an evacuation-offer screen.
 
 ### Implementation status
 
-Implemented, including Nadir hiding, both Trinket slots, and Opening storage activity.
+Not implemented and not fully implementation-ready until Apartment-to-Tunnels `travel-time` is approved in PATH-D01. The current special Opening flow, five-offer limit, Escape button, hidden Nadir cards, contents, and background are superseded by this task.
 
-## OPENING-02 — Resolve later Opening presentation and fiction
+### History
+
+The implemented Opening evacuation and five-offered-item design is intentionally retired. Its equipment-slot work remains valid, but its mode, limit, contents, transition, and presentation are not authority for Apartment.
+
+## OPENING-02 — Opening presentation question is superseded
 
 Priority: P3
-Decision: QUESTION FOR SIMON
+Decision: APPROVED BY SIMON
 Origin: Simon
 
-### Question
+### Resolution
 
-What is the final name/identity and narrative presentation of the Opening location, may it ever be revisited, and are the current offer quantities final beyond this prototype slice? Pain Killers, the clothing Values/effects, and final evacuation messaging need concrete mechanics before expansion.
+OPENING-01 resolves the former name, revisit, contents, and presentation questions: the location is Apartment, it has no return Path from Tunnels, its approved contents are explicit, and the special evacuation presentation is removed. Pain Killers and any future item-specific mechanics remain governed by their own tasks and are not invented here.
+
+### Implementation status
+
+Closed and superseded by OPENING-01.
 
 ## VISION-01 — Effective Vision controls Search and travel time
 
@@ -1045,7 +1265,7 @@ For current Search and travel tasks:
 - Vision 2: Search takes 2× and travel takes normal time.
 - Vision 3 or higher: Search and travel take normal time.
 
-The broader task vocabulary is: low-light tasks require Vision 2, normal-light tasks require Vision 3, and precision tasks require Vision 4. It exists to classify concrete future work, not to invent unrelated crafting. Approved examples are low-light—ripping cloth, making wood shavings, knife sharpening, spear practice, and fire starting; normal-light—cooking and stone throwing; precision—sewing. Opening is Bright, Tunnels Dim, Abandoned Office Bright, and Deep Tunnels Twilight. At Vision 0 or lower, leaving the room is the only currently available activity. Room presentation is derived from light state; artwork itself must not encode mechanically authoritative light. Deep Tunnels is a soft efficiency challenge, not Flashlight-gated.
+The broader task vocabulary is: low-light tasks require Vision 2, normal-light tasks require Vision 3, and precision tasks require Vision 4. It exists to classify concrete future work, not to invent unrelated crafting. Approved examples are low-light—ripping cloth, making wood shavings, knife sharpening, spear practice, and fire starting; normal-light—cooking and stone throwing; precision—sewing. Apartment is Bright, Tunnels Dim, Abandoned Office Bright, and Deep Tunnels Twilight. At Vision 0 or lower, leaving the room is the only currently available activity. Room presentation is derived from light state; artwork itself must not encode mechanically authoritative light. Deep Tunnels is a soft efficiency challenge, not Flashlight-gated.
 
 ### Acceptance criteria
 
@@ -1056,7 +1276,7 @@ The broader task vocabulary is: low-light tasks require Vision 2, normal-light t
 
 ### Implementation status
 
-Implemented for Search, travel, active equipment, and current room presentation.
+Implemented for Search, travel, active equipment, and the current Room presentation. Apartment's authored rename and normal-Room conversion remain unimplemented under OPENING-01.
 
 ## VISION-02 — Resolve extended lighting and task behavior
 
@@ -1076,7 +1296,7 @@ Origin: Simon
 
 ### Rule
 
-The Opening Flashlight starts with Battery 20. The Deep Tunnels Search Flashlight starts with Battery 0. A Flashlight is switched on and grants Vision +1 only when equipped in either Hand and Battery > 0. In Inventory or a Room it is inactive, grants no Vision, and drains no Battery.
+The Apartment Flashlight starts with Battery 20. The Deep Tunnels Search Flashlight starts with Battery 0. A Flashlight is switched on and grants Vision +1 only when equipped in either Hand and Battery > 0. In Inventory or a Room it is inactive, grants no Vision, and drains no Battery.
 
 ### Acceptance criteria
 
@@ -1087,7 +1307,7 @@ The Opening Flashlight starts with Battery 20. The Deep Tunnels Search Flashligh
 
 ### Implementation status
 
-Implemented except numerical drain, which is intentionally unresolved.
+Partially implemented. The current legacy Opening Flashlight starts at Battery 20 and the Deep Tunnels instance starts at 0; Apartment placement remains unimplemented under OPENING-01. Numerical drain remains intentionally unresolved.
 
 ## FLASHLIGHT-01 — Decide Flashlight Battery drain
 
@@ -1148,7 +1368,7 @@ Puddle of Water is Anchored and begins with Value `water = 3`. A valid empty con
 
 ### Implementation status
 
-Partially implemented. Puddle `water = 3` and container state exist, but the current depletion behavior discards the empty Puddle and filling was blocked while WATER-01 was unresolved. The approved persistent-empty behavior, one-minute Fill Action, and WATER-02 regeneration are not implemented.
+Partially implemented. Puddle `water = 3` and container state exist, but the current depletion behavior discards the empty Puddle and filling was blocked while WATER-01 was unresolved. The approved persistent-empty behavior, WATER-01 Fill duration, and WATER-02 regeneration are not implemented.
 
 ### History
 
@@ -1182,7 +1402,7 @@ Origin: Simon
 
 ### Rule
 
-Puddle has Value `water`, starting at 3 with maximum 3, and Value `refill`, starting at 0. Values must support authored game-start values. `refill` is internal gameplay state and must not be visible to the player.
+Puddle has Value `water`, starting at 3 with maximum 3 and `visibility = true`, and Value `refill`, starting at 0 with `visibility = false`. Values must support authored game-start values. DATA-10 makes visibility mandatory for every authored Value; `refill` remains ordinary internal gameplay state available to logic and effects while never being player-facing.
 
 Puddle remains in the world when `water = 0`. Its Process is evaluated on every global 15-minute tick using approved nested if/then/else logic:
 
@@ -1195,19 +1415,16 @@ Starting from `refill = 0`, exactly 96 ticks regenerate one Water. At 15 minutes
 ### Acceptance criteria
 
 - Authored game-start state creates Puddle with `water = 3` and `refill = 0`.
+- Authored Puddle data sets `water.visibility = true` and `refill.visibility = false`.
 - `water` never exceeds 3.
 - A full Puddle does not accumulate `refill`.
 - An unfilled Puddle regenerates exactly one Water on the 96th tick from `refill = 0`, then resets `refill` to 0.
 - `refill` never appears on the card, in inspection, or in ordinary player-facing previews.
 - Empty Puddles persist and can become usable again through the same generic Process system.
 
-### Open schema question
-
-What exact authored JSON representation defines a non-player-facing Value such as `refill`? Hidden Values are approved conceptually by CARD-D02, but no concrete generic JSON representation is approved. Do not invent syntax.
-
 ### Implementation status
 
-Not implemented and not fully implementation-ready until the hidden-Value representation is approved.
+Implementation-ready but not implemented. DATA-10 resolves the former hidden-Value blocker; no unresolved Puddle-regeneration design question remains.
 
 ## ROOM-01 — Persistent authored rooms and world state
 
@@ -1217,7 +1434,7 @@ Origin: Simon
 
 ### Rule
 
-The current persistent rooms are Tunnels, Abandoned Office, and Deep Tunnels; Opening is a special introductory location. Their current background assets are `images/opening-room-background.jpg`, `images/tunnels-background.jpg`, `images/abandoned-office-background.jpg`, and `images/deep-tunnels-background.jpg`. Backgrounds provide identity and atmosphere only; mechanically meaningful state remains in authored game state rather than baked into artwork. Each persistent room owns authored background, light, local card instances, local Search object/deck, and persistent card identity/state/position, including current Markers, Values, References, and exact position. Inactive rooms remain in world state. Travel switches the visible room while Nadir state, equipment, carried Inventory, elapsed time, and every room's exact state persist.
+Persistent Rooms include Apartment, Tunnels, Abandoned Office, Deep Tunnels, Back Alley, and Service Corridor. Apartment supersedes the special introductory Opening location and is a normal persistent Room under OPENING-01. Back Alley and Service Corridor are approved in ROOM-04 and ROOM-05. Backgrounds provide identity and atmosphere only; mechanically meaningful state remains in authored game state rather than baked into artwork. Each persistent Room owns authored background, light, local card instances, Room-owned decks where present, and persistent card identity/state/position, including current Markers, Values, References, and exact position. DECK-D01 also permits a card to own the same deck model. Inactive Rooms remain in world state. Travel switches the visible Room while Nadir state, equipment, carried Inventory, elapsed time, and every Room's exact state persist.
 
 ### Acceptance criteria
 
@@ -1228,7 +1445,7 @@ The current persistent rooms are Tunnels, Abandoned Office, and Deep Tunnels; Op
 
 ### Implementation status
 
-Implemented for the current room slice.
+Implemented for the legacy Opening, Tunnels, Abandoned Office, and Deep Tunnels slice. Apartment, Back Alley, and Service Corridor remain unimplemented.
 
 ## ROOM-02 — Routes travel through the common Action model
 
@@ -1246,12 +1463,13 @@ Navigation cards are ordinary room-local Anchored cards carrying the `path` Mark
 - Travel uses ACTION-D01 through ACTION-D04 and centralized time.
 - Discovered route cards remain in their room with exact identity and position.
 - Arrival preserves all world and Nadir state.
+- Every approved connection is represented by the authored Path cards required by PATH-D01; runtime invents no implicit edge.
 
 ### Implementation status
 
 Implemented through Body's common Travel Action. Route cards author `path`, `travel-time`, and `destination`; Vision adjusts resolved `spend-time`, Processes tick before `set-room`, and the legacy travel adapter is removed.
 
-## ROOM-03 — Resolve future rooms, routes, and room objects
+## ROOM-03 — Resolve remaining Room content and objects
 
 Priority: P3
 Decision: QUESTION FOR SIMON
@@ -1259,9 +1477,60 @@ Origin: Simon
 
 ### Question
 
-What future rooms/routes and final deck compositions should exist, and should Opening gain a return path? Day/night behavior and mechanics for Pipe, Squatter, Service Cabinet, Puddle-related environment presentation, and placeholder discoveries are not decided by their presence or names and must not be invented.
+What final content and deck compositions should fill the approved Rooms beyond the explicit decisions in ROOM-04, ROOM-05, DUMPSTER-01, and SEARCH-01? Mechanics for Pipe, Squatter, Service Cabinet, Puddle-related environment presentation, placeholder discoveries, and unspecified Back Alley or Service Corridor content are not decided by their presence or names and must not be invented. Approved topology is owned by PATH-D01 and is no longer open here.
 
-## SEARCH-01 — Search decks are persistent room-local objects
+## ROOM-04 — Back Alley
+
+Priority: P1
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Back Alley is a persistent Room. The approved topology is Tunnels to Back Alley and Back Alley to Tunnels, represented in both directions by authored Path cards under PATH-D01.
+
+Travel from Tunnels to Back Alley is available only at night: from 22:00 inclusive until 06:00 exclusive. The Path's availability is authored through TIME-D02 and evaluated by LOGIC-D01 against the existing world clock. Runtime must not contain a Back Alley-specific time check or a hardcoded `night` concept.
+
+Back Alley contains the Dumpster card owned by DUMPSTER-01. No other content is approved here.
+
+### Acceptance criteria
+
+- Back Alley persists under ROOM-01 like every other Room.
+- Authored Path cards provide both approved directions and no implicit runtime edge.
+- Only the Tunnels-to-Back-Alley direction is conditionally available at 22:00–06:00.
+- The midnight-spanning condition has the exact approved inclusive/exclusive boundaries.
+- Dumpster is present without hardcoded Room- or card-specific behavior.
+
+### Implementation status
+
+Not fully implementation-ready. TIME-D02's exact JSON syntax, new Path travel times, and DUMPSTER-01's unresolved authored details must be approved before the complete Room can be implemented.
+
+## ROOM-05 — Service Corridor
+
+Priority: P1
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Service Corridor is a persistent Room. The approved topology is Tunnels to Service Corridor and Service Corridor to Tunnels, represented in both directions by authored Path cards under PATH-D01. No other Service Corridor content is approved.
+
+### Acceptance criteria
+
+- Service Corridor persists under ROOM-01 like every other Room.
+- Authored Path cards provide both approved directions and no implicit runtime edge.
+- Runtime and authored data do not invent additional content.
+
+### Open questions
+
+- What content, if any, is initially present in Service Corridor?
+- What are the travel-time Values for its two Path cards?
+
+### Implementation status
+
+Under design and not fully implementation-ready until the required Path travel times are approved. Additional content is not required unless separately approved.
+
+## PATH-D01 — Every Room connection uses authored Path cards
 
 Priority: P0
 Decision: APPROVED BY SIMON
@@ -1269,7 +1538,95 @@ Origin: Simon
 
 ### Rule
 
-A Search deck is a clicked room-local interactive object, not a card, and does not inherit card rules such as Anchored, Stack, inspection, or discard. Every deck, including undiscovered-room decks, is shuffled exactly once when a new game starts; its hidden finite order persists and never rerolls between draws. It uses the shared full-face `images/search-back.jpg`, shows no remaining count, and disappears immediately when exhausted. Search is an Action with an explicit base `spend-time` amount of 15 minutes, modified by VISION-01; at Vision 0 or lower it is unavailable.
+Every Room/world connection is represented by authored Path cards. A Room is not complete until the Path cards required by the approved topology exist in the appropriate Rooms. Runtime must not invent implicit navigation edges. Conditional accessibility belongs to authored logic on the relevant Path behavior.
+
+Current approved topology is:
+
+- Apartment to Tunnels; no Tunnels-to-Apartment Path;
+- Tunnels to Abandoned Office and Abandoned Office to Tunnels;
+- Tunnels to Deep Tunnels and Deep Tunnels to Tunnels;
+- Tunnels to Back Alley and Back Alley to Tunnels;
+- Tunnels to Service Corridor and Service Corridor to Tunnels.
+
+Tunnels-to-Back-Alley access is restricted to the TIME-D02 condition `22:00 <= time OR time < 06:00`. No other Path is conditionally restricted unless another task explicitly approves it.
+
+### Acceptance criteria
+
+- Every listed directed connection has exactly the required authored Path card in its origin Room.
+- No unlisted reverse or implicit connection is created.
+- Path behavior continues to use the generic Marker, Value, Reference, Action, and logic systems rather than destination-specific code.
+- Every future Room task treats required authored Path cards as an acceptance criterion.
+
+### Open question
+
+What `travel-time` Values apply to Apartment-to-Tunnels and both directions for Back Alley and Service Corridor? Existing Abandoned Office and Deep Tunnels times remain owned by ROOM-02.
+
+### Implementation status
+
+Partially implemented for the existing Tunnels, Abandoned Office, and Deep Tunnels connections. The expanded topology is not fully implementation-ready until the new travel times and TIME-D02 syntax are approved.
+
+## DECK-D01 — Deck ownership is shared by Rooms and cards
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+The existing deck definition currently authored under Rooms is generalized and reused; no second deck schema is introduced. A deck may be owned by a Room or by a card. A card-owned deck uses the same underlying deck model and preserves existing shuffle, persistence, draw, removal, and retained-order behavior unless another approved task explicitly changes it.
+
+This enables interactive world cards such as Dumpster to own searchable contents without a Dumpster-specific deck subsystem.
+
+### Acceptance criteria
+
+- Room-owned and card-owned decks load through one generalized model.
+- Existing Room-deck behavior and persistence remain unchanged after migration.
+- A card-owned deck remains associated with its owning card instance and retains cards not found or removed.
+- Runtime contains no Dumpster-specific deck implementation.
+
+### Implementation status
+
+Implementation-ready but not implemented. Concrete Dumpster refill effects remain separately unresolved in DUMPSTER-01.
+
+## DUMPSTER-01 — Dumpster owns a persistent refillable deck
+
+Priority: P1
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Dumpster is a card located in Back Alley. It owns a searchable deck through DECK-D01. The deck has authored starting cards, retains cards that have not been found or removed, and receives two new cards every day at exactly 12:00.
+
+The daily addition is performed by a Process authored on Dumpster. It uses the authoritative world clock through TIME-D02, the shared evaluator in LOGIC-D01, and generic card/deck effects. Runtime must not hardcode daily Dumpster behavior.
+
+### Acceptance criteria
+
+- Dumpster and its deck persist as ordinary authored card/world state.
+- Searching uses the generalized deck behavior rather than a second deck type.
+- The authored Process adds exactly two cards when its approved 12:00 condition is met.
+- Cards not drawn or removed remain in the deck across searches and daily additions.
+- No Dumpster ID/name branch exists in runtime.
+
+### Open questions
+
+- What exact cards start in the Dumpster deck?
+- What source or refill pool supplies the two daily cards?
+- What exact generic JSON/effect representation adds cards to an owned deck?
+
+### Implementation status
+
+Under design and not fully implementation-ready until the starting contents, refill source, generic add-to-deck effect syntax, and TIME-D02 syntax are approved.
+
+## SEARCH-01 — Search decks are persistent owned objects
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+A Room-owned Search deck is presented as a clicked Room-local interactive object, not a card, and does not inherit card rules such as Anchored, Stack, inspection, or discard. Under DECK-D01 the same deck model may instead be owned by a card; the deck itself remains distinct from its owning card, while interaction occurs through that card as approved by its task. Every deck, including undiscovered-Room decks, is shuffled exactly once when a new game starts unless an owning task explicitly adds cards later; its hidden finite order persists and never rerolls between draws. Room-owned Search presentation uses the shared full-face `images/search-back.jpg`, shows no remaining count, and disappears immediately when exhausted. Search is an Action with an explicit base `spend-time` amount of 15 minutes, modified by VISION-01; at Vision 0 or lower it is unavailable.
 
 Current authored compositions are:
 
@@ -1282,6 +1639,7 @@ No mechanics are implied for Squatter, Pipe, Service Cabinet, Puddle beyond WATE
 ### Acceptance criteria
 
 - A controlled RNG proves deterministic one-time shuffle and stable hidden order.
+- Room-owned and card-owned searchable decks share the DECK-D01 model without conflating the deck with its owner.
 - Each completed Search advances centralized time through `spend-time`, then draws exactly one instance and depletes exactly one entry.
 - Undiscovered room decks are shuffled at new-game creation.
 - Exhausted decks become unavailable and are removed from presentation.
@@ -1341,7 +1699,7 @@ While dragging, every legal card receiver is green before hover. An ordinary leg
 - Hover colors follow the approved receiver and Stack distinctions.
 - Invalid overlapping targets never look release-ready and restore exact origin on release.
 - Previews show exact bounded before/after Values and cannot disagree with commit.
-- Bare-zone feedback reflects bounds, overlap, Anchored, storage, and Opening-limit legality.
+- Bare-zone feedback reflects bounds, overlap, Anchored, storage, and ordinary placement legality.
 
 ### Implementation status
 
@@ -1442,9 +1800,35 @@ The existing fallback behavior for genuinely missing artwork remains valid.
 - Click/release without movement preserves the artwork.
 - Selection or drag state does not visibly reload or remount the image.
 - Missing artwork still uses the established fallback.
-- Verified in Opening.
+- Verified in Apartment after OPENING-01 replaces the legacy Opening.
 - Verified in at least one normal Room.
 - When implemented, verified on the deployed GitHub Pages build.
+
+## UI-07 — Visually distinguish card roles without classes
+
+Priority: P1
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Cards should have stronger visual differentiation so different gameplay roles are easier to recognize. This presentation work must not introduce or depend on the rejected card-class system in CARD-09, and it must not invent categories or visual mappings.
+
+Potential visual dimensions include border, color, icon, layout, or another treatment. No exact system has been selected.
+
+### Acceptance criteria
+
+- The eventual treatment improves visual differentiation without adding class as authored or derived state.
+- Presentation derives only from separately approved authored data or rules.
+- No category, mapping, palette, icon set, border language, or layout rule is implemented until explicitly approved.
+
+### Open question
+
+Which card roles need visual distinction, and which combination of border, color, icon, layout, or other treatment should represent them?
+
+### Implementation status
+
+Open design task and not Codex-ready.
 
 ## DEPLOY-01 — Complete every iteration through main and GitHub Pages
 
@@ -1483,7 +1867,7 @@ Origin: Simon
 
 Safe Room displays its build number and build date/time unobtrusively in a fixed corner of the game window. Production GitHub Pages builds use GitHub Actions `GITHUB_RUN_NUMBER` as the build number and a UTC timestamp generated for the build being produced; the concrete values are injected into the production bundle at build time rather than fetched by the browser. Local development uses a safe `dev` fallback, and a production deployment must never silently show that fallback.
 
-The display is small, subdued, always readable, unaffected by Room zoom, and visible across Opening and normal rooms without covering important gameplay controls or cards. The preferred location is the bottom-right corner.
+The display is small, subdued, always readable, unaffected by Room zoom, and visible across Apartment and other Rooms without covering important gameplay controls or cards. The preferred location is the bottom-right corner.
 
 As part of the permanent iteration-completion invariant in DEPLOY-01, deployment verification confirms that the visible build number matches the GitHub Actions run number, that the visible timestamp matches the metadata injected into that build, and that the deployed page is not showing stale metadata from an earlier deployment. `BUILD-01` does not need to remain in `docs/next-iteration.md` after implementation for this verification rule to continue applying.
 
@@ -1493,7 +1877,7 @@ As part of the permanent iteration-completion invariant in DEPLOY-01, deployment
 - Production builds receive their build number from `GITHUB_RUN_NUMBER` and receive an unambiguous UTC build timestamp generated during the workflow/build.
 - The production bundle contains the concrete number and timestamp and does not fetch GitHub APIs at runtime for them.
 - Local development has a safe `dev` fallback, while the GitHub Pages production build fails rather than silently displaying `dev`.
-- The metadata remains visible across Opening and normal rooms, is unaffected by Room zoom, and does not obscure important gameplay UI.
+- The metadata remains visible across Apartment and other Rooms, is unaffected by Room zoom, and does not obscure important gameplay UI.
 - Automated tests cover supplied metadata rendering and any nontrivial formatting or production-fallback protection.
 - Deployment browser verification matches the displayed values to the successful workflow run and injected build metadata, rules out stale deployment content, confirms assets and basic interaction, and finds no new console errors.
 
