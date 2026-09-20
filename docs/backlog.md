@@ -595,7 +595,7 @@ The evaluator is a separate component with a small reusable API. Feature code su
 
 ### Implementation status
 
-Architecture approved but not yet fully implementation-ready. LOGIC-D04 and TIME-D02 still require exact authored JSON representation before the whole language can be implemented without inventing schema.
+Architecture approved. LOGIC-D04's count representation is now approved and implementation-ready. The only remaining language-level schema blocker is TIME-D02's exact valid JSON serialization for a world-clock comparison; evaluator work that does not depend on that atom is otherwise implementation-ready subject to its owning tasks.
 
 ## LOGIC-D02 — Atomic conditions support self and other targets
 
@@ -667,9 +667,9 @@ Origin: Simon
 
 ### Rule
 
-The logic system supports counting cards that match an ordinary condition expression and comparing the resulting count with a number. LOGIC-D01 owns evaluation of the condition against candidate cards and returns the number that match.
+The logic system supports counting cards that match an ordinary condition expression and comparing the resulting count with a number. `count` evaluates its contained ordinary condition expression against the relevant card population and returns the number of matching cards. The result uses the same approved comparator vocabulary as Value comparisons: `>`, `>=`, `<`, `<=`, `=`, and `<>`.
 
-The current required use case counts cards that have Marker `starving` and satisfy `in-inventory`, then compares the count with `>= 3`. The example below is illustrative, not approved JSON syntax:
+The approved count form for the first concrete use case, starvation, is:
 
 ```json
 {
@@ -689,16 +689,13 @@ This approval does not introduce a broader query language.
 
 - Count applies the shared condition semantics to cards and returns exactly the number of matches.
 - The Starvation use case can combine Marker `starving` with `in-inventory` and compare the result with 3.
+- Count results support exactly `>`, `>=`, `<`, `<=`, `=`, and `<>`.
 - Counting uses the same nested conditions, targets, literals, and invalid-expression behavior as LOGIC-D01.
 - No card-name-specific counting path exists.
 
-### Open schema question
-
-What exact JSON representation expresses count and its numeric comparison? The example above is conceptual only and must not be implemented as schema without a separate approved representation.
-
 ### Implementation status
 
-Not fully implementation-ready until the exact authored representation is approved.
+Implementation-ready but not implemented, subject to LOGIC-D01 through LOGIC-D03.
 
 ## TIME-D02 — Conditions can evaluate the authoritative world clock
 
@@ -708,24 +705,27 @@ Origin: Simon
 
 ### Rule
 
-LOGIC-D01 can evaluate authored conditions against TIME-D01's authoritative world clock. Runtime must not add hardcoded time concepts such as `night` for one Room.
+LOGIC-D01 can evaluate authored conditions against TIME-D01's existing authoritative world clock. Authored logic compares the current world-clock time with authored `HH:MM` times. Runtime must not add hardcoded time concepts such as `night` for one Room.
 
-For the current world, night means `22:00 <= time OR time < 06:00`. The language must also express exact authored clock conditions such as `12:00` for Process behavior. Back Alley's access and Dumpster's daily Process use these generic world-clock conditions.
+Night means `current time >= 22:00 OR current time < 06:00`. Exact noon means `current time = 12:00`. Back Alley's access uses the night expression, and Dumpster's daily Process uses the exact-noon expression.
+
+Earlier pseudo-JSON such as `{ "time": ">=", "22:00" }` records the intended semantics but is not valid JSON and is not approved serialization.
 
 ### Acceptance criteria
 
 - Conditions can express inclusive/exclusive clock ranges that cross midnight.
 - Conditions can express an exact clock time such as 12:00.
+- Authored clock operands use `HH:MM` times and compare against the current authoritative world-clock time.
 - All consumers read the same authoritative world clock through LOGIC-D01.
 - Runtime contains no Back Alley-, Dumpster-, or named-`night` special case.
 
-### Open schema question
+### QUESTION FOR SIMON — Valid time-atom serialization
 
-What exact JSON representation expresses world-clock comparison and equality? The semantics are approved, but syntax must not be invented.
+What exact valid JSON object shape serializes a world-clock comparison? The current approved condition schema has no existing atomic shape for time, so only this serialization detail remains unresolved; the comparison semantics above are approved.
 
 ### Implementation status
 
-Not fully implementation-ready until the exact authored representation is approved.
+World-clock semantics are approved, but consumers requiring a time atom are not implementation-ready until its exact valid JSON serialization is approved.
 
 ## ACTION-D01 — Card-on-card roles and Action matching
 
@@ -835,6 +835,32 @@ Rat Meat carries the `food` Marker and `food-value` 15. Canned Food carries the 
 
 Implemented through legacy authored interactions. Migration to the approved `food` Marker, `food-value`, and common Action executor remains part of ACTION-D01 through ACTION-D04.
 
+## FOOD-02 — Define Stale Bread gameplay data
+
+Priority: P1
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+A card named `Stale Bread` exists. DUMPSTER-01 may include Stale Bread in its starting contents and daily refill before the card's remaining gameplay details are decided.
+
+This approval establishes the card's identity and use as Dumpster content only. It does not yet approve a nutrition amount, eating duration, Values, Actions, or other gameplay behavior.
+
+### Acceptance criteria
+
+- Authored data can reference one or more Stale Bread instances through the normal card/deck model.
+- DUMPSTER-01 does not require a duplicate or placeholder bread authority.
+- No nutrition amount, duration, attribute, or effect is inferred from the display name.
+
+### QUESTION FOR SIMON — Stale Bread behavior
+
+Should Stale Bread be edible through the generic `food` Marker, and if so what `food-value` does it have? Does eating it spend time, and if so how long? No additional behavior is approved until these details are decided.
+
+### Implementation status
+
+The card identity and Dumpster references are approved. Its gameplay behavior is not implementation-ready until the questions above are answered.
+
 ## ACTION-05 — Direct interactions commit without a chooser
 
 Priority: P1
@@ -906,7 +932,7 @@ Origin: Simon
 
 ### Rule
 
-At each global quarter-hour tick, Body receives Hydration -2 and Satiation -1. Hydration reaching 0 triggers the generic GAMEOVER-01 state with cause `Dehydration`. Satiation reaching 0 is not immediate Game Over; its unresolved starvation progression is owned by SURV-03 and must not be inferred.
+At each global quarter-hour tick, Body receives Hydration -2 and Satiation -1. Hydration reaching 0 triggers the generic GAMEOVER-01 state with cause `Dehydration`. Satiation reaching 0 is not immediate Game Over; its approved starvation progression is owned by SURV-03.
 
 ### Acceptance criteria
 
@@ -918,7 +944,7 @@ At each global quarter-hour tick, Body receives Hydration -2 and Satiation -1. H
 
 ### Implementation status
 
-Partially implemented. Body loses Hydration 2 and Satiation 1 per crossed global tick in the current main phase. Hydration 0 exposes the current non-terminal game-over message, but GAMEOVER-01's terminal state and screen are not implemented. The legacy Opening exclusion is superseded by OPENING-01, and SURV-03's starvation timing and recovery remain unresolved.
+Partially implemented. Body loses Hydration 2 and Satiation 1 per crossed global tick in the current main phase. Hydration 0 exposes the current non-terminal game-over message, but GAMEOVER-01's terminal state and screen are not implemented. The legacy Opening exclusion is superseded by OPENING-01; SURV-03 now owns the approved starvation timing, counter, and recovery rules.
 
 ## PROCESS-02 — Resolve unfinished Process behavior
 
@@ -975,7 +1001,7 @@ Origin: Simon
 
 ### Rule
 
-Survival state should be expressed through visible Values on Body or separate persistent condition cards when a condition has its own identity and lifecycle. Do not introduce a generic Health resource or hidden accumulators as a substitute for a concrete mechanic. Ordinary Values use authored bounds; current Body survival Values use `0..100` and changes clamp to those bounds.
+Survival state should be expressed through visible Values on Body or separate persistent condition cards when a condition has its own identity and lifecycle. Do not introduce a generic Health resource or hidden accumulators as a substitute for a concrete mechanic. SURV-03's hidden Body Value `starvation` is an explicitly approved counter for one concrete mechanic, not authority for additional hidden survival state. Ordinary Values use authored bounds; current Body survival Values use `0..100` and changes clamp to those bounds.
 
 ### Acceptance criteria
 
@@ -997,33 +1023,35 @@ Origin: Simon
 
 `Starving` is a card with Marker `starving`. Multiple Starving cards may exist simultaneously and are carried in flat Inventory. Starving cards are created through authored Processes, not special runtime starvation code.
 
+Body has the normal authored Value `starvation`, starting at `0` with `visibility = false`. It is internal gameplay state that remains available to generic logic and effects under DATA-10.
+
+When Satiation transitions from above 0 to `0`, immediately create one Starving card and reset `starvation = 0`. Satiation 0 itself is still not directly Game Over.
+
+While Satiation remains 0, each applicable global 15-minute tick applies `starvation += 1`. After a full additional 96 ticks, exactly 24 hours, create one additional Starving card and reset `starvation = 0`. The tick that first changes Satiation to 0 creates the immediate card and resets the counter; it does not also count as the first tick of the following 24-hour interval. The next Starving card therefore cannot arrive after only 23 hours 45 minutes.
+
+When Satiation changes from 0 to above 0, discard one existing Starving card if one exists and reset `starvation = 0`. If Satiation later returns to 0, immediately create a new Starving card and restart the 24-hour counter from 0. There is no separate starvation-recovery subsystem.
+
 Each Starving card owns a Process that uses LOGIC-D04 to count cards matching both Marker `starving` and logical literal `in-inventory`. If that count is `>= 3`, the Process enters the generic GAMEOVER-01 state with cause `Starvation`.
 
 PROCESS-D03 applies when a starvation Process creates a card: the new instance is appended to the active card/Process order, so a newly created third Starving card can run its own Process and trigger Game Over in the same Process cycle.
 
-Satiation reaching 0 is not itself immediate Game Over. It participates in starvation progression whose timing, counter, and recovery remain unresolved below.
-
 ### Acceptance criteria
 
+- Body starts with hidden authored Value `starvation = 0`.
+- A transition from positive Satiation to 0 immediately creates one Starving card and resets the counter.
+- While Satiation stays 0, exactly 96 subsequent global ticks create each additional Starving card and reset the counter; no interval is shortened to 23 hours 45 minutes.
+- A transition from Satiation 0 to above 0 discards at most one existing Starving card and resets the counter.
+- Returning to Satiation 0 creates a new immediate Starving card and restarts the counter.
 - Starving cards carry Marker `starving` and are in flat Inventory.
 - More than one Starving card can exist at the same time.
 - Each Starving card owns the generic count-based Process; a count of at least three matching Inventory cards triggers GAMEOVER-01 with cause `Starvation`.
 - Satiation 0 alone does not trigger immediate Game Over.
 - Creation and loss behavior use generic Process, logic, and Game Over mechanisms without a starvation-specific runtime subsystem.
-- No starvation timing, counter, or recovery behavior is inferred from the approved loss threshold.
-
-### Open questions
-
-- What exact interval passes before a Starving card is created?
-- What exact generic mechanism or counter measures prolonged starvation?
-- What happens to starvation progression when Satiation rises above 0?
-- Can existing Starving cards be removed?
-- If recovery removes them, how quickly and through what mechanism?
-- Are there any Mood or other recovery effects?
+- No Mood effect is inferred from eating while Starving; Mood-related behavior remains postponed until a Mood system exists.
 
 ### Implementation status
 
-Not implemented and not implementation-ready until the progression, counter, and recovery questions are answered and LOGIC-D04's exact count syntax is approved.
+Implementation-ready but not implemented, subject to the generic dependencies in DATA-10, LOGIC-D01 through LOGIC-D04, PROCESS-D03, and GAMEOVER-01. Starvation timing, counter, and recovery are no longer open design questions.
 
 ## GAMEOVER-01 — Game Over is a generic terminal state
 
@@ -1186,13 +1214,36 @@ Priority: P1
 Decision: QUESTION FOR SIMON
 Origin: Implementation audit
 
-### Approved direction
+### APPROVED BY SIMON — Architectural direction
 
 Card-specific equipped-dependent behavior must not live as card-ID or card-name knowledge in runtime code. Whether a card's effect depends on that card being equipped should eventually be authored in card JSON/data, while runtime may implement a generic equipped-dependent effect mechanism. Runtime must not encode rules such as “Glasses have this effect while equipped.”
 
 The existing authored `whileEquipped` field predates DATA-09. It remains isolated from size, storage, compatibility, and Inventory legality because its replacement has not been designed; current Vision behavior must not be redesigned or broken by inference. LOGIC-D03's approved `equipped` literal is the generic primitive for determining whether a card is equipped, but it does not decide the surrounding passive-effect schema.
 
-### Question
+### SUGGESTED BY CHATGPT — Passive modifier proposal
+
+One possible architecture is:
+
+```json
+"passives": [
+  {
+    "if": "equipped",
+    "effects": [
+      {
+        "target": "nadir",
+        "value": "vision",
+        "+=": 1
+      }
+    ]
+  }
+]
+```
+
+Under this proposal, passive effects are continuous modifiers evaluated from current state. They do not mutate base state on equip and reverse-mutate it on unequip; removing or unequipping the source naturally removes its effective modifier. `if` would use LOGIC-D01, and `equipped` would use LOGIC-D03's approved literal. A Flashlight could conceptually require both `equipped` and Battery greater than 0 before contributing Vision.
+
+This proposal, including every shown field and the `nadir` target, is not approved schema.
+
+### QUESTION FOR SIMON — Passive-effect schema
 
 What concrete JSON/schema representation should express generic equipped-dependent effects within the approved authored-data model? Simon is deliberately deferring that redesign, so no field, wrapper, selector, effect shape, or migration is approved now.
 
@@ -1228,7 +1279,7 @@ Apartment's background must be replaced with a homely residential apartment. The
 
 ### Implementation status
 
-Not implemented and not fully implementation-ready until Apartment-to-Tunnels `travel-time` is approved in PATH-D01. The current special Opening flow, five-offer limit, Escape button, hidden Nadir cards, contents, and background are superseded by this task.
+Implementation-ready but not implemented. PATH-D01 now approves Apartment-to-Tunnels `travel-time = 15`; the current special Opening flow, five-offer limit, Escape button, hidden Nadir cards, contents, and background are superseded by this task.
 
 ### History
 
@@ -1503,7 +1554,7 @@ Back Alley contains the Dumpster card owned by DUMPSTER-01. No other content is 
 
 ### Implementation status
 
-Not fully implementation-ready. TIME-D02's exact JSON syntax, new Path travel times, and DUMPSTER-01's unresolved authored details must be approved before the complete Room can be implemented.
+Not fully implementation-ready. The new Path travel times are approved; TIME-D02's valid time-atom serialization and DUMPSTER-01's generic add-to-deck effect syntax remain blockers for the complete Room.
 
 ## ROOM-05 — Service Corridor
 
@@ -1521,14 +1572,13 @@ Service Corridor is a persistent Room. The approved topology is Tunnels to Servi
 - Authored Path cards provide both approved directions and no implicit runtime edge.
 - Runtime and authored data do not invent additional content.
 
-### Open questions
+### QUESTION FOR SIMON — Service Corridor contents
 
 - What content, if any, is initially present in Service Corridor?
-- What are the travel-time Values for its two Path cards?
 
 ### Implementation status
 
-Under design and not fully implementation-ready until the required Path travel times are approved. Additional content is not required unless separately approved.
+The Room and both required Path travel times are implementation-ready but not implemented. Additional content remains optional and unapproved unless separately decided.
 
 ## PATH-D01 — Every Room connection uses authored Path cards
 
@@ -1542,28 +1592,27 @@ Every Room/world connection is represented by authored Path cards. A Room is not
 
 Current approved topology is:
 
-- Apartment to Tunnels; no Tunnels-to-Apartment Path;
+- Apartment to Tunnels, `travel-time = 15`; no Tunnels-to-Apartment Path;
 - Tunnels to Abandoned Office and Abandoned Office to Tunnels;
 - Tunnels to Deep Tunnels and Deep Tunnels to Tunnels;
-- Tunnels to Back Alley and Back Alley to Tunnels;
-- Tunnels to Service Corridor and Service Corridor to Tunnels.
+- Tunnels to Back Alley and Back Alley to Tunnels, each with `travel-time = 15`;
+- Tunnels to Service Corridor and Service Corridor to Tunnels, each with `travel-time = 15`.
 
 Tunnels-to-Back-Alley access is restricted to the TIME-D02 condition `22:00 <= time OR time < 06:00`. No other Path is conditionally restricted unless another task explicitly approves it.
+
+These simple initial travel times may be rebalanced later. There remains no Tunnels-to-Apartment Path; Apartment is one-way by approved world topology.
 
 ### Acceptance criteria
 
 - Every listed directed connection has exactly the required authored Path card in its origin Room.
 - No unlisted reverse or implicit connection is created.
+- Apartment-to-Tunnels, both Back Alley directions, and both Service Corridor directions each use a base `travel-time` of exactly 15 minutes.
 - Path behavior continues to use the generic Marker, Value, Reference, Action, and logic systems rather than destination-specific code.
 - Every future Room task treats required authored Path cards as an acceptance criterion.
 
-### Open question
-
-What `travel-time` Values apply to Apartment-to-Tunnels and both directions for Back Alley and Service Corridor? Existing Abandoned Office and Deep Tunnels times remain owned by ROOM-02.
-
 ### Implementation status
 
-Partially implemented for the existing Tunnels, Abandoned Office, and Deep Tunnels connections. The expanded topology is not fully implementation-ready until the new travel times and TIME-D02 syntax are approved.
+Partially implemented for the existing Tunnels, Abandoned Office, and Deep Tunnels connections. All expanded-topology travel times are approved. The Tunnels-to-Back-Alley conditional Path remains blocked only by TIME-D02's valid time-atom serialization; the other new Path data is implementation-ready.
 
 ## DECK-D01 — Deck ownership is shared by Rooms and cards
 
@@ -1598,25 +1647,29 @@ Origin: Simon
 
 Dumpster is a card located in Back Alley. It owns a searchable deck through DECK-D01. The deck has authored starting cards, retains cards that have not been found or removed, and receives two new cards every day at exactly 12:00.
 
-The daily addition is performed by a Process authored on Dumpster. It uses the authoritative world clock through TIME-D02, the shared evaluator in LOGIC-D01, and generic card/deck effects. Runtime must not hardcode daily Dumpster behavior.
+At game start the Dumpster deck contains exactly one empty Plastic Bottle and one Stale Bread. The Plastic Bottle must not have `contains-water`.
+
+At exactly 12:00 every day, Dumpster's Process adds exactly one empty Plastic Bottle and one Stale Bread to the existing deck. Cards already remaining in the deck stay there. This is intentionally the simple first refill model; weighted loot, randomness, rarity tables, and more advanced loot behavior are not approved.
+
+The daily addition is performed by a Process authored on Dumpster. It uses the authoritative world clock through TIME-D02, the shared evaluator in LOGIC-D01, a generic effect for adding cards to a target deck, and the normal Process system. Runtime must not hardcode daily Dumpster behavior.
 
 ### Acceptance criteria
 
 - Dumpster and its deck persist as ordinary authored card/world state.
 - Searching uses the generalized deck behavior rather than a second deck type.
-- The authored Process adds exactly two cards when its approved 12:00 condition is met.
+- Starting contents are exactly one empty Plastic Bottle without `contains-water` and one Stale Bread.
+- The authored Process adds exactly one empty Plastic Bottle and one Stale Bread when its approved 12:00 condition is met.
 - Cards not drawn or removed remain in the deck across searches and daily additions.
+- Refill uses no weighted, random, rarity, or advanced loot model.
 - No Dumpster ID/name branch exists in runtime.
 
-### Open questions
+### QUESTION FOR SIMON — Add-card-to-deck effect serialization
 
-- What exact cards start in the Dumpster deck?
-- What source or refill pool supplies the two daily cards?
-- What exact generic JSON/effect representation adds cards to an owned deck?
+What exact generic JSON/effect representation adds authored card instances to a target deck? No effect syntax is approved by this task.
 
 ### Implementation status
 
-Under design and not fully implementation-ready until the starting contents, refill source, generic add-to-deck effect syntax, and TIME-D02 syntax are approved.
+Starting contents, exact daily additions, timing semantics, and generic architecture are approved. Implementation remains blocked only by the generic add-card-to-deck effect serialization and TIME-D02's valid time-atom serialization.
 
 ## SEARCH-01 — Search decks are persistent owned objects
 
@@ -1812,23 +1865,69 @@ Origin: Simon
 
 ### Rule
 
-Cards should have stronger visual differentiation so different gameplay roles are easier to recognize. This presentation work must not introduce or depend on the rejected card-class system in CARD-09, and it must not invent categories or visual mappings.
+Safe Room uses a layered card renderer in which card-specific artwork remains separate from reusable frame/material artwork. The first version has four presentation roles: Food, Item, Path, and Feature. These roles are presentation only. They are not gameplay classes, gameplay authority, or replacements for Markers, Values, References, Actions, or Processes. This work must not recreate the rejected class system in CARD-09.
 
-Potential visual dimensions include border, color, icon, layout, or another treatment. No exact system has been selected.
+The approved visual direction is:
+
+- **Food:** organic, warm, worn, aged or stained paper/cardboard character that suggests something physical and perishable.
+- **Item:** neutral utility appearance with worn paper/cardboard as the common treatment for ordinary carried non-food objects.
+- **Path:** blueprint, map, or navigation character with a technically drawn/map-like texture, clearly differentiated from physical objects. Destination and direction information remain dynamic UI, not baked artwork.
+- **Feature:** industrial or environmental character with a heavier or mounted appearance, potentially resembling metal, a plaque, or industrial labeling. It is intended for room objects such as Puddle, Dumpster, Cabinet, and similar fixed/interactable environmental objects.
+
+All four roles remain parts of the same Safe Room visual language. A special condition-card treatment, including for Starving, is outside UI-07 v1; condition cards may retain their current presentation. No fifth material is approved.
+
+### Production asset contract
+
+Four separate production assets will be supplied outside Codex implementation work:
+
+- `card-frame-food.png`
+- `card-frame-item.png`
+- `card-frame-path.png`
+- `card-frame-feature.png`
+
+Their exact repository directory will be finalized when the assets are supplied. Do not create placeholder artwork. Each production frame must have a transparent background, contain only reusable frame/material artwork, and leave a transparent central area for card-specific artwork. It must contain no card-specific illustration, title, descriptive text, Values, Actions, travel-time text, condition text, hover/selected/drag state, or baked-in capability/role icons.
+
+The previously generated four-frame overview is design reference only. It is not a production asset and must not be used directly as a card frame.
+
+### Renderer composition
+
+The renderer conceptually composes independent layers in this order:
+
+1. reusable frame/material asset;
+2. existing card-specific artwork;
+3. dynamic card title;
+4. dynamic Values and information;
+5. dynamic capability/status icons;
+6. contextual information/footer areas;
+7. HTML/CSS/SVG interaction styling.
+
+Dynamic information remains dynamic. Changing a Value, Action, destination, condition, travel time, or selection state must not require editing or regenerating frame artwork. Existing card artwork remains the actual illustration inside the frame.
+
+### Role selection
+
+The renderer must select a role from generic existing authored semantics/state, never from card-name or card-ID cases. Food may use the existing `food` Marker where appropriate. Path derives from existing authored Path semantics. Feature must derive from generic authored role/state rather than identity. Ordinary remaining carried items use Item presentation according to generic rules.
+
+### UI-06 compatibility
+
+UI-06 remains the authority for artwork stability. The layered renderer must not visibly reload or remount card artwork on first click, hover, selection, drag start, dragging, or other normal card interaction. Frame changes and dynamic overlays should remain independent of the mounted card-art image where practical.
 
 ### Acceptance criteria
 
-- The eventual treatment improves visual differentiation without adding class as authored or derived state.
-- Presentation derives only from separately approved authored data or rules.
-- No category, mapping, palette, icon set, border language, or layout rule is implemented until explicitly approved.
+- Food, Item, Path, and Feature are visually distinct while remaining one coherent Safe Room language.
+- Presentation roles add no gameplay state or authority and do not depend on a class field.
+- The renderer uses no card-name or card-ID special cases to choose a role.
+- The four supplied production frames comply with the asset contract and are composed with existing art and dynamic UI as independent layers.
+- Dynamic state and interaction styling never require regenerating a frame asset.
+- Condition cards retain their current presentation in v1.
+- UI-06 artwork-stability criteria remain satisfied across normal interaction.
 
-### Open question
+### QUESTION FOR SIMON — Generic Feature representation
 
-Which card roles need visual distinction, and which combination of border, color, icon, layout, or other treatment should represent them?
+What generic existing or newly approved authored semantic distinguishes Feature from Item without card-name/card-ID lookup? Current authored state can identify Food and Path, but does not provide a sufficient generic Feature discriminator. This narrow representation question must be answered without introducing a card-class system.
 
 ### Implementation status
 
-Open design task and not Codex-ready.
+The visual direction, layer contract, production asset contract, and UI-06 compatibility are approved. UI-07 remains outside an implementation iteration until the four production assets are supplied and the generic Feature discriminator is approved.
 
 ## DEPLOY-01 — Complete every iteration through main and GitHub Pages
 

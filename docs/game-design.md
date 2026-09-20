@@ -21,7 +21,7 @@ The play space has two major areas:
 
 Rooms are stable spatial contexts rather than scrolling levels. Room state persists while off-screen. Search, routes, lighting, carried resources, and equipment make exploration a matter of preparation and consequence.
 
-Cards are the primary language for interactable world entities and visible state. Other interface objects may exist when they are conceptually distinct. Decks remain distinct objects but may be owned by a Room or by an interactive card.
+Cards are the primary language for interactable world entities and visible state. Their presentation may layer reusable physical-material frames with card-specific artwork and dynamic information so Food, Item, Path, and Feature roles are legible without becoming gameplay classes or authority. Other interface objects may exist when they are conceptually distinct. Decks remain distinct objects but may be owned by a Room or by an interactive card.
 
 ## Nadir
 
