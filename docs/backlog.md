@@ -176,7 +176,7 @@ Origin: Simon
 
 `applicable` contains exactly one of `on` or `receive`. These keys determine the relationship between the Action owner and the other card. Within the Action, `self` is always the card that owns the Action and `other` is the card or object matched by applicability. Effect targets use only `self` and `other`; `accepted` and `received` describe drag/drop roles and determine which card owns or matches an `on`/`receive` Action, but they are not effect targets.
 
-Action applicability uses the shared condition language owned by LOGIC-D01 through LOGIC-D04 and TIME-D02. The original approved primitives are `marker`, a Value comparison, `and`, `or`, and `not`; the shared language adds the separately approved target, location-literal, count, and world-clock semantics. Conditions must not match specific card/master IDs. `and` and `or` take arrays, `not` takes one condition, and boolean conditions may be nested. Under LOGIC-D02 an omitted target means `self`, so applicability conditions that inspect the counterpart use explicit `target: "other"`:
+Action applicability uses the shared condition language owned by LOGIC-D01 through LOGIC-D05 and TIME-D02. The original approved primitives are `marker`, a Value comparison, `and`, `or`, and `not`; the shared language adds the separately approved target, location-literal, count, deck-size, and world-clock semantics. Conditions must not match specific card/master IDs. `and` and `or` take arrays, `not` takes one condition, and boolean conditions may be nested. Under LOGIC-D02 an omitted target means `self`, so applicability conditions that inspect the counterpart use explicit `target: "other"`:
 
 ```json
 {
@@ -227,6 +227,8 @@ Discard is a generic effect:
 ```json
 { "target": "other", "discard": true }
 ```
+
+ACTION-D05 separately owns the generic `add-random-card` effect shared by Actions and Processes. Its approved destination, random-pick, instance-creation, and deck-insertion semantics must not be duplicated or specialized here.
 
 `set-room` is the unique world effect. It changes the active Room through a Reference on `self` or `other`:
 
@@ -292,13 +294,13 @@ Conceptually:
 - Selectors cannot reference specific card/master IDs and Value selectors contain exactly one comparison operator.
 - All Action effect targets resolve as `self` or `other`; legacy `accepted`/`received` effect targets are rejected.
 - The complete Action validates before execution, and effects then execute in authored order without partial mutation from an invalid Action.
-- Generic Marker, Value, discard, `set-room`, and `spend-time` effects support exactly the approved operand forms.
+- Generic Marker, Value, discard, `set-room`, `spend-time`, and ACTION-D05 `add-random-card` effects support exactly their approved operand forms.
 - `food`, `hydration`, and `path` migrate to the approved Marker/Value/Reference representation without special card-name logic.
 - `spend-time` resolves crossed Process ticks before the following ordered effect.
 
 ### Implementation status
 
-Partially implemented. Strict authored-data validation, typed loading, the original selector subset, common prevalidation/execution, and focused malformed-data coverage exist. The shared evaluator, explicit/default condition targets, logical literals, count, world-clock conditions, and Value visibility remain unimplemented under LOGIC-D01 through LOGIC-D04, TIME-D02, and DATA-10.
+Partially implemented. Strict authored-data validation, typed loading, the original selector subset, common prevalidation/execution, and focused malformed-data coverage exist. The shared evaluator, explicit/default condition targets, logical literals, count, deck-size conditions, world-clock conditions, Value visibility, and random deck-insertion effect remain unimplemented under LOGIC-D01 through LOGIC-D05, TIME-D02, DATA-10, and ACTION-D05.
 
 ## DATA-09 — Card gameplay data is authored as attributes
 
@@ -325,7 +327,7 @@ Runtime code must not branch on card master IDs or display names to supply gamep
 
 ### Implementation status
 
-Implemented for the selected size, storage, equipment-compatibility, and carried-Inventory domains. Runtime rules interpret current instance Markers, Values, and References without master-ID/name lookup or fallback gameplay facts. The pre-existing passive `whileEquipped` representation is outside these domains and is recorded for Simon in EQUIP-05 rather than silently redesigned.
+Implemented for the selected size, storage, equipment-compatibility, and carried-Inventory domains. Runtime rules interpret current instance Markers, Values, and References without master-ID/name lookup or fallback gameplay facts. EQUIP-05 now approves generic `passives` as the replacement for the pre-existing `whileEquipped` representation; that migration remains unimplemented.
 
 ## DATA-10 — Every authored Value has explicit visibility
 
@@ -339,7 +341,7 @@ Every authored Value has a mandatory `visibility` field. There is no implicit vi
 
 - `true`;
 - `false`;
-- a logical expression in the condition language owned by LOGIC-D01 through LOGIC-D04 and TIME-D02.
+- a logical expression in the condition language owned by LOGIC-D01 through LOGIC-D05 and TIME-D02.
 
 `visibility` controls only whether the Value is player-facing. It does not control whether the Value exists, whether Actions or Processes can read it, or whether effects can mutate it.
 
@@ -622,9 +624,9 @@ Origin: Simon
 
 ### Rule
 
-Exactly one reusable logic-evaluation component owns the approved condition language. Action applicability/selectors, Process `if`, Value `visibility`, future passive-effect conditions, and future authored conditions using the same language must all use it. Feature-specific code must not independently reimplement condition evaluation.
+Exactly one reusable logic-evaluation component owns the approved condition language. Action applicability/selectors, Process `if`, Value `visibility`, EQUIP-05 passive-effect conditions, and future authored conditions using the same language must all use it. Feature-specific code must not independently reimplement condition evaluation.
 
-The evaluator is a separate component with a small reusable API. Feature code supplies an evaluation context and receives a boolean result. The component ultimately owns consistent behavior for `and`, `or`, `not`, Marker conditions, Value comparisons, logical literals, targets, nested expressions, count matching, world-clock conditions, and invalid-expression handling.
+The evaluator is a separate component with a small reusable API. Feature code supplies an evaluation context and receives a boolean result. The component ultimately owns consistent behavior for `and`, `or`, `not`, Marker conditions, Value comparisons, logical literals, targets, nested expressions, count matching, LOGIC-D05 deck-size comparisons, TIME-D02 world-clock conditions, and invalid-expression handling.
 
 ### Acceptance criteria
 
@@ -635,7 +637,7 @@ The evaluator is a separate component with a small reusable API. Feature code su
 
 ### Implementation status
 
-Architecture approved. LOGIC-D04's count representation is now approved and implementation-ready. The only remaining language-level schema blocker is TIME-D02's exact valid JSON serialization for a world-clock comparison; evaluator work that does not depend on that atom is otherwise implementation-ready subject to its owning tasks.
+Implementation-ready but not implemented. The shared architecture and all currently required condition forms, including count, deck size, and world-clock serialization, are approved under LOGIC-D02 through LOGIC-D05 and TIME-D02.
 
 ## LOGIC-D02 — Atomic conditions support self and other targets
 
@@ -645,7 +647,7 @@ Origin: Simon
 
 ### Rule
 
-Every atomic condition may specify `target`. If `target` is omitted, `target = self` is implicit. This applies to Marker conditions, Value conditions, and logical literal conditions.
+Every card-relative atomic condition may specify `target`. If `target` is omitted, `target = self` is implicit. This applies to Marker conditions, Value conditions, logical literal conditions, and LOGIC-D05's computed `deck_size` condition.
 
 These Marker conditions are equivalent:
 
@@ -661,7 +663,7 @@ Likewise, `{ "value": "battery", ">": 0 }` defaults to `self`. Explicit `other` 
 
 ### Acceptance criteria
 
-- Marker, Value, and logical literal conditions accept omitted, `self`, and context-valid `other` targets.
+- Marker, Value, logical literal, and `deck_size` conditions accept omitted, `self`, and context-valid `other` targets.
 - Omitted and explicit `self` behave identically.
 - `other` never resolves through card ID/name knowledge and cannot be used when the evaluation context has no `other`.
 - Existing Action applicability is migrated coherently: conditions inspecting the matched counterpart use explicit `other` rather than relying on the old implicit matched-card interpretation.
@@ -737,6 +739,43 @@ This approval does not introduce a broader query language.
 
 Implementation-ready but not implemented, subject to LOGIC-D01 through LOGIC-D03.
 
+## LOGIC-D05 — Deck-size computed condition
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+The shared condition language supports the generic computed variable `deck_size`:
+
+```json
+{
+  "deck_size": {
+    "<=": 3
+  }
+}
+```
+
+`deck_size` returns the current number of card instances in the deck owned by the target card. An omitted target defaults to `self` under LOGIC-D02. It supports exactly the normal numeric comparators `>`, `>=`, `<`, `<=`, `=`, and `<>`.
+
+`deck_size` is computed from authoritative deck contents whenever evaluated. It is not an authored Value and must not be persisted or cached as mutable gameplay state that can become stale. A card without an owned deck has `deck_size = 0`.
+
+This condition participates in LOGIC-D01 and must remain generic; runtime contains no Dumpster-specific deck counter.
+
+### Acceptance criteria
+
+- Every supported comparator evaluates the target card's current owned-deck size.
+- Omitted, explicit `self`, and context-valid `other` targets follow LOGIC-D02.
+- Adding, drawing, or removing deck cards is reflected without synchronizing a second stored counter.
+- Cards without an owned deck evaluate with size 0.
+- The condition composes through the shared `and`, `or`, and `not` operators.
+- Equivalent card-owned decks behave identically without card-ID or card-name checks.
+
+### Implementation status
+
+Implementation-ready but not implemented, subject to LOGIC-D01, LOGIC-D02, and DECK-D01.
+
 ## TIME-D02 — Conditions can evaluate the authoritative world clock
 
 Priority: P0
@@ -745,27 +784,54 @@ Origin: Simon
 
 ### Rule
 
-LOGIC-D01 can evaluate authored conditions against TIME-D01's existing authoritative world clock. Authored logic compares the current world-clock time with authored `HH:MM` times. Runtime must not add hardcoded time concepts such as `night` for one Room.
+LOGIC-D01 evaluates authored conditions against TIME-D01's existing authoritative world clock. Atomic comparisons use a `time` object containing exactly one normal comparator and a 24-hour `HH:MM` operand:
 
-Night means `current time >= 22:00 OR current time < 06:00`. Exact noon means `current time = 12:00`. Back Alley's access uses the night expression, and Dumpster's daily Process uses the exact-noon expression.
+```json
+{
+  "time": {
+    ">=": "22:00"
+  }
+}
+```
 
-Earlier pseudo-JSON such as `{ "time": ">=", "22:00" }` records the intended semantics but is not valid JSON and is not approved serialization.
+Supported comparators are exactly `>`, `>=`, `<`, `<=`, `=`, and `<>`. Time atoms participate in the shared condition language and compose through `and`, `or`, and `not`.
+
+Back Alley's night condition is:
+
+```json
+{
+  "or": [
+    { "time": { ">=": "22:00" } },
+    { "time": { "<": "06:00" } }
+  ]
+}
+```
+
+Dumpster's exact-noon condition is:
+
+```json
+{
+  "time": {
+    "=": "12:00"
+  }
+}
+```
+
+Runtime must not add hardcoded time concepts such as `night` for one Room. Earlier pseudo-JSON such as `{ "time": ">=", "22:00" }` expressed semantics only and is superseded by the valid shape above.
 
 ### Acceptance criteria
 
 - Conditions can express inclusive/exclusive clock ranges that cross midnight.
 - Conditions can express an exact clock time such as 12:00.
 - Authored clock operands use `HH:MM` times and compare against the current authoritative world-clock time.
+- Each atomic time object contains exactly one supported comparator.
+- Time atoms nest through the shared `and`, `or`, and `not` operators.
 - All consumers read the same authoritative world clock through LOGIC-D01.
 - Runtime contains no Back Alley-, Dumpster-, or named-`night` special case.
 
-### QUESTION FOR SIMON — Valid time-atom serialization
-
-What exact valid JSON object shape serializes an atomic world-clock comparison such as `current time >= 22:00`, `current time < 06:00`, or `current time = 12:00`? The current approved condition schema has no existing atomic shape for time, so only this serialization detail remains unresolved. The representation must preserve the existing comparator vocabulary, compose through the shared `and`/`or`/`not` operators, use LOGIC-D01, and introduce no hardcoded `night` literal. The earlier pseudo-JSON is not implementation schema.
-
 ### Implementation status
 
-World-clock semantics are approved, but consumers requiring a time atom are not implementation-ready until its exact valid JSON serialization is approved.
+Implementation-ready but not implemented. World-clock semantics and valid atomic JSON serialization are fully approved.
 
 ## ACTION-D01 — Card-on-card roles and Action matching
 
@@ -775,7 +841,7 @@ Origin: Simon
 
 ### Rule
 
-For drag/drop, the dragged card is `accepted` and the card underneath is `received`. An `on` Action belongs to accepted, so accepted is `self` and received is `other`. A `receive` Action belongs to received, so received is `self` and accepted is `other`. Applicability uses the shared condition language in LOGIC-D01 through LOGIC-D04 and TIME-D02; conditions never match a specific card/master ID. Under LOGIC-D02 an omitted target is the Action owner (`self`), so conditions about the matched card use explicit `other`. Zero matches means no Action; exactly one executes; two or more is invalid authored data and must be protected in validation and runtime.
+For drag/drop, the dragged card is `accepted` and the card underneath is `received`. An `on` Action belongs to accepted, so accepted is `self` and received is `other`. A `receive` Action belongs to received, so received is `self` and accepted is `other`. Applicability uses the shared condition language in LOGIC-D01 through LOGIC-D05 and TIME-D02; conditions never match a specific card/master ID. Under LOGIC-D02 an omitted target is the Action owner (`self`), so conditions about the matched card use explicit `other`. Zero matches means no Action; exactly one executes; two or more is invalid authored data and must be protected in validation and runtime.
 
 ### Acceptance criteria
 
@@ -854,6 +920,49 @@ When execution reaches `spend-time`, TIME-D01 advances world time and PROCESS-D0
 
 Implemented through one pure planning/execution path. Complete Actions resolve before mutation, effects execute in order, Process ticks resolve at `spend-time`, and failures return the original state.
 
+## ACTION-D05 — Add random cards to a deck
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Actions and Processes may use the generic `add-random-card` effect:
+
+```json
+{
+  "add-random-card": {
+    "count": 2,
+    "from": [
+      "plastic-bottle",
+      "stale-bread"
+    ],
+    "to": "self.deck"
+  }
+}
+```
+
+`count` is a positive integer specifying the number of random picks. `from` is a static authored list of card master IDs. Every pick is independent and selection is with replacement, so the same master may be selected more than once. Duplicate IDs in `from` naturally provide simple weighting.
+
+Each pick creates a fresh card instance from the selected master. New instances are appended to the destination deck in pick order. `to: "self.deck"` means the deck owned by the card whose Action or Process is executing.
+
+The effect performs only generic creation and insertion. It contains no time check, deck-size check, Dumpster-specific rule, or other applicability behavior; those belong in the owning Action or Process condition.
+
+### Acceptance criteria
+
+- Validation requires a positive integer `count`, a non-empty static list of valid card master IDs, and the approved `self.deck` destination.
+- Exactly `count` independent with-replacement picks occur.
+- Repeated source IDs act as repeated weighted entries without a separate weighting schema.
+- Every selected master produces a new independent card instance.
+- Created instances append in pick order without replacing or clearing existing deck contents.
+- Actions and Processes share the same effect implementation.
+- No runtime branch recognizes Dumpster, Plastic Bottle, Stale Bread, or another named master as part of the generic effect.
+
+### Implementation status
+
+Implementation-ready but not implemented, subject to CARD-D01 and DECK-D01.
+
 ## FOOD-01 — Authored food effects and consumption
 
 Priority: P1
@@ -883,23 +992,27 @@ Origin: Simon
 
 ### Rule
 
-A card named `Stale Bread` exists. DUMPSTER-01 may include Stale Bread in its starting contents and daily refill before the card's remaining gameplay details are decided.
+A card named `Stale Bread` exists and is food. It carries Marker `food` and provides 10 sustenance through the existing `food-value = 10` model. Body's generic Eat behavior adds that amount to Satiation and consumes/discards the Stale Bread instance. Eating Stale Bread takes exactly 15 minutes through an explicit `spend-time` effect.
 
-This approval establishes the card's identity and use as Dumpster content only. It does not yet approve a nutrition amount, eating duration, Values, Actions, or other gameplay behavior.
+Stale Bread uses the normal generic food Marker, Value, Eat Action, Satiation effect, time path, and discard behavior. Runtime must not contain Stale-Bread-specific logic. No additional effects are approved.
 
 ### Acceptance criteria
 
 - Authored data can reference one or more Stale Bread instances through the normal card/deck model.
-- DUMPSTER-01 does not require a duplicate or placeholder bread authority.
-- No nutrition amount, duration, attribute, or effect is inferred from the display name.
+- Stale Bread has Marker `food` and `food-value = 10`.
+- Eating one instance increases Body Satiation by 10 through the same bounded generic effect as other food.
+- Eating one instance advances centralized world time by exactly 15 minutes through `spend-time`.
+- Successful eating visibly discards exactly that instance through the generic Eat behavior.
+- DUMPSTER-01 does not require duplicate bread authority or a placeholder master.
+- No additional effect or card-name/card-ID runtime path is introduced.
 
-### QUESTION FOR SIMON — Stale Bread behavior
+### QUESTION FOR SIMON — Generic per-food Eat duration authoring
 
-Should Stale Bread be edible through the generic `food` Marker, and if so what `food-value` does it have? Does eating it spend time, and if so how long? No additional behavior is approved until these details are decided.
+The duration and behavior are decided, but what exact generic authored representation lets Body's one Eat Action resolve Stale Bread's 15-minute `spend-time` without also assigning that duration to every food? The current Eat Action owns a literal `spend-time: 0`, and no approved per-food duration Value ID exists. Do not add a Value name, a second card-specific Eat Action, or a master-ID branch without an explicit schema decision.
 
 ### Implementation status
 
-The card identity and Dumpster references are approved. Its gameplay behavior is not implementation-ready until the questions above are answered.
+Stale Bread's identity, sustenance, duration, consumption, and generic behavior are approved. Implementation remains blocked only by the exact generic authoring representation for its already-approved per-food Eat duration.
 
 ## ACTION-05 — Direct interactions commit without a chooser
 
@@ -950,7 +1063,11 @@ Origin: Simon
 
 ### Rule
 
-Processes have no private timers, intervals, or durations. Each active Process runs once for every world-time boundary crossed at `:00`, `:15`, `:30`, and `:45`. When `spend-time` reaches or crosses a boundary, world time advances and the tick's Process consequences resolve before the Action continues to its next ordered effect. Many Processes may be active while only one Action runs. JSON ordering must not become accidental gameplay ordering; PROCESS-D03 defines the intentional deterministic order for cards created during a cycle. Finite or staged Processes use card state, effects, conditions, and thresholds rather than private clocks.
+Processes have no private timers, intervals, or durations. Each active Process runs once for every world-time boundary crossed at `:00`, `:15`, `:30`, and `:45`. When `spend-time` reaches or crosses a boundary, world time advances and the tick's Process consequences resolve before the Action continues to its next ordered effect. Many Processes may be active while only one Action runs.
+
+The current authored Process model is one optional `if` condition plus ordered `effects`. Nested `if`/`then`/`else` control flow is not required or approved. Complex behavior should use multiple Processes when that is sufficient. Processes on the same card execute in authored order, and each later Process observes state changes made by earlier Processes in the same tick; WATER-02 is the first concrete dependency on that rule. In a card-owned Process, an effect with no explicit target applies to the owning card as `self`, as shown by WATER-02's approved serialization.
+
+Ordering must be intentional rather than an accidental consequence of unrelated JSON layout. PROCESS-D03 separately defines deterministic placement of cards and Processes created during a cycle. Finite or staged Processes use card state, effects, conditions, thresholds, and ordered Processes rather than private clocks. Nested conditional control flow may be reconsidered only if a future concrete requirement needs it.
 
 ### Acceptance criteria
 
@@ -958,11 +1075,15 @@ Processes have no private timers, intervals, or durations. Each active Process r
 - Exact-boundary tests prove Process-before-next-effect order.
 - Tick counts satisfy `floor(newElapsedMinutes / 15) - floor(oldElapsedMinutes / 15)`: 10→14 gives 0, 10→16 gives 1, 14→31 gives 2, 44→61 gives 2, and a 0-minute Action gives 0.
 - Process-authored data contains no per-Process interval field.
+- Process validation supports the approved optional `if` plus ordered `effects` shape, but no nested `if`/`then`/`else` language.
+- Multiple Processes on one card execute in authored order and later Processes observe earlier state changes from the same tick.
+- An omitted effect target in a card-owned Process resolves to the owning card as `self`.
 - Inactive rooms remain in world state so future room-local Processes can continue without being architecturally erased.
+- A globally active Process whose owning task requires off-screen evaluation, such as DUMPSTER-01, continues to evaluate while its Room is inactive.
 
 ### Implementation status
 
-Implemented with centralized quarter-hour boundary counting, deterministic non-conflicting Process batches, Process-before-next-effect ordering, and preservation of inactive-room state.
+Partially implemented with centralized quarter-hour boundary counting, deterministic non-conflicting Process batches, Process-before-next-effect ordering, and preservation of inactive-room state. The remaining conditional `if`, ordered same-card Process chaining, implicit Process-owner `self`, and off-screen global evaluation work is approved and implementation-ready.
 
 ## PROCESS-D02 — Body drains Hydration and Satiation on every tick
 
@@ -1251,7 +1372,7 @@ A compatible card in an equipment slot is equipped and active. The same card in 
 
 ### Implementation status
 
-Implemented through legacy authored representations; migration must preserve behavior.
+Implemented through the legacy `whileEquipped` representation. EQUIP-05 now approves the generic `passives` migration, which must preserve these behavior outcomes.
 
 ## INV-D01 — Flat carried Inventory uses size/capacity allocation
 
@@ -1284,21 +1405,15 @@ Origin: Simon
 
 Which cards can use Trinket slots and what effects do they have? Do any equipment changes later consume time, do any items occupy multiple slots, and how should the player resolve unequipping capacity-providing gear when carried items no longer fit? Final capacity-supplier presentation and any equipment effects beyond those in EQUIP-03 also remain undecided. Potential progression domains recorded in the earlier equipment note include storage, protection, warmth, access, visibility, concealment, comfort, and mood, but no concrete mechanic is implied by that list.
 
-## EQUIP-05 — Decide passive equipped-effect attribute representation
+## EQUIP-05 — Passive equipped-effect attribute representation
 
 Priority: P1
-Decision: QUESTION FOR SIMON
-Origin: Implementation audit
+Decision: APPROVED BY SIMON
+Origin: Simon
 
-### APPROVED BY SIMON — Architectural direction
+### Rule
 
-Card-specific equipped-dependent behavior must not live as card-ID or card-name knowledge in runtime code. Whether a card's effect depends on that card being equipped should eventually be authored in card JSON/data, while runtime may implement a generic equipped-dependent effect mechanism. Runtime must not encode rules such as “Glasses have this effect while equipped.”
-
-The existing authored `whileEquipped` field predates DATA-09. It remains isolated from size, storage, compatibility, and Inventory legality because its replacement has not been designed; current Vision behavior must not be redesigned or broken by inference. LOGIC-D03's approved `equipped` literal is the generic primitive for determining whether a card is equipped, but it does not decide the surrounding passive-effect schema.
-
-### SUGGESTED BY CHATGPT — Passive modifier proposal
-
-One possible architecture is:
+Cards may author continuous passive modifiers through `passives`. Glasses use:
 
 ```json
 "passives": [
@@ -1315,19 +1430,48 @@ One possible architecture is:
 ]
 ```
 
-Under this proposal, passive effects are continuous modifiers evaluated from current state. They do not mutate base state on equip and reverse-mutate it on unequip; removing or unequipping the source naturally removes its effective modifier. `if` would use LOGIC-D01, and `equipped` would use LOGIC-D03's approved literal. A Flashlight could conceptually require both `equipped` and Battery greater than 0 before contributing Vision.
+Flashlight uses the same mechanism with its Battery condition:
 
-Glasses and Flashlight should eventually use the same generic mechanism without named-card runtime knowledge. That intended architectural outcome does not approve the proposed `passives` schema.
+```json
+"passives": [
+  {
+    "if": {
+      "and": [
+        "equipped",
+        { "value": "battery", ">": 0 }
+      ]
+    },
+    "effects": [
+      {
+        "target": "nadir",
+        "value": "vision",
+        "+=": 1
+      }
+    ]
+  }
+]
+```
 
-This proposal, including every shown field and the `nadir` target, is not approved schema.
+Passive effects are continuous modifiers derived from current state. They do not permanently mutate base Values when activated and do not reverse-mutate base Values when deactivated. A passive contributes only while its `if` condition evaluates true; when the condition becomes false, its effective modifier disappears automatically.
 
-### QUESTION FOR SIMON — Passive-effect schema
+The implementation conceptually derives effective state from base state plus all currently active passive modifiers. `if` uses LOGIC-D01, and `equipped` uses LOGIC-D03's approved literal. Glasses and Flashlight use the same generic mechanism without card-ID or card-name runtime knowledge. The legacy `whileEquipped` representation is superseded and must migrate without changing the already-approved Vision outcomes.
 
-What concrete JSON/schema representation should express generic equipped-dependent effects within the approved authored-data model? Simon is deliberately deferring that redesign, so no field, wrapper, selector, effect shape, or migration is approved now.
+No additional passive-effect target, operation, stacking rule, lifecycle, or feature is approved beyond what the current Glasses and Flashlight use cases require.
+
+### Acceptance criteria
+
+- Validation accepts the approved `passives` array, `if` condition, and current Value-modifier effect shape.
+- Passive `if` conditions are evaluated by LOGIC-D01 and use LOGIC-D03's `equipped` literal.
+- Effective Vision equals base Vision plus currently active generic passive modifiers and other approved modifiers.
+- Equipping or unequipping a source changes effective state without mutating and later restoring the base Value.
+- Glasses contribute Vision +1 only while equipped.
+- Flashlight contributes Vision +1 only while equipped and Battery is greater than 0.
+- Equivalent authored passives behave equivalently without named-card runtime logic.
+- Legacy `whileEquipped` data is removed after migration.
 
 ### Implementation status
 
-Open design task. Do not place EQUIP-05 into an implementation iteration until the schema is explicitly approved.
+Implementation-ready but not implemented, subject to LOGIC-D01 and LOGIC-D03. Do not add EQUIP-05 to the current implementation iteration.
 
 ## OPENING-01 — Apartment is a normal one-way Room
 
@@ -1497,7 +1641,7 @@ Puddle of Water is Anchored and begins with Value `water = 3`. A valid empty con
 
 ### Implementation status
 
-Implementation-ready and partially implemented. Puddle `water = 3` and container state exist, but the current depletion behavior discards the empty Puddle. The approved persistent-empty behavior and WATER-01 Fill duration are ready to implement; WATER-02 regeneration remains separately blocked by its conditional Process serialization question.
+Implementation-ready and partially implemented. Puddle `water = 3` and container state exist, but the current depletion behavior discards the empty Puddle. The approved persistent-empty behavior, WATER-01 Fill duration, and WATER-02 regeneration are fully specified for implementation.
 
 ### History
 
@@ -1533,13 +1677,42 @@ Origin: Simon
 
 Puddle has Value `water`, starting at 3 with maximum 3 and `visibility = true`, and Value `refill`, starting at 0 with `visibility = false`. Values must support authored game-start values. DATA-10 makes visibility mandatory for every authored Value; `refill` remains ordinary internal gameplay state available to logic and effects while never being player-facing.
 
-Puddle remains in the world when `water = 0`. Its Process is evaluated on every global 15-minute tick using approved nested if/then/else logic:
+Puddle remains in the world when `water = 0`. Regeneration uses two Processes in authored order. It does not require nested `if`/`then`/`else` control flow.
 
-- If `water = 3`, do nothing; `refill` does not increase.
-- If `water < 3` and `refill < 95`, apply `refill += 1`.
-- Otherwise, apply `water += 1` and `refill = 0`.
+The first Process is:
 
-Starting from `refill = 0`, exactly 96 ticks regenerate one Water. At 15 minutes per global tick, this is exactly 24 hours.
+```json
+{
+  "if": {
+    "and": [
+      { "value": "water", "<": 3 },
+      { "value": "refill", "<": 96 }
+    ]
+  },
+  "effects": [
+    { "value": "refill", "+=": 1 }
+  ]
+}
+```
+
+The second Process is:
+
+```json
+{
+  "if": {
+    "and": [
+      { "value": "water", "<": 3 },
+      { "value": "refill", ">=": 96 }
+    ]
+  },
+  "effects": [
+    { "value": "water", "+=": 1 },
+    { "value": "refill", "=": 0 }
+  ]
+}
+```
+
+The first Process executes before the second, and the second observes state produced by the first in the same tick. Starting from `refill = 0`, ticks 1 through 95 leave `refill` at 1 through 95. On tick 96 the first Process raises it to 96; the second then applies `water += 1` and resets `refill = 0`. Exactly 96 ticks therefore regenerate one Water: `96 × 15 minutes = 24 hours`. If `water = 3`, neither Process applies and `refill` does not increase.
 
 ### Acceptance criteria
 
@@ -1548,16 +1721,14 @@ Starting from `refill = 0`, exactly 96 ticks regenerate one Water. At 15 minutes
 - `water` never exceeds 3.
 - A full Puddle does not accumulate `refill`.
 - An unfilled Puddle regenerates exactly one Water on the 96th tick from `refill = 0`, then resets `refill` to 0.
+- The first Process executes before the second, which observes the first Process's same-tick state change.
+- Regeneration uses only the approved Process `if` plus ordered `effects` model and introduces no nested conditional control flow.
 - `refill` never appears on the card, in inspection, or in ordinary player-facing previews.
 - Empty Puddles persist and can become usable again through the same generic Process system.
 
-### QUESTION FOR SIMON — Conditional Process serialization
-
-What exact valid JSON representation expresses the approved nested `if`/`then`/`else` Process behavior? The current repository Process schema accepts only an `effects` array and has no established conditional shape. DATA-D05 therefore prevents Codex from inventing the serialization even though the Puddle's conditional semantics are fully approved.
-
 ### Implementation status
 
-Not implemented. DATA-10 resolves the hidden-Value representation, but implementation remains blocked by the exact conditional Process serialization above.
+Implementation-ready but not implemented, subject to the approved generic dependencies in DATA-10, LOGIC-D01, LOGIC-D02, and PROCESS-D01. The prior nested-conditional requirement and serialization blocker are superseded.
 
 ## ROOM-01 — Persistent authored rooms and world state
 
@@ -1610,7 +1781,7 @@ Origin: Simon
 
 ### Question
 
-What final content and deck compositions should fill the approved Rooms beyond the explicit decisions in ROOM-04, ROOM-05, DUMPSTER-01, and SEARCH-01? Mechanics for Pipe, Squatter, Service Cabinet, Puddle-related environment presentation, placeholder discoveries, and unspecified Back Alley or Service Corridor content are not decided by their presence or names and must not be invented. Approved topology is owned by PATH-D01 and is no longer open here.
+What final content and deck compositions should fill the approved Rooms beyond the explicit decisions in ROOM-04, ROOM-05, DUMPSTER-01, and SEARCH-01? Mechanics for Pipe, Squatter, Service Cabinet, Puddle-related environment presentation, placeholder discoveries, and unspecified Back Alley content are not decided by their presence or names and must not be invented. ROOM-05 now approves an intentionally empty initial Service Corridor; its later purpose and content are isolated in ROOM-07. Approved topology is owned by PATH-D01 and is no longer open here.
 
 ## ROOM-04 — Back Alley
 
@@ -1636,7 +1807,7 @@ Back Alley contains the Dumpster card owned by DUMPSTER-01. No other content is 
 
 ### Implementation status
 
-Not fully implementation-ready. The new Path travel times are approved; TIME-D02's valid time-atom serialization and DUMPSTER-01's generic add-to-deck effect syntax remain blockers for the complete Room.
+Implementation-ready but not implemented, subject to the approved generic dependencies in TIME-D02, DUMPSTER-01, LOGIC-D01, LOGIC-D05, ACTION-D05, and DECK-D01.
 
 ## ROOM-05 — Service Corridor
 
@@ -1646,21 +1817,21 @@ Origin: Simon
 
 ### Rule
 
-Service Corridor is a persistent Room. The approved topology is Tunnels to Service Corridor and Service Corridor to Tunnels, represented in both directions by authored Path cards under PATH-D01. No other Service Corridor content is approved.
+Service Corridor is a deliberately minimal persistent Room. Its initial implementation contains exactly the authored Tunnels-to-Service-Corridor Path and Service-Corridor-to-Tunnels Path required by PATH-D01, each with `travel-time = 15`.
+
+Service Corridor otherwise starts empty: it has no Search deck, Features, loose items, additional Paths, or special behavior. Runtime and authored data must not invent content merely to make the Room feel complete. The current purpose is only to establish the Room and its two-way connectivity. ROOM-07 owns the separate future design work for purpose and content.
 
 ### Acceptance criteria
 
 - Service Corridor persists under ROOM-01 like every other Room.
-- Authored Path cards provide both approved directions and no implicit runtime edge.
+- Authored Path cards provide both approved directions at exactly 15 minutes each, with no implicit runtime edge.
+- The initial Room contains no Search deck, Features, loose items, additional Paths, or special behavior.
 - Runtime and authored data do not invent additional content.
-
-### QUESTION FOR SIMON — Service Corridor contents
-
-- What content, if any, is initially present in Service Corridor?
+- Future gameplay purpose and content remain isolated in ROOM-07 and do not block the intentionally empty first version; only the schema-required background and light authoring remain blockers.
 
 ### Implementation status
 
-The Room and both required Path travel times are implementation-ready but not implemented. Additional content remains optional and unapproved unless separately decided.
+The deliberately empty initial contents and both required 15-minute Paths are fully approved. The Room is not yet implementation-ready because ROOM-01's schema requires an authored background and light level, and ROOM-07 deliberately leaves those presentation/world-state choices unresolved.
 
 ## ROOM-06 — Future room candidates
 
@@ -1692,6 +1863,34 @@ If Simon later approves a candidate, it should receive its own Room task and fol
 ### Implementation status
 
 Open design record only. None of these candidate Rooms or their tentative purposes are approved or implementation-ready.
+
+## ROOM-07 — Define Service Corridor purpose and content
+
+Priority: P2
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Safe Room must revisit Service Corridor's longer-term purpose and content after ROOM-05's deliberately empty initial implementation. This approval establishes the need for a later design pass only; it adds no content or behavior to the current Room.
+
+### QUESTION FOR SIMON — Service Corridor purpose and content
+
+- What is Service Corridor's gameplay purpose?
+- Is it primarily transit, loot, shelter, access, or something else?
+- Which Features, if any, belong there?
+- Should it have one or more decks?
+- Which items, if any, should be present?
+- Should it gain additional Room connections?
+- What visual identity and background should it use?
+- What authored light level should it use?
+- What risks should it contain?
+- What opportunities should it offer?
+- Why should the player visit or return?
+
+### Implementation status
+
+Open design task. None of the future purpose, content, connection, risk, opportunity, or presentation decisions are implementation-ready. Do not add ROOM-07 to an implementation iteration until they are explicitly approved.
 
 ## PATH-D01 — Every Room connection uses authored Path cards
 
@@ -1725,7 +1924,7 @@ These simple initial travel times may be rebalanced later. There remains no Tunn
 
 ### Implementation status
 
-Partially implemented for the existing Tunnels, Abandoned Office, and Deep Tunnels connections. All expanded-topology travel times are approved. The Tunnels-to-Back-Alley conditional Path remains blocked only by TIME-D02's valid time-atom serialization; the other new Path data is implementation-ready.
+Partially implemented for the existing Tunnels, Abandoned Office, and Deep Tunnels connections. All expanded-topology travel times and the Tunnels-to-Back-Alley time condition serialization are approved; the new Path data is implementation-ready.
 
 ## DECK-D01 — Deck ownership is shared by Rooms and cards
 
@@ -1748,7 +1947,7 @@ This enables interactive world cards such as Dumpster to own searchable contents
 
 ### Implementation status
 
-Implementation-ready but not implemented. Concrete Dumpster refill effects remain separately unresolved in DUMPSTER-01.
+Implementation-ready but not implemented. DUMPSTER-01 and ACTION-D05 now fully specify the first card-owned-deck consumer and its generic refill effect.
 
 ## DUMPSTER-01 — Dumpster owns a persistent refillable deck
 
@@ -1758,31 +1957,75 @@ Origin: Simon
 
 ### Rule
 
-Dumpster is a card located in Back Alley. It owns a searchable deck through DECK-D01. The deck has authored starting cards, retains cards that have not been found or removed, and receives two new cards every day at exactly 12:00.
+Dumpster is a card located in Back Alley. It owns a searchable deck through DECK-D01. The deck has authored starting cards, retains cards that have not been found or removed, and may receive two new cards every day at exactly 12:00.
 
 At game start the Dumpster deck contains exactly one empty Plastic Bottle and one Stale Bread. The Plastic Bottle must not have `contains-water`.
 
-At exactly 12:00 every day, Dumpster's Process adds exactly one empty Plastic Bottle and one Stale Bread to the existing deck. Cards already remaining in the deck stay there. This is intentionally the simple first refill model; weighted loot, randomness, rarity tables, and more advanced loot behavior are not approved.
+Dumpster's authored Process runs globally through the normal Process system and continues to run and evaluate while Nadir is outside Back Alley. At exactly 12:00 it uses TIME-D02's authoritative world-clock condition. If the owned deck currently contains more than three card instances, no refill occurs. If `deck_size <= 3`, the Process adds exactly two new card instances.
 
-The daily addition is performed by a Process authored on Dumpster. It uses the authoritative world clock through TIME-D02, the shared evaluator in LOGIC-D01, a generic effect for adding cards to a target deck, and the normal Process system. Runtime must not hardcode daily Dumpster behavior.
+Each new card is selected independently, with replacement, from this static authored source list:
+
+```json
+[
+  "plastic-bottle",
+  "stale-bread"
+]
+```
+
+Valid outcomes therefore include two Plastic Bottles, one Plastic Bottle and one Stale Bread in either pick order, or two Stale Bread cards. Repeated master IDs in a future authored source list may provide simple weighting under ACTION-D05. Each pick creates a fresh instance, and the two instances append to the end of the existing Dumpster deck in pick order. Existing cards are never replaced or cleared.
+
+The approved Process is:
+
+```json
+{
+  "if": {
+    "and": [
+      {
+        "time": {
+          "=": "12:00"
+        }
+      },
+      {
+        "deck_size": {
+          "<=": 3
+        }
+      }
+    ]
+  },
+  "effects": [
+    {
+      "add-random-card": {
+        "count": 2,
+        "from": [
+          "plastic-bottle",
+          "stale-bread"
+        ],
+        "to": "self.deck"
+      }
+    }
+  ]
+}
+```
+
+The time and deck-size restrictions belong entirely to Process applicability. ACTION-D05's generic effect performs only creation and insertion. Runtime must not hardcode Dumpster behavior.
 
 ### Acceptance criteria
 
 - Dumpster and its deck persist as ordinary authored card/world state.
 - Searching uses the generalized deck behavior rather than a second deck type.
 - Starting contents are exactly one empty Plastic Bottle without `contains-water` and one Stale Bread.
-- The authored Process adds exactly one empty Plastic Bottle and one Stale Bread when its approved 12:00 condition is met.
+- The Process evaluates globally even when Back Alley is not the active Room.
+- At 12:00, a deck with more than three cards receives no refill; a deck with three or fewer receives exactly two new cards.
+- Each new card is independently selected with replacement from the exact authored Plastic Bottle/Stale Bread pool.
+- Each pick creates a fresh instance and appends it in pick order.
 - Cards not drawn or removed remain in the deck across searches and daily additions.
-- Refill uses no weighted, random, rarity, or advanced loot model.
+- Existing deck contents are never replaced or cleared by refill.
+- The refill uses only the simple static-list randomness and duplicate-entry weighting approved by ACTION-D05; no rarity table or advanced loot model is introduced.
 - No Dumpster ID/name branch exists in runtime.
-
-### QUESTION FOR SIMON — Add-card-to-deck effect serialization
-
-What exact generic JSON/effect representation adds authored card instances to a target deck? No effect syntax is approved by this task.
 
 ### Implementation status
 
-Starting contents, exact daily additions, timing semantics, and generic architecture are approved. Implementation remains blocked only by the generic add-card-to-deck effect serialization and TIME-D02's valid time-atom serialization.
+Implementation-ready but not implemented, subject to the approved generic dependencies in DECK-D01, LOGIC-D01, LOGIC-D05, TIME-D02, PROCESS-D01, and ACTION-D05. Starting contents, global evaluation, applicability, random source pool, creation, and insertion behavior are fully specified.
 
 ## SEARCH-01 — Search decks are persistent owned objects
 
