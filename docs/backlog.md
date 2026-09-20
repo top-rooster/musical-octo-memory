@@ -356,6 +356,46 @@ For Puddle, `water.visibility = true` and `refill.visibility = false`.
 
 Implementation-ready but not implemented. This task resolves the generic hidden-Value representation previously left open by CARD-D02 and WATER-02 without changing unrelated Value semantics.
 
+## DATA-11 — Card masters may author presentation metadata
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+A card master may contain the presentation-only field:
+
+```json
+{
+  "presentation": "food"
+}
+```
+
+The first-version vocabulary is exactly `food`, `item`, `path`, and `feature`. The renderer uses the value directly to select UI-07's corresponding production frame:
+
+- `food` selects `public/images/card-frames/card-frame-food.png`;
+- `item` selects `public/images/card-frames/card-frame-item.png`;
+- `path` selects `public/images/card-frames/card-frame-path.png`;
+- `feature` selects `public/images/card-frames/card-frame-feature.png`.
+
+`presentation` is presentation metadata only. It does not alter gameplay, replace Markers, Values, References, Actions, or Processes, become a card class, or participate in gameplay queries. No gameplay behavior may depend on it.
+
+The field is optional. Card roles outside the current vocabulary, including condition-like cards such as Starving and potentially other special cards, omit it and retain the existing legacy card presentation. No additional presentation value is approved.
+
+### Acceptance criteria
+
+- Card-master validation accepts only the four approved values when `presentation` is present and rejects any other value.
+- Loading preserves the optional value as presentation metadata for the renderer.
+- Cards without the field continue through the legacy renderer without an inferred fallback role.
+- Frame selection uses the authored value without card-name, card-ID, Marker, Value, Reference, Action, Process, or other gameplay heuristics.
+- Gameplay logic cannot query or branch on `presentation`.
+- Tests cover all four supported values, omission, invalid values, and the separation from gameplay behavior.
+
+### Implementation status
+
+Implementation-ready but not implemented. The exact field shape, vocabulary, semantics, fallback, and UI-07 mapping are approved.
+
 ## NADIR-D01 — Body, Mind, and Spirit are persistent Nadir cards
 
 Priority: P0
@@ -721,7 +761,7 @@ Earlier pseudo-JSON such as `{ "time": ">=", "22:00" }` records the intended sem
 
 ### QUESTION FOR SIMON — Valid time-atom serialization
 
-What exact valid JSON object shape serializes a world-clock comparison? The current approved condition schema has no existing atomic shape for time, so only this serialization detail remains unresolved; the comparison semantics above are approved.
+What exact valid JSON object shape serializes an atomic world-clock comparison such as `current time >= 22:00`, `current time < 06:00`, or `current time = 12:00`? The current approved condition schema has no existing atomic shape for time, so only this serialization detail remains unresolved. The representation must preserve the existing comparator vocabulary, compose through the shared `and`/`or`/`not` operators, use LOGIC-D01, and introduce no hardcoded `night` literal. The earlier pseudo-JSON is not implementation schema.
 
 ### Implementation status
 
@@ -1241,6 +1281,8 @@ One possible architecture is:
 
 Under this proposal, passive effects are continuous modifiers evaluated from current state. They do not mutate base state on equip and reverse-mutate it on unequip; removing or unequipping the source naturally removes its effective modifier. `if` would use LOGIC-D01, and `equipped` would use LOGIC-D03's approved literal. A Flashlight could conceptually require both `equipped` and Battery greater than 0 before contributing Vision.
 
+Glasses and Flashlight should eventually use the same generic mechanism without named-card runtime knowledge. That intended architectural outcome does not approve the proposed `passives` schema.
+
 This proposal, including every shown field and the `nadir` target, is not approved schema.
 
 ### QUESTION FOR SIMON — Passive-effect schema
@@ -1419,7 +1461,7 @@ Puddle of Water is Anchored and begins with Value `water = 3`. A valid empty con
 
 ### Implementation status
 
-Partially implemented. Puddle `water = 3` and container state exist, but the current depletion behavior discards the empty Puddle and filling was blocked while WATER-01 was unresolved. The approved persistent-empty behavior, WATER-01 Fill duration, and WATER-02 regeneration are not implemented.
+Implementation-ready and partially implemented. Puddle `water = 3` and container state exist, but the current depletion behavior discards the empty Puddle. The approved persistent-empty behavior and WATER-01 Fill duration are ready to implement; WATER-02 regeneration remains separately blocked by its conditional Process serialization question.
 
 ### History
 
@@ -1443,7 +1485,7 @@ Filling one bottle from the Puddle is an Action with an explicit `spend-time` ef
 
 ### Implementation status
 
-Not implemented. This resolves the former open duration question.
+Implementation-ready but not implemented. This resolves the former open duration question and uses WATER-D01's already approved Fill interaction.
 
 ## WATER-02 — Puddle regeneration
 
@@ -1473,9 +1515,13 @@ Starting from `refill = 0`, exactly 96 ticks regenerate one Water. At 15 minutes
 - `refill` never appears on the card, in inspection, or in ordinary player-facing previews.
 - Empty Puddles persist and can become usable again through the same generic Process system.
 
+### QUESTION FOR SIMON — Conditional Process serialization
+
+What exact valid JSON representation expresses the approved nested `if`/`then`/`else` Process behavior? The current repository Process schema accepts only an `effects` array and has no established conditional shape. DATA-D05 therefore prevents Codex from inventing the serialization even though the Puddle's conditional semantics are fully approved.
+
 ### Implementation status
 
-Implementation-ready but not implemented. DATA-10 resolves the former hidden-Value blocker; no unresolved Puddle-regeneration design question remains.
+Not implemented. DATA-10 resolves the hidden-Value representation, but implementation remains blocked by the exact conditional Process serialization above.
 
 ## ROOM-01 — Persistent authored rooms and world state
 
@@ -1857,6 +1903,10 @@ The existing fallback behavior for genuinely missing artwork remains valid.
 - Verified in at least one normal Room.
 - When implemented, verified on the deployed GitHub Pages build.
 
+### Implementation status
+
+Implementation-ready but not implemented. The renderer fix and current-room verification can proceed now; the Apartment-specific acceptance check must be repeated after OPENING-01 replaces the legacy Opening.
+
 ## UI-07 — Visually distinguish card roles without classes
 
 Priority: P1
@@ -1878,14 +1928,14 @@ All four roles remain parts of the same Safe Room visual language. A special con
 
 ### Production asset contract
 
-Four separate production assets will be supplied outside Codex implementation work:
+Simon supplied four authoritative production assets at these exact repository paths:
 
-- `card-frame-food.png`
-- `card-frame-item.png`
-- `card-frame-path.png`
-- `card-frame-feature.png`
+- `public/images/card-frames/card-frame-food.png`
+- `public/images/card-frames/card-frame-item.png`
+- `public/images/card-frames/card-frame-path.png`
+- `public/images/card-frames/card-frame-feature.png`
 
-Their exact repository directory will be finalized when the assets are supplied. Do not create placeholder artwork. Each production frame must have a transparent background, contain only reusable frame/material artwork, and leave a transparent central area for card-specific artwork. It must contain no card-specific illustration, title, descriptive text, Values, Actions, travel-time text, condition text, hover/selected/drag state, or baked-in capability/role icons.
+These are production assets, not temporary mockups. They must be used without destructive optimization, regeneration, redrawing, or substitution. Each production frame has a transparent background, contains only reusable frame/material artwork, and leaves a transparent central aperture for card-specific artwork. It contains no card-specific illustration, title, descriptive text, Values, Actions, travel-time text, condition text, hover/selected/drag state, or baked-in capability/role icons.
 
 The previously generated four-frame overview is design reference only. It is not a production asset and must not be used directly as a card frame.
 
@@ -1905,7 +1955,16 @@ Dynamic information remains dynamic. Changing a Value, Action, destination, cond
 
 ### Role selection
 
-The renderer must select a role from generic existing authored semantics/state, never from card-name or card-ID cases. Food may use the existing `food` Marker where appropriate. Path derives from existing authored Path semantics. Feature must derive from generic authored role/state rather than identity. Ordinary remaining carried items use Item presentation according to generic rules.
+The renderer selects the frame directly from the card master's optional DATA-11 `presentation` field, never from card-name/card-ID cases or gameplay inference:
+
+```text
+food    -> public/images/card-frames/card-frame-food.png
+item    -> public/images/card-frames/card-frame-item.png
+path    -> public/images/card-frames/card-frame-path.png
+feature -> public/images/card-frames/card-frame-feature.png
+```
+
+Cards without `presentation`, including current condition-like or other special cards outside the four roles, retain the existing legacy rendering. The renderer must not infer a value from Markers or other gameplay state, and gameplay must never query the field.
 
 ### UI-06 compatibility
 
@@ -1916,18 +1975,17 @@ UI-06 remains the authority for artwork stability. The layered renderer must not
 - Food, Item, Path, and Feature are visually distinct while remaining one coherent Safe Room language.
 - Presentation roles add no gameplay state or authority and do not depend on a class field.
 - The renderer uses no card-name or card-ID special cases to choose a role.
-- The four supplied production frames comply with the asset contract and are composed with existing art and dynamic UI as independent layers.
+- The renderer maps DATA-11's four exact values to the four exact authoritative asset paths.
+- Cards without `presentation` preserve the legacy rendering.
+- The supplied 512 × 768 RGBA PNG production frames comply with the asset contract and are composed with existing art and dynamic UI as independent layers.
+- Production builds and GitHub Pages deploy all four assets at their base-path-correct URLs.
 - Dynamic state and interaction styling never require regenerating a frame asset.
 - Condition cards retain their current presentation in v1.
 - UI-06 artwork-stability criteria remain satisfied across normal interaction.
 
-### QUESTION FOR SIMON — Generic Feature representation
-
-What generic existing or newly approved authored semantic distinguishes Feature from Item without card-name/card-ID lookup? Current authored state can identify Food and Path, but does not provide a sufficient generic Feature discriminator. This narrow representation question must be answered without introducing a card-class system.
-
 ### Implementation status
 
-The visual direction, layer contract, production asset contract, and UI-06 compatibility are approved. UI-07 remains outside an implementation iteration until the four production assets are supplied and the generic Feature discriminator is approved.
+Implementation-ready but not implemented. The production assets are present, DATA-11 resolves exact role selection and legacy fallback, and no unrelated UI-07 design question remains.
 
 ## DEPLOY-01 — Complete every iteration through main and GitHub Pages
 
