@@ -358,45 +358,19 @@ For Puddle, `water.visibility = true` and `refill.visibility = false`.
 
 Implementation-ready but not implemented. This task resolves the generic hidden-Value representation previously left open by CARD-D02 and WATER-02 without changing unrelated Value semantics.
 
-## DATA-11 — Card masters may author presentation metadata
+## DATA-11 — Card presentation metadata task merged into UI-07
 
 Priority: P0
 Decision: APPROVED BY SIMON
 Origin: Simon
 
-### Rule
+### Resolution
 
-A card master may contain the presentation-only field:
-
-```json
-{
-  "presentation": "food"
-}
-```
-
-The first-version vocabulary is exactly `food`, `item`, `path`, and `feature`. The renderer uses the value directly to select UI-07's corresponding production frame:
-
-- `food` selects `public/images/card-frames/card-frame-food.png`;
-- `item` selects `public/images/card-frames/card-frame-item.png`;
-- `path` selects `public/images/card-frames/card-frame-path.png`;
-- `feature` selects `public/images/card-frames/card-frame-feature.png`.
-
-`presentation` is presentation metadata only. It does not alter gameplay, replace Markers, Values, References, Actions, or Processes, become a card class, or participate in gameplay queries. No gameplay behavior may depend on it.
-
-The field is optional. Card roles outside the current vocabulary, including condition-like cards such as Starving and potentially other special cards, omit it and retain the existing legacy card presentation. No additional presentation value is approved.
-
-### Acceptance criteria
-
-- Card-master validation accepts only the four approved values when `presentation` is present and rejects any other value.
-- Loading preserves the optional value as presentation metadata for the renderer.
-- Cards without the field continue through the legacy renderer without an inferred fallback role.
-- Frame selection uses the authored value without card-name, card-ID, Marker, Value, Reference, Action, Process, or other gameplay heuristics.
-- Gameplay logic cannot query or branch on `presentation`.
-- Tests cover all four supported values, omission, invalid values, and the separation from gameplay behavior.
+The approved optional card-master `presentation` field, its exact vocabulary, validation, gameplay separation, legacy fallback, and renderer mapping are now owned together by UI-07. This ID no longer owns standalone implementation work and must not be scheduled separately.
 
 ### Implementation status
 
-Implementation-ready but not implemented. The exact field shape, vocabulary, semantics, fallback, and UI-07 mapping are approved.
+Closed and merged into UI-07 before implementation.
 
 ## NADIR-D01 — Body, Mind, and Spirit are persistent Nadir cards
 
@@ -628,16 +602,28 @@ Exactly one reusable logic-evaluation component owns the approved condition lang
 
 The evaluator is a separate component with a small reusable API. Feature code supplies an evaluation context and receives a boolean result. The component ultimately owns consistent behavior for `and`, `or`, `not`, Marker conditions, Value comparisons, logical literals, targets, nested expressions, count matching, LOGIC-D05 deck-size comparisons, TIME-D02 world-clock conditions, and invalid-expression handling.
 
+### Engine iteration boundary
+
+LOGIC-D01, LOGIC-D05, TIME-D02, ACTION-D05, PROCESS-D01, and EQUIP-05 form the current engine replacement iteration. Closing those six IDs is necessary but not sufficient: the milestone is complete only when all existing gameplay runs through the generic authored Action, Process, attribute, condition, and passive-effect engine.
+
+The iteration migrates existing gameplay and removes gameplay-specific custom logic and compatibility paths. Runtime must not retain hardcoded card IDs or Room IDs that implement gameplay behavior, special Travel, Water, or Equipment handlers, or another bespoke gameplay path that can be expressed through the approved generic authored model. Tests must prove the migrated existing gameplay through generic data and engine behavior rather than preserving a second compatibility implementation.
+
+This engine iteration introduces no new gameplay content. Apartment/Puddle content, Service Corridor content, crafting content, and UI-09 card-size/drag work remain in later iterations.
+
 ### Acceptance criteria
 
 - One evaluator is used by every approved consumer of the condition language.
 - The evaluation context supplies `self`, optional `other`, world/card access required by approved conditions, and the authoritative world clock without feature-specific card-name knowledge.
 - Invalid expressions fail consistently and never become truthy through a feature-specific fallback.
 - Central tests cover the language; individual features test integration without duplicating the evaluator's language matrix.
+- Existing gameplay uses the generic authored engine end to end, with obsolete custom handlers and compatibility paths removed.
+- Runtime contains no gameplay behavior selected by hardcoded card or Room IDs where approved attributes, Actions, Processes, or shared conditions provide the authority.
+- Travel, Water, and Equipment behavior do not retain parallel special handlers after migration.
+- No new Room, Puddle, crafting, or UI content is introduced merely to exercise the engine.
 
 ### Implementation status
 
-Implementation-ready but not implemented. The shared architecture and all currently required condition forms, including count, deck size, and world-clock serialization, are approved under LOGIC-D02 through LOGIC-D05 and TIME-D02.
+Selected for the current engine replacement iteration and not implemented. The shared architecture and all currently required condition forms, including count, deck size, and world-clock serialization, are approved under LOGIC-D02 through LOGIC-D05 and TIME-D02. Completion is governed by the engine iteration boundary above, not only by the local evaluator acceptance criteria.
 
 ## LOGIC-D02 — Atomic conditions support self and other targets
 
@@ -774,7 +760,7 @@ This condition participates in LOGIC-D01 and must remain generic; runtime contai
 
 ### Implementation status
 
-Implementation-ready but not implemented, subject to LOGIC-D01, LOGIC-D02, and DECK-D01.
+Selected for the current engine replacement iteration and not implemented, subject to LOGIC-D01, LOGIC-D02, and DECK-D01.
 
 ## TIME-D02 — Conditions can evaluate the authoritative world clock
 
@@ -831,7 +817,7 @@ Runtime must not add hardcoded time concepts such as `night` for one Room. Earli
 
 ### Implementation status
 
-Implementation-ready but not implemented. World-clock semantics and valid atomic JSON serialization are fully approved.
+Selected for the current engine replacement iteration and not implemented. World-clock semantics and valid atomic JSON serialization are fully approved.
 
 ## ACTION-D01 — Card-on-card roles and Action matching
 
@@ -961,7 +947,7 @@ The effect performs only generic creation and insertion. It contains no time che
 
 ### Implementation status
 
-Implementation-ready but not implemented, subject to CARD-D01 and DECK-D01.
+Selected for the current engine replacement iteration and not implemented, subject to CARD-D01 and DECK-D01.
 
 ## FOOD-01 — Authored food effects and consumption
 
@@ -1012,7 +998,7 @@ The duration and behavior are decided, but what exact generic authored represent
 
 ### Implementation status
 
-Stale Bread's identity, sustenance, duration, consumption, and generic behavior are approved. Implementation remains blocked only by the exact generic authoring representation for its already-approved per-food Eat duration.
+Stale Bread's identity, sustenance, duration, consumption, and generic behavior are approved. Implementation remains blocked only by the exact generic authoring representation for its already-approved per-food Eat duration. FOOD-02 belongs with DUMPSTER-01 in the Back Alley + Service Corridor + Dumpster + images content iteration once that blocker is resolved.
 
 ## ACTION-05 — Direct interactions commit without a chooser
 
@@ -1083,7 +1069,7 @@ Ordering must be intentional rather than an accidental consequence of unrelated 
 
 ### Implementation status
 
-Partially implemented with centralized quarter-hour boundary counting, deterministic non-conflicting Process batches, Process-before-next-effect ordering, and preservation of inactive-room state. The remaining conditional `if`, ordered same-card Process chaining, implicit Process-owner `self`, and off-screen global evaluation work is approved and implementation-ready.
+Selected for the current engine replacement iteration and partially implemented with centralized quarter-hour boundary counting, deterministic non-conflicting Process batches, Process-before-next-effect ordering, and preservation of inactive-room state. The remaining conditional `if`, ordered same-card Process chaining, implicit Process-owner `self`, and off-screen global evaluation work is approved and implementation-ready.
 
 ## PROCESS-D02 — Body drains Hydration and Satiation on every tick
 
@@ -1284,7 +1270,88 @@ Origin: Simon
 
 ### Question
 
-Which tools use Durability, what are their starting Values and wear rates, and what happens at 0? Do not implement generic wear or breakage until these choices are made.
+CRAFT-D01 establishes that recipe-required tools lose Durability where appropriate and that IPA uses Durability to represent remaining usable quantity. Which other tools use Durability, their starting Values, wear per concrete use, and the generic consequence at 0 remain `QUESTION FOR SIMON`. Do not invent exact costs, breakage, or depletion behavior.
+
+## CRAFT-D01 — Technical crafting, repair, and salvage design
+
+Priority: P2
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Crafting recipes consist of multiple ordered steps. Each step may be an Action or a Process. A recipe may require tools, those tools lose Durability where appropriate, and each recipe authors its own light requirements. Exact recipe times and Durability costs remain unresolved.
+
+Crafting should feel technical and reflect Nadir's background. Prefer repair, diagnosis, dismantling, salvage, modification, wiring, and technical construction over a generic primitive-survival tree. The world should primarily contain recognizable objects and damaged equipment rather than loose abstract crafting currencies.
+
+A damaged object such as a `Water-Damaged Emergency Light` can be carried elsewhere, repaired, or dismantled for useful components. Repair is generally a shortcut compared with building an equivalent object from scratch. Salvaging destroys the opportunity to repair or use that intact object.
+
+Generic technical repair normally follows this order:
+
+```text
+open if necessary
+→ clean
+→ dry if wet
+→ test / diagnose
+→ repair identified fault
+→ test again
+```
+
+Testing and diagnosis occur before fixing the identified fault.
+
+### Built Features and incomplete construction
+
+Half-finished crafts are primarily, and possibly exclusively, relevant to built Features. Do not create artificial intermediate cards such as `Workbench Frame`, `Half-Built Workbench`, or `Almost-Finished Workbench`. Create or use the actual Feature card and preserve that same instance while construction is incomplete. The incomplete Feature is semi-transparent, its completed functionality is inactive, and recipe/build progress determines when it becomes complete and fully visible.
+
+This presentation is not generalized to every small-item craft without a future concrete need.
+
+### Environment-sensitive Processes
+
+Recipe Processes may depend on the Room or environment. Drying wet electronics is faster in a dry Room and slower in a damp or wet Room, making it useful to move an object to a more suitable place. Use the simplest generic Process and Room-attribute representation that expresses a concrete recipe; this approval does not introduce a large humidity simulation or approve exact humidity values.
+
+### Tool capabilities
+
+Recipes normally require a generic tool capability rather than a named tool master. The first approved capability is `screw-tool`, whose Value is a work-time multiplier:
+
+```text
+Screwdriver
+screw-tool: 1
+
+Coin
+screw-tool: 2
+```
+
+A Coin can therefore perform screw work but takes twice as long as a Screwdriver. This pattern is generic and attribute-driven. Do not add specialist tool capabilities until concrete recipes justify them.
+
+### Cleaning and material vocabulary
+
+Use `Fabric`; do not create separate Rag, Fabric, or Strap resource types. Fabric may carry clean/dirty and wet/dry state when a concrete recipe needs it, and may later be washed and dried back into clean Fabric. Fabric can also supply strap material when a recipe needs it.
+
+Cleaning electronics uses clean Fabric and Isopropyl Alcohol/IPA. The Action changes `Fabric [clean]` to `Fabric [dirty]`. IPA is a reusable finite-use tool whose Durability represents remaining usable quantity. Do not introduce a separate Soft Brush.
+
+Avoid vague meta-resources such as `Structural Parts` and `Fasteners` unless a concrete future recipe proves that abstraction useful. Keep the component vocabulary small; the current short naming direction includes `Wire`, `Module`, and `Fabric`. Do not split `Module` into relays, fuses, terminal blocks, PCB assemblies, or similar detail unless concrete gameplay needs it. The name and granularity of a light-producing component, such as Lamp or LED, remain unresolved.
+
+### Battery
+
+Battery is a rechargeable resource carrier analogous to Bottle carrying Water: Battery carries Charge. Use reduces Charge and the Battery can be recharged. A Battery is not an ordinary consumed crafting component and should not be destroyed merely because it powers a crafted object when it can remain a reusable inserted or connected source. No multiple Battery chemistry or type vocabulary is approved.
+
+### Hi-Vis Jacket
+
+`Hi-Vis Jacket` is a future clothing concept. It protects against cold and water/weather, but its high visibility is harmful while Nadir is trying to remain hidden. It is a trade-off rather than a linear equipment upgrade. Exact protection, visibility, equipment, and recipe values remain unresolved.
+
+### QUESTION FOR SIMON — Concrete crafting design
+
+- What is the first complete crafting/repair tree and which concrete recipes prove the generic model?
+- Which exact components make the first Work Light or other light-producing object, and what is the light component called?
+- Which concrete finite salvage belongs in Service Corridor after the recipes justify it?
+- Which Room attributes express the first drying/environment dependency, and what exact values apply?
+- What are the exact recipe work times and Durability costs?
+- Which built Features need incomplete-state progress, and is that presentation exclusive to Features?
+- What are the exact Hi-Vis Jacket gameplay Values, visibility consequence, slot compatibility, source, and any recipe?
+
+### Implementation status
+
+Open design task. The principles above are approved, but the concrete crafting tree, recipes, contents, environmental values, times, costs, and unresolved component naming are not implementation-ready. Do not add crafting implementation or arbitrary Service Corridor loot to the engine replacement iteration.
 
 ## WOUND-01 — Current wound treatment and healing model
 
@@ -1471,7 +1538,7 @@ No additional passive-effect target, operation, stacking rule, lifecycle, or fea
 
 ### Implementation status
 
-Implementation-ready but not implemented, subject to LOGIC-D01 and LOGIC-D03. Do not add EQUIP-05 to the current implementation iteration.
+Selected for the current engine replacement iteration and not implemented, subject to LOGIC-D01 and LOGIC-D03. The iteration must remove the legacy `whileEquipped` compatibility representation after migrating existing equipment behavior to generic `passives`.
 
 ## OPENING-01 — Apartment is a normal one-way Room
 
@@ -1483,7 +1550,7 @@ Origin: Simon
 
 The player-facing Room formerly named `Opening Room` is `Apartment`. Apartment is an ordinary Room using the same normal Inventory, equipment, Action, Process, Path, and Travel systems as other Rooms. Body, Mind, and Spirit are available from the start, and normal survival simulation is active.
 
-The special Opening flow is superseded: there is no Escape button, `takeLimit`, special `offered` mechanism, or separate Opening gameplay mode/phase. The player leaves through an authored Apartment-to-Tunnels Path using normal Travel. There is no Tunnels-to-Apartment Path, so Apartment is one-way under PATH-D01.
+The special Opening flow is superseded: there is no Escape button, `takeLimit`, special `offered` mechanism, or separate Opening gameplay mode/phase. The player leaves through an authored Apartment-to-Tunnels Path using normal Travel. There is no Tunnels-to-Apartment Path, so Apartment is one-way under PATH-APT-01.
 
 Starting equipment remains ordinary equipment state: Pants are equipped in Legs and T-Shirt is equipped in Chest. Apartment contains exactly two Plastic Bottles, one starting with `contains-water` and one starting empty. The two Canned Food instances and Simple Backpack are removed from the legacy Opening contents. Retain the other approved items: Pocket Knife, Simple Lighter, Flashlight, Spare Batteries, Pain Killers, and Glasses.
 
@@ -1501,7 +1568,7 @@ Apartment's background must be replaced with a homely residential apartment. The
 
 ### Implementation status
 
-Implementation-ready but not implemented. PATH-D01 now approves Apartment-to-Tunnels `travel-time = 15`; the current special Opening flow, five-offer limit, Escape button, hidden Nadir cards, contents, and background are superseded by this task.
+Implementation-ready but not implemented. PATH-APT-01 approves Apartment-to-Tunnels `travel-time = 15`; the current special Opening flow, five-offer limit, Escape button, hidden Nadir cards, contents, and background are superseded by this task. OPENING-01, PATH-APT-01, WATER-D01, WATER-01, WATER-02, and required Apartment/Puddle images belong to the Apartment + Puddle + images content iteration after the engine replacement iteration.
 
 ### History
 
@@ -1641,7 +1708,7 @@ Puddle of Water is Anchored and begins with Value `water = 3`. A valid empty con
 
 ### Implementation status
 
-Implementation-ready and partially implemented. Puddle `water = 3` and container state exist, but the current depletion behavior discards the empty Puddle. The approved persistent-empty behavior, WATER-01 Fill duration, and WATER-02 regeneration are fully specified for implementation.
+Implementation-ready and partially implemented. Puddle `water = 3` and container state exist, but the current depletion behavior discards the empty Puddle. The approved persistent-empty behavior, WATER-01 Fill duration, and WATER-02 regeneration are fully specified for the Apartment + Puddle + images content iteration after the engine replacement iteration.
 
 ### History
 
@@ -1678,6 +1745,8 @@ Origin: Simon
 Puddle has Value `water`, starting at 3 with maximum 3 and `visibility = true`, and Value `refill`, starting at 0 with `visibility = false`. Values must support authored game-start values. DATA-10 makes visibility mandatory for every authored Value; `refill` remains ordinary internal gameplay state available to logic and effects while never being player-facing.
 
 Puddle remains in the world when `water = 0`. Regeneration uses two Processes in authored order. It does not require nested `if`/`then`/`else` control flow.
+
+The Tunnels Puddle is a slow renewable fallback in a hub-like Room. It provides some renewable water but is deliberately insufficient to make Nadir indefinitely self-sufficient in Tunnels. This content balance belongs to the Apartment + Puddle + images iteration; PROCESS-D01 supplies the generic engine capability without introducing the Puddle content during the engine iteration.
 
 The first Process is:
 
@@ -1728,7 +1797,7 @@ The first Process executes before the second, and the second observes state prod
 
 ### Implementation status
 
-Implementation-ready but not implemented, subject to the approved generic dependencies in DATA-10, LOGIC-D01, LOGIC-D02, and PROCESS-D01. The prior nested-conditional requirement and serialization blocker are superseded.
+Implementation-ready but not implemented, subject to the approved generic dependencies in DATA-10, LOGIC-D01, LOGIC-D02, and PROCESS-D01. The prior nested-conditional requirement and serialization blocker are superseded. This authored Puddle behavior belongs to the Apartment + Puddle + images content iteration after the generic engine iteration.
 
 ## ROOM-01 — Persistent authored rooms and world state
 
@@ -1767,7 +1836,7 @@ Navigation cards are ordinary room-local Anchored cards carrying the `path` Mark
 - Travel uses ACTION-D01 through ACTION-D04 and centralized time.
 - Discovered route cards remain in their room with exact identity and position.
 - Arrival preserves all world and Nadir state.
-- Every approved connection is represented by the authored Path cards required by PATH-D01; runtime invents no implicit edge.
+- Every approved connection is represented by the authored Path cards owned by ROOM-02 or the relevant Room-introduction Path task; runtime invents no implicit edge.
 
 ### Implementation status
 
@@ -1781,7 +1850,9 @@ Origin: Simon
 
 ### Question
 
-What final content and deck compositions should fill the approved Rooms beyond the explicit decisions in ROOM-04, ROOM-05, DUMPSTER-01, and SEARCH-01? Mechanics for Pipe, Squatter, Service Cabinet, Puddle-related environment presentation, placeholder discoveries, and unspecified Back Alley content are not decided by their presence or names and must not be invented. ROOM-05 now approves an intentionally empty initial Service Corridor; its later purpose and content are isolated in ROOM-07. Approved topology is owned by PATH-D01 and is no longer open here.
+What final content and deck compositions should fill the approved Rooms beyond the explicit decisions in ROOM-04, ROOM-05, DUMPSTER-01, and SEARCH-01? Mechanics for Pipe, Squatter, Service Cabinet, Puddle-related environment presentation, placeholder discoveries, and unspecified Back Alley content are not decided by their presence or names and must not be invented. ROOM-05 now approves an intentionally empty initial Service Corridor; its later purpose and content are isolated in ROOM-07. Approved new-room topology is owned by PATH-APT-01, PATH-BA-01, and PATH-SC-01 and is no longer open here.
+
+Abandoned Office is later content. Its approved light remains Bright under VISION-01. Its intended direction is that it offers good working light during daytime while continued activity can make it increasingly exposed or dangerous. The exact exposure system, thresholds, causes, and consequences remain `QUESTION FOR SIMON` and must not be invented in this planning task.
 
 ## ROOM-04 — Back Alley
 
@@ -1791,11 +1862,13 @@ Origin: Simon
 
 ### Rule
 
-Back Alley is a persistent Room. The approved topology is Tunnels to Back Alley and Back Alley to Tunnels, represented in both directions by authored Path cards under PATH-D01.
+Back Alley is a persistent Room. The approved topology is Tunnels to Back Alley and Back Alley to Tunnels, represented in both directions by authored Path cards under PATH-BA-01.
 
 Travel from Tunnels to Back Alley is available only at night: from 22:00 inclusive until 06:00 exclusive. The Path's availability is authored through TIME-D02 and evaluated by LOGIC-D01 against the existing world clock. Runtime must not contain a Back Alley-specific time check or a hardcoded `night` concept.
 
 Back Alley contains the Dumpster card owned by DUMPSTER-01. No other content is approved here.
+
+Back Alley is intended as an interesting loot location with a limited useful window. Continued surrounding activity or exposure may make it increasingly dangerous, but the exact exposure mechanic, thresholds, timing, and consequences remain `QUESTION FOR SIMON` and are not approved by this task.
 
 ### Acceptance criteria
 
@@ -1807,7 +1880,7 @@ Back Alley contains the Dumpster card owned by DUMPSTER-01. No other content is 
 
 ### Implementation status
 
-Implementation-ready but not implemented, subject to the approved generic dependencies in TIME-D02, DUMPSTER-01, LOGIC-D01, LOGIC-D05, ACTION-D05, and DECK-D01.
+Future content iteration after Apartment + Puddle + images. Implementation-ready behavior remains subject to the approved generic dependencies in TIME-D02, DUMPSTER-01, LOGIC-D01, LOGIC-D05, ACTION-D05, DECK-D01, and PATH-BA-01; the unresolved exposure progression is later design and must not be invented as part of the initial Room.
 
 ## ROOM-05 — Service Corridor
 
@@ -1817,7 +1890,7 @@ Origin: Simon
 
 ### Rule
 
-Service Corridor is a deliberately minimal persistent Room. Its initial implementation contains exactly the authored Tunnels-to-Service-Corridor Path and Service-Corridor-to-Tunnels Path required by PATH-D01, each with `travel-time = 15`.
+Service Corridor is a deliberately minimal persistent Room. Its initial implementation contains exactly the authored Tunnels-to-Service-Corridor Path and Service-Corridor-to-Tunnels Path required by PATH-SC-01, each with `travel-time = 15`.
 
 Service Corridor otherwise starts empty: it has no Search deck, Features, loose items, additional Paths, or special behavior. Runtime and authored data must not invent content merely to make the Room feel complete. The current purpose is only to establish the Room and its two-way connectivity. ROOM-07 owns the separate future design work for purpose and content.
 
@@ -1831,7 +1904,7 @@ Service Corridor otherwise starts empty: it has no Search deck, Features, loose 
 
 ### Implementation status
 
-The deliberately empty initial contents and both required 15-minute Paths are fully approved. The Room is not yet implementation-ready because ROOM-01's schema requires an authored background and light level, and ROOM-07 deliberately leaves those presentation/world-state choices unresolved.
+The deliberately empty initial contents and both required 15-minute Paths are fully approved. The Room is not yet implementation-ready because ROOM-01's schema requires an authored background and light level, and ROOM-07 deliberately leaves those presentation/world-state choices unresolved. Service Corridor belongs to the Back Alley + Service Corridor + Dumpster + images iteration, not the engine iteration.
 
 ## ROOM-06 — Future room candidates
 
@@ -1853,7 +1926,7 @@ The following locations were discussed as possible future additions but are not 
 
 This task preserves candidates only. It does not add them to the world map, create Path cards, assign travel times, approve backgrounds, define contents or decks, or make any candidate implementation-ready. Back Alley and Service Corridor are excluded because ROOM-04 and ROOM-05 already own them.
 
-If Simon later approves a candidate, it should receive its own Room task and follow PATH-D01's authored Path-card rule rather than gaining authority from this suggestion record.
+If Simon later approves a candidate, it should receive its own Room task and a Room-specific authored Path task rather than gaining authority from this suggestion record.
 
 ### QUESTION FOR SIMON — Candidate selection and design
 
@@ -1872,15 +1945,17 @@ Origin: Simon
 
 ### Rule
 
-Safe Room must revisit Service Corridor's longer-term purpose and content after ROOM-05's deliberately empty initial implementation. This approval establishes the need for a later design pass only; it adds no content or behavior to the current Room.
+Safe Room must revisit Service Corridor's longer-term purpose and content after ROOM-05's deliberately empty initial implementation. Service Corridor is a technical/utility area that can contain useful resources or salvage. Those resources are finite and exhaustible rather than a renewable loot farm. Detailed contents must wait until the crafting tree is mature enough to justify concrete recognizable objects and materials; arbitrary generic crafting resources must not be added merely to populate the Room.
+
+This direction belongs to the Back Alley + Service Corridor + Dumpster + images content iteration after Apartment + Puddle + images. It does not approve particular loot, Features, decks, risks, opportunities, background, light level, or additional connections.
 
 ### QUESTION FOR SIMON — Service Corridor purpose and content
 
 - What is Service Corridor's gameplay purpose?
-- Is it primarily transit, loot, shelter, access, or something else?
+- Within its approved technical/utility character, what precise gameplay purpose should it serve: transit, finite salvage, shelter, access, or another role?
 - Which Features, if any, belong there?
 - Should it have one or more decks?
-- Which items, if any, should be present?
+- Which concrete finite/exhaustible objects or salvage should be present once the crafting tree justifies them?
 - Should it gain additional Room connections?
 - What visual identity and background should it use?
 - What authored light level should it use?
@@ -1890,9 +1965,23 @@ Safe Room must revisit Service Corridor's longer-term purpose and content after 
 
 ### Implementation status
 
-Open design task. None of the future purpose, content, connection, risk, opportunity, or presentation decisions are implementation-ready. Do not add ROOM-07 to an implementation iteration until they are explicitly approved.
+Open design task. Its technical/utility character and finite/exhaustible resource direction are approved, but none of the concrete contents, connections, risks, opportunities, background, light, or presentation decisions are implementation-ready. Do not add ROOM-07 to an implementation iteration until they are explicitly approved.
 
-## PATH-D01 — Every Room connection uses authored Path cards
+## PATH-D01 — Combined expanded-topology Path task is superseded
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Resolution
+
+The former combined task mixed Paths from several Room-introduction iterations. Its active authority is split into PATH-APT-01, PATH-BA-01, and PATH-SC-01 so each Path ships with the content iteration that introduces its Room. ROOM-02 continues to own the already implemented Abandoned Office and Deep Tunnels routes and the shared generic Travel behavior.
+
+### Implementation status
+
+Closed and superseded by the three Room-specific Path tasks below.
+
+## PATH-APT-01 — Apartment to Tunnels Path
 
 Priority: P0
 Decision: APPROVED BY SIMON
@@ -1900,31 +1989,57 @@ Origin: Simon
 
 ### Rule
 
-Every Room/world connection is represented by authored Path cards. A Room is not complete until the Path cards required by the approved topology exist in the appropriate Rooms. Runtime must not invent implicit navigation edges. Conditional accessibility belongs to authored logic on the relevant Path behavior.
-
-Current approved topology is:
-
-- Apartment to Tunnels, `travel-time = 15`; no Tunnels-to-Apartment Path;
-- Tunnels to Abandoned Office and Abandoned Office to Tunnels;
-- Tunnels to Deep Tunnels and Deep Tunnels to Tunnels;
-- Tunnels to Back Alley and Back Alley to Tunnels, each with `travel-time = 15`;
-- Tunnels to Service Corridor and Service Corridor to Tunnels, each with `travel-time = 15`.
-
-Tunnels-to-Back-Alley access is restricted to the TIME-D02 condition `22:00 <= time OR time < 06:00`. No other Path is conditionally restricted unless another task explicitly approves it.
-
-These simple initial travel times may be rebalanced later. There remains no Tunnels-to-Apartment Path; Apartment is one-way by approved world topology.
+Apartment contains one authored Path to Tunnels with `travel-time = 15`. There is no Tunnels-to-Apartment Path. The route uses the generic Path Marker, `travel-time` Value, `destination` Reference, Body Travel Action, shared logic, and ordered effects; runtime invents no implicit edge or Apartment-specific Travel handler.
 
 ### Acceptance criteria
 
-- Every listed directed connection has exactly the required authored Path card in its origin Room.
-- No unlisted reverse or implicit connection is created.
-- Apartment-to-Tunnels, both Back Alley directions, and both Service Corridor directions each use a base `travel-time` of exactly 15 minutes.
-- Path behavior continues to use the generic Marker, Value, Reference, Action, and logic systems rather than destination-specific code.
-- Every future Room task treats required authored Path cards as an acceptance criterion.
+- Apartment has exactly one authored outgoing Path to Tunnels at a base travel time of 15 minutes.
+- Tunnels has no return Path to Apartment.
+- Travel uses the generic authored engine and contains no Apartment or Tunnels ID special case.
 
 ### Implementation status
 
-Partially implemented for the existing Tunnels, Abandoned Office, and Deep Tunnels connections. All expanded-topology travel times and the Tunnels-to-Back-Alley time condition serialization are approved; the new Path data is implementation-ready.
+Implementation-ready but not implemented. This task belongs with OPENING-01 and the Apartment + Puddle + images content iteration after the engine replacement iteration.
+
+## PATH-BA-01 — Tunnels and Back Alley Paths
+
+Priority: P1
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Tunnels contains an authored Path to Back Alley and Back Alley contains an authored Path to Tunnels. Each has `travel-time = 15`. Only the Tunnels-to-Back-Alley direction uses TIME-D02's approved night condition: current time is at least 22:00 or earlier than 06:00. Runtime contains no implicit edge, Room-ID branch, or hardcoded `night` literal.
+
+### Acceptance criteria
+
+- Both directed Paths exist and each has a base travel time of exactly 15 minutes.
+- Only entry from Tunnels is restricted to the approved 22:00–06:00 window.
+- Both routes use the generic authored Travel and condition systems without named-Room handling.
+
+### Implementation status
+
+Implementation-ready but not implemented, subject to the engine iteration's LOGIC-D01 and TIME-D02 work. This task belongs with ROOM-04, DUMPSTER-01, and the Back Alley + Service Corridor + Dumpster + images content iteration.
+
+## PATH-SC-01 — Tunnels and Service Corridor Paths
+
+Priority: P1
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Tunnels contains an authored Path to Service Corridor and Service Corridor contains an authored Path to Tunnels. Each has `travel-time = 15`. Runtime contains no implicit edge or named-Room Travel handler.
+
+### Acceptance criteria
+
+- Both directed Paths exist and each has a base travel time of exactly 15 minutes.
+- Neither direction gains a condition unless a future approved task explicitly adds one.
+- Both routes use the generic authored Travel system without named-Room handling.
+
+### Implementation status
+
+Implementation-ready but not implemented. This task belongs with ROOM-05, ROOM-07, and the Back Alley + Service Corridor + Dumpster + images content iteration, after the Room's unresolved content and presentation decisions are ready.
 
 ## DECK-D01 — Deck ownership is shared by Rooms and cards
 
@@ -2025,7 +2140,7 @@ The time and deck-size restrictions belong entirely to Process applicability. AC
 
 ### Implementation status
 
-Implementation-ready but not implemented, subject to the approved generic dependencies in DECK-D01, LOGIC-D01, LOGIC-D05, TIME-D02, PROCESS-D01, and ACTION-D05. Starting contents, global evaluation, applicability, random source pool, creation, and insertion behavior are fully specified.
+Implementation-ready but not implemented, subject to the approved generic dependencies in DECK-D01, LOGIC-D01, LOGIC-D05, TIME-D02, PROCESS-D01, and ACTION-D05. Starting contents, global evaluation, applicability, random source pool, creation, and insertion behavior are fully specified. DUMPSTER-01 belongs to the Back Alley + Service Corridor + Dumpster + images content iteration after the Apartment/Puddle iteration.
 
 ## SEARCH-01 — Search decks are persistent owned objects
 
@@ -2236,6 +2351,20 @@ The approved visual direction is:
 
 All four roles remain parts of the same Safe Room visual language. A special condition-card treatment, including for Starving, is outside UI-07 v1; condition cards may retain their current presentation. UI-08 owns the future design work for condition-card presentation. No fifth material or presentation value is approved.
 
+### Authored presentation metadata
+
+A card master may contain the optional presentation-only field:
+
+```json
+{
+  "presentation": "food"
+}
+```
+
+The first-version vocabulary is exactly `food`, `item`, `path`, and `feature`. Validation rejects any other authored value. Loading preserves the optional value for the renderer. The field does not alter gameplay, replace Markers, Values, References, Actions, or Processes, become a card class, or participate in gameplay queries. Gameplay logic must not query or branch on `presentation`.
+
+Cards outside the current vocabulary, including condition-like cards such as Starving and potentially other special cards, omit the field and retain the legacy presentation. Omission does not trigger gameplay inference or an inferred fallback role.
+
 ### Production asset contract
 
 Simon supplied four authoritative production assets at these exact repository paths:
@@ -2265,7 +2394,7 @@ Dynamic information remains dynamic. Changing a Value, Action, destination, cond
 
 ### Role selection
 
-The renderer selects the frame directly from the card master's optional DATA-11 `presentation` field, never from card-name/card-ID cases or gameplay inference:
+The renderer selects the frame directly from the card master's optional `presentation` field owned by this task, never from card-name/card-ID cases or gameplay inference:
 
 ```text
 food    -> public/images/card-frames/card-frame-food.png
@@ -2284,8 +2413,9 @@ UI-06 remains the authority for artwork stability. The layered renderer must not
 
 - Food, Item, Path, and Feature are visually distinct while remaining one coherent Safe Room language.
 - Presentation roles add no gameplay state or authority and do not depend on a class field.
+- Card-master validation accepts only `food`, `item`, `path`, and `feature` when `presentation` is present, preserves omission, and keeps the field unavailable to gameplay logic.
 - The renderer uses no card-name or card-ID special cases to choose a role.
-- The renderer maps DATA-11's four exact values to the four exact authoritative asset paths.
+- The renderer maps the four exact authored values to the four exact authoritative asset paths.
 - Cards without `presentation` preserve the legacy rendering.
 - The supplied 512 × 768 RGBA PNG production frames comply with the asset contract and are composed with existing art and dynamic UI as independent layers.
 - Production builds and GitHub Pages deploy all four assets at their base-path-correct URLs.
@@ -2295,7 +2425,7 @@ UI-06 remains the authority for artwork stability. The layered renderer must not
 
 ### Implementation status
 
-Implementation-ready but not implemented. The production assets are present, DATA-11 resolves exact role selection and legacy fallback, and no unrelated UI-07 design question remains.
+Implementation-ready but not implemented. This task now owns both the approved card-master presentation metadata and the renderer that consumes it; DATA-11 is closed and merged. The production assets, exact role selection, validation, gameplay separation, and legacy fallback are fully specified. UI-07 remains future UI work and is not part of the engine replacement iteration.
 
 ## UI-08 — Condition card presentation
 
@@ -2307,7 +2437,7 @@ Origin: Simon
 
 Safe Room must revisit the visual presentation of condition or state cards such as Starving in a future design pass. The need for that future work is approved, but no concrete visual treatment is approved.
 
-UI-07 v1 remains limited to Food, Item, Path, and Feature. Condition cards retain their existing legacy presentation for that implementation. This task does not add a fifth `presentation` value or expand DATA-11's production vocabulary.
+UI-07 v1 remains limited to Food, Item, Path, and Feature. Condition cards retain their existing legacy presentation for that implementation. This task does not add a fifth `presentation` value or expand UI-07's production vocabulary.
 
 ### QUESTION FOR SIMON — Condition-card visual language
 
@@ -2322,6 +2452,37 @@ UI-07 v1 remains limited to Food, Item, Path, and Feature. Condition cards retai
 ### Implementation status
 
 Open design task. The need to design condition-card presentation is approved, but its treatment and data representation are not implementation-ready. Do not add UI-08 to an implementation iteration until those decisions are approved.
+
+## UI-09 — Configurable card scale and drag-pointer presentation
+
+Priority: P2
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+The existing card dimensions are the `100%` reference size. Resting cards default to `150%` of that reference size. Dragged cards default to `90%` of the original reference dimensions, not 90% of the enlarged resting size. Both scales are dynamically configurable.
+
+Dragged cards are partially transparent. Drag opacity is dynamically configurable and defaults to approximately 70%.
+
+While dragging, the card's top-left corner is the interaction pointer. That corner aligns with the mouse pointer, and hit testing and drop targeting use the corner rather than the card center or another point. The smaller, partially transparent dragged card exposes more of the destination underneath.
+
+The active pointer corner uses a yellow/gold `┌` treatment: a short section of the top edge and a short section of the left edge. The entire card border must not be highlighted. Drop-target feedback uses the same yellow/gold visual language.
+
+A player-facing settings/menu control allows immediate changes to resting scale, dragged scale, and dragged opacity. The settings persist locally between sessions. The persistence mechanism and UI layout must remain generic presentation concerns and must not affect gameplay state.
+
+### Acceptance criteria
+
+- Default resting cards render at 150% of the existing reference dimensions.
+- Default dragged cards render at 90% of the reference dimensions, independently of resting scale.
+- Drag opacity defaults to approximately 70%, and all three presentation settings update immediately.
+- The dragged card's top-left corner aligns with the mouse and is the authoritative hit-test/drop point.
+- Only short top and left edge segments mark the active corner in yellow/gold; drop-target feedback uses the same visual language.
+- Settings persist locally between sessions without becoming authored gameplay data.
+
+### Implementation status
+
+Approved future UI work and not implemented. Do not add UI-09 to the engine replacement iteration.
 
 ## DEPLOY-01 — Complete every iteration through main and GitHub Pages
 
