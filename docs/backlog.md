@@ -604,11 +604,13 @@ The evaluator is a separate component with a small reusable API. Feature code su
 
 ### Engine iteration boundary
 
-LOGIC-D01, LOGIC-D05, TIME-D02, ACTION-D05, PROCESS-D01, and EQUIP-05 form the current engine replacement iteration. Closing those six IDs is necessary but not sufficient: the milestone is complete only when all existing gameplay runs through the generic authored Action, Process, attribute, condition, and passive-effect engine.
+LOGIC-D01, DECK-D01, LOGIC-D05, TIME-D02, ACTION-D05, PROCESS-D01, and EQUIP-05 form the current engine replacement iteration. Closing those seven IDs is necessary but not sufficient: the milestone is complete only when all existing gameplay runs through the generic authored Action, Process, attribute, condition, deck, and passive-effect engine.
 
 The iteration migrates existing gameplay and removes gameplay-specific custom logic and compatibility paths. Runtime must not retain hardcoded card IDs or Room IDs that implement gameplay behavior, special Travel, Water, or Equipment handlers, or another bespoke gameplay path that can be expressed through the approved generic authored model. Tests must prove the migrated existing gameplay through generic data and engine behavior rather than preserving a second compatibility implementation.
 
 This engine iteration introduces no new gameplay content. Apartment/Puddle content, Service Corridor content, crafting content, and UI-09 card-size/drag work remain in later iterations.
+
+DECK-D01 is a required engine dependency rather than a request to introduce Dumpster content. The current runtime stores decks only on Rooms, while LOGIC-D05 and ACTION-D05 operate on the deck owned by a target card through `self.deck`. The iteration must therefore generalize the existing Room-owned model into the shared ownership model, migrate existing Room Search decks without changing their behavior, and make the generic card-owned capability available. Dumpster, its starting contents, and its refill Process remain in DUMPSTER-01's later content iteration.
 
 ### Acceptance criteria
 
@@ -619,6 +621,7 @@ This engine iteration introduces no new gameplay content. Apartment/Puddle conte
 - Existing gameplay uses the generic authored engine end to end, with obsolete custom handlers and compatibility paths removed.
 - Runtime contains no gameplay behavior selected by hardcoded card or Room IDs where approved attributes, Actions, Processes, or shared conditions provide the authority.
 - Travel, Water, and Equipment behavior do not retain parallel special handlers after migration.
+- Existing Room Search decks use DECK-D01's shared ownership model without behavior or persistence regressions, while the engine supports card-owned decks generically without introducing a content-specific consumer.
 - No new Room, Puddle, crafting, or UI content is introduced merely to exercise the engine.
 
 ### Implementation status
@@ -2062,7 +2065,7 @@ This enables interactive world cards such as Dumpster to own searchable contents
 
 ### Implementation status
 
-Implementation-ready but not implemented. DUMPSTER-01 and ACTION-D05 now fully specify the first card-owned-deck consumer and its generic refill effect.
+Selected for the current engine replacement iteration and not implemented. It is a direct prerequisite of the selected LOGIC-D05 `deck_size` condition and ACTION-D05 `self.deck` destination: both require an authoritative deck associated with a card instance. The work generalizes the existing Room-owned Search-deck model, migrates existing Room decks to that shared model without changing gameplay, and enables the generic card-owned form. It does not add Dumpster or other new content; DUMPSTER-01 remains in its later content iteration.
 
 ## DUMPSTER-01 — Dumpster owns a persistent refillable deck
 
