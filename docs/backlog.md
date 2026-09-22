@@ -633,7 +633,7 @@ DECK-D01 is a required engine dependency rather than a request to introduce Dump
 
 ### Implementation status
 
-Selected for the current engine replacement iteration and not implemented. The shared architecture and all currently required condition forms, including count, deck size, and world-clock serialization, are approved under LOGIC-D02 through LOGIC-D05 and TIME-D02. PATH-D02 and VISION-D01 remain required cleanup within the milestone; GAMEOVER-01 and OPENING-01 own the two explicitly deferred compatibility paths. Completion is governed by the engine iteration boundary above, not only by the local evaluator acceptance criteria.
+Implemented. One shared evaluator now owns Marker, Value, placement-literal, boolean, count, deck-size, and world-clock conditions for Action matching, Process conditions, and passive conditions. Existing Action applicability was migrated to explicit `other` targets where it inspects the matched counterpart, and obsolete feature-local selector evaluation was removed. PATH-D02 and VISION-D01 remain required cleanup before the current engine milestone is complete; GAMEOVER-01 and OPENING-01 own the two explicitly deferred compatibility paths.
 
 ## LOGIC-D02 — Atomic conditions support self and other targets
 
@@ -770,7 +770,7 @@ This condition participates in LOGIC-D01 and must remain generic; runtime contai
 
 ### Implementation status
 
-Selected for the current engine replacement iteration and not implemented, subject to LOGIC-D01, LOGIC-D02, and DECK-D01.
+Implemented through LOGIC-D01 against the authoritative shared deck state. All comparators, implicit/explicit targets, missing-deck zero behavior, and boolean composition are covered without a stored deck counter or named-card branch.
 
 ## TIME-D02 — Conditions can evaluate the authoritative world clock
 
@@ -827,7 +827,7 @@ Runtime must not add hardcoded time concepts such as `night` for one Room. Earli
 
 ### Implementation status
 
-Selected for the current engine replacement iteration and not implemented. World-clock semantics and valid atomic JSON serialization are fully approved.
+Implemented through LOGIC-D01. Authored `HH:MM` comparisons validate and evaluate against centralized elapsed world time modulo the current day, including exact time and cross-midnight boolean ranges.
 
 ## ACTION-D01 — Card-on-card roles and Action matching
 
@@ -957,7 +957,7 @@ The effect performs only generic creation and insertion. It contains no time che
 
 ### Implementation status
 
-Selected for the current engine replacement iteration and not implemented, subject to CARD-D01 and DECK-D01.
+Implemented in the shared Action/Process effect path. Picks are independent with replacement, duplicate source IDs provide weighting, fresh instances append in pick order to the owning card's shared deck, and validation rejects unsupported destinations, invalid counts, empty pools, unknown masters, and owners without exactly one deck.
 
 ## FOOD-01 — Authored food effects and consumption
 
@@ -1079,7 +1079,7 @@ Ordering must be intentional rather than an accidental consequence of unrelated 
 
 ### Implementation status
 
-Selected for the current engine replacement iteration and partially implemented with centralized quarter-hour boundary counting, deterministic non-conflicting Process batches, Process-before-next-effect ordering, and preservation of inactive-room state. The remaining conditional `if`, ordered same-card Process chaining, implicit Process-owner `self`, and off-screen global evaluation work is approved and implementation-ready.
+Implemented for the approved current Process model. Global quarter-hour ticks evaluate optional shared conditions, run cards and each card's Processes in deterministic authored order, let later same-card Processes observe earlier changes, default omitted effect targets to the owner, and include off-screen cards. The superseded simultaneous-conflict batch path was removed; PROCESS-D03's later-cycle insertion rule remains outside this iteration. OPENING-01 owns removal of the deliberately deferred Opening-phase exclusion.
 
 ## PROCESS-D02 — Body drains Hydration and Satiation on every tick
 
@@ -1553,7 +1553,7 @@ No additional passive-effect target, operation, stacking rule, lifecycle, or fea
 
 ### Implementation status
 
-Selected for the current engine replacement iteration and not implemented, subject to LOGIC-D01 and LOGIC-D03. The iteration must remove the legacy `whileEquipped` compatibility representation after migrating existing equipment behavior to generic `passives`.
+Implemented. Glasses and Flashlight now author `passives`; passive `if` expressions use LOGIC-D01, effective Vision derives continuous modifiers without mutating base Values, and the legacy `whileEquipped` data, parser, and runtime compatibility path are removed.
 
 ## OPENING-01 — Apartment is a normal one-way Room
 
@@ -1647,7 +1647,7 @@ Origin: Simon
 
 Vision-adjusted Action time must resolve through a generic authored Action-time mechanism. The Action engine must not know whether an Action represents Travel, Search, Vision-sensitive work, a particular card, or a particular Room.
 
-The current implementation still recognizes Action IDs `travel` and `search` while resolving `spend-time`, routes them to separate `travelDuration` and `searchDuration` functions, and constructs Search as a special standalone runtime Action around the deck's authored base time. This is the current equivalent of the audit's separate `adjustSpendTime`/duration-callback compatibility path even though no function with that exact name remains on the current branch.
+The current Action executor exposes an `adjustSpendTime` callback. Travel supplies it through interaction rules that recognize Travel by inspecting whether the Action contains `set-room`; Search supplies a Search-specific callback while constructing a standalone runtime Search Action. Those callbacks route to separate `travelDuration` and `searchDuration` functions in `vision.ts`. These are the remaining compatibility paths identified by the audit.
 
 Travel continues to select a card through Marker `path`, obtain its base time from Value `path-time`, and obtain its destination from Reference `path-destination` under PATH-D02. Search and Travel retain the distinct approved Vision behavior in VISION-01, but that behavior must be selected and resolved from generic authored data rather than Action IDs, effect inspection, Search-specific callbacks, or dedicated runtime branches.
 
@@ -2188,7 +2188,7 @@ This enables interactive world cards such as Dumpster to own searchable contents
 
 ### Implementation status
 
-Selected for the current engine replacement iteration and not implemented. It is a direct prerequisite of the selected LOGIC-D05 `deck_size` condition and ACTION-D05 `self.deck` destination: both require an authoritative deck associated with a card instance. The work generalizes the existing Room-owned Search-deck model, migrates existing Room decks to that shared model without changing gameplay, and enables the generic card-owned form. It does not add Dumpster or other new content; DUMPSTER-01 remains in its later content iteration.
+Implemented as one shared runtime deck collection with explicit Room/card ownership. Room Search decks were migrated without changing shuffle, draw, exhaustion, retained-order, or persistence behavior; card masters load the same deck definition shape, and card-owned deck identity follows its owning instance. No Dumpster content or parallel Room-only runtime deck model was added.
 
 ## DUMPSTER-01 — Dumpster owns a persistent refillable deck
 
