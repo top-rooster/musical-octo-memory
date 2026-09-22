@@ -26,14 +26,14 @@ describe("Vision and lighting", () => {
     expect(effectiveVision({ ...state, currentRoomId: "deep-tunnels" })).toBe(1);
   });
 
-  it("adds Vision only while Glasses are equipped in Eyes", () => {
+  it("derives the Glasses passive from the generic equipped condition", () => {
     const glasses = find(state, "glasses");
     state = { ...state, cards: state.cards.map((card) => card.id === glasses.id
       ? { ...card, zone: "inventory" as const, roomId: undefined }
       : card) };
     expect(effectiveVision(state)).toBe(4);
     state = equipCard(state, glasses.id, "left-hand");
-    expect(effectiveVision(state)).toBe(4);
+    expect(effectiveVision(state)).toBe(5);
     state = { ...state, cards: state.cards.map((card) => card.id === glasses.id
       ? { ...card, equipmentSlot: undefined }
       : card) };

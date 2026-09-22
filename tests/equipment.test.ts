@@ -9,7 +9,6 @@ import {
   canTakeOpeningCard,
   EQUIPMENT_SLOTS,
   equipmentSlotName,
-  isEquipmentActive,
   itemSize,
   openingSelectionCount,
   storageCapacity,
@@ -122,11 +121,10 @@ describe("attribute-driven equipment, opening, and carried capacity", () => {
 
   it("distinguishes equipped cards from merely carried cards", () => {
     const glasses = find(state, "glasses");
-    const master = CARD_MASTERS.find((item) => item.id === glasses.masterId)!;
     state = moveToInventory(state, glasses.id);
-    expect(isEquipmentActive(find(state, "glasses"), master)).toBe(false);
+    expect(find(state, "glasses").equipmentSlot).toBeUndefined();
     state = equipCard(state, glasses.id, "eyes");
-    expect(isEquipmentActive(find(state, "glasses"), master)).toBe(true);
+    expect(find(state, "glasses").equipmentSlot).toBe("eyes");
   });
 
   it("derives Pants and Backpack capacity only from equipped storage Values", () => {

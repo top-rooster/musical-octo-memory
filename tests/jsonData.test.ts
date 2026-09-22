@@ -35,13 +35,14 @@ describe("JSON authored Action data", () => {
       CARD_MASTERS, WORLD_DEFINITION, { x: 0, y: 0, width: 1400, height: 800 }, () => 0.5,
     );
     const openingLight = state.cards.find((card) => card.masterId === "flashlight" && card.offered)!;
-    const deepLight = state.rooms!["deep-tunnels"].decks[0].cards
+    const deepLight = state.decks!.find((deck) => deck.owner.kind === "room" && deck.owner.id === "deep-tunnels")!.cards
       .find((card) => card.masterId === "flashlight")!;
     expect(openingLight.attributes).toContainEqual(expect.objectContaining({ id: "battery", value: 20 }));
     expect(deepLight.attributes).toContainEqual(expect.objectContaining({ id: "battery", value: 0 }));
     expect(state.cards.find((card) => card.masterId === "plastic-bottle" && card.offered)?.attributes)
       .toContainEqual({ kind: "marker", id: "contains-water" });
-    expect(state.rooms!.tunnels.decks[0].cards.find((card) => card.masterId === "service-cabinet")?.attributes)
+    expect(state.decks!.find((deck) => deck.owner.kind === "room" && deck.owner.id === "tunnels")!.cards
+      .find((card) => card.masterId === "service-cabinet")?.attributes)
       .toContainEqual({ kind: "marker", id: "locked" });
     const route = state.cards.find((card) => card.masterId === "go-tunnels-from-office")!;
     expect(route.references).toEqual({ destination: "tunnels" });
@@ -49,7 +50,8 @@ describe("JSON authored Action data", () => {
       { kind: "marker", id: "path" },
       expect.objectContaining({ kind: "value", id: "travel-time", value: 15 }),
     ]));
-    expect(state.rooms!.tunnels.decks[0].definitionId).toBe("explore");
+    expect(state.decks!.find((deck) => deck.owner.kind === "room" && deck.owner.id === "tunnels")?.definitionId)
+      .toBe("explore");
     const pants = CARD_MASTERS.find((master) => master.id === "pants")!;
     expect(pants.attributes).toEqual(expect.arrayContaining([
       { kind: "marker", id: "medium" },
@@ -62,7 +64,7 @@ describe("JSON authored Action data", () => {
     const body = CARD_MASTERS.find((master) => master.id === "body")!;
     expect(body.actions.map((action) => action.id)).toEqual(["travel", "eat", "drink"]);
     expect(body.actions.find((action) => action.id === "travel")).toMatchObject({
-      applicable: { direction: "on", selector: { kind: "marker", marker: "path" } },
+      applicable: { direction: "on", selector: { kind: "marker", target: "other", marker: "path" } },
       effects: [
         { kind: "spend-time", operand: { target: "other", value: "travel-time" } },
         { kind: "set-room", target: "other", reference: "destination" },
@@ -135,6 +137,51 @@ describe("JSON authored Action data", () => {
     const invalid = structuredClone(cards);
     invalid.body.actions[0].applicable.on = { value: "travel-time", ">": 0, "<": 100 };
     expect(() => validateAuthoredData(invalid, rooms, attributes)).toThrow(/exactly one comparison/);
+  });
+
+  it("parses approved deck-size and time conditions through the shared model", () => {
+    const authored = structuredClone(cards);
+    authored["service-cabinet"].decks = {
+      contents: { name: "Contents", time: "15m", cards: ["scrap-metal"] },
+    };
+    authored["service-cabinet"].processes = [{
+      if: {
+        and: [
+          { time: { "=": "12:00" } },
+          { deck_size: { "<=": 3 } },
+        ],
+      },
+      effects: [{
+        "add-random-card": { count: 2, from: ["scrap-metal", "pipe"], to: "self.deck" },
+      }],
+    }];
+    expect(() => validateAuthoredData(authored, rooms, attributes)).not.toThrow();
+  });
+
+  it("rejects malformed supported time and add-random-card syntax", () => {
+    const invalidTime = structuredClone(cards);
+    invalidTime.body.actions[0].applicable.on = { time: { ">=": "24:00" } };
+    expect(() => validateAuthoredData(invalidTime, rooms, attributes)).toThrow(/24-hour HH:MM/);
+
+    const noDeck = structuredClone(cards);
+    noDeck.body.actions[0].effects = [{
+      "add-random-card": { count: 2, from: ["scrap-metal"], to: "self.deck" },
+    }];
+    expect(() => validateAuthoredData(noDeck, rooms, attributes)).toThrow(/exactly one deck/);
+
+    const invalidCount = structuredClone(cards);
+    invalidCount.body.actions[0].effects = [{
+      "add-random-card": { count: 0, from: ["scrap-metal"], to: "self.deck" },
+    }];
+    expect(() => validateAuthoredData(invalidCount, rooms, attributes)).toThrow(/positive integer/);
+  });
+
+  it("uses passives and rejects the removed whileEquipped compatibility field", () => {
+    expect(cards.glasses.passives).toEqual(expect.any(Array));
+    expect(cards.flashlight.passives).toEqual(expect.any(Array));
+    const legacy = structuredClone(cards);
+    legacy.glasses.whileEquipped = [{ attribute: "vision", amount: 1 }];
+    expect(() => validateAuthoredData(legacy, rooms, attributes)).toThrow(/removed legacy representation/);
   });
 
   it("rejects card-ID selectors and invalid applicability direction", () => {

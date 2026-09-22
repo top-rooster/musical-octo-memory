@@ -3,11 +3,11 @@ import { CARD_MASTERS } from "../src/data/cardMasters";
 import { WORLD_DEFINITION } from "../src/data/worldDefinition";
 import type { ActionDefinition, ActionSelector, CardInstance, GameState } from "../src/domain/types";
 import {
-  evaluateSelector,
   executeCardInteraction,
   matchingActions,
 } from "../src/game/actions";
 import { getValue, hasMarker } from "../src/game/cardState";
+import { evaluateCondition } from "../src/game/logic";
 import { createWorldGameState, escapeOpening } from "../src/game/world";
 
 const bounds = { x: 0, y: 0, width: 1400, height: 800 };
@@ -29,7 +29,7 @@ function receivingAction(effects: ActionDefinition["effects"]): ActionDefinition
   return {
     id: "test-action",
     name: "Test Action",
-    applicable: { direction: "receive", selector: { kind: "marker", marker: "food" } },
+    applicable: { direction: "receive", selector: { kind: "marker", target: "other", marker: "food" } },
     effects,
   };
 }
@@ -50,32 +50,36 @@ describe("Action selectors", () => {
   };
 
   it("evaluates marker selectors", () => {
-    expect(evaluateSelector({ kind: "marker", marker: "food" }, card)).toBe(true);
-    expect(evaluateSelector({ kind: "marker", marker: "path" }, card)).toBe(false);
+    const state = { masters: [], cards: [card] };
+    expect(evaluateCondition({ kind: "marker", marker: "food" }, { state, self: card }).value).toBe(true);
+    expect(evaluateCondition({ kind: "marker", marker: "path" }, { state, self: card }).value).toBe(false);
   });
 
   it.each([
     [">", 19, true], [">=", 20, true], ["<", 21, true], ["<=", 20, true],
     ["=", 20, true], ["<>", 19, true], ["=", 19, false],
   ] as const)("evaluates Value %s %s", (operator, operand, expected) => {
-    expect(evaluateSelector({ kind: "value", value: "battery", operator, operand }, card)).toBe(expected);
+    expect(evaluateCondition(
+      { kind: "value", value: "battery", operator, operand },
+      { state: { masters: [], cards: [card] }, self: card },
+    ).value).toBe(expected);
   });
 
   it("evaluates nested and, or, and not", () => {
     const selector: ActionSelector = {
       kind: "and",
-      selectors: [
+      conditions: [
         { kind: "marker", marker: "food" },
         {
           kind: "or",
-          selectors: [
+          conditions: [
             { kind: "value", value: "battery", operator: "<", operand: 5 },
-            { kind: "not", selector: { kind: "marker", marker: "path" } },
+            { kind: "not", condition: { kind: "marker", marker: "path" } },
           ],
         },
       ],
     };
-    expect(evaluateSelector(selector, card)).toBe(true);
+    expect(evaluateCondition(selector, { state: { masters: [], cards: [card] }, self: card }).value).toBe(true);
   });
 });
 
@@ -137,7 +141,7 @@ describe("Action matching and effects", () => {
     state = replaceActions(state, food.masterId, [{
       id: "offer-food",
       name: "Offer Food",
-      applicable: { direction: "on", selector: { kind: "marker", marker: "anchored" } },
+      applicable: { direction: "on", selector: { kind: "marker", target: "other", marker: "anchored" } },
       effects: [],
     }, ...foodMaster.actions]);
     const result = executeCardInteraction(state, food, body);

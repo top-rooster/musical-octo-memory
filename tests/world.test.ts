@@ -20,7 +20,8 @@ const bounds = { x: 0, y: 0, width: 1400, height: 800 };
 function searchUntil(state: GameState, masterId: string): GameState {
   let current = state;
   while (!current.cards.some((card) => card.roomId === current.currentRoomId && card.masterId === masterId)) {
-    const deck = current.rooms![current.currentRoomId!].decks[0];
+    const deck = current.decks!.find((candidate) =>
+      candidate.owner.kind === "room" && candidate.owner.id === current.currentRoomId)!;
     const result = searchRoom(current, deck.id, bounds);
     if (result.reason) throw new Error(`Could not discover ${masterId}: ${result.reason}`);
     current = result.state;
@@ -82,35 +83,41 @@ describe("persistent world and Search decks", () => {
   it("shuffles every deck once into deterministic fixed order with controlled RNG", () => {
     const first = createWorldGameState(CARD_MASTERS, WORLD_DEFINITION, bounds, seeded());
     const second = createWorldGameState(CARD_MASTERS, WORLD_DEFINITION, bounds, seeded());
-    expect(Object.values(first.rooms!).map((room) => room.decks.map((deck) => deck.cards.map((card) => card.masterId))))
-      .toEqual(Object.values(second.rooms!).map((room) => room.decks.map((deck) => deck.cards.map((card) => card.masterId))));
+    expect(first.decks!.map((deck) => deck.cards.map((card) => card.masterId)))
+      .toEqual(second.decks!.map((deck) => deck.cards.map((card) => card.masterId)));
   });
 
   it("depletes a deck by exactly one and represents exhaustion as removal", () => {
-    const deck = state.rooms!.tunnels.decks[0];
+    const deck = state.decks!.find((candidate) => candidate.owner.kind === "room" && candidate.owner.id === "tunnels")!;
     const first = drawFromDeck(deck);
     expect(first.deck!.cards).toHaveLength(deck.cards.length - 1);
     let current = state;
     for (let index = 0; index < deck.cards.length; index += 1) {
-      const result = searchRoom(current, current.rooms!.tunnels.decks[0].id, bounds);
+      const currentDeck = current.decks!.find((candidate) =>
+        candidate.owner.kind === "room" && candidate.owner.id === "tunnels")!;
+      const result = searchRoom(current, currentDeck.id, bounds);
       if (result.reason) throw new Error(`Search ${index} failed: ${result.reason}`);
       current = result.state;
     }
-    expect(current.rooms!.tunnels.decks).toHaveLength(0);
+    expect(current.decks!.filter((candidate) => candidate.owner.kind === "room" && candidate.owner.id === "tunnels"))
+      .toHaveLength(0);
   });
 
   it("discovers navigation cards by drawing them from the Tunnels deck", () => {
     expect(state.cards.some((card) => card.roomId === "tunnels" && hasMarker(card, "path"))).toBe(false);
     let current = state;
     while (!current.cards.some((card) => card.roomId === "tunnels" && hasMarker(card, "path"))) {
-      current = searchRoom(current, current.rooms!.tunnels.decks[0].id, bounds).state;
+      const deck = current.decks!.find((candidate) =>
+        candidate.owner.kind === "room" && candidate.owner.id === "tunnels")!;
+      current = searchRoom(current, deck.id, bounds).state;
     }
     expect(current.cards.some((card) => card.roomId === "tunnels" && hasMarker(card, "path"))).toBe(true);
   });
 
   it("runs Search through centralized time and resolves its tick before one draw", () => {
     const beforeCount = state.cards.length;
-    const result = searchRoom(state, state.rooms!.tunnels.decks[0].id, bounds);
+    const deck = state.decks!.find((candidate) => candidate.owner.kind === "room" && candidate.owner.id === "tunnels")!;
+    const result = searchRoom(state, deck.id, bounds);
     expect(result.reason).toBeUndefined();
     expect(result.minutes).toBe(15);
     expect(result.processTicks).toBe(1);
@@ -122,7 +129,9 @@ describe("persistent world and Search decks", () => {
 
   it("applies the Vision multiplier before Search spends time", () => {
     state = { ...state, currentRoomId: "deep-tunnels" };
-    const result = searchRoom(state, state.rooms!["deep-tunnels"].decks[0].id, bounds);
+    const deck = state.decks!.find((candidate) =>
+      candidate.owner.kind === "room" && candidate.owner.id === "deep-tunnels")!;
+    const result = searchRoom(state, deck.id, bounds);
     expect(result.minutes).toBe(45);
     expect(result.state.elapsedMinutes).toBe(45);
     expect(getValue(result.state.cards.find((card) => card.masterId === "body")!, "hydration")?.value).toBe(44);

@@ -9,7 +9,7 @@
       {
         "id": "travel",
         "name": "Travel",
-        "applicable": { "on": { "marker": "path" } },
+        "applicable": { "on": { "target": "other", "marker": "path" } },
         "effects": [
           { "spend-time": { "target": "other", "value": "travel-time" } },
           { "set-room": { "target": "other", "reference": "destination" } }
@@ -18,7 +18,7 @@
       {
         "id": "eat",
         "name": "Eat",
-        "applicable": { "receive": { "marker": "food" } },
+        "applicable": { "receive": { "target": "other", "marker": "food" } },
         "effects": [
           { "spend-time": 0 },
           { "target": "self", "value": "satiation", "+=": { "target": "other", "value": "food-value" } },
@@ -31,8 +31,8 @@
         "applicable": {
           "receive": {
             "and": [
-              { "marker": "hydration" },
-              { "marker": "contains-water" }
+              { "target": "other", "marker": "hydration" },
+              { "target": "other", "marker": "contains-water" }
             ]
           }
         },
@@ -46,8 +46,8 @@
     "processes": [
       {
         "effects": [
-          { "target": "self", "value": "hydration", "-=": 2 },
-          { "target": "self", "value": "satiation", "-=": 1 }
+          { "value": "hydration", "-=": 2 },
+          { "value": "satiation", "-=": 1 }
         ]
       }
     ]
@@ -175,7 +175,19 @@
     "description": "A small battery-powered flashlight.",
     "markers": ["small"],
     "values": { "battery": 100 },
-    "whileEquipped": [{ "attribute": "vision", "amount": 1 }]
+    "passives": [
+      {
+        "if": {
+          "and": [
+            "equipped",
+            { "value": "battery", ">": 0 }
+          ]
+        },
+        "effects": [
+          { "target": "nadir", "value": "vision", "+=": 1 }
+        ]
+      }
+    ]
   },
   "spare-batteries": {
     "name": "Spare Batteries",
@@ -203,7 +215,14 @@
     "description": "Nadir's prescription glasses.",
     "markers": ["small"],
     "references": { "equip": "eyes" },
-    "whileEquipped": [{ "attribute": "vision", "amount": 1 }]
+    "passives": [
+      {
+        "if": "equipped",
+        "effects": [
+          { "target": "nadir", "value": "vision", "+=": 1 }
+        ]
+      }
+    ]
   },
   "scrap-metal": {
     "name": "Scrap Metal",

@@ -45,21 +45,6 @@ export function isEquipped(card: CardInstance): boolean {
   return card.zone === "inventory" && Boolean(card.equipmentSlot);
 }
 
-export function isEquipmentActive(card: CardInstance, master: CardMaster): boolean {
-  if (!isEquipped(card) || !card.equipmentSlot || !canEquip(card, card.equipmentSlot)) return false;
-  if (master.whileEquipped.length && getValue(card, "battery")?.value === 0) return false;
-  return true;
-}
-
-export function isEquipmentEffectActive(
-  card: CardInstance,
-  master: CardMaster,
-): boolean {
-  if (!isEquipmentActive(card, master) || !card.equipmentSlot) return false;
-  const authoredSlot = card.references.equip;
-  return authoredSlot ? card.equipmentSlot === authoredSlot : isHandSlot(card.equipmentSlot);
-}
-
 export function storageCapacity(
   cards: CardInstance[],
 ): CapacityCounts {
