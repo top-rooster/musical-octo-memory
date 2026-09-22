@@ -163,8 +163,8 @@
     "references": { "equip": "chest" }
   },
   "simple-lighter": {
-    "name": "Simple Lighter",
-    "image": "images/simple-lighter.png",
+    "name": "Lighter",
+    "image": "images/lighter.png",
     "description": "A cheap disposable lighter useful for starting fires.",
     "markers": ["small"],
     "values": { "fuel": 100 }
@@ -190,9 +190,9 @@
     ]
   },
   "spare-batteries": {
-    "name": "Spare Batteries",
-    "image": "images/spare-batteries.png",
-    "description": "Spare batteries for a flashlight.",
+    "name": "Battery",
+    "image": "images/battery.png",
+    "description": "A portable battery for a flashlight.",
     "markers": ["small"]
   },
   "pain-killers": {
@@ -202,8 +202,8 @@
     "markers": ["small"]
   },
   "simple-backpack": {
-    "name": "Simple Backpack",
-    "image": "images/simple-backpack.png",
+    "name": "Backpack",
+    "image": "images/backpack.png",
     "description": "A simple backpack that greatly increases what Nadir can carry.",
     "markers": ["medium"],
     "values": { "storage-medium": 5 },
