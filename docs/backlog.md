@@ -262,7 +262,7 @@ There is no separate Action-duration mechanism. The position of `spend-time` in 
 
 - Marker `food` with Value `food-value`;
 - Marker `hydration` with Value `hydration-value`;
-- Marker `path` with Value `path-time` and Reference `path-destination`.
+- Marker `path` with Values `path-time`, `path-visibility`, and `path-visibility-time-penalty`, and Reference `path-destination`.
 
 Conceptually:
 
@@ -283,8 +283,12 @@ Conceptually:
 ```json
 {
   "markers": ["path"],
-  "values": { "path-time": 30 },
-  "references": { "path-destination": "deep-tunnels" }
+  "values": {
+    "path-time": 15,
+    "path-visibility": 2,
+    "path-visibility-time-penalty": 15
+  },
+  "references": { "path-destination": "tunnels" }
 }
 ```
 
@@ -626,7 +630,7 @@ DECK-D01 is a required engine dependency rather than a request to introduce Dump
 - Runtime contains no gameplay behavior selected by hardcoded card or Room IDs where approved attributes, Actions, Processes, or shared conditions provide the authority.
 - Travel, Water, and Equipment behavior do not retain parallel special handlers after migration.
 - Path properties and Body's Travel Action use PATH-D02's normalized authored Marker, Value, and Reference names.
-- Vision-adjusted Search and Travel duration use VISION-D01's generic authored Action-time mechanism, with no Action-ID/effect-shape recognition or Search/Travel-specific callback.
+- Travel's additive low-Visibility time penalty and Search's minimum-Visibility applicability use VISION-D01's authored conditions and ordinary effects, with no Action-ID/effect-shape recognition, duration-modifier schema, or Search/Travel-specific callback.
 - Existing Room Search decks use DECK-D01's shared ownership model without behavior or persistence regressions, while the engine supports card-owned decks generically without introducing a content-specific consumer.
 - The only compatibility paths explicitly deferred beyond this milestone are the terminal-state path owned by GAMEOVER-01 and the Opening-phase path owned by OPENING-01.
 - No new Room, Puddle, crafting, or UI content is introduced merely to exercise the engine.
@@ -878,7 +882,7 @@ Origin: Simon
 
 ### Rule
 
-`path`, `food`, and `hydration` are ordinary Markers, not structured attributes. Under PATH-D02, a path card carries the `path` Marker, `path-time` Value, and `path-destination` Reference. Food carries the `food` Marker and `food-value` Value. A refillable hydration source carries the `hydration` Marker and `hydration-value` Value. `contains-water` remains the mutable Marker indicating that a container currently holds water and remains part of the Drink applicability selector; drinking removes `contains-water`, while `hydration` and `hydration-value` may remain on the refillable card.
+`path`, `food`, and `hydration` are ordinary Markers, not structured attributes. Under PATH-D02, a path card carries the `path` Marker, `path-time`, `path-visibility`, and `path-visibility-time-penalty` Values, and `path-destination` Reference. Food carries the `food` Marker and `food-value` Value. A refillable hydration source carries the `hydration` Marker and `hydration-value` Value. `contains-water` remains the mutable Marker indicating that a container currently holds water and remains part of the Drink applicability selector; drinking removes `contains-water`, while `hydration` and `hydration-value` may remain on the refillable card.
 
 Travel, Eat, and Drink Actions read those Values and References through DATA-08 effects. Destination, base travel time, sustenance, and hydration amounts are not duplicated in room composition, item-name logic, or special-purpose payloads.
 
@@ -1607,7 +1611,7 @@ OPENING-01 resolves the former name, revisit, contents, and presentation questio
 
 Closed and superseded by OPENING-01.
 
-## VISION-01 — Effective Vision controls Search and travel time
+## VISION-01 — Effective Vision controls Search and Travel
 
 Priority: P0
 Decision: APPROVED BY SIMON
@@ -1617,25 +1621,23 @@ Origin: Simon
 
 Mind has base Vision 4. Active equipment modifiers are Glasses in Eyes +1 and Flashlight in a Hand with Battery > 0 +1. Room light modifiers are Bright 0, Dim -1, Twilight -3, and Darkness -4. Effective Vision is the sum.
 
-For current Search and travel tasks:
+For current Search and Travel, the formerly tiered runtime duration multipliers are superseded by the authored behavior in PATH-D02 and VISION-D01:
 
-- Vision 0 or lower: Search is impossible; travel takes 3× base time and leaving remains possible.
-- Vision 1: Search takes 3× and travel takes 2×.
-- Vision 2: Search takes 2× and travel takes normal time.
-- Vision 3 or higher: Search and travel take normal time.
+- Travel always remains possible. Each Path authors its normal time, minimum Visibility for normal speed, and one additive insufficient-Visibility time penalty. Visibility is evaluated when Travel starts.
+- Search has one minimum effective Vision authored on Body's Search Action. Search is available at or above that minimum and unavailable below it. Low Visibility never makes Search slower.
 
-The broader task vocabulary is: low-light tasks require Vision 2, normal-light tasks require Vision 3, and precision tasks require Vision 4. It exists to classify concrete future work, not to invent unrelated crafting. Approved examples are low-light—ripping cloth, making wood shavings, knife sharpening, spear practice, and fire starting; normal-light—cooking and stone throwing; precision—sewing. Apartment is Bright, Tunnels Dim, Abandoned Office Bright, and Deep Tunnels Twilight. At Vision 0 or lower, leaving the room is the only currently available activity. Room presentation is derived from light state; artwork itself must not encode mechanically authoritative light. Deep Tunnels is a soft efficiency challenge, not Flashlight-gated.
+The broader task vocabulary is: low-light tasks require Vision 2, normal-light tasks require Vision 3, and precision tasks require Vision 4. It exists to classify concrete future work, not to invent unrelated crafting. Approved examples are low-light—ripping cloth, making wood shavings, knife sharpening, spear practice, and fire starting; normal-light—cooking and stone throwing; precision—sewing. Apartment is Bright, Tunnels Dim, Abandoned Office Bright, and Deep Tunnels Twilight. At Vision below Search's authored minimum, Travel remains possible but Search is unavailable. Room presentation is derived from light state; artwork itself must not encode mechanically authoritative light. Deep Tunnels is a soft efficiency challenge, not Flashlight-gated.
 
 ### Acceptance criteria
 
-- Pure rules calculate equipment modifiers, room modifier, effective Vision, legality, and duration multiplier.
-- Search and travel use the same effective Vision result.
-- Deep Tunnels can be entered without Glasses or Flashlight at the approved penalty.
+- Pure rules calculate equipment modifiers, room modifier, and effective Vision.
+- Search and Travel conditions use the same effective Vision result.
+- Deep Tunnels can be entered without Glasses or Flashlight; its authored Path rule determines whether the additive penalty applies.
 - Background treatment changes with authored light state without replacing room artwork.
 
 ### Implementation status
 
-Behaviorally implemented for Search, travel, active equipment, and the current Room presentation. Search and Travel duration still dispatch through gameplay-specific Action-ID handling and separate functions in `vision.ts`; VISION-D01 owns migration of that compatibility path to generic authored Action-time behavior. Apartment's authored rename and normal-Room conversion remain unimplemented under OPENING-01.
+Partially implemented. Effective Vision, active equipment, current Room presentation, and the superseded tiered runtime Search/Travel behavior exist. VISION-D01 owns migration to authored Search applicability and authored Path time/penalty effects and removal of the compatibility adapters. Apartment's authored rename and normal-Room conversion remain unimplemented under OPENING-01.
 
 ## VISION-D01 — Remove Search/Travel Vision duration adapters
 
@@ -1645,42 +1647,56 @@ Origin: Simon
 
 ### Rule
 
-Vision-adjusted Action time must resolve through a generic authored Action-time mechanism. The Action engine must not know whether an Action represents Travel, Search, Vision-sensitive work, a particular card, or a particular Room.
-
 The current Action executor exposes an `adjustSpendTime` callback. Travel supplies it through interaction rules that recognize Travel by inspecting whether the Action contains `set-room`; Search supplies a Search-specific callback while constructing a standalone runtime Search Action. Those callbacks route to separate `travelDuration` and `searchDuration` functions in `vision.ts`. These are the remaining compatibility paths identified by the audit.
 
-Travel continues to select a card through Marker `path`, obtain its base time from Value `path-time`, and obtain its destination from Reference `path-destination` under PATH-D02. Search and Travel retain the distinct approved Vision behavior in VISION-01, but that behavior must be selected and resolved from generic authored data rather than Action IDs, effect inspection, Search-specific callbacks, or dedicated runtime branches.
+The approved replacement needs no generic duration-modifier language. Travel uses PATH-D02's authored Path Values, ordinary `spend-time` effects, and a shared condition evaluated against effective Vision at Action start. Search uses a minimum effective Vision condition authored on Body's Search Action and its normal authored Search time. The generic Action engine evaluates conditions and effects without knowing whether an Action is Travel, Search, Vision-sensitive work, a particular card, or a particular Room.
 
-The mechanism must be general enough that future authored Action-time modifiers, including tool work-time multipliers, can use the same concept. This task does not design or implement speculative crafting rules.
+### Travel
+
+Travel selects `other` through Marker `path`. It always spends `other.path-time`. When effective Vision at Action start is strictly lower than `other.path-visibility`, it additionally spends `other.path-visibility-time-penalty`. Equality is sufficient for normal speed and applies no penalty. The result is additive rather than a multiplier.
+
+The start-state result is fixed for the whole Action: Process consequences caused while either `spend-time` effect advances the world do not trigger a duration recalculation. Travel then resolves the destination from `other.path-destination`. The authored Action, its conditions, and its ordered effects express this relationship; runtime does not infer Travel from `set-room` or use Travel-specific duration logic.
+
+### Search
+
+Search remains an authored Action on Body. Its applicability requires both a searchable deck in the current Room and effective Vision at or above the minimum authored by that Search Action. The Visibility requirement belongs to Body's Search Action, not to the Room, Search deck, or individual Search content. Equality with the minimum permits Search.
+
+Search spends its normal authored Search time and performs the generic deck/Search effect. Low Visibility adds no time penalty: below the minimum, the Action is simply not applicable. No `search-visibility` or `search-visibility-time-penalty` Value is added to Rooms or decks.
+
+### QUESTION FOR SIMON — Valid shared-condition/effect serialization
+
+The gameplay rule is fully decided, and no generic Action-duration modifier is needed or open. The current approved DATA-08 schema nevertheless documents conditions only in Action applicability and documents unconditional ordered effects; LOGIC-D02's card-relative Value comparisons also compare one `self`/`other` Value with a numeric constant. It does not currently provide a valid authored form for a conditional second `spend-time`, for reading aggregate effective Vision from Body's Action context, or for comparing it with `other.path-visibility`.
+
+Which valid generic serialization extends or composes the existing shared condition/effect vocabulary for those needs? The answer must serve ordinary authored Actions without Travel/Search runtime knowledge and must not introduce a duration-policy field, duration-expression language, or generic duration-modifier mechanism. Implementation must not invent this serialization.
 
 ### Required removals
 
-- `adjustSpendTime` and any equivalent Action-time adjustment callback;
+- `adjustSpendTime` and any equivalent Search/Travel Action-time adjustment callback;
 - Travel recognition by Action ID or by inspecting for a `set-room` effect;
 - Search recognition by Action ID or a Search-specific duration callback;
-- separate Search-specific and Travel-specific duration dispatch in runtime code;
+- separate Search-specific and Travel-specific Vision-duration dispatch in runtime code;
 - any equivalent compatibility path whose only purpose is Vision-adjusted Search/Travel duration.
-
-### QUESTION FOR SIMON
-
-What exact valid JSON representation authors the generic Vision-sensitive Action-time rule while preserving VISION-01's different Search and Travel behavior? No existing approved schema fully represents this modifier. DATA-D04 and DATA-08 currently require explicit `spend-time` and prohibit a separate Action-duration mechanism, so the unresolved representation must remain compatible with that rule unless Simon explicitly changes it. Implementation must not invent the field, wrapper, expression, multiplier shape, or parallel duration field. This representation must be approved before authored migration is completed.
 
 ### Acceptance criteria
 
-- Existing VISION-01 Search legality and duration behavior is preserved.
-- Existing VISION-01 Travel duration behavior is preserved, including leaving at Vision 0 or lower.
-- Vision-sensitive duration resolves from generic authored Action data.
-- Travel's base time resolves from `other.path-time` and its Room transition resolves from `other.path-destination`.
-- Search duration is authored rather than calculated through a Search runtime branch.
-- Search and Travel may express their different approved duration behavior through authored data without feature-specific TypeScript.
+- Sufficient Visibility spends only `other.path-time` for Travel.
+- Insufficient Visibility spends `other.path-time + other.path-visibility-time-penalty` for Travel.
+- Visibility equal to `other.path-visibility` applies no Travel penalty.
+- Travel evaluates Visibility once at Action start and does not recalculate it while world time advances.
+- Travel's Room transition resolves from `other.path-destination`.
+- Every authored Path card satisfies PATH-D02's complete-property invariant.
+- Search is available at or above the minimum Visibility authored on Body's Search Action and unavailable below it.
+- Equality with Search's minimum Visibility permits Search.
+- Search duration remains its normal authored duration and receives no low-Visibility penalty.
+- Search deck contents do not define Visibility requirements.
 - Generic Action execution contains no Search- or Travel-specific duration handling.
 - Travel is not identified by Action ID or by the presence of `set-room`.
 - No `adjustSpendTime`, Search-specific duration callback, Travel-specific duration callback, or equivalent legacy duration path remains.
-- Regression tests prove the authored behavior and the absence of feature-specific duration resolution.
+- Regression tests prove both authored behaviors and the absence of feature-specific duration resolution.
 
 ### Implementation status
 
-Selected for the current engine replacement iteration and not implemented. The generic outcome and required compatibility removal are approved, but the exact authored JSON representation remains `QUESTION FOR SIMON`; it must be decided without inventing schema during implementation.
+Selected for the current engine replacement iteration and not implemented. Travel and Search behavior are approved without a generic duration-modifier schema: Travel uses authored Path time, threshold, and additive penalty; Search uses authored applicability and its normal authored time. The current runtime adapters remain to be removed. The valid generic serialization for the approved conditional effect and effective-Vision condition remains the narrow question above.
 
 ## VISION-02 — Resolve extended lighting and task behavior
 
@@ -1892,7 +1908,7 @@ Origin: Simon
 
 ### Rule
 
-Navigation cards are ordinary room-local Anchored cards carrying the `path` Marker, a `path-time` Value, and a `path-destination` Reference under PATH-D02. Dropping Body on one invokes Body's generic Travel Action. Its `set-room` effect resolves `path-destination` from `other`, and its `spend-time` effect resolves `path-time` from `other` in the approved ordered effects. Current routes are Tunnels to Abandoned Office 15 minutes, Abandoned Office to Tunnels 15 minutes, Tunnels to Deep Tunnels 30 minutes, and Deep Tunnels to Tunnels 30 minutes. The two outbound Tunnels routes begin inside its Search deck and become visible navigation cards only when drawn. Vision modifies travel time through VISION-01 and VISION-D01's generic authored duration mechanism; there is no special Flashlight requirement.
+Navigation cards are ordinary room-local Anchored cards carrying the `path` Marker, `path-time`, `path-visibility`, and `path-visibility-time-penalty` Values, and a `path-destination` Reference under PATH-D02. Dropping Body on one invokes Body's generic Travel Action. Its `set-room` effect resolves `path-destination` from `other`; its ordinary `spend-time` effects resolve the base time and any applicable additive low-Visibility penalty from `other`. Current routes are Tunnels to Abandoned Office 15 minutes, Abandoned Office to Tunnels 15 minutes, Tunnels to Deep Tunnels 30 minutes, and Deep Tunnels to Tunnels 30 minutes. The two outbound Tunnels routes begin inside its Search deck and become visible navigation cards only when drawn. There is no special Flashlight requirement.
 
 ### Acceptance criteria
 
@@ -2053,59 +2069,60 @@ Origin: Simon
 
 ### Rule
 
-Path cards use three ordinary authored entities whose stable names make their shared role explicit:
+Path cards use ordinary authored entities whose stable names make their shared role explicit:
 
 - Marker `path`;
 - Value `path-time`;
+- Value `path-visibility`;
+- Value `path-visibility-time-penalty`;
 - Reference `path-destination`.
 
 The former Value name `travel-time` is replaced by `path-time`, and the former generic Reference name `destination` is replaced by `path-destination`. This does not introduce a structured Path object. Their relationship is expressed by Body's authored Travel Action through ordinary Marker applicability and ordered generic effects.
 
-Body's authored Travel Action is:
+`path-time` is the normal travel time. `path-visibility` is the minimum effective Vision required at Action start for normal-speed Travel. `path-visibility-time-penalty` is the additional time spent when effective Vision is strictly below that requirement. `path-destination` identifies the destination Room.
 
-```json
-{
-  "id": "travel",
-  "name": "Travel",
-  "applicable": {
-    "on": {
-      "target": "other",
-      "marker": "path"
-    }
-  },
-  "effects": [
-    {
-      "spend-time": {
-        "target": "other",
-        "value": "path-time"
-      }
-    },
-    {
-      "set-room": {
-        "target": "other",
-        "reference": "path-destination"
-      }
-    }
-  ]
-}
+The penalty is additive. For example, a Path with `path-time = 15`, `path-visibility = 2`, and `path-visibility-time-penalty = 15` takes 15 minutes when Action-start Vision is 2 or higher and 30 minutes when it is 1. Equality with `path-visibility` is sufficient and applies no penalty. Visibility is evaluated once at Action start; a change caused while world time advances during Travel does not recalculate the Action's duration.
+
+Conceptually, Body's authored Travel Action is:
+
+```text
+applicable:
+  other has marker path
+
+effects:
+  spend other.path-time
+
+  if effective Vision at Action start < other.path-visibility:
+      spend other.path-visibility-time-penalty
+
+  set-room other.path-destination
 ```
 
-Authored-data validation must be protected by a data-driven automated test named `every card marked path has path-time and path-destination`. It iterates over every authored card carrying Marker `path` rather than a maintained list of known Path IDs. Each such card has exactly one `path-time` Value and exactly one `path-destination` Reference. If the approved mapping representation makes duplicate names structurally impossible, presence once satisfies the exact-one intent without new duplicate-handling infrastructure.
+The Action uses the existing shared authored condition and effect vocabulary. It does not introduce Travel-specific runtime duration logic, callbacks, a duration-policy field, a structured Path object, or inference that the presence of `set-room` means Travel.
+
+VISION-D01 records the narrow remaining serialization conflict: DATA-08 and LOGIC-D02 do not yet show a valid authored form for the conditional penalty and effective-Vision comparison. This does not reopen a generic duration-modifier design; the approved behavior remains ordinary conditions plus ordered `spend-time` effects.
+
+Authored-data validation must be protected by a data-driven automated test named `every card marked path has complete path properties`. It iterates over every authored card carrying Marker `path` rather than a maintained list of known Path IDs. Each such card has exactly one `path-time`, one `path-visibility`, and one `path-visibility-time-penalty` Value, and exactly one `path-destination` Reference. If the approved mapping representation makes duplicate names structurally impossible, presence once satisfies the exact-one intent without new duplicate-handling infrastructure.
 
 ### Acceptance criteria
 
 - No authored Path card uses Value `travel-time`.
 - No authored Path card uses generic Reference `destination` for Path travel.
 - Every authored card carrying Marker `path` has exactly one `path-time` Value.
+- Every authored card carrying Marker `path` has exactly one `path-visibility` Value.
+- Every authored card carrying Marker `path` has exactly one `path-visibility-time-penalty` Value.
 - Every authored card carrying Marker `path` has exactly one `path-destination` Reference.
-- Body's Travel Action reads `other.path-time` through its generic `spend-time` effect.
+- Body's Travel Action always reads `other.path-time` through its generic `spend-time` effect.
+- Body's Travel Action adds `other.path-visibility-time-penalty` only when Action-start effective Vision is strictly below `other.path-visibility`.
+- Equality with `other.path-visibility` applies no penalty.
+- Travel duration is not recalculated if Visibility changes while the Action advances world time.
 - Body's Travel Action reads `other.path-destination` through its generic `set-room` effect.
-- The invariant is protected by the data-driven test `every card marked path has path-time and path-destination`.
-- No Travel-specific runtime branch is added.
+- The invariant is protected by the data-driven test `every card marked path has complete path properties`.
+- No Travel-specific runtime duration branch, callback, policy field, structured Path object, or `set-room` inference is added.
 
 ### Implementation status
 
-Selected for the current engine replacement iteration and not implemented. Current authored Path cards and Body's Travel Action still use `travel-time` and `destination`; this task migrates and validates those names without adding new gameplay content or a structured Path datatype.
+Selected for the current engine replacement iteration and not implemented. Current authored Path cards and Body's Travel Action still use `travel-time` and `destination` and do not yet author the Visibility requirement or additive penalty; this task migrates and validates the complete Path property set without adding new gameplay content or a structured Path datatype.
 
 ## PATH-APT-01 — Apartment to Tunnels Path
 
@@ -2115,7 +2132,7 @@ Origin: Simon
 
 ### Rule
 
-Apartment contains one authored Path to Tunnels with `path-time = 15`. There is no Tunnels-to-Apartment Path. The route uses Marker `path`, Value `path-time`, Reference `path-destination`, Body's Travel Action, shared logic, and ordered effects; runtime invents no implicit edge or Apartment-specific Travel handler.
+Apartment contains one authored Path to Tunnels with `path-time = 15`. There is no Tunnels-to-Apartment Path. The route uses Marker `path`, PATH-D02's complete required Path Value set, Reference `path-destination`, Body's Travel Action, shared logic, and ordered effects; runtime invents no implicit edge or Apartment-specific Travel handler.
 
 ### Acceptance criteria
 
@@ -2135,7 +2152,7 @@ Origin: Simon
 
 ### Rule
 
-Tunnels contains an authored Path to Back Alley and Back Alley contains an authored Path to Tunnels. Each has `path-time = 15`. Only the Tunnels-to-Back-Alley direction uses TIME-D02's approved night condition: current time is at least 22:00 or earlier than 06:00. Runtime contains no implicit edge, Room-ID branch, or hardcoded `night` literal.
+Tunnels contains an authored Path to Back Alley and Back Alley contains an authored Path to Tunnels. Each has `path-time = 15` and PATH-D02's complete required Path property set. Only the Tunnels-to-Back-Alley direction uses TIME-D02's approved night condition: current time is at least 22:00 or earlier than 06:00. Runtime contains no implicit edge, Room-ID branch, or hardcoded `night` literal.
 
 ### Acceptance criteria
 
@@ -2155,7 +2172,7 @@ Origin: Simon
 
 ### Rule
 
-Tunnels contains an authored Path to Service Corridor and Service Corridor contains an authored Path to Tunnels. Each has `path-time = 15`. Runtime contains no implicit edge or named-Room Travel handler.
+Tunnels contains an authored Path to Service Corridor and Service Corridor contains an authored Path to Tunnels. Each has `path-time = 15` and PATH-D02's complete required Path property set. Runtime contains no implicit edge or named-Room Travel handler.
 
 ### Acceptance criteria
 
