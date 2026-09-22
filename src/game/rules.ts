@@ -9,6 +9,7 @@ import { CARD_HEIGHT, CARD_WIDTH } from "./constants";
 import { executeCardInteraction } from "./actions";
 export { clampValue, getValue, hasMarker, isAnchored } from "./cardState";
 import { isAnchored } from "./cardState";
+import { effectiveVision, travelDuration } from "./vision";
 
 export interface ValueChangePreview {
   cardId: string;
@@ -33,6 +34,19 @@ export interface DragOrigin {
   position: Position;
   roomId?: string;
   equipmentSlot?: CardInstance["equipmentSlot"];
+}
+
+function interactionExecutionOptions() {
+  return {
+    adjustSpendTime: (
+      baseMinutes: number,
+      current: GameState,
+      _roles: { selfId?: string; otherId?: string },
+      action: { effects: { kind: string }[] },
+    ) => action.effects.some((effect) => effect.kind === "set-room")
+      ? travelDuration(baseMinutes, effectiveVision(current))
+      : baseMinutes,
+  };
 }
 
 export function isCardAvailableInPhase(state: GameState, card: CardInstance): boolean {
@@ -97,7 +111,7 @@ export function calculateInteractionOutcome(
   target: CardInstance,
 ): InteractionOutcome | null {
   if (!isCardAvailableInPhase(state, source) || !isCardAvailableInPhase(state, target)) return null;
-  const result = executeCardInteraction(state, source, target);
+  const result = executeCardInteraction(state, source, target, interactionExecutionOptions());
   if (!result.success || !result.match) return null;
   return {
     sourceId: source.id,
@@ -159,7 +173,7 @@ export function applyInteraction(
   const target = state.cards.find((card) => card.id === targetId);
   if (!source || !target) return state;
 
-  return executeCardInteraction(state, source, target).state;
+  return executeCardInteraction(state, source, target, interactionExecutionOptions()).state;
 }
 
 export function stackCards(state: GameState, sourceId: string, targetId: string): GameState {

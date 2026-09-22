@@ -22,42 +22,87 @@ export type CardAttribute = MarkerAttribute | ValueAttribute;
 
 export type ActionRole = "self" | "other";
 export type ComparisonOperator = ">" | ">=" | "<" | "<=" | "=" | "<>";
-export interface MarkerSelector { kind: "marker"; marker: string; }
-export interface ValueSelector {
+export type PlacementLiteral = "in-inventory" | "in-room" | "equipped";
+export interface MarkerCondition { kind: "marker"; target?: ActionRole; marker: string; }
+export interface ValueCondition {
   kind: "value";
+  target?: ActionRole;
   value: string;
   operator: ComparisonOperator;
   operand: number;
 }
-export interface AndSelector { kind: "and"; selectors: ActionSelector[]; }
-export interface OrSelector { kind: "or"; selectors: ActionSelector[]; }
-export interface NotSelector { kind: "not"; selector: ActionSelector; }
-export type ActionSelector = MarkerSelector | ValueSelector | AndSelector | OrSelector | NotSelector;
+export interface LiteralCondition { kind: "literal"; target?: ActionRole; literal: PlacementLiteral; }
+export interface AndCondition { kind: "and"; conditions: LogicCondition[]; }
+export interface OrCondition { kind: "or"; conditions: LogicCondition[]; }
+export interface NotCondition { kind: "not"; condition: LogicCondition; }
+export interface CountCondition {
+  kind: "count";
+  condition: LogicCondition;
+  operator: ComparisonOperator;
+  operand: number;
+}
+export interface DeckSizeCondition {
+  kind: "deck-size";
+  target?: ActionRole;
+  operator: ComparisonOperator;
+  operand: number;
+}
+export interface TimeCondition {
+  kind: "time";
+  operator: ComparisonOperator;
+  operandMinutes: number;
+}
+export type LogicCondition = MarkerCondition | ValueCondition | LiteralCondition |
+  AndCondition | OrCondition | NotCondition | CountCondition | DeckSizeCondition | TimeCondition;
+export type ActionSelector = LogicCondition;
 
 export interface ValueOperand { target: ActionRole; value: string; }
-export interface AddMarkerEffect { kind: "add-marker"; target: ActionRole; marker: string; }
-export interface RemoveMarkerEffect { kind: "remove-marker"; target: ActionRole; marker: string; }
+export interface AddMarkerEffect { kind: "add-marker"; target?: ActionRole; marker: string; }
+export interface RemoveMarkerEffect { kind: "remove-marker"; target?: ActionRole; marker: string; }
 export interface ChangeValueEffect {
   kind: "value";
-  target: ActionRole;
+  target?: ActionRole;
   value: string;
   operator: "=" | "+=" | "-=";
   operand: number | ValueOperand;
 }
-export interface DiscardEffect { kind: "discard"; target: ActionRole; }
+export interface DiscardEffect { kind: "discard"; target?: ActionRole; }
 export interface SetRoomEffect { kind: "set-room"; target: ActionRole; reference: string; }
 export interface SpendTimeEffect { kind: "spend-time"; operand: number | ValueOperand; }
+export interface AddRandomCardEffect {
+  kind: "add-random-card";
+  count: number;
+  from: string[];
+  to: "self.deck";
+}
 export type ActionEffect = AddMarkerEffect | RemoveMarkerEffect | ChangeValueEffect |
-  DiscardEffect | SetRoomEffect | SpendTimeEffect;
+  DiscardEffect | SetRoomEffect | SpendTimeEffect | AddRandomCardEffect;
 export interface ActionDefinition {
   id: string;
   name: string;
   applicable: { direction: "on" | "receive"; selector: ActionSelector };
   effects: ActionEffect[];
 }
-export interface ProcessDefinition { effects: ActionEffect[]; }
+export interface ProcessDefinition { condition?: LogicCondition; effects: ActionEffect[]; }
+export interface PassiveValueEffect {
+  target: "nadir";
+  value: string;
+  operator: "+=";
+  operand: number;
+}
+export interface PassiveDefinition { condition: LogicCondition; effects: PassiveValueEffect[]; }
 
-export interface EquippedModifier { attribute: string; amount: number; }
+export interface DeckCardDefinition {
+  masterId: string;
+  attributes: CardAttribute[];
+  references: Record<string, string>;
+}
+export interface DeckDefinition {
+  id: string;
+  name: string;
+  baseMinutes: number;
+  cards: DeckCardDefinition[];
+}
 
 export interface CardMaster {
   id: string;
@@ -66,9 +111,10 @@ export interface CardMaster {
   description?: string;
   attributes: CardAttribute[];
   references: Record<string, string>;
-  whileEquipped: EquippedModifier[];
+  passives: PassiveDefinition[];
   actions: ActionDefinition[];
   processes: ProcessDefinition[];
+  decks: DeckDefinition[];
 }
 
 export interface CardInstance {
@@ -97,12 +143,14 @@ export interface DeckCardState {
   attributes: CardAttribute[];
   references: Record<string, string>;
 }
-export interface SearchDeckState {
+export interface DeckOwner { kind: "room" | "card"; id: string; }
+export interface DeckState {
   id: string;
   definitionId: string;
   name: string;
   baseMinutes: number;
-  position: Position;
+  owner: DeckOwner;
+  position?: Position;
   cards: DeckCardState[];
 }
 export interface RoomRuntimeState {
@@ -111,7 +159,6 @@ export interface RoomRuntimeState {
   background: string;
   light: LightLevel;
   discovered: boolean;
-  decks: SearchDeckState[];
 }
 
 export interface GameState {
@@ -120,7 +167,9 @@ export interface GameState {
   phase?: GamePhase;
   currentRoomId?: string;
   rooms?: Record<string, RoomRuntimeState>;
+  decks?: DeckState[];
   elapsedMinutes?: number;
+  nextEntitySerial?: number;
   gameOver?: boolean;
   openingTakeLimit?: number;
   openingEscapeRoomId?: string;

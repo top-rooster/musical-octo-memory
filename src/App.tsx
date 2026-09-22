@@ -22,6 +22,7 @@ import type {
 import { CARD_HEIGHT, CARD_WIDTH, SEARCH_DECK_HEIGHT, SEARCH_DECK_WIDTH } from "./game/constants";
 import { allocateCarriedCapacity, canCarryCard, canEquip, EQUIPMENT_SLOTS, equipmentSlotName, openingSelectionCount } from "./game/equipment";
 import { measureClientBox } from "./game/geometry";
+import { decksOwnedBy } from "./game/decks";
 import {
   applyInteraction,
   calculateInteractionOutcome,
@@ -380,7 +381,7 @@ export function App() {
           window.setTimeout(() => setDiscardGhost(null), 420);
         }
         setGame(next);
-        if (outcome.actionId === "travel") {
+        if (next.currentRoomId !== game.currentRoomId) {
           setMessage(`Travelled to ${next.rooms?.[next.currentRoomId!]?.name} in ${outcome.minutes}m.`);
         } else {
           setMessage(`${outcome.actionName}: ${sourceCard.title} on ${target.title}.`);
@@ -500,6 +501,9 @@ export function App() {
     : { capacity: { Small: 0, Medium: 0, Large: 0 }, used: { Small: 0, Medium: 0, Large: 0 }, unplacedIds: [] };
   const vision = game ? effectiveVision(game) : 0;
   const selected = game ? openingSelectionCount(game) : 0;
+  const currentRoomDecks = game?.currentRoomId
+    ? decksOwnedBy(game, { kind: "room", id: game.currentRoomId })
+    : [];
   const lightClass = currentRoom?.light.toLowerCase() ?? "bright";
   const dragSlot = drag?.hoveredSlot ? layout?.slots[drag.hoveredSlot] : undefined;
   const dragCardStyle: CSSProperties | undefined = drag
@@ -555,8 +559,9 @@ export function App() {
           </div>
         </header>
         <div className="zone__card-layer">
-          {currentRoom?.decks.map((deck) => {
+          {currentRoomDecks.map((deck) => {
             if (!layout) return null;
+            if (!deck.position) return null;
             const rect = roomObjectRect(deck.position, SEARCH_DECK_WIDTH, SEARCH_DECK_HEIGHT, layout.room, roomZoom);
             return (
               <SearchDeck

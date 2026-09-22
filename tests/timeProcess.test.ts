@@ -92,11 +92,44 @@ describe("centralized world time and Processes", () => {
     expect(getValue(find(result.state, "mind"), "vision")?.value).toBe(3);
   });
 
+  it("evaluates Process conditions and later Processes see earlier same-tick changes", () => {
+    state = {
+      ...state,
+      masters: state.masters.map((master) => master.id === "mind" ? {
+        ...master,
+        processes: [
+          { effects: [{ kind: "value", value: "vision", operator: "-=", operand: 1 }] },
+          {
+            condition: { kind: "value", value: "vision", operator: "=", operand: 3 },
+            effects: [{ kind: "value", value: "vision", operator: "-=", operand: 1 }],
+          },
+        ],
+      } : master),
+    };
+    const result = advanceWorldTime(state, 15);
+    expect(result.success).toBe(true);
+    expect(getValue(find(result.state, "mind"), "vision")?.value).toBe(2);
+  });
+
+  it("keeps globally active off-screen card Processes running", () => {
+    const remote = find(state, "go-tunnels-from-office");
+    state = {
+      ...state,
+      masters: state.masters.map((master) => master.id === remote.masterId ? {
+        ...master,
+        processes: [{ effects: [{ kind: "value", value: "travel-time", operator: "+=", operand: 5 }] }],
+      } : master),
+    };
+    const result = advanceWorldTime(state, 15);
+    expect(remote.roomId).not.toBe(state.currentRoomId);
+    expect(getValue(result.state.cards.find((card) => card.id === remote.id)!, "travel-time")?.value).toBe(20);
+  });
+
   it("resolves an exact-boundary Process before the next ordered Action effect", () => {
     const action: ActionDefinition = {
       id: "wait-then-eat",
       name: "Wait then eat",
-      applicable: { direction: "receive", selector: { kind: "marker", marker: "food" } },
+      applicable: { direction: "receive", selector: { kind: "marker", target: "other", marker: "food" } },
       effects: [
         { kind: "spend-time", operand: 15 },
         { kind: "value", target: "self", value: "satiation", operator: "+=", operand: 10 },

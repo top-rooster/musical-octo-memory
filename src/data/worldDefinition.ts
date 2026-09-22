@@ -1,4 +1,4 @@
-import type { CardAttribute, EquipmentSlot, LightLevel } from "../domain/types";
+import type { CardAttribute, DeckDefinition, EquipmentSlot, LightLevel } from "../domain/types";
 import { AUTHORED_DATA } from "./authoredData";
 
 export interface CardInstanceDefinition {
@@ -7,12 +7,6 @@ export interface CardInstanceDefinition {
   references: Record<string, string>;
 }
 export interface EquippedDefinition extends CardInstanceDefinition { slot: EquipmentSlot; }
-export interface DeckDefinition {
-  id: string;
-  name: string;
-  baseMinutes: number;
-  cards: CardInstanceDefinition[];
-}
 export interface RoomDefinition {
   id: string;
   name: string;

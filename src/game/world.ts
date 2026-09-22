@@ -1,24 +1,25 @@
 import type {
   Bounds,
   CardAttribute,
+  DeckState,
   CardInstance,
   CardMaster,
   EquipmentSlot,
   GameState,
   Position,
-  SearchDeckState,
 } from "../domain/types";
 import type {
   CardInstanceDefinition,
   WorldDefinition,
 } from "../data/worldDefinition";
 import { CARD_GAP, CARD_HEIGHT, CARD_WIDTH, SEARCH_DECK_HEIGHT, SEARCH_DECK_WIDTH } from "./constants";
-import { drawFromDeck, shuffleOnce } from "./decks";
+import { createOwnedDeckStates, decksOwnedBy, drawFromDeck, replaceDeck } from "./decks";
 import { executeStandaloneAction } from "./actions";
 import { allocateCarriedCapacity, canEquip, canTakeOpeningCard } from "./equipment";
 import { generateRoomPlacements } from "./placement";
 import { isAnchored } from "./cardState";
 import { rectanglesOverlap } from "./rules";
+import { effectiveVision, searchDuration } from "./vision";
 
 function cloneAttributes(attributes: CardAttribute[]): CardAttribute[] {
   return attributes.map((attribute) => ({ ...attribute }));
@@ -37,6 +38,7 @@ export function createWorldGameState(
   let serial = 0;
   const nextId = (prefix: string) => `${prefix}-${++serial}`;
   const cards: CardInstance[] = [];
+  const decks: DeckState[] = [];
   const start = definition.rooms.find((room) => room.id === definition.startRoomId)!;
 
   const makeCard = (
@@ -46,7 +48,7 @@ export function createWorldGameState(
     options: Partial<CardInstance> = {},
   ): CardInstance => {
     const master = masterById(masters, authored.masterId);
-    return {
+    const card: CardInstance = {
       id: nextId(master.id),
       masterId: master.id,
       title: master.title,
@@ -59,6 +61,10 @@ export function createWorldGameState(
       position: { ...position },
       ...options,
     };
+    decks.push(...createOwnedDeckStates(
+      masters, master.decks, { kind: "card", id: card.id }, nextId, random,
+    ));
+    return card;
   };
 
   start.nadir.forEach((authored, index) => {
@@ -101,26 +107,20 @@ export function createWorldGameState(
   }
 
   const rooms = Object.fromEntries(definition.rooms.map((room) => {
-    const decks: SearchDeckState[] = room.decks.map((deck, index) => ({
-      id: nextId(`deck-${room.id}`),
-      definitionId: deck.id,
-      name: deck.name,
-      baseMinutes: deck.baseMinutes,
-      position: { x: 18 + index * (SEARCH_DECK_WIDTH + CARD_GAP), y: 66 },
-      cards: shuffleOnce(deck.cards.map((card) => ({
-        id: nextId(`deck-card-${card.masterId}`),
-        masterId: card.masterId,
-        attributes: cloneAttributes(card.attributes),
-        references: { ...card.references },
-      })), random),
-    }));
+    decks.push(...createOwnedDeckStates(
+      masters,
+      room.decks,
+      { kind: "room", id: room.id },
+      nextId,
+      random,
+      room.decks.map((_, index) => ({ x: 18 + index * (SEARCH_DECK_WIDTH + CARD_GAP), y: 66 })),
+    ));
     return [room.id, {
       id: room.id,
       name: room.name,
       background: room.background,
       light: room.light,
       discovered: room.id === definition.startRoomId,
-      decks,
     }];
   }));
 
@@ -130,7 +130,9 @@ export function createWorldGameState(
     phase: "opening",
     currentRoomId: definition.startRoomId,
     rooms,
+    decks,
     elapsedMinutes: 0,
+    nextEntitySerial: serial + 1,
     openingTakeLimit: start.takeLimit,
     openingEscapeRoomId: start.escapeRoomId,
     searchBack: definition.searchBack,
@@ -150,11 +152,11 @@ export function nearestFreeRoomPosition(
   bounds: Bounds,
 ): Position | null {
   const roomCards = state.cards.filter((card) => card.zone === "room" && card.roomId === roomId);
-  const roomDecks = state.rooms?.[roomId]?.decks ?? [];
+  const roomDecks = decksOwnedBy(state, { kind: "room", id: roomId });
   const legal = (position: Position) =>
     positionWithin(position, bounds) &&
     roomCards.every((card) => !rectanglesOverlap(position, card.position, CARD_GAP)) &&
-    roomDecks.every((deck) => (
+    roomDecks.every((deck) => deck.position && (
       position.x + CARD_WIDTH + CARD_GAP <= deck.position.x ||
       deck.position.x + SEARCH_DECK_WIDTH + CARD_GAP <= position.x ||
       position.y + CARD_HEIGHT + CARD_GAP <= deck.position.y ||
@@ -189,8 +191,10 @@ export interface SearchResult {
 export function searchRoom(state: GameState, deckId: string, bounds: Bounds): SearchResult {
   const roomId = state.currentRoomId;
   const room = roomId ? state.rooms?.[roomId] : undefined;
-  const deck = room?.decks.find((candidate) => candidate.id === deckId);
+  const deck = (state.decks ?? []).find((candidate) =>
+    candidate.id === deckId && candidate.owner.kind === "room" && candidate.owner.id === roomId);
   if (!roomId || !room || !deck || state.phase !== "main") return { state, reason: "no-deck" };
+  if (!deck.position) return { state, reason: "no-deck" };
   const position = nearestFreeRoomPosition(state, roomId, deck.position, bounds);
   if (!position) return { state, reason: "no-space" };
   const result = drawFromDeck(deck);
@@ -199,6 +203,8 @@ export function searchRoom(state: GameState, deckId: string, bounds: Bounds): Se
     id: "search",
     name: "Search",
     effects: [{ kind: "spend-time", operand: deck.baseMinutes }],
+  }, {}, {
+    adjustSpendTime: (baseMinutes, current) => searchDuration(baseMinutes, effectiveVision(current)),
   });
   if (!execution.success) {
     return { state, reason: execution.reason === "too-dark" ? "too-dark" : "action-invalid" };
@@ -219,14 +225,11 @@ export function searchRoom(state: GameState, deckId: string, bounds: Bounds): Se
     animation: "draw",
     drawOrigin: { ...deck.position },
   };
-  const decks = room.decks
-    .map((candidate) => candidate.id === deckId ? result.deck : candidate)
-    .filter((candidate): candidate is SearchDeckState => Boolean(candidate));
+  const withDeck = replaceDeck(execution.state, deckId, result.deck);
   return {
     state: {
-      ...execution.state,
-      cards: [...execution.state.cards, drawnCard],
-      rooms: { ...execution.state.rooms, [roomId]: { ...room, decks } },
+      ...withDeck,
+      cards: [...withDeck.cards, drawnCard],
     },
     drawnCardId: drawnCard.id,
     minutes: execution.minutes,

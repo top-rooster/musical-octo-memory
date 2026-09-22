@@ -10,6 +10,7 @@ const SIZE_MARKERS = new Set(["small", "medium", "large"]);
 const STORAGE_VALUES = new Set(["storage-small", "storage-medium", "storage-large"]);
 const COMPARISONS = new Set([">", ">=", "<", "<=", "=", "<>"]);
 const VALUE_OPERATORS = new Set(["=", "+=", "-="]);
+const LOGICAL_LITERALS = new Set(["in-inventory", "in-room", "equipped"]);
 
 function object(value: unknown, location: string): JsonObject {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -50,45 +51,95 @@ function reference(value: unknown, known: Set<string>, location: string): assert
   if (!known.has(value)) throw new Error(`${location} references unknown ID "${value}"`);
 }
 
-function validateSelector(value: unknown, attributes: Set<string>, location: string): void {
-  const selector = object(value, location);
-  const keys = Object.keys(selector);
-  if (keys.length === 1 && keys[0] === "marker") {
-    reference(selector.marker, attributes, `${location}.marker`);
+function validateTarget(value: unknown, location: string): void {
+  if (value !== "self" && value !== "other") throw new Error(`${location} must be "self" or "other"`);
+}
+
+function validateOptionalTarget(value: JsonObject, location: string): void {
+  if (value.target !== undefined) validateTarget(value.target, `${location}.target`);
+}
+
+function oneComparison(value: JsonObject, location: string, numeric = true): string {
+  const operators = Object.keys(value).filter((key) => COMPARISONS.has(key));
+  if (operators.length !== 1) throw new Error(`${location} must use exactly one comparison operator`);
+  if (numeric) number(value[operators[0]], `${location}.${operators[0]}`);
+  return operators[0];
+}
+
+function validateCondition(value: unknown, attributes: Set<string>, location: string): void {
+  if (typeof value === "string") {
+    if (!LOGICAL_LITERALS.has(value)) throw new Error(`${location} has unsupported logical literal "${value}"`);
+    return;
+  }
+  const condition = object(value, location);
+  const keys = Object.keys(condition);
+  if (keys.includes("marker")) {
+    exactKeys(condition, ["target", "marker"], location);
+    validateOptionalTarget(condition, location);
+    reference(condition.marker, attributes, `${location}.marker`);
     return;
   }
   if (keys.includes("value")) {
-    const operators = keys.filter((key) => COMPARISONS.has(key));
-    if (keys.length !== 2 || operators.length !== 1) {
-      throw new Error(`${location} Value selector must use exactly one comparison operator`);
+    const operator = oneComparison(condition, location);
+    exactKeys(condition, ["target", "value", operator], location);
+    validateOptionalTarget(condition, location);
+    reference(condition.value, attributes, `${location}.value`);
+    return;
+  }
+  if (keys.includes("literal")) {
+    exactKeys(condition, ["target", "literal"], location);
+    validateOptionalTarget(condition, location);
+    string(condition.literal, `${location}.literal`);
+    if (!LOGICAL_LITERALS.has(condition.literal)) {
+      throw new Error(`${location}.literal has unsupported logical literal "${condition.literal}"`);
     }
-    reference(selector.value, attributes, `${location}.value`);
-    number(selector[operators[0]], `${location}.${operators[0]}`);
     return;
   }
   if (keys.length === 1 && (keys[0] === "and" || keys[0] === "or")) {
-    array(selector[keys[0]], `${location}.${keys[0]}`).forEach((child, index) =>
-      validateSelector(child, attributes, `${location}.${keys[0]}[${index}]`));
+    const children = array(condition[keys[0]], `${location}.${keys[0]}`);
+    if (!children.length) throw new Error(`${location}.${keys[0]} must not be empty`);
+    children.forEach((child, index) => validateCondition(child, attributes, `${location}.${keys[0]}[${index}]`));
     return;
   }
   if (keys.length === 1 && keys[0] === "not") {
-    validateSelector(selector.not, attributes, `${location}.not`);
+    validateCondition(condition.not, attributes, `${location}.not`);
     return;
   }
-  throw new Error(`${location} must use marker, value, and, or, or not; card-ID matching is unsupported`);
+  if (keys.includes("count")) {
+    const operator = oneComparison(condition, location);
+    exactKeys(condition, ["count", operator], location);
+    validateCondition(condition.count, attributes, `${location}.count`);
+    return;
+  }
+  if (keys.includes("deck_size")) {
+    exactKeys(condition, ["target", "deck_size"], location);
+    validateOptionalTarget(condition, location);
+    const computed = object(condition.deck_size, `${location}.deck_size`);
+    const operator = oneComparison(computed, `${location}.deck_size`);
+    exactKeys(computed, [operator], `${location}.deck_size`);
+    return;
+  }
+  if (keys.length === 1 && keys[0] === "time") {
+    const time = object(condition.time, `${location}.time`);
+    const operator = oneComparison(time, `${location}.time`, false);
+    exactKeys(time, [operator], `${location}.time`);
+    const clock = time[operator];
+    string(clock, `${location}.time.${operator}`);
+    if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(clock)) {
+      throw new Error(`${location}.time.${operator} must be a 24-hour HH:MM time`);
+    }
+    return;
+  }
+  throw new Error(`${location} is not a supported condition expression; card-ID matching is unsupported`);
 }
 
 function validateRole(value: unknown, location: string, process = false): void {
-  if (value !== "self" && value !== "other") throw new Error(`${location} must be "self" or "other"`);
+  if (value === undefined && process) return;
+  validateTarget(value, location);
   if (process && value === "other") throw new Error(`${location} cannot use "other" in a Process`);
 }
 
-function validateOperand(
-  value: unknown,
-  attributes: Set<string>,
-  location: string,
-  process = false,
-): void {
+function validateOperand(value: unknown, attributes: Set<string>, location: string, process = false): void {
   if (typeof value === "number") {
     number(value, location);
     return;
@@ -102,8 +153,10 @@ function validateOperand(
 function validateEffects(
   value: unknown,
   attributes: Set<string>,
+  cardIds: Set<string>,
   location: string,
   process = false,
+  ownerDeckCount = 0,
 ): void {
   for (const [index, rawEffect] of array(value, location).entries()) {
     const effectLocation = `${location}[${index}]`;
@@ -148,7 +201,24 @@ function validateEffects(
       }
       continue;
     }
-    throw new Error(`${effectLocation} is not a supported Action effect`);
+    if (keys.length === 1 && keys[0] === "add-random-card") {
+      const add = object(effect["add-random-card"], `${effectLocation}.add-random-card`);
+      exactKeys(add, ["count", "from", "to"], `${effectLocation}.add-random-card`);
+      number(add.count, `${effectLocation}.add-random-card.count`);
+      if (!Number.isInteger(add.count) || add.count <= 0) {
+        throw new Error(`${effectLocation}.add-random-card.count must be a positive integer`);
+      }
+      const source = array(add.from, `${effectLocation}.add-random-card.from`);
+      if (!source.length) throw new Error(`${effectLocation}.add-random-card.from must not be empty`);
+      source.forEach((masterId, sourceIndex) =>
+        reference(masterId, cardIds, `${effectLocation}.add-random-card.from[${sourceIndex}]`));
+      if (add.to !== "self.deck") throw new Error(`${effectLocation}.add-random-card.to must be "self.deck"`);
+      if (ownerDeckCount !== 1) {
+        throw new Error(`${effectLocation}.add-random-card requires its owning card to define exactly one deck`);
+      }
+      continue;
+    }
+    throw new Error(`${effectLocation} is not a supported Action or Process effect`);
   }
 }
 
@@ -170,11 +240,11 @@ function validateInstance(
     }
   }
   if (instance?.values !== undefined) {
-    const masterValues = object(master.values ?? {}, `cards.${instance.card}.values`);
+    const masterValues = object(master.values ?? {}, `cards.${masterId}.values`);
     for (const [valueId, value] of Object.entries(object(instance.values, `${location}.values`))) {
       reference(valueId, attributes, `${location}.values.${valueId}`);
       if (!(valueId in masterValues)) {
-        throw new Error(`${location}.values.${valueId} does not exist on master "${instance.card}"`);
+        throw new Error(`${location}.values.${valueId} does not exist on master "${masterId}"`);
       }
       number(value, `${location}.values.${valueId}`);
     }
@@ -190,11 +260,28 @@ function validateInstance(
   }
 }
 
-export function validateAuthoredData(
-  rawCards: unknown,
-  rawRooms: unknown,
-  rawAttributes: unknown,
-): void {
+function validateDecks(
+  rawDecks: unknown,
+  cards: JsonObject,
+  cardIds: Set<string>,
+  attributes: Set<string>,
+  location: string,
+): number {
+  if (rawDecks === undefined) return 0;
+  const decks = object(rawDecks, location);
+  for (const [deckId, rawDeck] of Object.entries(decks)) {
+    id(deckId, `${location}.${deckId}`);
+    const deck = object(rawDeck, `${location}.${deckId}`);
+    exactKeys(deck, ["name", "time", "cards"], `${location}.${deckId}`);
+    string(deck.name, `${location}.${deckId}.name`);
+    duration(deck.time, `${location}.${deckId}.time`);
+    array(deck.cards, `${location}.${deckId}.cards`).forEach((instance, index) =>
+      validateInstance(instance, cards, cardIds, attributes, `${location}.${deckId}.cards[${index}]`));
+  }
+  return Object.keys(decks).length;
+}
+
+export function validateAuthoredData(rawCards: unknown, rawRooms: unknown, rawAttributes: unknown): void {
   const cards = object(rawCards, "cards");
   const world = object(rawRooms, "rooms document");
   const rooms = object(world.rooms, "rooms document.rooms");
@@ -216,22 +303,19 @@ export function validateAuthoredData(
     const card = object(cards[cardId], `cards.${cardId}`);
     string(card.name, `cards.${cardId}.name`);
     string(card.image, `cards.${cardId}.image`);
-    for (const legacy of ["size", "storage", "equip"] as const) {
-      if (card[legacy] !== undefined) {
-        throw new Error(`cards.${cardId}.${legacy} is a removed legacy representation`);
-      }
+    for (const legacy of ["size", "storage", "equip", "whileEquipped"] as const) {
+      if (card[legacy] !== undefined) throw new Error(`cards.${cardId}.${legacy} is a removed legacy representation`);
     }
-    if (card.accept !== undefined) throw new Error(`cards.${cardId}.accept is a removed legacy representation`);
-    if (card.when !== undefined) throw new Error(`cards.${cardId}.when is a removed legacy representation`);
+    if (card.accept !== undefined || card.when !== undefined) {
+      throw new Error(`cards.${cardId} contains a removed legacy representation`);
+    }
     exactKeys(card, [
       "name", "image", "description", "markers", "values", "references",
-      "whileEquipped", "actions", "processes",
+      "passives", "actions", "processes", "decks",
     ], `cards.${cardId}`);
     if (card.markers !== undefined) {
       const markers = array(card.markers, `cards.${cardId}.markers`);
-      for (const [index, marker] of markers.entries()) {
-        reference(marker, attributeIds, `cards.${cardId}.markers[${index}]`);
-      }
+      markers.forEach((marker, index) => reference(marker, attributeIds, `cards.${cardId}.markers[${index}]`));
       if (markers.filter((marker) => typeof marker === "string" && SIZE_MARKERS.has(marker)).length > 1) {
         throw new Error(`cards.${cardId}.markers contains multiple size Markers`);
       }
@@ -263,10 +347,21 @@ export function validateAuthoredData(
         }
       }
     }
-    if (card.whileEquipped !== undefined) {
-      for (const [index, rawModifier] of array(card.whileEquipped, `cards.${cardId}.whileEquipped`).entries()) {
-        const modifier = object(rawModifier, `cards.${cardId}.whileEquipped[${index}]`);
-        reference(modifier.attribute, attributeIds, `cards.${cardId}.whileEquipped[${index}].attribute`);
+    const deckCount = validateDecks(card.decks, cards, cardIds, attributeIds, `cards.${cardId}.decks`);
+    if (card.passives !== undefined) {
+      for (const [index, rawPassive] of array(card.passives, `cards.${cardId}.passives`).entries()) {
+        const passiveLocation = `cards.${cardId}.passives[${index}]`;
+        const passive = object(rawPassive, passiveLocation);
+        exactKeys(passive, ["if", "effects"], passiveLocation);
+        validateCondition(passive.if, attributeIds, `${passiveLocation}.if`);
+        for (const [effectIndex, rawEffect] of array(passive.effects, `${passiveLocation}.effects`).entries()) {
+          const effectLocation = `${passiveLocation}.effects[${effectIndex}]`;
+          const effect = object(rawEffect, effectLocation);
+          exactKeys(effect, ["target", "value", "+="], effectLocation);
+          if (effect.target !== "nadir") throw new Error(`${effectLocation}.target must be "nadir"`);
+          reference(effect.value, attributeIds, `${effectLocation}.value`);
+          number(effect["+="], `${effectLocation}.+=`);
+        }
       }
     }
     if (card.actions !== undefined) {
@@ -286,19 +381,20 @@ export function validateAuthoredData(
         if (directions.length !== 1 || (directions[0] !== "on" && directions[0] !== "receive")) {
           throw new Error(`${actionLocation}.applicable must contain exactly one of on or receive`);
         }
-        validateSelector(applicable[directions[0]], attributeIds, `${actionLocation}.applicable.${directions[0]}`);
+        validateCondition(applicable[directions[0]], attributeIds, `${actionLocation}.applicable.${directions[0]}`);
         const signature = `${directions[0]}:${JSON.stringify(applicable[directions[0]])}`;
         if (applicability.has(signature)) throw new Error(`${actionLocation}.applicable duplicates an overlapping selector`);
         applicability.add(signature);
-        validateEffects(action.effects, attributeIds, `${actionLocation}.effects`);
+        validateEffects(action.effects, attributeIds, cardIds, `${actionLocation}.effects`, false, deckCount);
       }
     }
     if (card.processes !== undefined) {
       for (const [index, rawProcess] of array(card.processes, `cards.${cardId}.processes`).entries()) {
         const processLocation = `cards.${cardId}.processes[${index}]`;
         const process = object(rawProcess, processLocation);
-        exactKeys(process, ["effects"], processLocation);
-        validateEffects(process.effects, attributeIds, `${processLocation}.effects`, true);
+        exactKeys(process, ["if", "effects"], processLocation);
+        if (process.if !== undefined) validateCondition(process.if, attributeIds, `${processLocation}.if`);
+        validateEffects(process.effects, attributeIds, cardIds, `${processLocation}.effects`, true, deckCount);
       }
     }
   }
@@ -314,38 +410,28 @@ export function validateAuthoredData(
     string(room.name, `rooms.${roomId}.name`);
     string(room.background, `rooms.${roomId}.background`);
     if (room.cards !== undefined) {
-      array(room.cards, `rooms.${roomId}.cards`).forEach((instance, index) =>
-        validateInstance(instance, cards, cardIds, attributeIds, `rooms.${roomId}.cards[${index}]`));
+      array(room.cards, `rooms.${roomId}.cards`).forEach((entry, index) =>
+        validateInstance(entry, cards, cardIds, attributeIds, `rooms.${roomId}.cards[${index}]`));
     }
-    if (room.decks !== undefined) {
-      for (const [deckId, rawDeck] of Object.entries(object(room.decks, `rooms.${roomId}.decks`))) {
-        id(deckId, `rooms.${roomId}.decks.${deckId}`);
-        const deck = object(rawDeck, `rooms.${roomId}.decks.${deckId}`);
-        string(deck.name, `rooms.${roomId}.decks.${deckId}.name`);
-        duration(deck.time, `rooms.${roomId}.decks.${deckId}.time`);
-        array(deck.cards, `rooms.${roomId}.decks.${deckId}.cards`).forEach((instance, index) =>
-          validateInstance(instance, cards, cardIds, attributeIds, `rooms.${roomId}.decks.${deckId}.cards[${index}]`));
-      }
-    }
+    validateDecks(room.decks, cards, cardIds, attributeIds, `rooms.${roomId}.decks`);
     if (room.opening !== undefined) {
       const opening = object(room.opening, `rooms.${roomId}.opening`);
       reference(opening.escape, roomIds, `rooms.${roomId}.opening.escape`);
       const equipped = object(opening.equipped, `rooms.${roomId}.opening.equipped`);
-      for (const [slot, instance] of Object.entries(equipped)) {
+      for (const [slot, entry] of Object.entries(equipped)) {
         reference(slot, SLOT_IDS, `rooms.${roomId}.opening.equipped.${slot}`);
-        validateInstance(instance, cards, cardIds, attributeIds, `rooms.${roomId}.opening.equipped.${slot}`);
+        validateInstance(entry, cards, cardIds, attributeIds, `rooms.${roomId}.opening.equipped.${slot}`);
         if (!HAND_SLOT_IDS.has(slot)) {
-          const masterId = typeof instance === "string" ? instance : object(instance, `rooms.${roomId}.opening.equipped.${slot}`).card;
+          const masterId = typeof entry === "string" ? entry : object(entry, `rooms.${roomId}.opening.equipped.${slot}`).card;
           string(masterId, `rooms.${roomId}.opening.equipped.${slot}.card`);
-          const master = object(cards[masterId], `cards.${masterId}`);
-          const references = object(master.references ?? {}, `cards.${masterId}.references`);
+          const references = object(object(cards[masterId], `cards.${masterId}`).references ?? {}, `cards.${masterId}.references`);
           if (references.equip !== slot) {
             throw new Error(`rooms.${roomId}.opening.equipped.${slot} requires references.equip = "${slot}"`);
           }
         }
       }
-      array(opening.offered, `rooms.${roomId}.opening.offered`).forEach((instance, index) =>
-        validateInstance(instance, cards, cardIds, attributeIds, `rooms.${roomId}.opening.offered[${index}]`));
+      array(opening.offered, `rooms.${roomId}.opening.offered`).forEach((entry, index) =>
+        validateInstance(entry, cards, cardIds, attributeIds, `rooms.${roomId}.opening.offered[${index}]`));
     }
   }
 }
