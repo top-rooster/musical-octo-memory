@@ -3,14 +3,14 @@ import type { CardInstance, CardMaster, GameState } from "../src/domain/types";
 import { getValue } from "../src/game/cardState";
 import { effectiveCardValue } from "../src/game/passives";
 
-function source(id: string, equipped: boolean): CardInstance {
+function source(id: string, equipped: boolean, equipReference?: string): CardInstance {
   return {
     id,
     masterId: id,
     title: id,
     image: "",
     attributes: [],
-    references: {},
+    references: equipReference ? { equip: equipReference } : {},
     zone: "inventory",
     equipmentSlot: equipped ? "left-hand" : undefined,
     position: { x: 0, y: 0 },
@@ -48,5 +48,23 @@ describe("generic continuous passives", () => {
     };
     expect(effectiveCardValue(unequipped, mind, "vision").value).toBe(5);
     expect(getValue(mind, "vision")?.value).toBe(4);
+  });
+
+  it("uses authored slot compatibility without source-card identity", () => {
+    const mind: CardInstance = {
+      id: "mind", masterId: "mind", title: "Mind", image: "", nadirState: true,
+      attributes: [{ kind: "value", id: "vision", value: 4, min: 0, max: 100 }],
+      references: {}, zone: "inventory", position: { x: 0, y: 0 },
+    };
+    const eyewear = source("generic-eyewear", true, "eyes");
+    const state: GameState = { cards: [mind, eyewear], masters: [passiveMaster(eyewear.masterId)] };
+    expect(effectiveCardValue(state, mind, "vision").value).toBe(4);
+    const inAuthoredSlot = {
+      ...state,
+      cards: state.cards.map((card) => card.id === eyewear.id
+        ? { ...card, equipmentSlot: "eyes" as const }
+        : card),
+    };
+    expect(effectiveCardValue(inAuthoredSlot, mind, "vision").value).toBe(5);
   });
 });
