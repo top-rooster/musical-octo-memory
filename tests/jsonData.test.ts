@@ -30,6 +30,24 @@ describe("JSON authored Action data", () => {
     expect(WORLD_DEFINITION.rooms.find((room) => room.id === "deep-tunnels")?.name).toBe("Deep Tunnels");
   });
 
+  it("maps the supplied card artwork and renamed display names onto existing stable IDs", () => {
+    const expected = {
+      glasses: { name: "Glasses", image: "images/glasses.png" },
+      "spare-batteries": { name: "Battery", image: "images/battery.png" },
+      "pain-killers": { name: "Pain Killers", image: "images/pain-killers.png" },
+      "simple-backpack": { name: "Backpack", image: "images/backpack.png" },
+      "simple-lighter": { name: "Lighter", image: "images/lighter.png" },
+      pants: { name: "Pants", image: "images/pants.png" },
+      "t-shirt": { name: "T-Shirt", image: "images/t-shirt.png" },
+      flashlight: { name: "Flashlight", image: "images/flashlight.png" },
+    };
+
+    for (const [id, presentation] of Object.entries(expected)) {
+      expect(cards[id]).toMatchObject(presentation);
+      expect(existsSync(new URL(`../public/${presentation.image}`, import.meta.url))).toBe(true);
+    }
+  });
+
   it("creates independent overrides, decks, equipment, and References", () => {
     const state = createWorldGameState(
       CARD_MASTERS, WORLD_DEFINITION, { x: 0, y: 0, width: 1400, height: 800 }, () => 0.5,
