@@ -82,7 +82,7 @@ Every time-consuming Action contains or resolves an explicit `spend-time` effect
 
 ### Implementation status
 
-Implemented. Every active time-consuming path resolves an explicit `spend-time` effect through the common Action executor, and the legacy Search/travel elapsed-time mutations have been removed.
+Partially implemented. Every active time-consuming path resolves an explicit `spend-time` effect through the common Action executor, and the legacy direct Search/travel elapsed-time mutations have been removed. VISION-D01 owns removal of the remaining Search/Travel-specific duration resolution around that effect.
 
 ## DATA-D05 — JSON schema cannot be invented
 
@@ -236,7 +236,7 @@ ACTION-D05 separately owns the generic `add-random-card` effect shared by Action
 {
   "set-room": {
     "target": "other",
-    "reference": "destination"
+    "reference": "path-destination"
   }
 }
 ```
@@ -251,7 +251,7 @@ ACTION-D05 separately owns the generic `add-random-card` effect shared by Action
 {
   "spend-time": {
     "target": "other",
-    "value": "travel-time"
+    "value": "path-time"
   }
 }
 ```
@@ -262,7 +262,7 @@ There is no separate Action-duration mechanism. The position of `spend-time` in 
 
 - Marker `food` with Value `food-value`;
 - Marker `hydration` with Value `hydration-value`;
-- Marker `path` with Value `travel-time` and Reference `destination`.
+- Marker `path` with Value `path-time` and Reference `path-destination`.
 
 Conceptually:
 
@@ -283,8 +283,8 @@ Conceptually:
 ```json
 {
   "markers": ["path"],
-  "values": { "travel-time": 30 },
-  "references": { "destination": "deep-tunnels" }
+  "values": { "path-time": 30 },
+  "references": { "path-destination": "deep-tunnels" }
 }
 ```
 
@@ -604,11 +604,15 @@ The evaluator is a separate component with a small reusable API. Feature code su
 
 ### Engine iteration boundary
 
-LOGIC-D01, DECK-D01, LOGIC-D05, TIME-D02, ACTION-D05, PROCESS-D01, and EQUIP-05 form the current engine replacement iteration. Closing those seven IDs is necessary but not sufficient: the milestone is complete only when all existing gameplay runs through the generic authored Action, Process, attribute, condition, deck, and passive-effect engine.
+LOGIC-D01, DECK-D01, LOGIC-D05, TIME-D02, ACTION-D05, PROCESS-D01, EQUIP-05, PATH-D02, and VISION-D01 form the current engine replacement iteration. Closing those nine IDs is necessary but not sufficient: the milestone is complete only when all existing gameplay covered by this iteration runs through the generic authored Action, Process, attribute, condition, deck, and passive-effect engine.
 
 The iteration migrates existing gameplay and removes gameplay-specific custom logic and compatibility paths. Runtime must not retain hardcoded card IDs or Room IDs that implement gameplay behavior, special Travel, Water, or Equipment handlers, or another bespoke gameplay path that can be expressed through the approved generic authored model. Tests must prove the migrated existing gameplay through generic data and engine behavior rather than preserving a second compatibility implementation.
 
 This engine iteration introduces no new gameplay content. Apartment/Puddle content, Service Corridor content, crafting content, and UI-09 card-size/drag work remain in later iterations.
+
+PATH-D02 and VISION-D01 are required engine cleanup. Path data must use the approved normalized property names, and Vision-adjusted Search/Travel duration must stop using gameplay-specific runtime recognition or adapters. These are not deferred exceptions to the engine milestone.
+
+Two currently observed compatibility paths are deliberately owned by already-planned future work rather than this engine iteration: GAMEOVER-01 owns the Hydration-specific provisional terminal-state path, and OPENING-01 owns the Opening-phase Process exclusion and the rest of the scripted Opening replacement. These narrow deferrals do not permit Path, Vision, Search, Travel, Water, Equipment, or other engine behavior to retain bespoke compatibility logic.
 
 DECK-D01 is a required engine dependency rather than a request to introduce Dumpster content. The current runtime stores decks only on Rooms, while LOGIC-D05 and ACTION-D05 operate on the deck owned by a target card through `self.deck`. The iteration must therefore generalize the existing Room-owned model into the shared ownership model, migrate existing Room Search decks without changing their behavior, and make the generic card-owned capability available. Dumpster, its starting contents, and its refill Process remain in DUMPSTER-01's later content iteration.
 
@@ -621,12 +625,15 @@ DECK-D01 is a required engine dependency rather than a request to introduce Dump
 - Existing gameplay uses the generic authored engine end to end, with obsolete custom handlers and compatibility paths removed.
 - Runtime contains no gameplay behavior selected by hardcoded card or Room IDs where approved attributes, Actions, Processes, or shared conditions provide the authority.
 - Travel, Water, and Equipment behavior do not retain parallel special handlers after migration.
+- Path properties and Body's Travel Action use PATH-D02's normalized authored Marker, Value, and Reference names.
+- Vision-adjusted Search and Travel duration use VISION-D01's generic authored Action-time mechanism, with no Action-ID/effect-shape recognition or Search/Travel-specific callback.
 - Existing Room Search decks use DECK-D01's shared ownership model without behavior or persistence regressions, while the engine supports card-owned decks generically without introducing a content-specific consumer.
+- The only compatibility paths explicitly deferred beyond this milestone are the terminal-state path owned by GAMEOVER-01 and the Opening-phase path owned by OPENING-01.
 - No new Room, Puddle, crafting, or UI content is introduced merely to exercise the engine.
 
 ### Implementation status
 
-Implemented. One shared evaluator now owns Marker, Value, placement-literal, boolean, count, deck-size, and world-clock conditions for Action matching, Process conditions, and passive conditions. Existing Action applicability was migrated to explicit `other` targets where it inspects the matched counterpart, and obsolete feature-local selector evaluation was removed.
+Selected for the current engine replacement iteration and not implemented. The shared architecture and all currently required condition forms, including count, deck size, and world-clock serialization, are approved under LOGIC-D02 through LOGIC-D05 and TIME-D02. PATH-D02 and VISION-D01 remain required cleanup within the milestone; GAMEOVER-01 and OPENING-01 own the two explicitly deferred compatibility paths. Completion is governed by the engine iteration boundary above, not only by the local evaluator acceptance criteria.
 
 ## LOGIC-D02 — Atomic conditions support self and other targets
 
@@ -763,7 +770,7 @@ This condition participates in LOGIC-D01 and must remain generic; runtime contai
 
 ### Implementation status
 
-Implemented through LOGIC-D01 against the authoritative shared deck state. All comparators, implicit/explicit targets, missing-deck zero behavior, and boolean composition are covered without a stored deck counter or named-card branch.
+Selected for the current engine replacement iteration and not implemented, subject to LOGIC-D01, LOGIC-D02, and DECK-D01.
 
 ## TIME-D02 — Conditions can evaluate the authoritative world clock
 
@@ -820,7 +827,7 @@ Runtime must not add hardcoded time concepts such as `night` for one Room. Earli
 
 ### Implementation status
 
-Implemented through LOGIC-D01. Authored `HH:MM` comparisons validate and evaluate against centralized elapsed world time modulo the current day, including exact time and cross-midnight boolean ranges.
+Selected for the current engine replacement iteration and not implemented. World-clock semantics and valid atomic JSON serialization are fully approved.
 
 ## ACTION-D01 — Card-on-card roles and Action matching
 
@@ -871,7 +878,7 @@ Origin: Simon
 
 ### Rule
 
-`path`, `food`, and `hydration` are ordinary Markers, not structured attributes. A path card carries the `path` Marker, `travel-time` Value, and `destination` Reference. Food carries the `food` Marker and `food-value` Value. A refillable hydration source carries the `hydration` Marker and `hydration-value` Value. `contains-water` remains the mutable Marker indicating that a container currently holds water and remains part of the Drink applicability selector; drinking removes `contains-water`, while `hydration` and `hydration-value` may remain on the refillable card.
+`path`, `food`, and `hydration` are ordinary Markers, not structured attributes. Under PATH-D02, a path card carries the `path` Marker, `path-time` Value, and `path-destination` Reference. Food carries the `food` Marker and `food-value` Value. A refillable hydration source carries the `hydration` Marker and `hydration-value` Value. `contains-water` remains the mutable Marker indicating that a container currently holds water and remains part of the Drink applicability selector; drinking removes `contains-water`, while `hydration` and `hydration-value` may remain on the refillable card.
 
 Travel, Eat, and Drink Actions read those Values and References through DATA-08 effects. Destination, base travel time, sustenance, and hydration amounts are not duplicated in room composition, item-name logic, or special-purpose payloads.
 
@@ -884,7 +891,7 @@ Travel, Eat, and Drink Actions read those Values and References through DATA-08 
 
 ### Implementation status
 
-Implemented for food, hydration, and paths. Their legacy special-purpose representations are absent from active authored data and runtime logic.
+Implemented for food and hydration. Path behavior already uses the generic Marker/Value/Reference model, but PATH-D02's normalization from `travel-time`/`destination` to `path-time`/`path-destination` and its data-driven invariant validation remain selected engine work.
 
 ## ACTION-D04 — Actions prevalidate completely and execute ordered effects
 
@@ -950,7 +957,7 @@ The effect performs only generic creation and insertion. It contains no time che
 
 ### Implementation status
 
-Implemented in the shared Action/Process effect path. Picks are independent with replacement, duplicate source IDs provide weighting, fresh instances append in pick order to the owning card's shared deck, and validation rejects unsupported destinations, invalid counts, empty pools, unknown masters, and owners without exactly one deck.
+Selected for the current engine replacement iteration and not implemented, subject to CARD-D01 and DECK-D01.
 
 ## FOOD-01 — Authored food effects and consumption
 
@@ -1072,7 +1079,7 @@ Ordering must be intentional rather than an accidental consequence of unrelated 
 
 ### Implementation status
 
-Implemented for the approved current Process model. Global quarter-hour ticks evaluate optional shared conditions, run cards and each card's Processes in deterministic authored order, let later same-card Processes observe earlier changes, default omitted effect targets to the owner, and include off-screen cards. The superseded simultaneous-conflict batch path was removed; PROCESS-D03's later-cycle insertion rule remains outside this iteration.
+Selected for the current engine replacement iteration and partially implemented with centralized quarter-hour boundary counting, deterministic non-conflicting Process batches, Process-before-next-effect ordering, and preservation of inactive-room state. The remaining conditional `if`, ordered same-card Process chaining, implicit Process-owner `self`, and off-screen global evaluation work is approved and implementation-ready.
 
 ## PROCESS-D02 — Body drains Hydration and Satiation on every tick
 
@@ -1253,17 +1260,22 @@ Once Game Over is active, normal gameplay stops. The player cannot continue thro
 
 The mechanism is generic rather than Dehydration-specific. Future approved loss conditions use the same state with their own cause; SURV-03 already approves `Starvation` as the cause when three Starving cards coexist. At present, `Dehydration` is the only already-active loss cause.
 
+Normal Hydration mutation is already generic: authored Processes reduce Hydration and authored Actions/effects restore it. This task also owns removal of the remaining provisional compatibility path that explicitly inspects Body's `hydration` Value at runtime and selects a hardcoded dehydration presentation. The final terminal-state transition must be driven through the generic authored Game Over mechanism; runtime and UI must not treat Hydration or Dehydration as privileged terminal-state cases.
+
 ### Acceptance criteria
 
 - Hydration reaching 0 enters Game Over exactly once with cause `Dehydration`.
 - A dedicated terminal screen visibly explains the loss cause.
 - All normal gameplay interaction and player-driven time or Process progression are blocked after Game Over.
 - The terminal-state architecture accepts a cause and contains no Dehydration-specific control flow.
+- No runtime branch explicitly checks Hydration to decide whether Game Over begins.
+- No dehydration-specific UI branch selects or renders the terminal state.
+- Normal authored Hydration loss, drinking, and restoration behavior remains unchanged.
 - Existing and future loss conditions can enter the same Game Over state with distinct causes.
 
 ### Implementation status
 
-Implementation-ready but not implemented. The current build displays `Game Over = Dehydration` when Hydration reaches 0, yet gameplay continues; that observed behavior does not satisfy the terminal-state rule.
+Implementation-ready but not implemented and not selected for the current engine iteration. The current runtime explicitly checks `hydration === 0`, sets the provisional boolean Game Over state, and the UI hardcodes dehydration presentation while allowing gameplay to continue. This task replaces that compatibility path with the generic authored terminal-state model without changing normal Hydration gameplay.
 
 ## DURABILITY-01 — Decide tool Durability
 
@@ -1541,7 +1553,7 @@ No additional passive-effect target, operation, stacking rule, lifecycle, or fea
 
 ### Implementation status
 
-Implemented. Glasses and Flashlight now author `passives`; passive `if` expressions use LOGIC-D01, effective Vision derives continuous modifiers without mutating base Values, and the legacy `whileEquipped` data, parser, and runtime compatibility path are removed.
+Selected for the current engine replacement iteration and not implemented, subject to LOGIC-D01 and LOGIC-D03. The iteration must remove the legacy `whileEquipped` compatibility representation after migrating existing equipment behavior to generic `passives`.
 
 ## OPENING-01 — Apartment is a normal one-way Room
 
@@ -1559,11 +1571,15 @@ Starting equipment remains ordinary equipment state: Pants are equipped in Legs 
 
 Apartment's background must be replaced with a homely residential apartment. The visual goal is to make the player feel that Nadir is leaving a safe, private home and entering the dangerous outside world. This approval introduces no additional Apartment mechanic.
 
+This task also owns removal of the current Process-engine compatibility exclusion for the Opening phase. Opening sequencing and gating must be expressed through authored state, conditions, Actions, and Processes as part of replacing the scripted Opening. The generic Process engine must not retain special knowledge that an Opening sequence exists.
+
 ### Acceptance criteria
 
 - Authored Apartment setup and exact contents load from room/world data as a normal persistent Room.
 - No Opening-only mode, limit, offered state, Escape control, or transition code remains active.
 - Body, Mind, Spirit, survival, Inventory, equipment, Actions, and Processes behave normally from game start.
+- Current intended introductory sequencing remains correct while its gating moves to authored state and conditions.
+- The generic Process engine contains no Opening-phase exclusion or other branch whose sole purpose is supporting the scripted Opening.
 - Apartment has one authored Path to Tunnels; Tunnels has no return Path to Apartment.
 - Pants begin in Legs and T-Shirt in Chest through ordinary equipment state.
 - The two Bottles start in their approved different states, and Canned Food and Simple Backpack are absent.
@@ -1571,7 +1587,7 @@ Apartment's background must be replaced with a homely residential apartment. The
 
 ### Implementation status
 
-Implementation-ready but not implemented. PATH-APT-01 approves Apartment-to-Tunnels `travel-time = 15`; the current special Opening flow, five-offer limit, Escape button, hidden Nadir cards, contents, and background are superseded by this task. OPENING-01, PATH-APT-01, WATER-D01, WATER-01, WATER-02, and required Apartment/Puddle images belong to the Apartment + Puddle + images content iteration after the engine replacement iteration.
+Implementation-ready but not implemented and not selected for the current engine iteration. PATH-APT-01 approves Apartment-to-Tunnels `path-time = 15`; the current special Opening flow, five-offer limit, Escape button, hidden Nadir cards, Process-phase exclusion, contents, and background are superseded by this task. OPENING-01, PATH-APT-01, WATER-D01, WATER-01, WATER-02, and required Apartment/Puddle images belong to the Apartment + Puddle + images content iteration after the engine replacement iteration.
 
 ### History
 
@@ -1619,7 +1635,52 @@ The broader task vocabulary is: low-light tasks require Vision 2, normal-light t
 
 ### Implementation status
 
-Implemented for Search, travel, active equipment, and the current Room presentation. Apartment's authored rename and normal-Room conversion remain unimplemented under OPENING-01.
+Behaviorally implemented for Search, travel, active equipment, and the current Room presentation. Search and Travel duration still dispatch through gameplay-specific Action-ID handling and separate functions in `vision.ts`; VISION-D01 owns migration of that compatibility path to generic authored Action-time behavior. Apartment's authored rename and normal-Room conversion remain unimplemented under OPENING-01.
+
+## VISION-D01 — Remove Search/Travel Vision duration adapters
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Vision-adjusted Action time must resolve through a generic authored Action-time mechanism. The Action engine must not know whether an Action represents Travel, Search, Vision-sensitive work, a particular card, or a particular Room.
+
+The current implementation still recognizes Action IDs `travel` and `search` while resolving `spend-time`, routes them to separate `travelDuration` and `searchDuration` functions, and constructs Search as a special standalone runtime Action around the deck's authored base time. This is the current equivalent of the audit's separate `adjustSpendTime`/duration-callback compatibility path even though no function with that exact name remains on the current branch.
+
+Travel continues to select a card through Marker `path`, obtain its base time from Value `path-time`, and obtain its destination from Reference `path-destination` under PATH-D02. Search and Travel retain the distinct approved Vision behavior in VISION-01, but that behavior must be selected and resolved from generic authored data rather than Action IDs, effect inspection, Search-specific callbacks, or dedicated runtime branches.
+
+The mechanism must be general enough that future authored Action-time modifiers, including tool work-time multipliers, can use the same concept. This task does not design or implement speculative crafting rules.
+
+### Required removals
+
+- `adjustSpendTime` and any equivalent Action-time adjustment callback;
+- Travel recognition by Action ID or by inspecting for a `set-room` effect;
+- Search recognition by Action ID or a Search-specific duration callback;
+- separate Search-specific and Travel-specific duration dispatch in runtime code;
+- any equivalent compatibility path whose only purpose is Vision-adjusted Search/Travel duration.
+
+### QUESTION FOR SIMON
+
+What exact valid JSON representation authors the generic Vision-sensitive Action-time rule while preserving VISION-01's different Search and Travel behavior? No existing approved schema fully represents this modifier. DATA-D04 and DATA-08 currently require explicit `spend-time` and prohibit a separate Action-duration mechanism, so the unresolved representation must remain compatible with that rule unless Simon explicitly changes it. Implementation must not invent the field, wrapper, expression, multiplier shape, or parallel duration field. This representation must be approved before authored migration is completed.
+
+### Acceptance criteria
+
+- Existing VISION-01 Search legality and duration behavior is preserved.
+- Existing VISION-01 Travel duration behavior is preserved, including leaving at Vision 0 or lower.
+- Vision-sensitive duration resolves from generic authored Action data.
+- Travel's base time resolves from `other.path-time` and its Room transition resolves from `other.path-destination`.
+- Search duration is authored rather than calculated through a Search runtime branch.
+- Search and Travel may express their different approved duration behavior through authored data without feature-specific TypeScript.
+- Generic Action execution contains no Search- or Travel-specific duration handling.
+- Travel is not identified by Action ID or by the presence of `set-room`.
+- No `adjustSpendTime`, Search-specific duration callback, Travel-specific duration callback, or equivalent legacy duration path remains.
+- Regression tests prove the authored behavior and the absence of feature-specific duration resolution.
+
+### Implementation status
+
+Selected for the current engine replacement iteration and not implemented. The generic outcome and required compatibility removal are approved, but the exact authored JSON representation remains `QUESTION FOR SIMON`; it must be decided without inventing schema during implementation.
 
 ## VISION-02 — Resolve extended lighting and task behavior
 
@@ -1831,11 +1892,11 @@ Origin: Simon
 
 ### Rule
 
-Navigation cards are ordinary room-local Anchored cards carrying the `path` Marker, a `travel-time` Value, and a `destination` Reference. Dropping Body on one invokes Body's generic Travel Action. Its `set-room` effect resolves `destination` from `other`, and its `spend-time` effect resolves `travel-time` from `other` in the approved ordered effects. Current routes are Tunnels to Abandoned Office 15 minutes, Abandoned Office to Tunnels 15 minutes, Tunnels to Deep Tunnels 30 minutes, and Deep Tunnels to Tunnels 30 minutes. The two outbound Tunnels routes begin inside its Search deck and become visible navigation cards only when drawn. Vision modifies travel time through VISION-01; there is no special Flashlight requirement.
+Navigation cards are ordinary room-local Anchored cards carrying the `path` Marker, a `path-time` Value, and a `path-destination` Reference under PATH-D02. Dropping Body on one invokes Body's generic Travel Action. Its `set-room` effect resolves `path-destination` from `other`, and its `spend-time` effect resolves `path-time` from `other` in the approved ordered effects. Current routes are Tunnels to Abandoned Office 15 minutes, Abandoned Office to Tunnels 15 minutes, Tunnels to Deep Tunnels 30 minutes, and Deep Tunnels to Tunnels 30 minutes. The two outbound Tunnels routes begin inside its Search deck and become visible navigation cards only when drawn. Vision modifies travel time through VISION-01 and VISION-D01's generic authored duration mechanism; there is no special Flashlight requirement.
 
 ### Acceptance criteria
 
-- Destination comes from the path card's `destination` Reference and base time from its `travel-time` Value, not component conditionals.
+- Destination comes from the path card's `path-destination` Reference and base time from its `path-time` Value, not component conditionals.
 - Travel uses ACTION-D01 through ACTION-D04 and centralized time.
 - Discovered route cards remain in their room with exact identity and position.
 - Arrival preserves all world and Nadir state.
@@ -1843,7 +1904,7 @@ Navigation cards are ordinary room-local Anchored cards carrying the `path` Mark
 
 ### Implementation status
 
-Implemented through Body's common Travel Action. Route cards author `path`, `travel-time`, and `destination`; Vision adjusts resolved `spend-time`, Processes tick before `set-room`, and the legacy travel adapter is removed.
+Partially implemented through Body's common Travel Action. PATH-D02 owns renaming the currently authored `travel-time` and `destination` properties and adding the data-driven Path invariant. VISION-D01 owns removal of the remaining Action-ID-specific Vision-duration adapter. Processes already tick before `set-room` through ordered effects.
 
 ## ROOM-03 — Resolve remaining Room content and objects
 
@@ -1893,7 +1954,7 @@ Origin: Simon
 
 ### Rule
 
-Service Corridor is a deliberately minimal persistent Room. Its initial implementation contains exactly the authored Tunnels-to-Service-Corridor Path and Service-Corridor-to-Tunnels Path required by PATH-SC-01, each with `travel-time = 15`.
+Service Corridor is a deliberately minimal persistent Room. Its initial implementation contains exactly the authored Tunnels-to-Service-Corridor Path and Service-Corridor-to-Tunnels Path required by PATH-SC-01, each with `path-time = 15`.
 
 Service Corridor otherwise starts empty: it has no Search deck, Features, loose items, additional Paths, or special behavior. Runtime and authored data must not invent content merely to make the Room feel complete. The current purpose is only to establish the Room and its two-way connectivity. ROOM-07 owns the separate future design work for purpose and content.
 
@@ -1984,6 +2045,68 @@ The former combined task mixed Paths from several Room-introduction iterations. 
 
 Closed and superseded by the three Room-specific Path tasks below.
 
+## PATH-D02 — Normalize Path properties and validate authored Path cards
+
+Priority: P0
+Decision: APPROVED BY SIMON
+Origin: Simon
+
+### Rule
+
+Path cards use three ordinary authored entities whose stable names make their shared role explicit:
+
+- Marker `path`;
+- Value `path-time`;
+- Reference `path-destination`.
+
+The former Value name `travel-time` is replaced by `path-time`, and the former generic Reference name `destination` is replaced by `path-destination`. This does not introduce a structured Path object. Their relationship is expressed by Body's authored Travel Action through ordinary Marker applicability and ordered generic effects.
+
+Body's authored Travel Action is:
+
+```json
+{
+  "id": "travel",
+  "name": "Travel",
+  "applicable": {
+    "on": {
+      "target": "other",
+      "marker": "path"
+    }
+  },
+  "effects": [
+    {
+      "spend-time": {
+        "target": "other",
+        "value": "path-time"
+      }
+    },
+    {
+      "set-room": {
+        "target": "other",
+        "reference": "path-destination"
+      }
+    }
+  ]
+}
+```
+
+Authored-data validation must be protected by a data-driven automated test named `every card marked path has path-time and path-destination`. It iterates over every authored card carrying Marker `path` rather than a maintained list of known Path IDs. Each such card has exactly one `path-time` Value and exactly one `path-destination` Reference. If the approved mapping representation makes duplicate names structurally impossible, presence once satisfies the exact-one intent without new duplicate-handling infrastructure.
+
+### Acceptance criteria
+
+- No authored Path card uses Value `travel-time`.
+- No authored Path card uses generic Reference `destination` for Path travel.
+- Every authored card carrying Marker `path` has exactly one `path-time` Value.
+- Every authored card carrying Marker `path` has exactly one `path-destination` Reference.
+- Body's Travel Action reads `other.path-time` through its generic `spend-time` effect.
+- Body's Travel Action reads `other.path-destination` through its generic `set-room` effect.
+- The invariant is protected by the data-driven test `every card marked path has path-time and path-destination`.
+- No Travel-specific runtime branch is added.
+
+### Implementation status
+
+Selected for the current engine replacement iteration and not implemented. Current authored Path cards and Body's Travel Action still use `travel-time` and `destination`; this task migrates and validates those names without adding new gameplay content or a structured Path datatype.
+
 ## PATH-APT-01 — Apartment to Tunnels Path
 
 Priority: P0
@@ -1992,7 +2115,7 @@ Origin: Simon
 
 ### Rule
 
-Apartment contains one authored Path to Tunnels with `travel-time = 15`. There is no Tunnels-to-Apartment Path. The route uses the generic Path Marker, `travel-time` Value, `destination` Reference, Body Travel Action, shared logic, and ordered effects; runtime invents no implicit edge or Apartment-specific Travel handler.
+Apartment contains one authored Path to Tunnels with `path-time = 15`. There is no Tunnels-to-Apartment Path. The route uses Marker `path`, Value `path-time`, Reference `path-destination`, Body's Travel Action, shared logic, and ordered effects; runtime invents no implicit edge or Apartment-specific Travel handler.
 
 ### Acceptance criteria
 
@@ -2012,7 +2135,7 @@ Origin: Simon
 
 ### Rule
 
-Tunnels contains an authored Path to Back Alley and Back Alley contains an authored Path to Tunnels. Each has `travel-time = 15`. Only the Tunnels-to-Back-Alley direction uses TIME-D02's approved night condition: current time is at least 22:00 or earlier than 06:00. Runtime contains no implicit edge, Room-ID branch, or hardcoded `night` literal.
+Tunnels contains an authored Path to Back Alley and Back Alley contains an authored Path to Tunnels. Each has `path-time = 15`. Only the Tunnels-to-Back-Alley direction uses TIME-D02's approved night condition: current time is at least 22:00 or earlier than 06:00. Runtime contains no implicit edge, Room-ID branch, or hardcoded `night` literal.
 
 ### Acceptance criteria
 
@@ -2032,7 +2155,7 @@ Origin: Simon
 
 ### Rule
 
-Tunnels contains an authored Path to Service Corridor and Service Corridor contains an authored Path to Tunnels. Each has `travel-time = 15`. Runtime contains no implicit edge or named-Room Travel handler.
+Tunnels contains an authored Path to Service Corridor and Service Corridor contains an authored Path to Tunnels. Each has `path-time = 15`. Runtime contains no implicit edge or named-Room Travel handler.
 
 ### Acceptance criteria
 
@@ -2065,7 +2188,7 @@ This enables interactive world cards such as Dumpster to own searchable contents
 
 ### Implementation status
 
-Implemented as one shared runtime deck collection with explicit Room/card ownership. Room Search decks were migrated without changing shuffle, draw, exhaustion, retained-order, or persistence behavior; card masters load the same deck definition shape, and card-owned deck identity follows its owning instance. No Dumpster content or parallel Room-only runtime deck model was added.
+Selected for the current engine replacement iteration and not implemented. It is a direct prerequisite of the selected LOGIC-D05 `deck_size` condition and ACTION-D05 `self.deck` destination: both require an authoritative deck associated with a card instance. The work generalizes the existing Room-owned Search-deck model, migrates existing Room decks to that shared model without changing gameplay, and enables the generic card-owned form. It does not add Dumpster or other new content; DUMPSTER-01 remains in its later content iteration.
 
 ## DUMPSTER-01 — Dumpster owns a persistent refillable deck
 
