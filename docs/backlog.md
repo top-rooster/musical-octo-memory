@@ -316,7 +316,7 @@ Origin: Simon
 
 All gameplay-relevant information belonging to a card must be represented in authored card attributes. Approved card attribute categories include the existing Markers, Values, References, Actions, and Processes. Runtime code may define the generic meaning and behavior of attribute types, but it must not define data that belongs to an individual card or master.
 
-Examples include Flashlight and Canned Food size coming from their size Markers, Pants storage coming from `storage-small`, Simple Backpack storage coming from `storage-medium`, equipment compatibility coming from `references.equip`, food quantity coming from `food-value`, hydration quantity coming from `hydration-value`, and route travel time/destination coming from authored Values and References.
+Examples include Flashlight and Canned Food size coming from their size Markers, Pants storage coming from `storage-small`, Backpack storage coming from `storage-medium`, equipment compatibility coming from `references.equip`, food quantity coming from `food-value`, hydration quantity coming from `hydration-value`, and route travel time/destination coming from authored Values and References.
 
 Runtime code must not branch on card master IDs or display names to supply gameplay facts, use lookup tables mapping cards to size or equipment slots, keep hidden storage metadata outside ordinary Values, or provide fallback/default gameplay values when required authored attributes are missing. If required authored card data is missing or malformed, validation fails rather than deriving or inventing it.
 
@@ -493,18 +493,18 @@ Origin: Simon
 
 ### Rule
 
-Storage capacity is represented by `storage-small`, `storage-medium`, and `storage-large` Values, not a separate storage object. Pants provide `storage-small = 2`. Simple Backpack provides `storage-medium = 5`. Only equipped gear contributes its storage Values. Apartment uses the same ordinary equipment and capacity rules as every other Room.
+Storage capacity is represented by `storage-small`, `storage-medium`, and `storage-large` Values, not a separate storage object. Pants provide `storage-small = 2`. Backpack provides `storage-medium = 5`. Only equipped gear contributes its storage Values. Apartment uses the same ordinary equipment and capacity rules as every other Room.
 
 ### Acceptance criteria
 
 - Capacity is derived from Values on active equipped instances.
-- Pants and Simple Backpack supply the approved capacities.
+- Pants and Backpack supply the approved capacities.
 - Carried or Room storage gear supplies no capacity.
 - Apartment has no separate offered-item limit or capacity exception.
 
 ### Implementation status
 
-Implemented for the current equipment calculation. Equipped Pants and Simple Backpack contribute their visible `storage-small` and `storage-medium` Values through the common capacity calculation; carried or Room storage gear contributes nothing. The legacy Opening limit is superseded by OPENING-01.
+Implemented for the current equipment calculation. Equipped Pants and Backpack contribute their visible `storage-small` and `storage-medium` Values through the common capacity calculation; carried or Room storage gear contributes nothing. The legacy Opening limit is superseded by OPENING-01.
 
 ## CARD-06 — Anchored movement and ordinary placement
 
@@ -1427,7 +1427,7 @@ Origin: Simon
 
 ### Rule
 
-Non-Hand compatibility is read from the approved Reference mapping under `references.equip`. Examples include T-Shirt to `chest`, Pants to `legs`, Glasses to `eyes`, and Simple Backpack to `back`. Ordinary movable cards may use either Hand through the universal Hand rule and do not need Left/Right compatibility references. Anchored world cards and Nadir-state cards may not be held. This Hand rule does not imply that every tool must be held before it can be used; such a requirement needs its own explicit decision.
+Non-Hand compatibility is read from the approved Reference mapping under `references.equip`. Examples include T-Shirt to `chest`, Pants to `legs`, Glasses to `eyes`, and Backpack to `back`. Ordinary movable cards may use either Hand through the universal Hand rule and do not need Left/Right compatibility references. Anchored world cards and Nadir-state cards may not be held. This Hand rule does not imply that every tool must be held before it can be used; such a requirement needs its own explicit decision.
 
 ### Acceptance criteria
 
@@ -1448,7 +1448,7 @@ Origin: Simon
 
 ### Rule
 
-A compatible card in an equipment slot is equipped and active. The same card in flat carried Inventory or a Room is inactive. Equipping and unequipping are free. Glasses in Eyes provide Vision +1. Flashlight in either Hand provides Vision +1 only with Battery > 0. Pants in Legs and Simple Backpack in Back provide the storage Values in CARD-D05. Cards in any equipment slot, including Hands, consume no carried capacity.
+A compatible card in an equipment slot is equipped and active. The same card in flat carried Inventory or a Room is inactive. Equipping and unequipping are free. Glasses in Eyes provide Vision +1. Flashlight in either Hand provides Vision +1 only with Battery > 0. Pants in Legs and Backpack in Back provide the storage Values in CARD-D05. Cards in any equipment slot, including Hands, consume no carried capacity.
 
 ### Acceptance criteria
 
@@ -1571,7 +1571,7 @@ The player-facing Room formerly named `Opening Room` is `Apartment`. Apartment i
 
 The special Opening flow is superseded: there is no Escape button, `takeLimit`, special `offered` mechanism, or separate Opening gameplay mode/phase. The player leaves through an authored Apartment-to-Tunnels Path using normal Travel. There is no Tunnels-to-Apartment Path, so Apartment is one-way under PATH-APT-01.
 
-Starting equipment remains ordinary equipment state: Pants are equipped in Legs and T-Shirt is equipped in Chest. Apartment contains exactly two Plastic Bottles, one starting with `contains-water` and one starting empty. The two Canned Food instances and Simple Backpack are removed from the legacy Opening contents. Retain the other approved items: Pocket Knife, Simple Lighter, Flashlight, Spare Batteries, Pain Killers, and Glasses.
+Starting equipment remains ordinary equipment state: Pants are equipped in Legs and T-Shirt is equipped in Chest. Apartment contains exactly two Plastic Bottles, one starting with `contains-water` and one starting empty. The two Canned Food instances and Backpack are removed from the legacy Opening contents. Retain the other approved items: Pocket Knife, Lighter, Flashlight, Battery, Pain Killers, and Glasses.
 
 Apartment's background must be replaced with a homely residential apartment. The visual goal is to make the player feel that Nadir is leaving a safe, private home and entering the dangerous outside world. This approval introduces no additional Apartment mechanic.
 
@@ -1586,7 +1586,7 @@ This task also owns removal of the current Process-engine compatibility exclusio
 - The generic Process engine contains no Opening-phase exclusion or other branch whose sole purpose is supporting the scripted Opening.
 - Apartment has one authored Path to Tunnels; Tunnels has no return Path to Apartment.
 - Pants begin in Legs and T-Shirt in Chest through ordinary equipment state.
-- The two Bottles start in their approved different states, and Canned Food and Simple Backpack are absent.
+- The two Bottles start in their approved different states, and Canned Food and Backpack are absent.
 - The background communicates a homely residential apartment rather than an evacuation-offer screen.
 
 ### Implementation status
